@@ -1,4 +1,5 @@
 import type { PortfolioProject } from '@/lib/types'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { STATUS_CONFIG } from '@/lib/constants'
 import { cn } from '@/lib/utils'
 
@@ -12,6 +13,7 @@ export function PortfolioCard({ project, className }: PortfolioCardProps) {
     STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.completed
   const techs = project.techs ?? project.technologies ?? []
   const title = project.title ?? project.name ?? 'Projeto'
+  const coverImage = project.coverImage ?? project.imageUrl
 
   return (
     <div
@@ -23,6 +25,19 @@ export function PortfolioCard({ project, className }: PortfolioCardProps) {
         className,
       )}
     >
+      {coverImage ? (
+        <div className="relative aspect-video overflow-hidden rounded-lg border border-border bg-surface">
+          <OptimizedImage
+            src={coverImage}
+            alt={`Preview do projeto ${title}`}
+            width={640}
+            height={360}
+            sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw"
+            className="h-full w-full"
+          />
+        </div>
+      ) : null}
+
       <div className="flex items-start justify-between gap-2">
         <h3 className="font-semibold text-foreground leading-snug">{title}</h3>
         <span

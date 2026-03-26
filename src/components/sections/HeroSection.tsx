@@ -1,5 +1,6 @@
 import { CTAGroup } from '@/components/ui/CTAGroup'
 import { Container } from '@/components/ui/Container'
+import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { buildDefaultCTAs } from '@/lib/cta'
 import { SITE } from '@/lib/constants'
 
@@ -61,29 +62,20 @@ export function HeroSection() {
 
           {/* Right column — illustration */}
           <div className="hidden lg:flex items-center justify-center">
-            {/* @ASSET_PLACEHOLDER
-            name: hero-illustration
-            type: image
-            extension: svg
-            format: 4:3
-            dimensions: 600x450
-            description: Ilustração abstrata moderna representando desenvolvimento de software. Elementos geométricos que sugerem código, conectividade, blocos de construção digitais e transformação tecnológica. Estilo neo-minimalista com linhas finas.
-            context: Seção hero da landing page, coluna direita em desktop
-            style: Neo-minimalista, linhas finas, formas geométricas
-            mood: Profissional, moderno, confiável, tecnológico
-            colors: primary (#2563EB), accent (#BFDBFE), background (#FFFFFF)
-            elements: Janelas de código, grafos de nós, engrenagens abstratas, linhas de conexão
-            avoid: Imagens genéricas de teclado, pessoas foto-realistas, gradientes pesados
-            */}
             <div
-              className="w-full max-w-[480px] aspect-[4/3] rounded-2xl bg-surface border border-border flex flex-col items-center justify-center gap-4 p-8"
+              className="w-full max-w-[480px] aspect-[4/3] rounded-2xl bg-surface border border-border overflow-hidden p-4"
               role="img"
               aria-label="Ilustração de desenvolvimento de software"
             >
-              <div className="text-7xl" aria-hidden="true">⚡</div>
-              <div className="text-center">
-                <p className="font-semibold text-foreground">SystemForge</p>
-                <p className="text-sm text-muted-foreground">{SITE.tagline}</p>
+              <div className="relative h-full w-full rounded-xl bg-gradient-to-br from-primary/5 via-background to-accent/20">
+                <OptimizedImage
+                  src="/images/hero-illustration.svg"
+                  alt={`Ilustração ${SITE.tagline}`}
+                  width={600}
+                  height={450}
+                  priority
+                  className="h-full w-full object-contain p-6"
+                />
               </div>
             </div>
           </div>

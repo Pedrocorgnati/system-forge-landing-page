@@ -7,7 +7,7 @@ export const organizationSchema = {
   url: SITE.url,
   logo: {
     '@type': 'ImageObject',
-    url: `${SITE.url}/images/logo.svg`,
+    url: `${SITE.url}/images/logo.png`,
     width: 180,
     height: 40,
   },
@@ -62,7 +62,7 @@ export function articleSchema(article: {
       name: SITE.name,
       logo: {
         '@type': 'ImageObject',
-        url: `${SITE.url}/images/logo.svg`,
+        url: `${SITE.url}/images/logo.png`,
       },
     },
     url: `${SITE.url}/blog/${article.slug}`,

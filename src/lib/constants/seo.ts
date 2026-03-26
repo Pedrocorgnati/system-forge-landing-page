@@ -16,7 +16,7 @@ export const SEO_DEFAULTS = {
     'SystemForge desenvolve SaaS, aplicativos mobile, marketplaces e sistemas sob medida com qualidade de produto. Time especializado, entrega em semanas.',
 
   /** Imagem OG padrão (deve existir em public/images/) */
-  defaultOgImage: '/images/og-default.jpg',
+  defaultOgImage: '/images/og-image.png',
 
   /** Nome do site para OG */
   siteName: 'SystemForge',
