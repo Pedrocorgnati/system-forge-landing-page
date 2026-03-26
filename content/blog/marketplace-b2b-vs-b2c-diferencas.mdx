@@ -1,0 +1,131 @@
+---
+title: "Marketplace B2B vs B2C: diferenças que importam"
+slug: "marketplace-b2b-vs-b2c-diferencas"
+date: "2024-09-12"
+description: "Como produto, UX e arquitetura técnica diferem entre marketplaces B2B e B2C — precificação, aprovação de compras, crédito e integração com ERPs."
+tags: ["marketplace b2b", "marketplace b2c", "e-commerce b2b", "ux b2b", "marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+---
+
+À primeira vista, um marketplace B2B e um B2C parecem fazer a mesma coisa: conectar quem vende com quem compra. Na prática, eles são produtos tão diferentes que compartilhar a mesma base de código entre os dois costuma gerar mais problemas do que economizar tempo. O público, o fluxo de compra, a precificação, os meios de pagamento e os requisitos de integração são estruturalmente diferentes — e entender essas diferenças antes de arquitetar o sistema é o que separa projetos que escalam dos que ficam presos em retrabalho.
+
+Um marketplace B2C serve consumidores finais. A decisão de compra é individual, impulsiva em muitos casos, e o critério principal costuma ser preço e experiência. Um marketplace B2B serve empresas. A decisão de compra envolve múltiplas pessoas, processos de aprovação, orçamento previamente alocado e critérios técnicos que vão muito além do preço.
+
+## Fluxo de Compra B2B: Aprovações e Múltiplos Compradores
+
+No B2C, o fluxo de compra é linear: busca → produto → carrinho → checkout → pagamento. Em minutos. No B2B, esse fluxo pode se estender por dias e envolver múltiplas pessoas com papéis distintos.
+
+Um fluxo B2B realista funciona assim:
+
+**Comprador operacional** encontra o produto e cria uma "solicitação de compra" (não um pedido ainda). Essa solicitação vai para uma fila de aprovação.
+
+**Aprovador** (gerente, financeiro ou diretor, dependendo do valor) recebe notificação, revisa a solicitação e aprova, rejeita ou pede ajustes.
+
+**Após aprovação**, a solicitação se converte em pedido de compra. O comprador operacional finaliza com os dados de entrega e forma de pagamento (faturamento, boleto, transferência).
+
+**Comprovante** é gerado automaticamente (NF-e, em muitos casos) e enviado para o e-mail do departamento fiscal.
+
+Esse fluxo exige que o modelo de dados suporte múltiplos usuários por conta compradora, com papéis e permissões distintas:
+
+```typescript
+// Modelo de conta B2B com múltiplos usuários
+interface BuyerAccount {
+  id: string;
+  companyName: string;
+  cnpj: string;
+  creditLimit?: number;  // Limite de crédito negociado
+  users: BuyerUser[];
+  approvalRules: ApprovalRule[];
+}
+
+interface BuyerUser {
+  id: string;
+  accountId: string;
+  role: 'operator' | 'approver' | 'admin' | 'finance';
+  purchaseLimit?: number;  // Valor máximo que pode aprovar sozinho
+}
+
+interface ApprovalRule {
+  minAmount: number;
+  maxAmount: number;
+  requiredApprovers: number;
+  approverRoles: string[];
+}
+```
+
+Essa estrutura permite definir regras como "compras acima de R$ 5.000 precisam de 2 aprovadores, sendo pelo menos um do financeiro". Implementar isso no MVP B2B não é opcional — é o coração do produto.
+
+## Precificação Diferenciada por Cliente no B2B
+
+Em marketplaces B2C, todo mundo vê o mesmo preço. Em B2B, isso quase nunca acontece. Clientes com volume alto negociam preços especiais, distribuidores têm tabelas próprias e clientes estratégicos podem ter condições exclusivas.
+
+O sistema de precificação B2B precisa suportar múltiplas camadas:
+
+| Nível | Descrição | Exemplo |
+|---|---|---|
+| Preço base | Preço padrão, visível publicamente | R$ 100,00 |
+| Tabela de grupo | Preço por segmento de cliente | Distribuidores: R$ 85,00 |
+| Preço por conta | Preço negociado individualmente | Cliente X: R$ 78,00 |
+| Desconto por volume | Desconto por quantidade no pedido | 10+ unidades: -8% |
+| Desconto por período | Campanha ou promoção temporária | -5% em outubro |
+
+A lógica de resolução deve seguir uma hierarquia clara: preço por conta → desconto por volume → tabela de grupo → preço base. O preço mais específico tem precedência.
+
+Esse sistema também implica que o carrinho B2B deve exibir o preço correto para aquele comprador específico — não o preço público. Se um usuário não autenticado ver preços diferentes dos que verá após login, isso pode gerar desconfiança. Em alguns casos, a melhor UX é não exibir preços antes do login.
+
+## Integração com ERPs e Notas Fiscais
+
+Esta é a parte que mais diferencia o desenvolvimento B2B do B2C em termos técnicos. Empresas compradores geralmente precisam que os pedidos do marketplace se reflitam automaticamente no seu ERP — seja para controle de estoque, contas a pagar ou auditoria fiscal.
+
+As integrações mais comuns são com:
+
+- **TOTVS Protheus / RM:** dominante em médias e grandes empresas brasileiras
+- **SAP Business One / S/4HANA:** multinacionais e empresas de grande porte
+- **Omie / Contaazul / Bling:** PMEs
+- **Planilhas + NFe.io / Nuvemfiscal:** clientes que ainda não têm ERP mas precisam de NF-e
+
+Do lado da nota fiscal, a emissão da NF-e (ou NFS-e para serviços) é obrigatória. As opções mais usadas são:
+
+```typescript
+// Emissão de NF-e via NFe.io após confirmação do pedido
+async function emitirNota(order: Order): Promise<string> {
+  const response = await nfeio.post('/companies/{companyId}/serviceinvoices', {
+    cityServiceCode: '6619-3/00',
+    cnaeCode: '6619300',
+    description: `Compra no marketplace - Pedido #${order.id}`,
+    servicesAmount: order.totalCents / 100,
+    borrower: {
+      federalTaxNumber: order.buyer.cnpj,
+      name: order.buyer.companyName,
+      email: order.buyer.fiscalEmail,
+      address: order.buyer.address,
+    }
+  });
+
+  return response.data.id; // ID da nota para rastreamento
+}
+```
+
+A integração com ERP é frequentemente um requisito de "deal breaker" em vendas B2B: se o marketplace não se integra com o ERP do comprador, o departamento de TI da empresa inviabiliza a compra. Mapear as integrações necessárias antes do desenvolvimento poupa meses de negociação.
+
+## UX B2B vs B2C: Funcionalidade antes de Estética
+
+A tentação em projetos B2B é replicar a experiência visual polida de grandes B2Cs como Amazon ou Mercado Livre. Esse é um erro de prioridade. Usuários B2B preferem eficiência à beleza — eles usam a plataforma como ferramenta de trabalho, muitas vezes diariamente, e valorizam:
+
+**Busca avançada com filtros técnicos:** número de referência do produto, código interno do fornecedor, especificações técnicas (dimensões, materiais, normas). Um operador de compras não quer navegar por categorias — ele quer digitar "parafuso M8x40 inox 304" e encontrar imediatamente.
+
+**Histórico e reorder rápido:** a maioria dos pedidos B2B são repetições. "Repetir último pedido" e "salvar lista de compras frequentes" valem mais que qualquer animação de UI.
+
+**Exportação de dados:** pedidos em CSV/XML, notas fiscais em PDF, relatórios de gasto por período e por categoria. Esses dados precisam estar no ERP do comprador.
+
+**Dashboard de conta:** saldo de crédito disponível, pedidos em andamento, aprovações pendentes, histórico financeiro. O comprador B2B precisa ter controle total sobre o status da conta.
+
+A regra prática é: invista no fluxo de compra recorrente antes de qualquer melhoria estética. O usuário que compra todo mês precisa fazer isso em menos de 5 minutos.
+
+## Conclusão com CTA
+
+A decisão entre construir um marketplace B2B ou B2C define não apenas o produto, mas a arquitetura técnica, o modelo de dados, as integrações necessárias e o perfil do time que vai manter a plataforma. Construir para o público errado ou construir B2C quando o mercado pede B2B são erros caros.
+
+O SystemForge ajuda a tomar essas decisões com documentação estruturada antes do código — identificando os fluxos críticos, mapeando as integrações necessárias e gerando as User Stories que cobrem os cenários B2B que costumam ser esquecidos até que um cliente importante peça. Com a documentação certa, o desenvolvimento começa sem ambiguidade e termina com um produto que realmente serve ao público correto.

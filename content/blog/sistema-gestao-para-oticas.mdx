@@ -1,0 +1,138 @@
+---
+title: "Sistema de gestão para óticas: do cadastro ao estoque"
+slug: "sistema-gestao-para-oticas"
+date: "2024-10-05"
+description: "Requisitos de software de gestão para óticas: cadastro de receitas ópticas, histórico do cliente, controle de armações/lentes e integração com laboratórios."
+tags: ["otica", "gestao setorial", "software otica", "estoque", "receita optica"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+---
+
+Quando uma ótica tenta usar um sistema genérico de gestão — seja um ERP de varejo ou uma ferramenta de controle financeiro — inevitavelmente esbarra em um problema fundamental: sistemas genéricos não sabem o que é uma receita óptica. Eles não entendem graus, eixos, adições e DNP. Não sabem que uma armação tamanho 52 não serve com qualquer lente, que um pedido de lente progressiva tem lead time diferente de uma lente simples, ou que o histórico de prescrição de um cliente é tão importante quanto o histórico de compras.
+
+O resultado é a proliferação de planilhas paralelas, receituários em papel que se perdem, controle de estoque impreciso e pedidos para laboratórios feitos por WhatsApp. O custo invisível dessas ineficiências — em retrabalho, erros de pedido e tempo do optometrista — frequentemente supera o investimento em um sistema especializado.
+
+Este artigo detalha os requisitos técnicos e operacionais de um sistema de gestão para óticas: do modelo de dados da receita óptica até a integração com laboratórios parceiros.
+
+## Modelo de Dados: Receita Óptica, Armação e Lente
+
+O coração técnico de um sistema para óticas é a estrutura de dados da receita óptica. Uma receita óptica não é um texto livre — é um conjunto de campos numéricos e categóricos com validações específicas que precisam ser tratados como dados estruturados para serem úteis.
+
+A estrutura básica de uma receita óptica para óculos de grau:
+
+```sql
+CREATE TABLE receitas_opticas (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cliente_id UUID NOT NULL REFERENCES clientes(id),
+  optometrista VARCHAR(200),
+  crm_optometrista VARCHAR(20),
+  data_prescricao DATE NOT NULL,
+  validade DATE,
+
+  -- Olho Direito (OD)
+  od_esf DECIMAL(4,2),   -- Esfera: -20.00 a +20.00, steps de 0.25
+  od_cil DECIMAL(4,2),   -- Cilindro: -8.00 a +8.00, steps de 0.25
+  od_eixo SMALLINT,      -- Eixo: 0 a 180 graus
+  od_add DECIMAL(3,2),   -- Adição (bifocal/progressiva): +0.75 a +4.00
+  od_dp DECIMAL(4,1),    -- Distância pupilar OD (mm)
+
+  -- Olho Esquerdo (OE)
+  oe_esf DECIMAL(4,2),
+  oe_cil DECIMAL(4,2),
+  oe_eixo SMALLINT,
+  oe_add DECIMAL(3,2),
+  oe_dp DECIMAL(4,1),
+
+  -- Dados complementares
+  dp_total DECIMAL(4,1),       -- DP binocular (pode ser OD+OE)
+  altura_montagem SMALLINT,    -- para lentes progressivas (mm)
+  observacoes TEXT,
+  uso VARCHAR(20),             -- 'longe', 'perto', 'multifocal', 'solar'
+  criado_em TIMESTAMPTZ DEFAULT NOW(),
+  medico_assina BOOLEAN DEFAULT FALSE
+);
+```
+
+Para lentes de contato, o schema é diferente — inclui campos como curvatura base (BC), diâmetro (DIA), potência (PWR), fator de cilindro e eixo para lentes tóricas.
+
+O modelo de armações e lentes precisa tratar o estoque com granularidade de grade. Uma armação não existe apenas como "modelo X marca Y" — ela existe em combinações específicas de cor, aro e tamanho. Da mesma forma, lentes existem em índices de refração diferentes (1.53, 1.56, 1.60, 1.67, 1.74), tratamentos (AR, Blue Light, fotossensível) e design (esférica, asférica, progressiva).
+
+| Atributo | Armação | Lente |
+|----------|---------|-------|
+| SKU base | Marca + modelo + cor | Fabricante + design + índice |
+| Variação | Tamanho do aro (48, 50, 52...) | Grau (esf/cil) + tratamento |
+| Estoque | Por tamanho e cor | Por faixa de grau disponível |
+| Reposição | Pedido ao fornecedor | Pedido ao laboratório ou fornecedor |
+
+## Histórico do Cliente: Evolução da Prescrição no Tempo
+
+Uma das funcionalidades que mais diferencia sistemas especializados para óticas é a visualização da evolução da prescrição ao longo do tempo. Para o optometrista ou para o atendente que está montando um pedido, poder ver que o cliente passou de -1.50 para -2.25 nos últimos dois anos é informação clínica relevante.
+
+O sistema deve oferecer:
+
+**Linha do tempo de receitas**: visualização cronológica de todas as receitas do cliente com indicação de mudanças significativas (variação maior que 0.50D em qualquer campo).
+
+**Alertas de receita vencida**: receitas ópticas têm validade médica (geralmente 12 meses). O sistema deve alertar automaticamente quando um cliente volta para compra e sua última receita está vencida, impedindo que o atendente monte óculos com grau desatualizado.
+
+**Comparativo visual**: exibição lado a lado da receita atual vs anterior, com destaque para campos alterados.
+
+**Integração com pedido**: ao iniciar um pedido, o sistema deve pré-preencher os campos de grau a partir da receita mais recente válida, reduzindo erros de digitação e agilizando o atendimento.
+
+O histórico de compras vinculado à receita também é valioso: saber que o cliente comprou óculos com determinado grau e depois voltou com reclamação permite identificar padrões de adaptação problemática para certas lentes.
+
+## Pedido para Laboratório: Integração e Rastreamento
+
+O fluxo do pedido de lente para laboratório é um ponto crítico de operação da ótica. O laboratório recebe o pedido (geralmente com armação física ou medidas), processa a lente, e devolve o óculos montado. O prazo pode variar de 24h (lentes simples em estoque) a 15 dias (progressivas de alto índice com tratamentos especiais).
+
+Um sistema bem estruturado deve cobrir:
+
+**Criação do pedido com dados completos**: o pedido deve conter todos os dados necessários para o laboratório sem ambiguidade — receita completa, especificação da lente (índice, design, tratamento), dados da armação (modelo, tamanho, material do aro), altura de montagem e qualquer instrução especial.
+
+**Envio digital**: laboratórios maiores (Essilor, Zeiss, Indo, Shamir) oferecem APIs ou portais web para envio de pedidos digitais, eliminando o WhatsApp e reduzindo erros de transcrição.
+
+**Rastreamento de status**: o pedido no sistema deve refletir o status no laboratório — recebido, em processamento, aguardando armação, pronto para retirada, enviado, entregue.
+
+**Controle de prazo e alertas**: o sistema deve calcular a data prevista de entrega com base no tipo de lente e laboratório, e alertar automaticamente quando o prazo estiver próximo de vencer sem confirmação de conclusão.
+
+**Registro de ocorrências**: lentes que chegam com defeito, pedidos extraviados e reprocessamentos devem ser registrados para análise de desempenho por laboratório.
+
+```
+Fluxo típico de pedido:
+
+[Venda aprovada]
+    → [Pedido criado no sistema]
+    → [Armação separada no estoque e etiquetada]
+    → [Pedido enviado ao laboratório]
+    → [Confirmação de recebimento]
+    → [Status: em produção]
+    → [Notificação: pronto]
+    → [Recebimento conferido]
+    → [Montagem e controle de qualidade]
+    → [Aviso ao cliente: pronto para retirada]
+    → [Entrega com confirmação]
+```
+
+## Estoque Especializado: Grade de Lentes e Armações
+
+O controle de estoque para óticas tem particularidades que sistemas de varejo genérico não suportam adequadamente.
+
+**Estoque de armações por grade**: uma armação em cor prata tamanho 50 é um item diferente da mesma armação em cor dourada tamanho 52. O sistema precisa controlar estoque em combinações de atributos (cor × tamanho × material), não apenas por modelo.
+
+**Estoque de lentes prontas**: óticas que trabalham com lentes de grau acabado (principalmente para graus simples de alta rotatividade) precisam controlar estoque por faixa de grau. Uma lente -2.00 esférica índice 1.56 AR é um SKU específico com quantidade em estoque.
+
+**Consignação**: parte do estoque de armações pode estar em consignação com fornecedores — a ótica só paga quando vende. O sistema precisa distinguir estoque próprio de consignado e gerar relatório de acerto periódico com fornecedor.
+
+**Ponto de pedido automático**: baseado no histórico de giro de cada produto, o sistema deve calcular o ponto de reposição e gerar alertas ou pedidos automáticos quando o estoque atinge o nível mínimo.
+
+**Rastreabilidade de armação**: cada armação tem um número de referência ou código de barras. O sistema deve permitir rastrear a armação desde a entrada no estoque até a saída para laboratório (com número do pedido) e entrega ao cliente.
+
+A gestão de inventário em óticas é particularmente desafiadora porque o mix de produtos é amplo (centenas de modelos de armação), o ticket médio é alto e a taxa de devolução por insatisfação com o resultado visual existe. Ter rastreabilidade completa de cada peça protege a ótica em casos de disputa com clientes ou fornecedores.
+
+## Conclusão
+
+Um sistema de gestão para óticas precisa ser construído por quem entende que o negócio óptico não é só varejo — é uma combinação de comércio, serviço técnico e (para óticas com optometrista) saúde visual. O software precisa falar a língua do setor: graus, eixos, adições, DP, índice de refração, tratamentos.
+
+Sistemas genéricos podem cobrir as partes de financeiro e gestão básica, mas falham nos processos core que geram eficiência operacional: o cadastro estruturado de receitas, a integração com laboratórios, o controle de estoque por grade e o histórico de prescrição do cliente.
+
+A SystemForge desenvolve sistemas setoriais com modelagem de dados específica para cada vertical. Se você está pensando em construir ou reformular o sistema da sua ótica ou rede, entre em contato para entender o que um sistema sob medida pode mudar na sua operação.

@@ -1,0 +1,121 @@
+---
+title: "Como prevenir fraudes em marketplace"
+slug: "prevenir-fraudes-marketplace"
+date: "2024-09-26"
+description: "Estratégias e ferramentas para prevenir fraudes em marketplaces: chargebacks, contas fake, triangulação e bypass de KYC — com técnicas de detecção."
+tags: ["fraud prevention", "marketplace", "chargeback", "seguranca", "antifraude"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+---
+
+Fraude em marketplace corrói margem e reputação de formas que muitas vezes não aparecem nos dashboards até que o estrago já está feito. Um chargeback não é apenas a perda do valor da venda — é a perda do produto (que já foi enviado), a taxa de chargeback cobrada pela gateway, o custo operacional de disputar ou aceitar, e o impacto na pontuação da sua conta de merchant junto à adquirente. Quando esse índice ultrapassa 1%, as gateways começam a cobrar taxas adicionais. Acima de 2%, o risco é o encerramento da conta.
+
+Marketplaces são particularmente vulneráveis porque a superfície de ataque é maior: há o lado do comprador, o lado do vendedor e a própria plataforma. Fraudadores sofisticados atacam os três simultaneamente.
+
+## Tipos de Fraude Mais Comuns em Marketplaces
+
+Entender os vetores é o primeiro passo para construir defesas adequadas.
+
+**Fraude de comprador (chargeback fraudulento):** o comprador efetua uma compra com cartão legítimo ou roubado e posteriormente aciona o banco alegando que não reconhece a cobrança. Em muitos casos, o produto já foi entregue. O marketplace fica no prejuízo duplo: sem produto e sem dinheiro.
+
+**Fraude de vendedor (scam):** um vendedor cadastra produtos que não tem estoque para enviar, recebe os pagamentos e some. Variação: o vendedor envia produtos falsificados ou com qualidade muito inferior ao anunciado.
+
+**Triangulação:** um fraudador usa o marketplace como intermediário entre um comprador legítimo e um fornecedor legítimo, pagando o fornecedor com cartão roubado. O comprador recebe o produto e fica satisfeito. O fornecedor recebe o pagamento e fica satisfeito. O fraudador fica com a diferença. O chargeback chega semanas depois.
+
+**Manipulação de reviews:** uso de contas falsas para inflar avaliações de produtos ou vendedores, ou para atacar concorrentes com reviews negativos. Isso não é fraude financeira direta, mas destrói a confiabilidade da plataforma.
+
+**Abuso de promoções:** criação de múltiplas contas para aproveitar cupons de "primeiro acesso" ou promoções por CPF. Em plataformas com cashback ou crédito, esse vetor pode ser muito lucrativo para fraudadores organizados.
+
+**Bypass de KYC:** uso de identidades compradas no mercado negro (CPF/CNPJ de terceiros com documentos falsificados) para criar contas de vendedores e operar sem risco imediato.
+
+## Fingerprinting de Dispositivo e Detecção de Bots
+
+A primeira linha de defesa é entender quem está acessando sua plataforma antes que qualquer transação aconteça. O fingerprinting de dispositivo cria um identificador único para cada dispositivo com base em dezenas de atributos coletados pelo browser ou app.
+
+```typescript
+// Implementação básica com FingerprintJS Pro
+import FingerprintJS from '@fingerprintjs/fingerprintjs-pro';
+
+const fpPromise = FingerprintJS.load({
+  apiKey: process.env.NEXT_PUBLIC_FPJS_API_KEY,
+  region: 'us', // ou 'eu' para dados na Europa
+});
+
+async function getVisitorData() {
+  const fp = await fpPromise;
+  const result = await fp.get({
+    extendedResult: true,
+  });
+
+  return {
+    visitorId: result.visitorId,          // ID estável do dispositivo
+    confidence: result.confidence.score,  // 0 a 1
+    ipAddress: result.ip,
+    vpnDetected: result.vpn?.result,
+    botDetected: result.bot?.result,
+    incognito: result.incognito,
+  };
+}
+
+// Enviar junto com o checkout para análise de risco
+async function processCheckout(order: OrderInput, visitorData: VisitorData) {
+  const riskScore = await calculateRiskScore({
+    ...order,
+    deviceId: visitorData.visitorId,
+    isVpn: visitorData.vpnDetected,
+    isBot: visitorData.botDetected,
+    isIncognito: visitorData.incognito,
+  });
+
+  if (riskScore > RISK_THRESHOLD_BLOCK) {
+    throw new Error('TRANSACTION_BLOCKED');
+  }
+
+  if (riskScore > RISK_THRESHOLD_REVIEW) {
+    await flagForManualReview(order.id);
+  }
+}
+```
+
+Atributos relevantes para fingerprinting incluem: user agent, timezone, plugins instalados, resolução de tela, fontes disponíveis, WebGL renderer, capacidade de áudio e comportamento de mouse/touch. A combinação desses dados cria um identificador com 99%+ de precisão mesmo em modo anônimo.
+
+Para bots, a análise de comportamento é complementar: velocidade de digitação, padrões de clique, tempo entre ações e sequência de interação com o formulário são indicadores confiáveis.
+
+## Regras de Risco: Velocidade, Localização e Comportamento
+
+As regras de risco são a lógica que combina múltiplos sinais para calcular uma pontuação de risco por transação. Elas são o núcleo de qualquer sistema antifraude.
+
+| Regra | Sinal | Score de risco |
+|---|---|---|
+| Múltiplos cartões no mesmo dispositivo | > 3 cartões em 24h | +30 |
+| Velocidade de compra | < 30 segundos no checkout | +20 |
+| IP geolocation vs endereço de entrega | Distância > 500km | +15 |
+| VPN ou proxy detectado | Sim | +25 |
+| Primeiro pedido de alto valor | > R$ 500 em conta nova | +20 |
+| Mesmo endereço de entrega, diferentes contas | > 3 contas | +35 |
+| Horário incomum | 2h às 5h (horário local) | +10 |
+| Browser em modo incógnito | Sim | +10 |
+| E-mail descartável | Domínio temporário | +20 |
+
+Scores acima de 70 devem ser bloqueados automaticamente. Entre 40 e 70, enviar para revisão manual ou aplicar fricção adicional (3D Secure, confirmação de e-mail, SMS OTP). Abaixo de 40, aprovar normalmente.
+
+As regras devem ser revisadas mensalmente. Fraudadores se adaptam às regras conhecidas, e um sistema que não evolui rapidamente se torna ineficaz.
+
+## Ferramentas: Stripe Radar, Clearsale e Soluções Open Source
+
+**Stripe Radar:** integrado automaticamente em transações via Stripe. Usa ML treinado em bilhões de transações globais. Configurável via regras customizadas no dashboard. Custo: sem taxa adicional no plano padrão; R$ 0,05 por transação adicional no plano Radar for Fraud Teams.
+
+**Clearsale:** empresa brasileira especializada em antifraude para o mercado local. Forte histórico com CPFs e padrões de comportamento brasileiro. Oferece garantia de chargeback (se aprovar e houver chargeback, eles pagam). Custo: porcentagem do GMV, negociado por volume.
+
+**Konduto:** antifraude brasileiro com foco em análise comportamental. API simples, boa documentação, preços competitivos para startups. Análise em tempo real com resposta em milissegundos.
+
+**Solução open source:** para times que querem controle total, é possível construir um sistema básico com regras customizadas usando Redis para controle de velocidade e PostgreSQL para histórico de transações. Não substitui ML especializado, mas é eficaz contra fraudes simples.
+
+A recomendação prática para marketplaces em crescimento é começar com Stripe Radar (custo zero no início) e adicionar Clearsale ou Konduto quando o volume de chargebacks indicar que o ML básico não é suficiente.
+
+## Conclusão com CTA
+
+Fraude não é um problema que aparece "depois que a plataforma crescer". Ela começa no primeiro dia, com os primeiros vendedores e compradores. Times que deixam antifraude para a Fase 2 frequentemente descobrem que já acumularam chargebacks suficientes para comprometer a conta na adquirente antes de implementar qualquer defesa.
+
+O SystemForge incorpora segurança desde a fase de documentação — com modelagem de ameaças, análise de riscos por fluxo e User Stories que cobrem os cenários de fraude antes da implementação. O resultado é um sistema construído com as defesas certas desde o início, não remendado depois que o dano já aconteceu.

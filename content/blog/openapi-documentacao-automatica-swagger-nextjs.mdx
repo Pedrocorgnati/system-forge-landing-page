@@ -1,0 +1,238 @@
+---
+title: "OpenAPI: documentação automática de API no Next.js"
+slug: "openapi-documentacao-automatica-swagger-nextjs"
+date: "2024-08-23"
+description: "Como configurar OpenAPI 3.x com Swagger UI em APIs Next.js — geração automática a partir de tipos TypeScript com zod-to-openapi ou ts-to-openapi."
+tags: ["openapi", "swagger", "documentacao api", "nextjs", "typescript"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+---
+
+Documentação de API escrita manualmente tem um prazo de validade: o próximo pull request que altera um endpoint sem atualizar o README. Em equipes que movem rápido, a documentação manual inevitavelmente fica desatualizada — e documentação desatualizada é pior do que nenhuma documentação, porque gera confiança em informações erradas.
+
+A solução é gerar a documentação diretamente do código. Com OpenAPI 3.x e as ferramentas certas para TypeScript, você define seus schemas uma vez (em Zod, por exemplo), e a documentação Swagger é gerada automaticamente e sempre reflete o estado real da API.
+
+## OpenAPI 3.x: Estrutura e Componentes Principais
+
+OpenAPI (antigo Swagger) é a especificação padrão da indústria para descrever APIs REST. Um arquivo OpenAPI 3.x é um YAML ou JSON que descreve todos os endpoints, parâmetros, schemas de request/response e regras de autenticação.
+
+A estrutura básica de um documento OpenAPI 3.x:
+
+```yaml
+openapi: "3.0.3"
+info:
+  title: "API de Pedidos"
+  version: "1.0.0"
+  description: "API para gestão de pedidos da plataforma"
+
+servers:
+  - url: "https://api.meusite.com.br/v1"
+    description: "Produção"
+  - url: "http://localhost:3000/api/v1"
+    description: "Desenvolvimento"
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Order:
+      type: object
+      required: [id, status, total]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, confirmed, shipped, delivered, cancelled]
+        total:
+          type: number
+          format: float
+
+paths:
+  /orders:
+    get:
+      summary: "Listar pedidos"
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [pending, confirmed, shipped]
+      responses:
+        "200":
+          description: "Lista de pedidos"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+        "401":
+          description: "Não autenticado"
+```
+
+Escrever isso manualmente é trabalhoso e propenso a erros. É aí que entram as ferramentas de geração automática.
+
+## zod-to-openapi: Gerando Schema do Zod
+
+Se você já usa Zod para validação de inputs (o que deveria, em qualquer API TypeScript), a biblioteca `@asteasolutions/zod-to-openapi` permite registrar seus schemas Zod e gerar automaticamente o documento OpenAPI.
+
+```typescript
+// lib/openapi.ts
+import { OpenAPIRegistry, OpenApiGeneratorV3 } from "@asteasolutions/zod-to-openapi";
+import { z } from "zod";
+
+export const registry = new OpenAPIRegistry();
+
+// Definindo schemas Zod que também servem como documentação
+export const OrderSchema = registry.register(
+  "Order",
+  z.object({
+    id: z.string().uuid().openapi({ example: "550e8400-e29b-41d4-a716-446655440000" }),
+    status: z.enum(["pending", "confirmed", "shipped", "delivered", "cancelled"]),
+    total: z.number().positive().openapi({ example: 299.90 }),
+    createdAt: z.string().datetime(),
+  })
+);
+
+export const CreateOrderSchema = z.object({
+  items: z.array(
+    z.object({
+      productId: z.string().uuid(),
+      quantity: z.number().int().positive(),
+    })
+  ).min(1),
+  addressId: z.string().uuid(),
+});
+
+// Registrando o endpoint
+registry.registerPath({
+  method: "post",
+  path: "/orders",
+  summary: "Criar pedido",
+  tags: ["Pedidos"],
+  security: [{ BearerAuth: [] }],
+  request: {
+    body: {
+      content: {
+        "application/json": { schema: CreateOrderSchema },
+      },
+    },
+  },
+  responses: {
+    201: {
+      description: "Pedido criado com sucesso",
+      content: {
+        "application/json": { schema: OrderSchema },
+      },
+    },
+    422: {
+      description: "Dados inválidos",
+    },
+  },
+});
+
+// Gerando o documento OpenAPI
+export function generateOpenApiDocument() {
+  const generator = new OpenApiGeneratorV3(registry.definitions);
+  return generator.generateDocument({
+    openapi: "3.0.0",
+    info: {
+      title: "API de Pedidos",
+      version: "1.0.0",
+    },
+    servers: [{ url: "/api/v1" }],
+  });
+}
+```
+
+A vantagem crítica dessa abordagem: o schema Zod que você usa para validar os inputs do endpoint é o mesmo que gera a documentação. Se você alterar a validação, a documentação atualiza automaticamente. Impossível ficar desatualizada.
+
+## Configurando Swagger UI no Next.js
+
+Com o documento OpenAPI gerado, o próximo passo é servir o Swagger UI para que desenvolvedores possam explorar a API interativamente.
+
+No Next.js App Router:
+
+```typescript
+// app/api/docs/route.ts — serve o JSON do OpenAPI
+import { generateOpenApiDocument } from "@/lib/openapi";
+import { NextResponse } from "next/server";
+
+export function GET() {
+  const document = generateOpenApiDocument();
+  return NextResponse.json(document);
+}
+```
+
+```typescript
+// app/docs/page.tsx — página com Swagger UI
+"use client";
+import SwaggerUI from "swagger-ui-react";
+import "swagger-ui-react/swagger-ui.css";
+
+export default function ApiDocsPage() {
+  return (
+    <div className="swagger-container">
+      <SwaggerUI url="/api/docs" />
+    </div>
+  );
+}
+```
+
+Adicione a dependência: `npm install swagger-ui-react`. Em produção, considere proteger a rota `/docs` com autenticação ou limitar ao ambiente de desenvolvimento com `if (process.env.NODE_ENV === "production") redirect("/")`.
+
+Uma alternativa mais leve é o **Scalar** (`@scalar/nextjs-api-reference`), que gera uma UI mais moderna que o Swagger UI padrão, com melhor suporte a temas e experiência de uso.
+
+## Versionamento de Documentação
+
+À medida que a API evolui, a documentação precisa refletir múltiplas versões. A estratégia mais simples é manter um arquivo OpenAPI por versão principal:
+
+```
+app/
+  api/
+    v1/
+      docs/
+        route.ts  → gera docs da v1
+    v2/
+      docs/
+        route.ts  → gera docs da v2
+  docs/
+    v1/
+      page.tsx
+    v2/
+      page.tsx
+```
+
+Cada versão tem seu próprio `OpenAPIRegistry` com os schemas e endpoints daquela versão. Quando você depreca um endpoint, você mantém ele na documentação da v1 (com o campo `deprecated: true`) e remove da v2.
+
+```yaml
+# Marcando endpoint como deprecated no OpenAPI
+/orders/{id}/cancel:
+  post:
+    deprecated: true
+    summary: "Cancelar pedido (deprecated)"
+    description: "Use PATCH /orders/{id} com status=cancelled. Este endpoint será removido na v2."
+```
+
+Você também pode usar o header `Sunset` nas respostas para comunicar quando o endpoint será removido — integrado com a documentação, isso cria um contrato claro com os integradores.
+
+## Conclusão
+
+Documentação de API gerada automaticamente a partir do código não é um luxo — é uma necessidade em qualquer API que vai ser consumida por mais de um desenvolvedor. A combinação Zod + zod-to-openapi + Swagger UI no Next.js entrega:
+
+- Documentação sempre sincronizada com o código
+- Validação de inputs usando o mesmo schema da documentação
+- Interface interativa para testar endpoints sem precisar de Postman
+- Contrato formal que pode ser usado por clientes para gerar SDKs automaticamente
+
+O investimento de configurar isso na primeira semana do projeto economiza dezenas de horas de "por que esse endpoint não está funcionando?" nos meses seguintes.
+
+No SystemForge, o arquivo `openapi.yaml` é gerado como parte do processo de documentação técnica, antes do desenvolvimento começar. Isso garante que o contrato da API seja definido e revisado antes de qualquer linha de código — e que a documentação reflita a intenção original do design, não as improvisações do desenvolvimento. Se você quer estruturar sua API com documentação que se paga, podemos ajudar.

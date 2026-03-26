@@ -1,0 +1,179 @@
+---
+title: "Autenticação biométrica em apps: Face ID e digital"
+slug: "autenticacao-biometrica-apps-mobile"
+date: "2024-08-12"
+description: "Como implementar autenticação biométrica em apps React Native — expo-local-authentication, fallback para PIN, armazenamento seguro de tokens e UX de login."
+tags: ["biometria", "face id", "touch id", "react native", "seguranca mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+---
+
+Biometria é a senha que o usuário nunca esquece, nunca perde e nunca reutiliza em vinte sites diferentes. Face ID e Touch ID eliminaram o maior ponto de atrito no login mobile: digitar uma senha complexa em uma tela de 6 polegadas. O resultado prático é simples — apps com autenticação biométrica têm taxas de abertura significativamente maiores e menor abandono na tela de login.
+
+Mas implementar biometria corretamente vai além de chamar uma API. Envolve armazenamento seguro de tokens, fallback robusto para quando a biometria não está disponível e um fluxo de UX que não frustra o usuário nos casos de borda.
+
+## expo-local-authentication: Setup e Compatibilidade
+
+A biblioteca `expo-local-authentication` abstrai Face ID, Touch ID (iOS) e Biometria Android em uma única API. Antes de autenticar, sempre verifique o suporte do dispositivo:
+
+```typescript
+import * as LocalAuthentication from 'expo-local-authentication';
+
+async function checkBiometricSupport() {
+  const hasHardware = await LocalAuthentication.hasHardwareAsync();
+  const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+  const supportedTypes = await LocalAuthentication.supportedAuthenticationTypesAsync();
+
+  return {
+    hasHardware,          // dispositivo tem sensor?
+    isEnrolled,           // usuário cadastrou biometria?
+    hasFaceId: supportedTypes.includes(
+      LocalAuthentication.AuthenticationType.FACIAL_RECOGNITION
+    ),
+    hasFingerprint: supportedTypes.includes(
+      LocalAuthentication.AuthenticationType.FINGERPRINT
+    ),
+  };
+}
+
+async function authenticateWithBiometrics(): Promise<boolean> {
+  const support = await checkBiometricSupport();
+
+  if (!support.hasHardware || !support.isEnrolled) {
+    return false; // cai para o fallback
+  }
+
+  const result = await LocalAuthentication.authenticateAsync({
+    promptMessage: 'Confirme sua identidade para continuar',
+    fallbackLabel: 'Usar PIN',        // texto do botão de fallback (iOS)
+    cancelLabel: 'Cancelar',
+    disableDeviceFallback: false,     // permite fallback nativo do sistema
+  });
+
+  return result.success;
+}
+```
+
+No iOS, é necessário adicionar a permissão no `Info.plist` via `app.json`:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "infoPlist": {
+        "NSFaceIDUsageDescription": "Usamos Face ID para proteger sua conta e agilizar o login."
+      }
+    }
+  }
+}
+```
+
+Sem essa descrição, o app é rejeitado na App Store Review. O texto precisa explicar claramente por que o app precisa do Face ID — genérico demais também causa rejeição.
+
+Uma nota sobre compatibilidade: `disableDeviceFallback: false` permite que o sistema operacional ofereça o fallback nativo (PIN/senha do dispositivo) quando a biometria falha repetidamente. É diferente do fallback da sua aplicação — o do sistema entra depois de algumas tentativas falhas consecutivas.
+
+## Armazenamento Seguro de Tokens com expo-secure-store
+
+Armazenar tokens de autenticação no AsyncStorage é um erro de segurança. O AsyncStorage não é criptografado e pode ser acessado em dispositivos com jailbreak ou root. O `expo-secure-store` usa o Keychain do iOS e o Android Keystore System — ambos protegidos pelo hardware do dispositivo e, em muitos casos, vinculados à biometria.
+
+```typescript
+import * as SecureStore from 'expo-secure-store';
+
+const TOKEN_KEY = 'auth_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+
+export async function saveTokens(accessToken: string, refreshToken: string) {
+  await SecureStore.setItemAsync(TOKEN_KEY, accessToken);
+  await SecureStore.setItemAsync(REFRESH_TOKEN_KEY, refreshToken);
+}
+
+export async function getAccessToken(): Promise<string | null> {
+  return SecureStore.getItemAsync(TOKEN_KEY);
+}
+
+export async function clearTokens() {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  await SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
+}
+```
+
+O fluxo completo de login biométrico fica assim:
+
+1. Usuário faz login com email/senha (primeira vez)
+2. Backend retorna `access_token` e `refresh_token`
+3. App salva os tokens no SecureStore
+4. Nas próximas aberturas, app apresenta a autenticação biométrica
+5. Se aprovada, recupera o token do SecureStore e autentica a sessão
+6. Se o token estiver expirado, usa o `refresh_token` para renovar silenciosamente
+
+Esse modelo significa que as credenciais reais (email/senha) são inseridas apenas uma vez — tudo depois é gerenciado pelos tokens.
+
+## Fallback para PIN: Quando Biometria Não Está Disponível
+
+Biometria pode estar indisponível por vários motivos: dispositivo sem sensor, usuário não cadastrou biometria, muitas tentativas falhas, ou o usuário simplesmente optou por não usar. Seu app precisa ter um caminho alternativo funcional para todos esses casos.
+
+Uma boa UX de fallback para PIN no app (diferente do PIN do sistema) envolve um fluxo de criação de PIN no onboarding e uma tela de entrada de PIN como alternativa ao biométrico:
+
+```typescript
+import { useState } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import * as Crypto from 'expo-crypto';
+
+const PIN_HASH_KEY = 'user_pin_hash';
+
+async function createPin(pin: string) {
+  const hash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    pin + 'seu-salt-aqui' // use um salt único por usuário em produção
+  );
+  await SecureStore.setItemAsync(PIN_HASH_KEY, hash);
+}
+
+async function verifyPin(pin: string): Promise<boolean> {
+  const storedHash = await SecureStore.getItemAsync(PIN_HASH_KEY);
+  if (!storedHash) return false;
+
+  const inputHash = await Crypto.digestStringAsync(
+    Crypto.CryptoDigestAlgorithm.SHA256,
+    pin + 'seu-salt-aqui'
+  );
+
+  return storedHash === inputHash;
+}
+```
+
+Nunca armazene o PIN em texto plano, mesmo no SecureStore. O hash com salt garante que, mesmo que o SecureStore seja comprometido, o PIN original não é recuperável.
+
+| Cenário | Comportamento esperado |
+|---|---|
+| Biometria disponível e cadastrada | Apresenta biometria automaticamente ao abrir |
+| Biometria disponível, não cadastrada | Oferece cadastro ou fallback para PIN |
+| Biometria indisponível (hardware) | Vai direto para PIN |
+| 5 tentativas biométricas falhas | Bloqueia biometria, exige PIN |
+| Usuário cancelou biometria | Oferece opção de PIN sem forçar |
+
+## UX de Login: Fluxo que Não Frustra
+
+A maior fonte de frustração em autenticação biométrica é o app pedir biometria no momento errado ou não dar saída clara quando ela falha. Algumas diretrizes práticas:
+
+**Dispare a autenticação biométrica automaticamente, mas com delay**
+Chamar a autenticação logo no `useEffect` do mount, sem esperar a tela renderizar, cria uma experiência confusa. Adicione um delay de 300–500ms para que o usuário veja a tela antes do diálogo aparecer.
+
+**Mostre o tipo de biometria disponível**
+"Toque no sensor" para Touch ID e "Olhe para a câmera" para Face ID são instruções diferentes. Use o resultado de `supportedAuthenticationTypesAsync()` para personalizar o texto e o ícone.
+
+**Botão de fallback sempre visível**
+Nunca esconda a opção de usar PIN. Usuários com mãos sujas, óculos de sol ou em ambientes com iluminação difícil precisam de uma saída rápida.
+
+**Não repita o prompt em loop**
+Se a autenticação falhar e o usuário cancelar, respeite essa decisão. Não mostre o diálogo novamente automaticamente. Ofereça um botão "Tentar novamente" em vez de disparar o prompt sem a ação do usuário.
+
+**Estado de loading após autenticação**
+Entre a confirmação da biometria e a tela principal, há uma chamada de rede para validar o token. Mostre um loading nesse intervalo — evita a sensação de que o app travou.
+
+## Conclusão
+
+Autenticação biométrica bem implementada é transparente para o usuário — ela simplesmente funciona, rápido, sem atritos. Mas "simplesmente funcionar" exige atenção aos detalhes: tokens armazenados com segurança, fallbacks claros e uma UX que antecipa os casos onde a biometria não está disponível.
+
+Na SystemForge, segurança mobile não é uma camada adicionada depois — ela é projetada junto com a arquitetura do app desde o início. Se você está construindo um app que lida com dados sensíveis ou transações financeiras e quer garantir que a autenticação esteja implementada do jeito certo, fale com a nossa equipe.

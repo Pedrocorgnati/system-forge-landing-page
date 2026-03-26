@@ -1,0 +1,59 @@
+{
+  "_comment": "SLOs derivados dos RNFs do PRD (SLO-SPEC.md não encontrado). Site estático com Cloudflare CDN.",
+  "_source": "PRD.md seção Performance: TTFB < 200ms (cache), load time < 2s, LCP < 2.5s",
+  "global": {
+    "error_rate_max": 0.01,
+    "base_url": "https://forjadesistemas.com.br"
+  },
+  "scenarios": {
+    "home": {
+      "description": "Página inicial — shell + seções + hero",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "servicos": {
+      "description": "Listagem de serviços — grid de 11 cards",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "servico-detalhe": {
+      "description": "Página individual de serviço (/servicos/saas)",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "portfolio": {
+      "description": "Grid do portfólio com 19+ projetos",
+      "type": "pagina-estatica",
+      "p95_ms": 600,
+      "p99_ms": 1200,
+      "error_rate_max": 0.01
+    },
+    "blog-listing": {
+      "description": "Listagem de artigos do blog",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "blog-artigo": {
+      "description": "Artigo MDX renderizado — conteúdo mais pesado",
+      "type": "pagina-conteudo",
+      "p95_ms": 800,
+      "p99_ms": 1500,
+      "error_rate_max": 0.01
+    },
+    "conselheiro": {
+      "description": "Página do Conselheiro",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    }
+  }
+}

@@ -1,0 +1,285 @@
+---
+title: "Export de relatórios em PDF e Excel no Next.js"
+slug: "export-relatorios-pdf-excel-nextjs"
+date: "2024-09-25"
+description: "Como gerar PDFs e planilhas Excel a partir de dashboards em Next.js — React-PDF, Puppeteer, ExcelJS e quando usar cada abordagem."
+tags: ["pdf", "excel", "relatorios", "nextjs", "dashboard"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+---
+
+Se você perguntar para qualquer time que fez pesquisa de usuário com compradores corporativos qual é o feature mais solicitado em dashboards B2B, a resposta quase sempre é a mesma: "exportar para Excel". Em segundo lugar vem "gerar PDF para apresentar na reunião".
+
+Esses dois formatos dominam o fluxo de trabalho corporativo por razões simples: planilhas são o denominador comum de análise nas empresas, e PDFs são o formato padrão para relatórios formais, apresentações e arquivamento. Um dashboard que não exporta force os usuários a fazer screenshots ou copiar números manualmente — e eles vão fazer isso, mas vão reclamar de você.
+
+## React-PDF: PDFs com JSX (Client-side e Server-side)
+
+React-PDF (`@react-pdf/renderer`) é uma biblioteca que permite descrever PDFs usando componentes JSX com um subset de estilos similar ao CSS. O resultado é um arquivo PDF gerado programaticamente, com layout preciso e independente de qualquer browser ou rendering de HTML.
+
+```typescript
+// components/reports/RevenuePDF.tsx
+import {
+  Document, Page, Text, View, StyleSheet, Image
+} from '@react-pdf/renderer';
+
+const styles = StyleSheet.create({
+  page: {
+    padding: 40,
+    fontFamily: 'Helvetica',
+    backgroundColor: '#ffffff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+    paddingBottom: 16,
+    borderBottom: '1px solid #e5e7eb',
+  },
+  title: { fontSize: 20, fontWeight: 'bold', color: '#111827' },
+  subtitle: { fontSize: 11, color: '#6b7280', marginTop: 4 },
+  kpiRow: { flexDirection: 'row', gap: 16, marginBottom: 24 },
+  kpiBox: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#f9fafb',
+    borderRadius: 8,
+  },
+  kpiLabel: { fontSize: 10, color: '#6b7280', marginBottom: 4 },
+  kpiValue: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
+  table: { marginTop: 16 },
+  tableRow: { flexDirection: 'row', borderBottom: '1px solid #f3f4f6', padding: '8px 0' },
+  tableHeader: { fontSize: 10, color: '#6b7280', fontWeight: 'bold' },
+  tableCell: { fontSize: 10, color: '#374151', flex: 1 },
+});
+
+interface RevenueReportData {
+  period: string;
+  totalRevenue: number;
+  growth: number;
+  topCustomers: Array<{ name: string; revenue: number; orders: number }>;
+}
+
+export function RevenuePDF({ data }: { data: RevenueReportData }) {
+  return (
+    <Document>
+      <Page size="A4" style={styles.page}>
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Relatório de Receita</Text>
+            <Text style={styles.subtitle}>Período: {data.period}</Text>
+          </View>
+          <Text style={{ fontSize: 10, color: '#9ca3af' }}>
+            Gerado em {new Date().toLocaleDateString('pt-BR')}
+          </Text>
+        </View>
+
+        <View style={styles.kpiRow}>
+          <View style={styles.kpiBox}>
+            <Text style={styles.kpiLabel}>Receita Total</Text>
+            <Text style={styles.kpiValue}>
+              {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+                .format(data.totalRevenue)}
+            </Text>
+          </View>
+          <View style={styles.kpiBox}>
+            <Text style={styles.kpiLabel}>Crescimento</Text>
+            <Text style={{ ...styles.kpiValue, color: data.growth >= 0 ? '#16a34a' : '#dc2626' }}>
+              {data.growth > 0 ? '+' : ''}{data.growth.toFixed(1)}%
+            </Text>
+          </View>
+        </View>
+
+        <Text style={{ fontSize: 13, fontWeight: 'bold', marginBottom: 8 }}>Top Clientes</Text>
+        <View style={styles.table}>
+          <View style={styles.tableRow}>
+            <Text style={{ ...styles.tableHeader, flex: 2 }}>Cliente</Text>
+            <Text style={styles.tableHeader}>Receita</Text>
+            <Text style={styles.tableHeader}>Pedidos</Text>
+          </View>
+          {data.topCustomers.map((c, i) => (
+            <View key={i} style={styles.tableRow}>
+              <Text style={{ ...styles.tableCell, flex: 2 }}>{c.name}</Text>
+              <Text style={styles.tableCell}>
+                {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(c.revenue)}
+              </Text>
+              <Text style={styles.tableCell}>{c.orders}</Text>
+            </View>
+          ))}
+        </View>
+      </Page>
+    </Document>
+  );
+}
+
+// Download no cliente:
+import { pdf } from '@react-pdf/renderer';
+
+async function downloadPDF(data: RevenueReportData) {
+  const blob = await pdf(<RevenuePDF data={data} />).toBlob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `relatorio-receita-${data.period}.pdf`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+```
+
+**Vantagens de React-PDF:** layout pixel-perfect, sem dependência de browser, funciona em Server Actions e API Routes, e o resultado é consistente em qualquer ambiente.
+
+**Limitações:** não renderiza gráficos automaticamente. Para incluir gráficos em PDFs com React-PDF, você precisa exportar os gráficos como imagens SVG ou PNG e incluí-los como `<Image>`. Isso adiciona complexidade ao pipeline de geração.
+
+## Puppeteer: Screenshot de Página como PDF
+
+Puppeteer controla uma instância do Chrome headless e pode gerar PDFs de qualquer página web. A abordagem é diferente: em vez de descrever o PDF programaticamente, você renderiza a página do dashboard no browser e "imprime" como PDF.
+
+```typescript
+// app/api/reports/pdf/route.ts
+import puppeteer from 'puppeteer-core';
+import chromium from '@sparticuz/chromium'; // versão otimizada para serverless
+
+export async function POST(request: Request) {
+  const { reportUrl, filename } = await request.json();
+
+  const browser = await puppeteer.launch({
+    args: chromium.args,
+    executablePath: await chromium.executablePath(),
+    headless: true,
+  });
+
+  const page = await browser.newPage();
+
+  // Injeta token de autenticação para páginas protegidas
+  const sessionToken = request.headers.get('authorization');
+  await page.setExtraHTTPHeaders({ authorization: sessionToken ?? '' });
+
+  await page.goto(`${process.env.NEXT_PUBLIC_URL}${reportUrl}?print=true`, {
+    waitUntil: 'networkidle0', // aguarda todas as requisições de dados
+    timeout: 30_000,
+  });
+
+  // Aguarda animações de gráficos terminarem
+  await page.waitForTimeout(2000);
+
+  const pdfBuffer = await page.pdf({
+    format: 'A4',
+    printBackground: true,
+    margin: { top: '20px', bottom: '20px', left: '20px', right: '20px' },
+  });
+
+  await browser.close();
+
+  return new Response(pdfBuffer, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename="${filename}.pdf"`,
+    }
+  });
+}
+```
+
+**Vantagens de Puppeteer:** o PDF inclui gráficos e toda a visualização do dashboard exatamente como aparece na tela, sem necessidade de recriar o layout em código PDF. É mais rápido de implementar quando o design já existe.
+
+**Limitações:** requer Chrome headless no servidor (~130MB), latência maior de geração (2-5s), custo de infra mais alto em serverless, e o CSS precisa de ajustes para modo de impressão (`@media print`).
+
+## ExcelJS: Planilhas com Formatação Completa
+
+Para exports Excel, `ExcelJS` é a biblioteca mais robusta disponível em Node.js — suporta múltiplas abas, formatação de células, fórmulas, gráficos, imagens e proteção de planilha.
+
+```typescript
+// lib/exports/excel.ts
+import ExcelJS from 'exceljs';
+
+interface ExcelReportOptions {
+  title: string;
+  data: Array<Record<string, string | number>>;
+  columns: Array<{ key: string; header: string; width?: number; format?: string }>;
+}
+
+export async function generateExcelReport(options: ExcelReportOptions): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Dashboard B2B';
+  workbook.created = new Date();
+
+  const sheet = workbook.addWorksheet(options.title, {
+    pageSetup: { paperSize: 9, orientation: 'landscape' }
+  });
+
+  // Cabeçalho visual
+  sheet.mergeCells('A1', `${String.fromCharCode(64 + options.columns.length)}1`);
+  const titleCell = sheet.getCell('A1');
+  titleCell.value = options.title;
+  titleCell.font = { bold: true, size: 14, color: { argb: 'FF111827' } };
+  titleCell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF9FAFB' } };
+  titleCell.alignment = { vertical: 'middle', horizontal: 'center' };
+  sheet.getRow(1).height = 32;
+
+  // Colunas
+  sheet.columns = options.columns.map(col => ({
+    key: col.key,
+    header: col.header,
+    width: col.width ?? 18,
+  }));
+
+  // Linha de cabeçalho formatada
+  const headerRow = sheet.getRow(2);
+  headerRow.values = ['', ...options.columns.map(c => c.header)];
+  headerRow.eachCell(cell => {
+    cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+    cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4F46E5' } };
+    cell.alignment = { vertical: 'middle' };
+  });
+  headerRow.height = 24;
+
+  // Dados com alternância de cor
+  options.data.forEach((row, index) => {
+    const dataRow = sheet.addRow(row);
+    if (index % 2 === 0) {
+      dataRow.eachCell(cell => {
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F3FF' } };
+      });
+    }
+    // Formata células numéricas
+    options.columns.forEach(col => {
+      if (col.format) {
+        const cell = dataRow.getCell(col.key);
+        cell.numFmt = col.format;
+      }
+    });
+  });
+
+  // Congela cabeçalhos
+  sheet.views = [{ state: 'frozen', ySplit: 2 }];
+
+  // Auto-filtro
+  sheet.autoFilter = {
+    from: { row: 2, column: 1 },
+    to: { row: 2, column: options.columns.length }
+  };
+
+  return workbook.xlsx.writeBuffer() as Promise<Buffer>;
+}
+```
+
+## Quando Gerar no Cliente vs no Servidor
+
+A decisão de onde gerar o export afeta performance, segurança e custos:
+
+| Critério | Client-side | Server-side |
+|----------|-------------|-------------|
+| Dados sensíveis no payload | Risco (trafega pro cliente) | Seguro (permanece no servidor) |
+| Datasets grandes (> 50k linhas) | Pode travar o browser | Recomendado |
+| Gráficos no PDF | Difícil | Fácil com Puppeteer |
+| Custo de infra | Nenhum | CPU/memória do servidor |
+| Latência percebida | Imediata (bloqueia UI) | Assíncrona possível |
+
+A regra prática: **React-PDF no servidor** para PDFs de relatórios formais com dados sensíveis; **ExcelJS no servidor** para planilhas com mais de 1.000 linhas ou dados financeiros; **client-side** apenas para exports simples de tabelas visíveis na tela.
+
+## Conclusão
+
+Exportação de relatórios é o feature mais subestimado em roadmaps de dashboard. Parece simples — "é só gerar um arquivo" — mas a implementação de qualidade envolve decisões de arquitetura sobre onde processar, como lidar com gráficos, como manter consistência visual com o dashboard e como escalar quando muitos usuários exportam simultaneamente.
+
+Implementar export como afterthought gera PDFs feios, planilhas sem formatação e timeouts em requests longos. Implementar como parte do design do sistema desde o início resulta em exports que os usuários orgulhosamente levam para reuniões de diretoria.
+
+Na SystemForge, exportação é especificada como requisito no PRD com formato, conteúdo e frequência estimada de uso — não adicionada como feature de última hora antes do lançamento.

@@ -1,0 +1,10 @@
+# Proteção de branch: Inbound Forge (usuário de deploy key)
+# Qualquer arquivo fora de content/blog/ e public/images/blog/
+# requer review de owner do repositório.
+
+# Regra geral: tudo requer review do owner
+*   @Pedrocorgnati
+
+# Exceção: Inbound Forge pode commitar nestas pastas sem review
+content/blog/           @inbound-forge @Pedrocorgnati
+public/images/blog/     @inbound-forge @Pedrocorgnati

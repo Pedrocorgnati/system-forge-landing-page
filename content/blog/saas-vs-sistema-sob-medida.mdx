@@ -1,0 +1,94 @@
+---
+title: "SaaS vs sistema sob medida: como decidir"
+slug: "saas-vs-sistema-sob-medida"
+date: "2024-08-07"
+description: "Quando contratar um SaaS pronto e quando construir um sistema customizado — análise por custo total, diferenciação competitiva e lock-in."
+tags: ["saas", "software sob medida", "build vs buy", "decisao tecnica", "gestao de tecnologia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+---
+
+Toda empresa que cresce chega a um momento em que precisa responder a essa pergunta: contratar um SaaS pronto ou construir algo sob medida? A resposta errada pode significar anos de dependência de uma plataforma que não escala com o negócio, ou meses de desenvolvimento desperdiçados em algo que já existia perfeitamente resolvido no mercado.
+
+Não existe resposta universal. Mas existe um processo claro de análise que separa decisões bem fundamentadas de apostas cegas.
+
+## Quando o SaaS Pronto é a Resposta Certa
+
+A regra mais simples: se a funcionalidade que você precisa **não é um diferencial competitivo**, não construa — compre.
+
+Gestão de e-mail marketing, autenticação de usuários, processamento de pagamentos, emissão de nota fiscal, videoconferência, assinatura de documentos — nenhum desses processos diferencia sua empresa no mercado. Eles são commodities operacionais. Construí-los sob medida é um gasto de energia de engenharia que poderia estar indo para o que realmente diferencia seu produto ou serviço.
+
+Outras indicações de que o SaaS pronto é o caminho certo:
+
+- **O problema é bem definido e genérico.** CRM, ERP para PME, helpdesk, gestão de RH — existem dezenas de soluções maduras, com anos de melhoria contínua, que resolvem esses problemas melhor do que qualquer equipe pequena conseguiria em 6 meses.
+- **O time técnico é enxuto.** Cada sistema próprio precisa de manutenção, atualização, monitoramento. Um sistema sob medida consumido por uma equipe de dois desenvolvedores é um passivo.
+- **A necessidade é imediata.** Um SaaS com plano mensal está disponível em horas. Um sistema sob medida leva de 3 a 12 meses para chegar ao nível de maturidade que você precisa.
+
+## Quando o Sistema Sob Medida Compensa
+
+O sistema sob medida faz sentido quando o processo que você quer automatizar **é o próprio negócio** — ou quando as soluções de mercado criam mais atrito do que valor.
+
+Exemplos de quando construir vale a pena:
+
+- **O processo é proprietário e difícil de generalizar.** Uma metodologia de precificação exclusiva, uma lógica de roteamento de pedidos específica do seu setor, um modelo de análise de risco que você desenvolveu ao longo de anos — isso não está pronto em nenhum SaaS porque é o seu diferencial.
+- **A integração com sistemas legados é complexa demais.** Em setores como logística, indústria e varejo, sistemas ERP antigos têm APIs proprietárias ou inexistentes. Às vezes é mais barato construir do que integrar.
+- **O volume justifica economicamente.** Um SaaS de R$ 5.000/mês ao longo de 5 anos custa R$ 300.000. Se um sistema sob medida pode ser construído por R$ 150.000 e mantido por R$ 20.000/ano, o break-even acontece no terceiro ano.
+- **Requisitos regulatórios ou de segurança são restritivos.** Setor financeiro, saúde, governo — há situações em que os dados simplesmente não podem sair da infraestrutura da empresa.
+
+## O Custo Total de Propriedade (TCO) na Prática
+
+A comparação mais honesta entre SaaS e sistema sob medida passa pelo custo total de propriedade em um horizonte de 3 a 5 anos. O erro mais comum é comparar o custo de desenvolvimento com o custo de assinatura — e esquecer os custos escondidos de cada lado.
+
+| Item de custo | SaaS | Sistema sob medida |
+|---------------|------|-------------------|
+| Implantação inicial | Baixo (onboarding) | Alto (desenvolvimento) |
+| Treinamento de equipe | Médio | Alto (sistema novo) |
+| Customizações | Limitado ou caro | Ilimitado |
+| Manutenção anual | Incluída na assinatura | 15% a 20% do custo de desenvolvimento |
+| Upgrades e novas features | Automáticos | Sob demanda (custo adicional) |
+| Risco de aumento de preço | Alto | Nenhum |
+| Risco de descontinuação | Presente | Nenhum |
+| Integração com outros sistemas | Via API (quando existe) | Construída sob medida |
+
+Uma estimativa prática para um sistema de médio porte:
+
+```
+Cenário A — SaaS pronto
+Assinatura mensal:         R$ 3.500/mês
+Custo em 5 anos:           R$ 210.000
+Customizações cobradas:    R$ 40.000
+TCO 5 anos:                R$ 250.000
+
+Cenário B — Sistema sob medida
+Desenvolvimento:           R$ 120.000
+Infraestrutura (mensal):   R$ 800/mês
+Manutenção anual:          R$ 18.000/ano
+TCO 5 anos:                R$ 216.000
+```
+
+Os números se aproximam — e a vantagem do sistema sob medida aumenta à medida que o negócio cresce e o volume de uso escala sem custo adicional.
+
+## Lock-in: o Risco Esquecido do SaaS
+
+O lock-in é o custo que não aparece na planilha de TCO, mas frequentemente decide a discussão. Quando uma empresa depende de um SaaS por anos, acumula dados, configurações, integrações e processos internos construídos em torno daquela plataforma. Migrar torna-se progressivamente mais difícil e caro.
+
+Os tipos de lock-in mais comuns:
+
+**Lock-in de dados:** O SaaS armazena anos de histórico em um formato proprietário. A exportação é incompleta, exige processamento manual ou simplesmente não existe para certos tipos de dados.
+
+**Lock-in de integração:** Dezenas de sistemas internos se conectam via API do SaaS. Uma migração exige reescrever todas essas integrações.
+
+**Lock-in de processo:** A equipe inteira trabalha com o vocabulário e os fluxos do SaaS. Mudar implica retraining e queda de produtividade.
+
+**Lock-in de preço:** Com o tempo, o fornecedor sabe que o custo de migração é alto — e usa isso para aumentar preços acima do mercado. Aumentos de 20% a 40% ao ano não são raros em plataformas consolidadas.
+
+Para mitigar lock-in sem abrir mão do SaaS: exija exportação de dados em formato aberto no contrato, documente todas as integrações, e defina um plano de contingência antes de depender criticamente de qualquer plataforma de terceiros.
+
+## Conclusão com CTA
+
+A decisão entre SaaS e sistema sob medida raramente é binária. Empresas maduras usam as duas abordagens em equilíbrio: SaaS para tudo que é commodity, sistema próprio para o que é diferencial.
+
+O que define founders e CTOs que tomam boas decisões nessa frente é a clareza sobre o que realmente diferencia o negócio — e a disciplina de não gastar energia de engenharia em resolver problemas que já estão resolvidos no mercado.
+
+Se você está avaliando construir um sistema próprio e quer uma análise técnica honesta do que faz sentido para o seu momento, a **SystemForge** pode ajudar. Trabalhamos com founders para mapear o que deve ser construído, o que deve ser integrado e como estruturar a arquitetura para que as duas abordagens coexistam sem atrito. [Entre em contato](/contato) para uma conversa sem compromisso.

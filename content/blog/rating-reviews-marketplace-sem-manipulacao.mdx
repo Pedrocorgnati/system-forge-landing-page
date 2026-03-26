@@ -1,0 +1,172 @@
+---
+title: "Ratings e reviews em marketplace sem manipulação"
+slug: "rating-reviews-marketplace-sem-manipulacao"
+date: "2024-10-10"
+description: "Como implementar um sistema de avaliações confiável em marketplace: verificação de compra, moderação, resposta do vendedor e algoritmo de ranking."
+tags: ["marketplace", "reviews", "avaliacao", "moderacao", "confianca"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+---
+
+Avaliações falsas são o câncer silencioso de qualquer marketplace. Elas não aparecem no monitoramento técnico, não geram alertas de sistema e levam tempo para afetar métricas de negócio — mas quando o estrago está feito, a confiança que levou anos para construir desmorona em semanas. A Amazon perdeu bilhões em GMV no segmento de eletrônicos quando ficou evidente a manipulação de reviews por vendedores chineses. O Mercado Livre investe em moderação contínua justamente porque sabe que a credibilidade do sistema de avaliações é parte do produto.
+
+Construir um sistema de reviews confiável não é apenas uma questão técnica. É uma decisão de produto que define regras claras sobre quem pode avaliar, o que pode ser dito, como o conteúdo é moderado e como as avaliações influenciam o posicionamento de vendedores e produtos. Essas decisões precisam ser feitas antes de qualquer implementação.
+
+## Verificação de Compra: Só Quem Comprou Avalia
+
+A regra mais importante de qualquer sistema de reviews é também a mais simples: apenas compradores verificados podem avaliar. "Verificado" significa que houve uma transação concluída entre aquele usuário e aquele vendedor ou produto.
+
+A implementação técnica precisa ser robusta o suficiente para resistir a tentativas de bypass:
+
+```typescript
+// Verificação antes de aceitar uma avaliação
+async function canUserReviewProduct(
+  userId: string,
+  productId: string,
+  sellerId: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  // 1. Verificar se existe pedido concluído
+  const completedOrder = await db.orderItems.findFirst({
+    where: {
+      order: {
+        buyerId: userId,
+        status: { in: ['delivered', 'completed'] },
+      },
+      productId,
+      sellerId,
+    },
+    include: { order: true },
+  });
+
+  if (!completedOrder) {
+    return { allowed: false, reason: 'NO_COMPLETED_PURCHASE' };
+  }
+
+  // 2. Verificar se já avaliou este item
+  const existingReview = await db.reviews.findFirst({
+    where: { userId, orderItemId: completedOrder.id },
+  });
+
+  if (existingReview) {
+    return { allowed: false, reason: 'ALREADY_REVIEWED' };
+  }
+
+  // 3. Verificar período mínimo após entrega (evitar reviews imediatos de bots)
+  const deliveredAt = completedOrder.order.deliveredAt;
+  const minimumWait = 2 * 60 * 60 * 1000; // 2 horas em ms
+  if (Date.now() - deliveredAt.getTime() < minimumWait) {
+    return { allowed: false, reason: 'TOO_SOON' };
+  }
+
+  // 4. Verificar período máximo (reviews muito tardios são suspeitos)
+  const maximumPeriod = 90 * 24 * 60 * 60 * 1000; // 90 dias em ms
+  if (Date.now() - deliveredAt.getTime() > maximumPeriod) {
+    return { allowed: false, reason: 'EXPIRED' };
+  }
+
+  return { allowed: true };
+}
+```
+
+A verificação de período mínimo (2 horas) evita bots que tentam avaliar imediatamente após a marcação de entrega. O período máximo (90 dias) evita que avaliações muito tardias — que são incomuns organicamente — sejam usadas para manipulação.
+
+O convite para avaliação deve ser proativo. E-mails automáticos enviados 3 a 5 dias após a entrega geram taxas de resposta significativamente maiores do que esperar que o comprador lembre de avaliar por conta própria.
+
+## Moderação Automática e Humana
+
+Nem toda avaliação publicada é válida. Conteúdo ofensivo, spam, informações pessoais, ameaças e desinformação precisam ser detectados e removidos. A moderação eficaz combina filtros automáticos com revisão humana para os casos de borda.
+
+**Moderação automática — aprovação imediata:**
+
+- Texto sem palavras bloqueadas
+- Score de sentimento neutro ou positivo
+- Sem links ou e-mails no texto
+- Sem padrões de spam (texto repetido, caracteres excessivos)
+- Usuário sem histórico de violações
+
+**Moderação automática — fila de revisão:**
+
+- Palavras potencialmente ofensivas (lista configurável)
+- Avaliação 1 estrela com texto curto (< 20 caracteres)
+- Score de sentimento muito negativo com indicadores de emoção alta
+- Link detectado no texto
+- Usuário com histórico de violações anteriores
+
+**Moderação humana obrigatória:**
+
+- Conteúdo denunciado por outros usuários
+- Avaliações de usuários recém-cadastrados para produtos de alto valor
+- Avaliações em produtos com spike recente de volume (indicador de manipulação)
+
+A tabela de tipos de conteúdo e suas ações padrão é útil para documentar a política internamente:
+
+| Tipo de conteúdo | Ação padrão | Revisão humana? |
+|---|---|---|
+| Linguagem ofensiva | Remover, notificar autor | Não (automático) |
+| Menção a concorrente | Fila de revisão | Sim |
+| Informação pessoal | Remover automaticamente | Sim |
+| Suspeita de fabricação | Ocultar, investigar | Sim |
+| Spam detectado | Remover, bloquear conta | Não |
+| Review incoerente com produto | Fila de revisão | Sim |
+
+É importante comunicar aos usuários quando uma avaliação é removida e por quê. Transparência no processo de moderação reduz a percepção de arbitrariedade e aumenta a confiança no sistema.
+
+## Algoritmo de Ranking: Mais do que Média Simples
+
+A média aritmética de estrelas é a forma mais ingênua de calcular a reputação de um produto ou vendedor. Um produto com 4 avaliações de 5 estrelas tem média 5,0 — mas statistically não é mais confiável do que um produto com 200 avaliações e média 4,7.
+
+O algoritmo de Wilson Score é amplamente usado para rankings que precisam ser confiáveis com volumes variados de avaliações:
+
+```typescript
+// Wilson Score Interval para rankings confiáveis
+function wilsonScore(positiveRatings: number, totalRatings: number): number {
+  if (totalRatings === 0) return 0;
+
+  const z = 1.96; // 95% de confiança
+  const p = positiveRatings / totalRatings;
+  const n = totalRatings;
+
+  const numerator = p + (z * z) / (2 * n) - z * Math.sqrt((p * (1 - p) + (z * z) / (4 * n)) / n);
+  const denominator = 1 + (z * z) / n;
+
+  return numerator / denominator;
+}
+
+// Uso: definir "positivo" como 4+ estrelas
+function calculateProductScore(reviews: Review[]): number {
+  const total = reviews.length;
+  const positive = reviews.filter(r => r.rating >= 4).length;
+  return wilsonScore(positive, total);
+}
+```
+
+Além do Wilson Score, outros fatores que devem influenciar o ranking:
+
+**Recência:** avaliações recentes pesam mais que avaliações antigas. Um produto com 50 reviews de 4,5 estrelas nos últimos 3 meses é mais relevante do que um com 200 reviews de 4,8 estrelas de 2 anos atrás.
+
+**Utilidade:** avaliações marcadas como "útil" por outros compradores devem ter peso maior. Reviews detalhados com fotos do produto recebem mais marcações de utilidade e refletem melhor a experiência real.
+
+**Verificação da compra:** reviews de compradores verificados têm peso maior do que reviews de não-compradores (se você permitir avaliações externas, o que é discutível).
+
+## Resposta do Vendedor: UX e Impacto no Comprador
+
+A capacidade do vendedor de responder publicamente a avaliações — positivas ou negativas — é um dos elementos mais subestimados em sistemas de reviews. Estudos da Harvard Business Review mostram que vendedores que respondem consistentemente a avaliações negativas têm índice de recompra 30% maior do que os que ignoram.
+
+A UX da resposta do vendedor precisa de atenção especial:
+
+O vendedor deve ser notificado de novas avaliações por e-mail (com link direto para responder). No painel, a fila de avaliações sem resposta deve ser visível e destacada. O prazo para resposta deve ser razoável — 72 horas é um bom padrão.
+
+Do lado do comprador, a resposta do vendedor aparece abaixo da avaliação original, claramente identificada como "Resposta do vendedor". Isso não é uma discussão — o vendedor responde uma vez e o comprador não pode continuar o thread (evita conflitos públicos que degradam a experiência).
+
+Uma boa resposta a avaliação negativa segue a estrutura: agradecimento pelo feedback → reconhecimento do problema específico → solução oferecida ou ação tomada → convite para contato direto. Respostas defensivas ou que culpam o comprador fazem mais dano do que não responder.
+
+Avaliações com resposta do vendedor devem aparecer com destaque levemente diferente na listagem — um indicador visual de que o vendedor está ativo e engajado aumenta a confiança de novos compradores.
+
+## Conclusão com CTA
+
+Um sistema de reviews bem implementado é um ativo competitivo duradouro. Ele aumenta a confiança de novos compradores, cria incentivo para vendedores manterem qualidade e gera dados valiosos sobre os pontos fortes e fracos de cada produto e categoria.
+
+Mas sistemas mal projetados — com manipulação fácil, moderação inexistente ou ranking ingênuo — causam dano proporcional. Compradores experientes identificam reviews falsos rapidamente, e uma vez que a reputação do sistema é questionada, é muito difícil recuperá-la.
+
+O SystemForge suporta a especificação detalhada de funcionalidades como essa ainda na fase de documentação, com User Stories que cobrem os fluxos de moderação, os algoritmos de ranking e os edge cases que costumam aparecer apenas em produção. Isso garante que o sistema seja construído corretamente desde a primeira versão.

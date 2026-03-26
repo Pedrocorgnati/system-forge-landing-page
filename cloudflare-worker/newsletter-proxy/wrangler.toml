@@ -1,0 +1,23 @@
+name = "systemforge-newsletter-proxy"
+main = "index.ts"
+compatibility_date = "2024-01-01"
+
+# Variáveis públicas (não sensíveis)
+[vars]
+ALLOWED_ORIGIN = "https://forjadesistemas.com.br"
+
+# KV Namespace para rate limiting e armazenamento de tokens
+# Setup:
+#   npx wrangler kv namespace create "RATE_LIMIT_KV"
+#   (copie o id retornado e substitua abaixo)
+#   npx wrangler kv namespace create "RATE_LIMIT_KV" --preview
+#   (copie o preview_id retornado e substitua abaixo)
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "SUBSTITUIR_PELO_ID_DO_KV_NAMESPACE"
+preview_id = "SUBSTITUIR_PELO_PREVIEW_ID"
+
+# ATENÇÃO: Secrets NUNCA devem ser colocados aqui.
+# Configure via linha de comando:
+#   npx wrangler secret put RESEND_API_KEY
+#   npx wrangler secret put RESEND_AUDIENCE_ID

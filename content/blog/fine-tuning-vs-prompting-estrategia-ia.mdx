@@ -1,0 +1,113 @@
+---
+title: "Fine-tuning vs prompt engineering: quando usar cada um"
+slug: "fine-tuning-vs-prompting-estrategia-ia"
+date: "2024-08-29"
+description: "Quando investir em fine-tuning de um LLM e quando prompt engineering resolve — custo, dados necessários, latência e casos de uso ideais de cada abordagem."
+tags: ["fine-tuning", "prompt engineering", "llm", "ia generativa", "openai"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+---
+
+Quando as respostas do LLM não são boas o suficiente, a primeira reação de muitas equipes é "precisamos fazer fine-tuning". É um erro caro. Fine-tuning resolve problemas específicos de forma poderosa, mas a maioria dos problemas que empresas enfrentam com LLMs pode ser resolvida com bom prompt engineering — e por uma fração do custo.
+
+A decisão entre as duas abordagens não é técnica no sentido de "qual é mais poderosa". É econômica e estratégica: qual problema você está tentando resolver, quantos dados você tem e quanto está disposto a investir?
+
+## Prompt Engineering: O Que Resolve e o Que Não Resolve
+
+Prompt engineering é a prática de estruturar suas instruções ao LLM para obter respostas melhores. Vai desde adicionar exemplos no prompt até criar estruturas complexas com personas, restrições, formatos de saída e cadeias de raciocínio.
+
+O que prompt engineering resolve bem:
+
+- **Formato de saída:** quer JSON, markdown, tabelas? Mostre um exemplo no prompt.
+- **Tom e estilo:** formal, coloquial, técnico, simplificado — tudo controlável via instrução.
+- **Foco em domínio:** contextualizar o modelo com informações do seu negócio antes de cada chamada.
+- **Restrições:** "responda apenas com informações do contexto fornecido", "nunca mencione concorrentes".
+- **Tarefas de raciocínio:** chain-of-thought prompting melhora significativamente desempenho em problemas matemáticos e lógicos.
+
+O que prompt engineering não resolve:
+
+- **Conhecimento especializado profundo:** se o modelo simplesmente não sabe sobre a terminologia específica do seu setor, um prompt melhor não vai criar esse conhecimento.
+- **Consistência de estilo em alta escala:** se você precisa que 100% das respostas sigam exatamente um formato proprietário sem variações, prompting terá falhas ocasionais.
+- **Latência e custo de contexto longo:** se seu system prompt tem 10.000 tokens de exemplos e regras, você paga por esses tokens em cada chamada.
+
+```python
+# Exemplo de prompt engineering avançado com few-shot
+system_prompt = """Você é um assistente de classificação de tickets de suporte.
+Classifique cada ticket nas categorias: FINANCEIRO, TÉCNICO, COMERCIAL ou OUTROS.
+Responda APENAS com o JSON: {"categoria": "...", "confianca": 0.0-1.0}
+
+Exemplos:
+Input: "Minha fatura está errada, cobrou duas vezes"
+Output: {"categoria": "FINANCEIRO", "confianca": 0.98}
+
+Input: "O aplicativo trava ao abrir no iPhone 15"
+Output: {"categoria": "TÉCNICO", "confianca": 0.95}
+
+Input: "Quero saber sobre os planos disponíveis"
+Output: {"categoria": "COMERCIAL", "confianca": 0.92}"""
+```
+
+## Fine-tuning: Quando os Dados Justificam o Investimento
+
+Fine-tuning consiste em continuar o treinamento de um modelo base com seus próprios dados, ajustando os pesos para que o modelo aprenda padrões específicos do seu domínio. O resultado é um modelo que internalizou seu estilo, vocabulário e raciocínio — sem precisar explicar tudo via prompt em cada chamada.
+
+Os casos onde fine-tuning genuinamente ganha sobre prompting:
+
+**Estilo muito específico e consistente:** se você tem um tom de voz proprietário muito distinto — pense em uma marca com voz extremamente particular — fine-tuning pode internalizar esse estilo de forma mais confiável do que um prompt.
+
+**Domínio com terminologia muito específica:** modelos fine-tuned em documentação médica ou jurídica muito especializada entendem o contexto de forma diferente do modelo base.
+
+**Latência crítica:** um modelo fine-tuned pode ser menor e mais rápido do que usar um modelo grande com um prompt extenso de few-shot.
+
+**Volume muito alto:** se você faz 50 milhões de chamadas por mês com um system prompt de 2.000 tokens, o custo desses tokens de prompt em todas as chamadas pode superar o custo do fine-tuning.
+
+O requisito mínimo prático: **pelo menos 100 exemplos de alta qualidade**, de preferência 500-1000. Fine-tuning com dados ruins produz um modelo consistentemente ruim — o modelo aprende seus erros com a mesma eficiência que aprende seus acertos.
+
+## Custo Comparativo: Tokens de Inferência vs Treinamento
+
+| Aspecto | Prompt Engineering | Fine-tuning |
+|---------|-------------------|-------------|
+| Custo inicial | Zero (só tempo) | $50-500 por job de treino (GPT-4o mini) |
+| Custo por chamada | Alto (prompt longo = mais tokens) | Menor (prompt menor) |
+| Dados necessários | Nenhum (few-shot usa exemplos no prompt) | 100-1000+ exemplos rotulados |
+| Tempo para iterar | Minutos | Horas a dias |
+| Atualizações | Imediatas (muda o prompt) | Novo job de treino |
+| Risco | Baixo | Overfitting se dados ruins |
+
+Para uma empresa que faz 1 milhão de chamadas por mês com um system prompt de 1.500 tokens usando GPT-4o mini (US$ 0,15/1M tokens de input), o custo mensal só do prompt é aproximadamente **US$ 225/mês**. Um fine-tuning pode reduzir o prompt para 200 tokens, economizando ~US$ 195/mês — pagando o custo do treino em menos de 3 meses.
+
+Mas isso assume que o fine-tuning funciona bem. Se os dados não forem suficientemente representativos, você gasta o custo do treino e ainda precisa manter um prompt longo para cobrir os casos que o modelo fine-tuned errar.
+
+## Few-shot Learning como Alternativa ao Fine-tuning
+
+Antes de investir em fine-tuning, explore few-shot learning: incluir de 5 a 20 exemplos de alta qualidade diretamente no prompt. Para muitos casos de uso, isso aproxima o desempenho do fine-tuning sem o custo e complexidade do treinamento.
+
+A diferença prática: few-shot no prompt é pago a cada chamada (em tokens), enquanto fine-tuning é pago uma vez no treino e depois economiza tokens. Para baixo volume, few-shot wins. Para alto volume com prompts longos, fine-tuning pode compensar.
+
+```python
+# Few-shot estruturado para extração de entidades
+exemplos_few_shot = [
+    {
+        "input": "Reunião com Dr. Carlos Mendes na próxima terça às 14h na Av. Paulista",
+        "output": '{"pessoa": "Dr. Carlos Mendes", "dia": "terça-feira", "hora": "14:00", "local": "Av. Paulista"}'
+    },
+    {
+        "input": "Call com equipe de vendas amanhã às 9h",
+        "output": '{"pessoa": "equipe de vendas", "dia": "amanhã", "hora": "09:00", "local": null}'
+    }
+]
+
+def montar_prompt_few_shot(exemplos: list, input_novo: str) -> str:
+    prompt = "Extraia entidades do texto. Responda em JSON.\n\n"
+    for ex in exemplos:
+        prompt += f"Input: {ex['input']}\nOutput: {ex['output']}\n\n"
+    prompt += f"Input: {input_novo}\nOutput:"
+    return prompt
+```
+
+## Conclusão com CTA
+
+A decisão entre fine-tuning e prompt engineering raramente é binária. A ordem de avaliação correta é: primeiro, esgotar as possibilidades de prompt engineering (incluindo few-shot). Se os resultados ainda não atingem a qualidade necessária e você tem dados suficientes, avalie fine-tuning com um job piloto pequeno antes de comprometer recursos maiores.
+
+No **SystemForge**, começamos qualquer projeto de LLM com prompt engineering sólido — porque é mais rápido de iterar e raramente deixa espaço de melhoria não explorado. Quando fine-tuning faz sentido, implementamos com processo rigoroso de avaliação de dados e métricas de qualidade. Se você está enfrentando resultados inconsistentes com seu LLM atual, podemos ajudar a diagnosticar onde está o problema real.

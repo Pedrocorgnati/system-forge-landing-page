@@ -1,0 +1,57 @@
+name: Validate PR
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    name: Validate & Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: |
+            node_modules
+            .velite
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.npm-cache.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: TypeScript type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Validate frontmatter
+        run: npm run validate:frontmatter
+        env:
+          NEXT_PUBLIC_SITE_URL: https://forjadesistemas.com.br
+
+      - name: Build check
+        run: npm run build
+        env:
+          NEXT_PUBLIC_SITE_URL: https://forjadesistemas.com.br
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: G-PLACEHOLDER
+          NEXT_PUBLIC_WHATSAPP_NUMBER: "+5541999999999"
+          NEXT_PUBLIC_CONTACT_EMAIL: contato@forjadesistemas.com.br
+          NEXT_PUBLIC_CALENDLY_URL: https://calendly.com/placeholder
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: https://placeholder.forjadesistemas.com.br

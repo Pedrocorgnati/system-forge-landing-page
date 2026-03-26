@@ -1,0 +1,124 @@
+---
+title: "Como construir um marketplace do zero"
+slug: "como-construir-marketplace-do-zero"
+date: "2024-07-22"
+description: "Arquitetura e decisões técnicas para construir um marketplace: stack, modelo de dados para multi-vendor, pagamentos e painel do vendedor."
+tags: ["marketplace", "arquitetura", "multi-vendor", "e-commerce", "desenvolvimento"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+---
+
+Um marketplace não é um e-commerce com mais produtos. É uma plataforma que conecta dois lados de um mercado — compradores e vendedores — e cobra por essa intermediação. Essa diferença conceitual se traduz em complexidade técnica real: você precisa de contas segregadas, repasse financeiro automático, painel por vendedor, sistema de avaliações duplas, regras de qualidade e, no mínimo, o dobro de superfície de interface.
+
+Se você está considerando construir um marketplace, é seguro dizer que a complexidade técnica é três vezes maior do que a de um e-commerce simples. Isso não é exagero — é o que a prática mostra em projetos reais. Antes de começar, é fundamental entender onde essa complexidade mora e como arquitetar o sistema para que ela não se torne dívida técnica irrecuperável.
+
+## Modelo de Dados: Sellers, Products e Orders
+
+A principal diferença arquitetural de um marketplace está no modelo de dados. Em um e-commerce tradicional, há um único "dono" dos produtos. Em um marketplace, cada produto pertence a um vendedor, cada pedido pode conter itens de vendedores diferentes e cada pagamento precisa ser rateado de forma precisa.
+
+O modelo central gira em torno de quatro entidades principais:
+
+```sql
+-- Vendedores com conta financeira própria
+CREATE TABLE sellers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  slug TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  commission_rate NUMERIC(5, 2) NOT NULL DEFAULT 10.00,
+  payment_account_id TEXT, -- ID na gateway de pagamento
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, active, suspended
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Produtos vinculados a um vendedor
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id UUID REFERENCES sellers(id) NOT NULL,
+  title TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  stock INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'draft', -- draft, active, paused
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Pedidos com múltiplos itens de vendedores diferentes
+CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  buyer_id UUID REFERENCES users(id),
+  total_cents INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Itens segregados por vendedor para facilitar o repasse
+CREATE TABLE order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id),
+  seller_id UUID REFERENCES sellers(id),
+  product_id UUID REFERENCES products(id),
+  quantity INTEGER NOT NULL,
+  unit_price_cents INTEGER NOT NULL,
+  commission_cents INTEGER NOT NULL,
+  seller_net_cents INTEGER NOT NULL
+);
+```
+
+Essa separação entre `order_items` e `orders` é fundamental. Ela permite calcular exatamente quanto cada vendedor deve receber por pedido, mesmo quando o cliente compra de múltiplos sellers em uma só transação.
+
+A coluna `commission_cents` e `seller_net_cents` devem ser calculadas no momento da criação do item — não na hora do repasse. Isso evita problemas caso as taxas de comissão mudem ao longo do tempo.
+
+## Painel do Vendedor: o Que Construir no Dia 1
+
+O painel do vendedor é onde a maioria dos times subestima o escopo. No dia 1 de um MVP funcional, o vendedor precisa de, no mínimo:
+
+**Gestão de catálogo:** criar, editar e pausar produtos. Isso inclui upload de imagens, descrição rica, variantes (tamanho, cor) e controle de estoque por SKU.
+
+**Gestão de pedidos:** visualizar pedidos que contêm seus produtos, atualizar status (confirmado, em separação, enviado, entregue) e comunicar o código de rastreamento.
+
+**Financeiro básico:** ver o saldo disponível, o saldo a liberar (período de holdback) e o histórico de repasses já realizados. Transparência financeira é essencial para conquistar vendedores sérios.
+
+**Configurações de conta:** dados bancários para recebimento, dados fiscais (CNPJ, IE) e configuração de políticas de frete.
+
+Tudo isso antes de lançar. Vendedores que não conseguem gerenciar seus produtos de forma autônoma abandonam a plataforma nas primeiras semanas.
+
+## Stack Recomendada para Marketplaces em 2025
+
+A escolha de stack afeta diretamente a velocidade de desenvolvimento e a capacidade de escalar funcionalidades críticas.
+
+| Camada | Opção Primária | Alternativa |
+|---|---|---|
+| Frontend comprador | Next.js 14 + App Router | Remix |
+| Frontend vendedor | Next.js 14 (painel separado) | React SPA |
+| Backend/API | Node.js + Fastify | NestJS |
+| Banco de dados | PostgreSQL (Supabase) | PlanetScale |
+| Pagamentos | Stripe Connect | Pagar.me Marketplace |
+| Fila de jobs | BullMQ (Redis) | Inngest |
+| Storage | Cloudflare R2 | AWS S3 |
+| Search | Typesense | Algolia |
+| Deploy | Vercel + Railway | AWS |
+
+A separação entre o frontend do comprador e o painel do vendedor não é obrigatória no MVP, mas é altamente recomendada. As duas interfaces têm necessidades de UX completamente diferentes e tendem a crescer em direções opostas.
+
+O uso de BullMQ ou Inngest para jobs assíncronos é essencial desde o dia 1. Repasses financeiros, e-mails de notificação, atualizações de estoque e processamento de imagens não devem acontecer de forma síncrona na requisição HTTP.
+
+## Roadmap: do MVP ao Marketplace Escalável
+
+Um roadmap realista para um marketplace segue três fases distintas:
+
+**Fase 1 — MVP Funcional (2 a 4 meses):** cadastro e onboarding de vendedores, catálogo básico, carrinho e checkout com split de pagamento, painel do vendedor com gestão de pedidos e financeiro simples, sistema de avaliações básico (só comprador avalia vendedor).
+
+**Fase 2 — Crescimento (3 a 6 meses):** busca avançada com filtros por seller/categoria/preço, programa de cupons e promoções, integração com transportadoras para cotação automática de frete, aplicativo mobile (se o público-alvo usar predominantemente mobile), sistema de disputas e resolução de conflitos.
+
+**Fase 3 — Escala (ongoing):** recomendações personalizadas com ML, programa de sellers premium com taxas diferenciadas, API pública para integrações externas (ERPs dos vendedores), analytics avançado por categoria, expansão de meios de pagamento (PIX, parcelamento próprio, crédito).
+
+A armadilha mais comum é tentar entregar a Fase 3 junto com a Fase 1. O resultado é atraso no lançamento, tecnologia complexa com poucos usuários para justificá-la e dívida técnica que trava o crescimento futuro.
+
+## Conclusão com CTA SystemForge
+
+Construir um marketplace do zero exige decisões técnicas acertadas desde o início. Um modelo de dados mal planejado, uma escolha equivocada de gateway de pagamento ou um painel de vendedor inutilizável podem comprometer meses de desenvolvimento.
+
+O SystemForge acelera esse processo gerando toda a documentação técnica — PRD, arquitetura, LLD, User Stories, tasks detalhadas — antes de escrever a primeira linha de código. Com isso, o time de desenvolvimento começa com clareza sobre o que construir, em que ordem e por quê.
+
+Se você está começando um marketplace ou precisa reorganizar um projeto já em andamento, o SystemForge pode reduzir significativamente o retrabalho e a incerteza técnica no seu próximo projeto.

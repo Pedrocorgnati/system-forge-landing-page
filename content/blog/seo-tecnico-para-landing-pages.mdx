@@ -1,0 +1,149 @@
+---
+title: "SEO técnico para landing pages: além do conteúdo"
+slug: "seo-tecnico-para-landing-pages"
+date: "2024-08-29"
+description: "Como otimizar landing pages para SEO técnico: Core Web Vitals, Schema.org, canonical tags, hreflang, crawlability e indexação correta."
+tags: ["seo tecnico", "landing page", "core web vitals", "schema.org", "indexacao"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+---
+
+Conteúdo bom em site lento não ranqueia. Essa realidade ficou explícita em 2021, quando o Google oficializou os Core Web Vitals como fator de ranking. Antes disso, SEO técnico era frequentemente tratado como um complemento — algo que você fazia depois de ter o conteúdo certo. Agora, a performance do servidor, a estabilidade visual da página durante o carregamento e a responsividade a interações do usuário são métricas que afetam diretamente a posição nos resultados de busca.
+
+Mas Core Web Vitals são apenas uma camada do SEO técnico. Há outros elementos igualmente críticos que a maioria das landing pages ignora: Schema.org para rich snippets, gerenciamento correto de canonical tags em páginas com múltiplas variações, crawlability garantida para que o Googlebot indexe corretamente, e — quando aplicável — hreflang para sites multilíngues.
+
+## Core Web Vitals: LCP, CLS e FID na Prática
+
+Os três Core Web Vitals medem dimensões diferentes da experiência do usuário:
+
+**LCP (Largest Contentful Paint)** mede o tempo até o maior elemento visível na dobra superior ser renderizado. Na prática, costuma ser a hero image ou o bloco de headline. A meta é abaixo de 2,5 segundos.
+
+As causas mais comuns de LCP alto em landing pages:
+
+- Imagem hero em formato PNG ou JPEG sem otimização (use WebP ou AVIF)
+- Imagem hero não marcada com `fetchpriority="high"` — o browser a trata como recurso secundário
+- CSS ou JavaScript de terceiros bloqueando a renderização antes do LCP
+- Ausência de CDN, com o asset sendo servido do servidor de origem
+
+```html
+<!-- Imagem hero com prioridade correta -->
+<img
+  src="/hero.png"
+  alt="Descrição da imagem"
+  width="1200"
+  height="630"
+  fetchpriority="high"
+  loading="eager"
+/>
+```
+
+**CLS (Cumulative Layout Shift)** mede instabilidade visual — elementos que se movem enquanto a página carrega. A meta é abaixo de 0,1.
+
+Os maiores vilões do CLS são imagens sem dimensões definidas (o browser não reserva espaço antes de carregar), fontes web que causam FOUT (Flash of Unstyled Text) e banners de cookie que aparecem depois do layout já ter sido renderizado.
+
+**INP (Interaction to Next Paint)** substituiu o FID em março de 2024. Mede a latência de resposta a qualquer interação do usuário (clique, toque, tecla) ao longo de toda a sessão. A meta é abaixo de 200ms. O maior causador de INP alto é JavaScript pesado no main thread, especialmente de bibliotecas de analytics e chat widgets.
+
+## Schema.org: Rich Snippets que Aumentam CTR
+
+Schema.org é um vocabulário de dados estruturados que o Google usa para entender o conteúdo da página e, em alguns casos, exibir rich snippets nos resultados de busca. Rich snippets aumentam o CTR sem melhorar o ranking diretamente — mas mais cliques com a mesma posição é um resultado valioso.
+
+Para landing pages de serviços, os schemas mais relevantes são:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "Desenvolvimento de Landing Pages",
+  "description": "Landing pages em Next.js com foco em performance e conversão",
+  "provider": {
+    "@type": "Organization",
+    "name": "SystemForge",
+    "url": "https://systemforge.dev"
+  },
+  "areaServed": "BR",
+  "hasOfferCatalog": {
+    "@type": "OfferCatalog",
+    "name": "Planos",
+    "itemListElement": [
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Landing Page Starter"
+        },
+        "price": "2500",
+        "priceCurrency": "BRL"
+      }
+    ]
+  }
+}
+```
+
+Para páginas de FAQ (seção comum em landing pages), o schema `FAQPage` gera a exibição de perguntas e respostas diretamente nos resultados de busca, aumentando o espaço ocupado no SERP:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Quanto tempo leva para desenvolver uma landing page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Entre 5 e 10 dias úteis dependendo da complexidade e aprovação de conteúdo."
+      }
+    }
+  ]
+}
+```
+
+Valide a implementação com o Rich Results Test do Google antes de publicar.
+
+## Canonical Tags e Duplicate Content
+
+Duplicate content é um problema frequente em landing pages que têm variações por UTM, variações de copy para tráfego pago versus orgânico, ou versões de uma mesma página em múltiplos domínios.
+
+A canonical tag informa ao Google qual é a URL "verdadeira" de uma página, consolidando o link equity de todas as variações em uma única URL:
+
+```html
+<!-- Em todas as variações da landing page -->
+<link rel="canonical" href="https://seusite.com/landing-page-servico" />
+```
+
+Situações que exigem canonical tag em landing pages:
+
+- URLs com parâmetros de UTM sendo indexadas (`/lp?utm_source=google`)
+- Mesmo conteúdo acessível em `www.seusite.com` e `seusite.com`
+- Versões de teste com slug diferente da versão principal
+- Landing pages duplicadas para diferentes regiões sem hreflang configurado
+
+O erro mais comum é não configurar a canonical tag nas páginas acessadas por parâmetros de UTM. O Google não ignora parâmetros de UTM automaticamente — se a URL com parâmetros é indexável, ela pode ser interpretada como conteúdo duplicado.
+
+## Crawlability: Robots.txt, Sitemap e Indexação Forçada
+
+**Robots.txt** controla quais URLs o Googlebot pode rastrear. O erro clássico é bloquear acidentalmente CSS e JavaScript necessários para renderizar a página corretamente — o Google precisa renderizar o JavaScript para indexar SPAs e páginas com conteúdo dinâmico.
+
+Um robots.txt correto para sites Next.js:
+
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+Sitemap: https://seusite.com/sitemap.xml
+```
+
+**Sitemap.xml** deve listar todas as URLs que você quer indexadas, com a tag `<priority>` ajustada para refletir a importância relativa. Landing pages principais devem ter prioridade `1.0`, páginas secundárias `0.8`, e páginas de suporte (política de privacidade, termos) `0.3`.
+
+**Indexação forçada:** quando você publica uma nova landing page e quer que o Google a indexe rapidamente, use o Google Search Console → URL Inspection → Request Indexing. O processo leva entre horas e 3 dias. Para landing pages com campanhas pagas ativas, enviar a URL para indexação assim que publicar é essencial — uma landing page nova ainda não indexada pode demorar semanas para aparecer em resultados orgânicos.
+
+A ferramenta de **URL Inspection** no Search Console também revela problemas de crawl: se o Googlebot está encontrando erros de redirecionamento, se a versão renderizada pelo Googlebot difere do que o usuário vê (indicando bloqueio de JavaScript), ou se a canonical tag está sendo respeitada.
+
+## Conclusão
+
+SEO técnico não é optativo para landing pages que dependem de tráfego orgânico. Performance abaixo das metas de Core Web Vitals, ausência de dados estruturados, canonical tags mal configuradas e problemas de crawlability são lacunas que o melhor conteúdo do mundo não compensa.
+
+A vantagem de desenvolver landing pages com Next.js é que boa parte desse SEO técnico vem por padrão: exportação estática elimina TTFB alto, o componente `next/image` resolve LCP e CLS de imagens automaticamente, e a geração de sitemap pode ser automatizada. No [SystemForge](/), configuramos toda essa infraestrutura de SEO técnico como parte do desenvolvimento — não como serviço adicional.

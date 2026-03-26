@@ -1,0 +1,214 @@
+---
+title: "Webhooks seguros: assinatura, retry e idempotência"
+slug: "webhooks-seguros-validacao-assinatura-idempotencia"
+date: "2024-10-04"
+description: "Como implementar webhooks seguros: validação de assinatura HMAC, retry com backoff exponencial, idempotência e fila de processamento assíncrono."
+tags: ["webhook", "hmac", "idempotencia", "seguranca", "fila mensagens"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+---
+
+Webhooks são um dos padrões mais poderosos e mais mal implementados de integrações entre sistemas. A ideia é simples: em vez de você ficar consultando uma API periodicamente ("tem novidade?"), o serviço externo te avisa quando algo acontece. Pagamento aprovado? POST no seu endpoint. Entrega confirmada? POST no seu endpoint.
+
+O problema é que um endpoint de webhook sem proteção é uma porta aberta. Qualquer pessoa que descobrir a URL pode enviar eventos falsos — um pagamento "aprovado" que nunca aconteceu, um estorno fabricado, uma entrega confirmada de um pedido inexistente. Isso não é teórico: ataques a webhooks mal configurados são relativamente comuns em sistemas de e-commerce.
+
+## Validação de Assinatura HMAC-SHA256
+
+Todo serviço sério que expõe webhooks assina os payloads com HMAC-SHA256. Stripe, GitHub, PagSeguro, Mercado Pago, Shopify — todos usam variações do mesmo padrão: o serviço calcula um hash do corpo da requisição usando um segredo compartilhado e envia esse hash em um header. Seu endpoint precisa recalcular o hash e comparar.
+
+```typescript
+import { createHmac, timingSafeEqual } from "crypto";
+
+export function validateWebhookSignature(
+  payload: Buffer,
+  signature: string,
+  secret: string
+): boolean {
+  // Calculamos o HMAC do payload recebido
+  const expectedSignature = createHmac("sha256", secret)
+    .update(payload)
+    .digest("hex");
+
+  // Comparação em tempo constante — evita timing attacks
+  // timingSafeEqual garante que a comparação não vaza informação
+  // sobre quantos bytes são iguais
+  const sigBuffer = Buffer.from(signature.replace("sha256=", ""), "hex");
+  const expectedBuffer = Buffer.from(expectedSignature, "hex");
+
+  if (sigBuffer.length !== expectedBuffer.length) return false;
+  return timingSafeEqual(sigBuffer, expectedBuffer);
+}
+
+// Handler de webhook do Stripe no Next.js App Router
+export async function POST(request: Request) {
+  const payload = Buffer.from(await request.arrayBuffer());
+  const signature = request.headers.get("stripe-signature") ?? "";
+
+  if (!validateWebhookSignature(payload, signature, process.env.STRIPE_WEBHOOK_SECRET!)) {
+    return Response.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  // Só processa o evento se a assinatura for válida
+  const event = JSON.parse(payload.toString());
+  await processWebhookEvent(event);
+
+  return Response.json({ received: true });
+}
+```
+
+**Erro crítico:** nunca use `signature === expectedSignature` para comparar. Comparação de strings em JavaScript para quando encontra o primeiro caractere diferente — isso cria um timing attack onde um atacante pode adivinhar o HMAC byte por byte medindo o tempo de resposta. Use sempre `timingSafeEqual` de `node:crypto`.
+
+**Outro erro comum:** não ler o body como Buffer bruto. Se você parsear o JSON antes de calcular o HMAC, qualquer refornatação (espaços extras, ordem de chaves) vai invalidar a assinatura. Leia o body como bytes brutos, valide a assinatura, depois parse o JSON.
+
+## Retry com Backoff Exponencial: Configuração e Limites
+
+Serviços que enviam webhooks assumem que seu endpoint pode estar indisponível temporariamente. Por isso implementam retry automático. O problema é que, sem coordenação, isso pode criar tempestades de retry: seu servidor cai, o serviço redobra as tentativas, sobrecarregando ainda mais quando você volta.
+
+O padrão da indústria é backoff exponencial com jitter:
+
+| Tentativa | Delay base | Jitter (aleatorio) | Delay real |
+|---|---|---|---|
+| 1 (imediata) | 0s | — | 0s |
+| 2 | 30s | ±5s | 25-35s |
+| 3 | 1min | ±10s | 50s-1min10s |
+| 4 | 5min | ±30s | 4min30s-5min30s |
+| 5 | 30min | ±2min | 28-32min |
+| 6 | 2h | ±10min | 1h50min-2h10min |
+| 7 (final) | 12h | ±30min | 11h30min-12h30min |
+
+O jitter aleatório distribui os retries ao longo do tempo, evitando que múltiplos clientes que falharam simultaneamente colidam todos no mesmo segundo quando o servidor volta.
+
+Do lado do receptor (o seu endpoint), você deve:
+
+1. **Responder rápido:** Retorne `200 OK` em menos de 3 segundos. Processamento pesado vai para uma fila.
+2. **Responder corretamente:** Só retorne `200` se você recebeu e enfileirou o evento. `5xx` sinaliza "tente novamente". `4xx` sinaliza "esse evento está malformado, não adianta tentar de novo".
+3. **Não fazer trabalho pesado no handler:** Salve o evento no banco, retorne 200, processe depois.
+
+## Idempotência: Processando Eventos Duplicados com Segurança
+
+Mesmo com backoff exponencial, você vai receber eventos duplicados. Isso é garantido — não é se, é quando. Redes falham, timeouts acontecem, o serviço externo não tem certeza se você recebeu o evento e envia novamente.
+
+Seu sistema precisa ser idempotente: processar o mesmo evento duas vezes deve ter o mesmo resultado que processar uma vez.
+
+A implementação padrão é uma tabela de eventos processados:
+
+```typescript
+// Schema (Prisma)
+model ProcessedWebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique  // ID do evento do serviço externo
+  source      String            // "stripe", "mercado_pago", etc.
+  eventType   String            // "payment.approved", etc.
+  processedAt DateTime @default(now())
+
+  @@index([eventId, source])
+}
+
+// Handler idempotente
+async function processWebhookEvent(event: WebhookEvent): Promise<void> {
+  // Verificação de duplicata
+  const alreadyProcessed = await db.processedWebhookEvent.findUnique({
+    where: { eventId: event.id },
+  });
+
+  if (alreadyProcessed) {
+    console.log(`Evento ${event.id} já processado em ${alreadyProcessed.processedAt}. Ignorando.`);
+    return; // Retorno silencioso — não é erro, é idempotência
+  }
+
+  // Processa o evento em uma transação atômica
+  await db.$transaction(async (tx) => {
+    // Marca como processado PRIMEIRO
+    await tx.processedWebhookEvent.create({
+      data: {
+        eventId: event.id,
+        source: event.source,
+        eventType: event.type,
+      },
+    });
+
+    // Depois executa a lógica de negócio
+    if (event.type === "payment.approved") {
+      await approveOrder(tx, event.data.orderId);
+    }
+  });
+}
+```
+
+A ordem importa: registre o evento como processado dentro da mesma transação que executa a lógica de negócio. Isso garante que, em caso de falha no meio do processamento, o evento não fica "preso" na tabela como processado quando na verdade não foi.
+
+## Fila de Processamento: Não Processe no Handler do Webhook
+
+Este é o erro mais comum em implementações de webhook: fazer trabalho pesado diretamente no handler HTTP.
+
+O problema: se o processamento demora mais de 3-5 segundos (timeout padrão de muitos serviços), o serviço externo considera que o webhook falhou e tenta novamente. Você então processa o mesmo evento duas vezes — mesmo com idempotência, isso desperdiça recursos.
+
+A arquitetura correta separa recepção de processamento:
+
+```typescript
+// Handler do webhook: apenas recebe, valida e enfileira
+export async function POST(request: Request) {
+  const payload = Buffer.from(await request.arrayBuffer());
+  const signature = request.headers.get("stripe-signature") ?? "";
+
+  // 1. Valida assinatura
+  if (!validateWebhookSignature(payload, signature, process.env.STRIPE_WEBHOOK_SECRET!)) {
+    return Response.json({ error: "Invalid signature" }, { status: 401 });
+  }
+
+  const event = JSON.parse(payload.toString());
+
+  // 2. Persiste o evento raw (nunca perde um evento)
+  await db.webhookEventQueue.create({
+    data: {
+      eventId: event.id,
+      source: "stripe",
+      type: event.type,
+      payload: payload.toString(),
+      status: "pending",
+    },
+  });
+
+  // 3. Retorna 200 imediatamente — processamento acontece de forma assíncrona
+  return Response.json({ received: true });
+}
+
+// Worker separado processa a fila (pode ser um cron job, BullMQ, etc.)
+async function processWebhookQueue(): Promise<void> {
+  const pendingEvents = await db.webhookEventQueue.findMany({
+    where: { status: "pending" },
+    orderBy: { createdAt: "asc" },
+    take: 10,
+  });
+
+  for (const queuedEvent of pendingEvents) {
+    try {
+      await processWebhookEvent(JSON.parse(queuedEvent.payload));
+      await db.webhookEventQueue.update({
+        where: { id: queuedEvent.id },
+        data: { status: "processed" },
+      });
+    } catch (error) {
+      await db.webhookEventQueue.update({
+        where: { id: queuedEvent.id },
+        data: {
+          status: "failed",
+          error: String(error),
+          retryCount: { increment: 1 },
+        },
+      });
+    }
+  }
+}
+```
+
+Persista o evento raw antes de processar. Se o processamento falhar por um bug, você tem o payload original para reprocessar manualmente. Eventos perdidos em produção por falta de persistência são uma das piores situações em integrações financeiras.
+
+## Conclusão
+
+Um webhook bem implementado tem quatro camadas de proteção: validação de assinatura HMAC para autenticidade, idempotência por event ID para segurança contra duplicatas, resposta rápida com processamento assíncrono para confiabilidade, e persistência do evento raw para auditoria e reprocessamento.
+
+Webhooks mal implementados são a causa de bugs difíceis de reproduzir — eventos processados duas vezes, pagamentos marcados como aprovados sem validação, callbacks recebidos de fontes desconhecidas. Esses bugs chegam em produção, em fins de semana, e levam horas para diagnosticar.
+
+No SystemForge, integrações com webhooks são especificadas com contrato de assinatura, modelo de idempotência e fluxo de processamento assíncrono antes de qualquer código ser escrito. Isso elimina uma classe inteira de bugs antes que eles existam. Se você está integrando com Stripe, Mercado Pago, ou qualquer serviço que usa webhooks, podemos ajudar a estruturar essa integração do jeito certo.

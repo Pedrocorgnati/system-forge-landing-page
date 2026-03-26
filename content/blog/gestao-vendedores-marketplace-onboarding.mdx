@@ -1,0 +1,110 @@
+---
+title: "Gestão de vendedores em marketplace: onboarding e compliance"
+slug: "gestao-vendedores-marketplace-onboarding"
+date: "2024-08-28"
+description: "Como estruturar onboarding, verificação de identidade, políticas de qualidade e desativação de vendedores em marketplaces."
+tags: ["marketplace", "gestao vendedores", "kyc", "onboarding", "compliance"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+---
+
+A qualidade de um marketplace é, em última análise, a qualidade dos seus vendedores. Compradores não voltam por causa da sua tecnologia — eles voltam porque encontraram produtos reais, com descrições honestas, entregues no prazo por vendedores que respondem às dúvidas. Isso significa que a gestão do lado da oferta é tão crítica quanto qualquer outra funcionalidade técnica da plataforma.
+
+O processo começa muito antes do vendedor publicar o primeiro produto. Um onboarding mal estruturado atrai perfis inadequados, dificulta o KYC e cria problemas de compliance que se arrastam por meses. Um onboarding bem desenhado, por outro lado, filtra os vendedores sérios desde o início e cria uma base de qualidade que se sustenta com o crescimento da plataforma.
+
+## Fluxo de Onboarding: Cadastro, Verificação e Aprovação
+
+O onboarding de vendedores deve ser tratado como um produto separado, com seu próprio fluxo de UX e seus próprios critérios de sucesso. O objetivo não é apenas coletar dados — é conduzir o vendedor até o estado "ativo e publicando" o mais rapidamente possível, sem abrir mão das verificações necessárias.
+
+Um fluxo de onboarding bem estruturado tem cinco etapas:
+
+**Etapa 1 — Cadastro básico:** e-mail, senha e tipo de conta (PF ou PJ). Não peça mais do que isso neste momento. O objetivo é reduzir o atrito inicial e criar a conta o mais rápido possível. A verificação de e-mail deve acontecer aqui.
+
+**Etapa 2 — Dados do perfil:** nome de exibição da loja, categoria principal, breve descrição, foto de perfil/logo. Isso é o que o comprador vê — ajude o vendedor a criar uma boa primeira impressão.
+
+**Etapa 3 — Documentação e KYC:** CPF/CNPJ, documentos de identidade, comprovante de endereço, dados bancários. Esta é a etapa mais sensível e deve ser tratada com cuidado na UX — explique por que cada informação é necessária e quanto tempo leva a análise.
+
+**Etapa 4 — Configuração financeira:** dados para recebimento (banco, agência, conta), chave PIX, concordância com os termos financeiros incluindo taxas e cronograma de repasse.
+
+**Etapa 5 — Publicação do primeiro produto:** guiada, com checklist. Vendedores que publicam o primeiro produto nas primeiras 48 horas têm uma taxa de ativação muito maior do que os que adiam essa etapa.
+
+O status do vendedor deve transitar entre estados claramente definidos:
+
+```typescript
+type SellerStatus =
+  | 'draft'           // cadastro iniciado, sem verificação
+  | 'pending_kyc'     // aguardando análise de documentos
+  | 'kyc_review'      // documentos em análise manual
+  | 'active'          // aprovado, pode vender
+  | 'suspended'       // suspenso temporariamente (aviso prévio)
+  | 'deactivated';    // desativado definitivamente
+```
+
+Cada transição de status deve disparar um e-mail automático informando o vendedor sobre o que aconteceu e o que é esperado dele a seguir.
+
+## KYC Automatizado: Verificação de Documentos
+
+O KYC (Know Your Customer) é o processo de verificar que o vendedor é quem diz ser. No contexto de marketplaces, ele serve a dois propósitos: conformidade regulatória (exigida pelo BACEN para plataformas de pagamento) e redução de fraudes.
+
+A abordagem recomendada combina verificação automática para os casos simples e revisão humana para os casos de borda.
+
+**Verificações automáticas viáveis:**
+
+- CPF: consulta direta à base da Receita Federal via Serpro ou serviços como BigDataCorp
+- CNPJ: situação cadastral, quadro societário, data de abertura
+- Dados bancários: validação de titularidade via PIX ou serviço de validação bancária
+- Endereço: cruzamento com base de CEPs e validação de coerência
+
+**Verificações que exigem análise humana ou OCR avançado:**
+
+- Reconhecimento facial (liveness check) para confirmar que a pessoa é real
+- Leitura e validação de documentos de identidade (RG, CNH, passaporte)
+- Verificação de comprovantes de endereço
+
+Ferramentas como Unico Check, Truora, Idwall e Serpro DataValid cobrem a maior parte dessas necessidades via API. O custo por verificação completa varia de R$ 3 a R$ 15 dependendo dos serviços utilizados — um custo que se paga rapidamente ao bloquear vendedores fraudulentos.
+
+O SLA de análise manual deve ser comunicado explicitamente. "Seu cadastro está em análise e será processado em até 2 dias úteis" é muito melhor do que deixar o vendedor esperando sem feedback.
+
+## Políticas de Qualidade e Sistema de Score
+
+Após o onboarding, a gestão de qualidade dos vendedores se torna contínua. Um sistema de score bem implementado cria incentivos corretos e permite identificar vendedores problemáticos antes que causem dano à reputação da plataforma.
+
+As métricas mais relevantes para o score de vendedores em marketplaces são:
+
+| Métrica | Peso sugerido | Meta |
+|---|---|---|
+| Taxa de avaliações positivas | 30% | > 90% |
+| Taxa de cancelamentos | 20% | < 5% |
+| Tempo médio de resposta | 15% | < 4 horas |
+| Taxa de envio no prazo | 20% | > 95% |
+| Taxa de devoluções | 15% | < 3% |
+
+O score final (0 a 100) define o tier do vendedor:
+
+- **Platinum (90-100):** destaque nos resultados de busca, taxa de comissão reduzida, badge de qualidade
+- **Gold (75-89):** posicionamento padrão, condições normais
+- **Silver (60-74):** aviso sobre métricas em queda, acesso a programa de melhoria
+- **At Risk (abaixo de 60):** notificação formal, prazo para recuperação, restrição de novos produtos
+
+A transparência é fundamental: o vendedor deve conseguir ver seu score atual, quais métricas estão puxando para baixo e o que precisa melhorar. Um painel de métricas detalhado não é luxo — é parte essencial do painel do vendedor.
+
+## Desativação de Vendedores: Processo e Comunicação
+
+Desativar um vendedor é inevitável em qualquer marketplace que cresce. O processo precisa ser justo, documentado e respeitoso — mesmo quando a causa é fraude, porque a forma como você trata o desligamento é observada por outros vendedores e pode virar pauta em comunidades.
+
+O processo recomendado tem três camadas:
+
+**Suspensão temporária automática:** acionada quando métricas caem abaixo de thresholds críticos (ex: 3 chargebacks em 30 dias, score abaixo de 50 por 2 semanas consecutivas). O vendedor recebe e-mail explicando a suspensão, as métricas que a causaram e um prazo claro (ex: 15 dias) para resolver os problemas.
+
+**Suspensão manual:** acionada pelo time de operações após análise de denúncias, comportamento suspeito ou violações de política. Requer registro interno do motivo e evidências, que podem ser necessárias em disputas judiciais.
+
+**Desativação definitiva:** após suspensão temporária sem melhora, ou imediatamente para casos de fraude comprovada. O vendedor deve receber comunicação formal com os motivos específicos e informações sobre o saldo pendente e prazo de recebimento.
+
+O saldo financeiro de um vendedor desativado não pode ser simplesmente retido indefinidamente. Defina na política (e comunique no onboarding) que vendedores desativados recebem os valores já processados em até X dias, com retenção apenas dos valores em período de holdback para cobertura de chargebacks em aberto.
+
+## Conclusão com CTA
+
+A gestão de vendedores é uma das partes mais subestimadas na construção de um marketplace. Times que planejam apenas o lado técnico e deixam os processos de onboarding, KYC e qualidade como "fase 2" invariavelmente enfrentam crises de credibilidade quando a plataforma começa a crescer.
+
+O SystemForge apoia essa etapa gerando documentação estruturada para todos esses fluxos — desde o modelo de dados até as User Stories com cenários de erro — antes de qualquer implementação. Com a documentação completa em mãos, o time técnico pode construir com confiança e o time de operações sabe exatamente quais processos precisa executar.

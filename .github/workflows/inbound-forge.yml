@@ -1,0 +1,47 @@
+name: Inbound Forge — Content Validation
+
+on:
+  push:
+    paths:
+      - 'content/blog/**'
+      - 'public/images/blog/**'
+
+jobs:
+  validate-content:
+    name: Validate Blog Content
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate frontmatter de novos posts
+        run: npm run validate:frontmatter
+        env:
+          NEXT_PUBLIC_SITE_URL: https://forjadesistemas.com.br
+
+      - name: Trigger deploy (se validação passar)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy.yml',
+              ref: 'main'
+            })

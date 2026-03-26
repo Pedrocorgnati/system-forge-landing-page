@@ -1,0 +1,128 @@
+---
+title: "Gestão de estoque no e-commerce: evitar overselling"
+slug: "gestao-estoque-ecommerce-evitar-overselling"
+date: "2024-10-28"
+description: "Como arquitetar gestão de estoque em e-commerce para evitar overselling — reserva otimista vs pessimista, sincronização multi-canal e alertas automáticos."
+tags: ["gestao estoque", "e-commerce", "overselling", "inventario", "ecommerce operacoes"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+---
+
+Overselling é quando um e-commerce vende mais unidades de um produto do que tem em estoque. O que acontece em seguida é sempre ruim: o pedido precisa ser cancelado, o cliente fica frustrado, avaliações negativas surgem e, em plataformas como Mercado Livre, o seller score cai — impactando diretamente a visibilidade dos anúncios. Em casos graves, o consumidor pode acionar o Procon ou processar o lojista por práticas abusivas.
+
+O problema é mais comum do que parece, especialmente em operações multi-canal (loja própria + marketplaces) onde o mesmo estoque físico alimenta múltiplos canais de venda. A solução técnica existe, mas exige arquitetura cuidadosa e entendimento dos trade-offs.
+
+## Reserva Pessimista vs Otimista: Trade-offs de Conversão
+
+Existem duas abordagens fundamentais para reserva de estoque: pessimista e otimista.
+
+**Reserva pessimista** decremeneta o estoque disponível no momento em que o produto é adicionado ao carrinho. Se 10 clientes colocam o último item no carrinho, apenas o primeiro vê o produto disponível — os outros 9 veem "esgotado" antes mesmo de iniciar o checkout.
+
+Vantagem: overselling é praticamente impossível. Desvantagem: a taxa de conversão cai, pois carrinhos abandonados "prendem" o estoque. Um cliente que adiciona ao carrinho e não compra mantém o produto "reservado" pelo tempo configurado (geralmente 15-60 minutos), impedindo outros de comprar.
+
+**Reserva otimista** mantém o estoque disponível durante toda a navegação e só o decrementa no momento da confirmação do pagamento. Múltiplos clientes podem "ver" o mesmo produto disponível simultaneamente.
+
+Vantagem: conversão mais alta, pois não há falsos alarmes de "esgotado". Desvantagem: dois clientes podem completar o checkout do mesmo produto simultaneamente, gerando overselling se não houver controle transacional adequado.
+
+A maioria dos e-commerces com operação saudável usa uma **abordagem híbrida**: reserva temporária ao iniciar o checkout (não ao adicionar ao carrinho) com expiração automática em 15-20 minutos se o pagamento não for confirmado.
+
+```sql
+-- Tabela de reservas de estoque
+CREATE TABLE reservas_estoque (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  produto_id UUID NOT NULL REFERENCES produtos(id),
+  variante_id UUID REFERENCES variantes(id),
+  quantidade INT NOT NULL,
+  pedido_id UUID REFERENCES pedidos(id),
+  sessao_id VARCHAR(64),           -- Para reservas anônimas (antes do login)
+  expira_em TIMESTAMPTZ NOT NULL,  -- Expiração automática
+  status VARCHAR(20) DEFAULT 'ativa', -- ativa | confirmada | expirada | cancelada
+  criada_em TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- View de estoque disponível (leva em conta reservas ativas)
+CREATE VIEW estoque_disponivel AS
+SELECT
+  e.produto_id,
+  e.variante_id,
+  e.quantidade_fisica
+    - COALESCE(SUM(r.quantidade) FILTER (WHERE r.status = 'ativa' AND r.expira_em > NOW()), 0)
+    AS disponivel
+FROM estoque e
+LEFT JOIN reservas_estoque r USING (produto_id, variante_id)
+GROUP BY e.produto_id, e.variante_id, e.quantidade_fisica;
+```
+
+## Estoque em Multi-canal: O Problema de Sincronização
+
+O maior desafio de overselling em 2025 não é a loja própria — é a operação multi-canal. Quando o mesmo estoque físico alimenta loja própria, Mercado Livre, Shopee e Amazon, qualquer venda em qualquer canal precisa ser refletida em todos os outros em tempo real (ou o mais próximo disso).
+
+O problema de sincronização multi-canal é fundamentalmente um problema de consistência distribuída. Você tem N sistemas externos (cada marketplace é um sistema independente) e precisa garantir que o estoque exibido em cada um reflita a realidade do estoque central.
+
+As abordagens variam em complexidade e confiabilidade:
+
+| Abordagem | Latência de sync | Confiabilidade | Complexidade |
+|---|---|---|---|
+| Polling periódico (cada 5 min) | Alta (até 5 min de delay) | Baixa | Baixa |
+| Webhook + fila de mensagens | Baixa (segundos) | Alta | Média |
+| Buffer de estoque por canal | Baixa (virtual) | Alta | Baixa-média |
+| Estoque unificado com lock | Muito baixa | Muito alta | Alta |
+
+A abordagem mais prática para operações de médio porte é o **buffer de estoque por canal**: você não sincroniza o estoque real, mas atribui uma quota de estoque para cada canal. Se você tem 100 unidades, configura 40 para a loja própria, 35 para o ML, 25 para a Shopee. Quando um canal esgota sua quota, você redistribui manualmente ou por regra automática.
+
+Essa abordagem sacrifica a utilização ótima do estoque (em cenários extremos, a Shopee pode ter 0 de quota enquanto a loja própria tem 40 unidades paradas), mas elimina o risco de overselling em cenários de alta concorrência por unidades.
+
+## Locks de Banco de Dados vs Filas de Mensagens
+
+Para a loja própria, o controle de overselling no momento da confirmação de pagamento é um problema de concorrência clássico. Dois usuários completando o checkout do mesmo produto simultaneamente podem resultar em overselling se não houver controle.
+
+A solução com **locks de banco de dados** (SELECT FOR UPDATE) garante exclusividade no nível da transação:
+
+```typescript
+async function confirmarPedido(pedidoId: string): Promise<void> {
+  await db.transaction(async (trx) => {
+    // Lock na linha do estoque — bloqueia outras transações simultâneas
+    const [estoque] = await trx
+      .select()
+      .from("estoque")
+      .where({ produto_id: pedido.produtoId })
+      .forUpdate() // SELECT ... FOR UPDATE
+      .noWait();   // Falha imediatamente se já estiver lockado
+
+    if (estoque.disponivel < pedido.quantidade) {
+      throw new EstoqueInsuficienteError(pedido.produtoId);
+    }
+
+    await trx("estoque")
+      .where({ produto_id: pedido.produtoId })
+      .decrement("disponivel", pedido.quantidade);
+
+    await trx("pedidos")
+      .where({ id: pedidoId })
+      .update({ status: "confirmado", confirmado_em: new Date() });
+  });
+}
+```
+
+Locks funcionam bem para volumes moderados, mas têm limitações em alta concorrência: transações em espera acumulam, aumentando latência. Para Black Friday ou lançamentos com alta demanda simultânea, **filas de mensagens** (RabbitMQ, SQS, Redis Streams) são mais escaláveis — pedidos entram na fila, um worker processa um por vez, sem concorrência no banco.
+
+## Alertas de Reposição e Integração com ERP
+
+Controlar overselling é metade do problema; o outro lado é garantir que o estoque seja reposto antes de esgotar. Alertas de reposição automatizados são essenciais para operações que dependem de fornecedores com lead time.
+
+O ponto de reposição (ROP — Reorder Point) é calculado com base no consumo médio e no lead time do fornecedor:
+
+```
+ROP = (Vendas médias por dia × Lead time em dias) + Estoque de segurança
+```
+
+Um produto que vende 10 unidades/dia e tem lead time de 7 dias com fornecedor precisa de alerta quando o estoque chega a 70 unidades (+ estoque de segurança de 20% = 84 unidades). Se você espera o estoque zerar para fazer o pedido, vai ficar 7 dias sem vender.
+
+A integração com ERP (TOTVS, SAP, Bling, Tiny) fecha o ciclo: alertas automáticos geram ordens de compra no ERP, que atualiza o estoque previsto, que é refletido no e-commerce com disponibilidade futura ("Disponível em 7 dias"). Comunicar proativamente a disponibilidade futura converte clientes que teriam ido embora por falta de estoque.
+
+## Conclusão com CTA
+
+Overselling não é apenas um problema técnico — é um problema de reputação, de relacionamento com marketplaces e, em casos extremos, um problema legal. A arquitetura de estoque certa depende do perfil da operação: reserva híbrida (no início do checkout, com expiração), buffer de quotas para multi-canal e locks transacionais para confirmação de pagamento são os blocos essenciais.
+
+A complexidade aumenta com o crescimento: mais canais, mais SKUs, mais picos de demanda exigem soluções progressivamente mais robustas. Na SystemForge, projetamos módulos de gestão de estoque desde a loja própria até integrações com múltiplos marketplaces e ERPs, com a arquitetura adequada ao momento do negócio. [Fale com nossa equipe](/contato).

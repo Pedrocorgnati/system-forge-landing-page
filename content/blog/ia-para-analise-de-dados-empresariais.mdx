@@ -1,0 +1,178 @@
+---
+title: "IA para análise de dados: do CSV ao insight"
+slug: "ia-para-analise-de-dados-empresariais"
+date: "2024-10-24"
+description: "Como usar IA generativa para análise de dados empresariais — Code Interpreter, consultas em linguagem natural, geração de relatórios e limitações."
+tags: ["ia analise dados", "code interpreter", "llm dados", "business intelligence", "automacao relatorios"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+---
+
+Durante décadas, análise de dados foi uma atividade de especialistas. Você precisava saber SQL para consultar bancos de dados, Python ou R para análises mais complexas, e ferramentas de BI para visualização. Quem não tinha esse conhecimento técnico dependia de alguém que tivesse — criando gargalos e atrasos nas decisões de negócio.
+
+IA generativa está mudando isso de forma gradual mas significativa. Não ao ponto de tornar analistas de dados desnecessários — longe disso. Mas ao ponto de permitir que um gestor faça perguntas sobre seus dados em português e obtenha respostas úteis sem escrever uma linha de código. E ao ponto de automatizar a geração de relatórios que antes consumiam horas todo início de semana.
+
+Este artigo explora o que é possível hoje, como funciona tecnicamente e onde estão as limitações reais.
+
+## Code Interpreter: LLM que Executa Código de Análise
+
+Code Interpreter é o nome da funcionalidade da OpenAI onde o GPT-4o pode escrever e executar código Python em um ambiente sandbox. Você envia um arquivo CSV, faz uma pergunta e o modelo escreve o código para responder, executa e retorna o resultado — incluindo gráficos.
+
+O ciclo é: pergunta → código gerado → execução → resultado → interpretação em linguagem natural. O usuário vê apenas a pergunta e a resposta; o código acontece nos bastidores.
+
+Para integrar Code Interpreter via API em sua aplicação:
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI()
+
+def analisar_com_code_interpreter(caminho_csv: str, pergunta: str) -> str:
+    # Fazer upload do arquivo
+    with open(caminho_csv, "rb") as f:
+        arquivo = client.files.create(file=f, purpose="assistants")
+
+    # Criar assistente com Code Interpreter
+    assistente = client.beta.assistants.create(
+        name="Analista de Dados",
+        instructions="""Você é um analista de dados.
+        Responda perguntas sobre os dados fornecidos usando análises precisas.
+        Sempre apresente os resultados em português com contexto de negócio, não apenas números.""",
+        tools=[{"type": "code_interpreter"}],
+        model="gpt-4o",
+        tool_resources={"code_interpreter": {"file_ids": [arquivo.id]}}
+    )
+
+    # Criar thread e enviar mensagem
+    thread = client.beta.threads.create()
+    client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=pergunta,
+    )
+
+    # Executar e aguardar
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id=assistente.id,
+    )
+
+    # Obter resposta
+    mensagens = client.beta.threads.messages.list(thread_id=thread.id)
+    for msg in mensagens.data:
+        if msg.role == "assistant":
+            return msg.content[0].text.value
+
+    return "Sem resposta"
+
+# Uso
+resposta = analisar_com_code_interpreter(
+    "vendas_2024.csv",
+    "Qual produto teve maior crescimento percentual entre Q1 e Q2? E quais regiões puxaram esse crescimento?"
+)
+print(resposta)
+```
+
+O diferencial do Code Interpreter em relação a uma simples consulta de texto é a execução real: o modelo não está "adivinhando" a resposta com base no treinamento. Ele lê os dados, calcula e apresenta resultados verificáveis. Se você quiser auditar, pode pedir para mostrar o código que gerou o resultado.
+
+## Consultas em Linguagem Natural: Text-to-SQL na Prática
+
+Text-to-SQL é a capacidade de converter uma pergunta em português diretamente em uma query SQL executável. É particularmente útil em ambientes onde os dados ficam em bancos relacionais e você quer democratizar o acesso sem dar acesso direto ao banco para usuários não técnicos.
+
+```python
+from openai import OpenAI
+import sqlite3
+
+client = OpenAI()
+
+# Schema do banco de dados (fornecido ao modelo como contexto)
+SCHEMA_BD = """
+Tabelas disponíveis:
+
+vendas(id, data, produto_id, quantidade, valor_total, cliente_id, vendedor_id, regiao)
+produtos(id, nome, categoria, preco_unitario, custo_unitario)
+clientes(id, nome, cidade, estado, segmento, data_cadastro)
+vendedores(id, nome, equipe, meta_mensal)
+
+Relacionamentos:
+- vendas.produto_id -> produtos.id
+- vendas.cliente_id -> clientes.id
+- vendas.vendedor_id -> vendedores.id
+"""
+
+def texto_para_sql(pergunta: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": f"""Converta a pergunta em uma query SQL para SQLite.
+                Retorne APENAS a query SQL, sem explicações.
+
+                Schema:
+                {SCHEMA_BD}
+
+                Regras:
+                - Use apenas tabelas e colunas do schema
+                - Datas no formato YYYY-MM-DD
+                - Limite resultados a 1000 linhas por padrão"""
+            },
+            {"role": "user", "content": pergunta}
+        ],
+        temperature=0,
+    )
+    return response.choices[0].message.content.strip()
+
+def executar_consulta(pergunta: str, conn: sqlite3.Connection) -> list[dict]:
+    sql = texto_para_sql(pergunta)
+    print(f"SQL gerado: {sql}")  # Para auditoria
+
+    cursor = conn.execute(sql)
+    colunas = [desc[0] for desc in cursor.description]
+    return [dict(zip(colunas, row)) for row in cursor.fetchall()]
+```
+
+Um cuidado crítico: Text-to-SQL para usuários externos nunca deve ter acesso de escrita ao banco. Use usuários de banco somente-leitura e valide que a query gerada não contém UPDATE, DELETE, DROP ou INSERT antes de executar.
+
+## Geração Automática de Relatórios com LLM
+
+Relatórios semanais de vendas, métricas de operações, dashboards executivos — muito do tempo de analistas é gasto não em análise, mas em montar o mesmo relatório com dados diferentes toda semana. IA pode automatizar essa montagem.
+
+O padrão é:
+
+1. Extrair dados do banco com queries predefinidas
+2. Passar os dados para o LLM com um template de relatório
+3. O modelo preenche o template com análise dos dados, identifica destaques e exceções
+4. Relatório é enviado por e-mail ou publicado em um dashboard
+
+| Tipo de relatório | Automação viável | Observação |
+|-------------------|-----------------|------------|
+| KPIs semanais | Alta | Dados estruturados, pouca interpretação |
+| Relatório executivo mensal | Média | Exige revisão humana antes de distribuir |
+| Análise de anomalias | Alta | LLM é bom em identificar o que foge do padrão |
+| Relatório para conselho | Baixa | Risco reputacional alto, sempre revisão humana |
+| Diagnóstico de causa raiz | Média | LLM sugere hipóteses, humano valida |
+
+A automação de relatórios de alto risco (para conselho, regulatórios) deve sempre ter revisão humana antes do envio. Automatizar o rascunho economiza 80% do tempo; a revisão final garante que um erro de análise não chegue a tomadores de decisão importantes.
+
+## Limitações: O Que IA de Dados Ainda Não Faz Bem
+
+Honestidade sobre limitações é importante para definir expectativas corretas e evitar projetos mal direcionados.
+
+**Dados muito grandes:** Code Interpreter tem limite de tamanho de arquivo. Para análises sobre datasets de gigabytes ou bilhões de linhas, a abordagem precisa ser diferente — executar queries no banco e enviar apenas os resultados agregados ao LLM.
+
+**Contexto de negócio específico:** o modelo não sabe que "SKU-789" é o produto mais importante da empresa ou que o mercado do Nordeste tem sazonalidade diferente. Esse contexto precisa ser fornecido explicitamente no prompt ou via RAG sobre documentação interna.
+
+**Causalidade vs correlação:** LLMs são bons em identificar correlações nos dados. Estabelecer causalidade (vendas caíram porque o concorrente lançou um produto ou porque houve problema logístico?) exige conhecimento de negócio que o modelo não tem a menos que você forneça o contexto.
+
+**Análises estatísticas complexas:** para análises que exigem técnicas estatísticas específicas (regressão com controle de variáveis, séries temporais com sazonalidade complexa, A/B testing rigoroso), um analista de dados com as ferramentas certas ainda supera LLMs de forma significativa.
+
+**Confiabilidade em produção:** em demos, Code Interpreter sempre funciona. Em produção com dados reais e perguntas imprevisíveis, você vai encontrar casos onde o modelo gera código com bug, usa a coluna errada ou interpreta mal a pergunta. Revisão humana dos resultados ainda é necessária para decisões importantes.
+
+## Conclusão com CTA
+
+IA para análise de dados não substitui analistas — aumenta a produtividade deles e democratiza o acesso a dados para pessoas sem perfil técnico. As aplicações mais práticas e com ROI rápido são automação de relatórios recorrentes, consultas ad-hoc em linguagem natural sobre dados estruturados e identificação automática de anomalias.
+
+No **SystemForge**, integramos capacidades de análise com IA em sistemas de gestão empresarial, permitindo que equipes façam perguntas sobre seus dados sem depender de um analista disponível. Se você quer transformar seus dados em insights mais acessíveis, podemos conversar sobre como isso se aplica ao seu contexto específico.

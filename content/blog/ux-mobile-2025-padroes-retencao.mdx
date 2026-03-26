@@ -1,0 +1,140 @@
+---
+title: "UX mobile em 2025: padrões que aumentam retenção"
+slug: "ux-mobile-2025-padroes-retencao"
+date: "2024-10-07"
+description: "Os padrões de UX mobile que aumentam retenção em 2025 — gestos, bottom sheets, haptic feedback, skeleton screens e navegação por tabs vs drawer."
+tags: ["ux mobile", "design mobile", "retencao app", "haptic feedback", "bottom sheet"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+---
+
+UX mobile é sobre sensação, não só sobre aparência. Um app pode ser visualmente bonito e ainda assim ser frustrante de usar. Um app visualmente simples pode criar uma sensação de fluidez e controle que mantém o usuário voltando. A diferença está nos detalhes que a maioria dos designers e desenvolvedores trata como ornamento — gestos, feedback tátil, comportamento de loading, padrões de navegação — mas que, juntos, definem se o usuário sente que o app está trabalhando com ele ou contra ele.
+
+Em 2025, os apps que retêm usuários não são necessariamente os mais bonitos. São os que criam a melhor sensação de uso.
+
+## Gestos: Swipe, Pull-to-Refresh e Long Press com Propósito
+
+Gestos são atalhos de poder. Usuários experientes de mobile aprenderam convenções de gestos ao longo de anos — e quando seu app segue essas convenções, ele parece imediatamente familiar. Quando viola, parece broken.
+
+**Swipe para deletar ou arquivar**
+O padrão de swipe horizontal em itens de lista para revelar ações (deletar, arquivar, marcar como lido) é amplamente reconhecido. Mas há uma versão boa e uma versão ruim. A boa: a ação é destrutiva e o swipe completo exige confirmação, ou a ação é reversível (como no Gmail). A ruim: o swipe completo executa uma ação destrutiva imediatamente, sem possibilidade de desfazer.
+
+**Pull-to-refresh**
+É um gesto que os usuários fazem instintivamente quando querem dados frescos. Mas o pull-to-refresh só faz sentido em conteúdo que muda frequentemente — feed de atividades, lista de pedidos, conversas. Em telas estáticas, é confuso. O indicador de atualização deve ser visível durante toda a duração do request, não apenas por um segundo fixo.
+
+**Long press para contexto**
+Long press é o equivalente mobile do clique direito — revela um menu contextual com ações relevantes para o item pressionado. Usado com moderação (não em todo elemento interativo), é uma forma elegante de oferecer ações secundárias sem poluir a interface com botões.
+
+**Gestos de navegação do sistema**
+No iOS, o swipe da borda esquerda para voltar é um gesto nativo que os usuários esperam funcionar em qualquer app. Desabilitá-lo, ou criar gestos que conflitam com ele, é uma fonte consistente de frustração. O mesmo vale para o swipe para baixo para dispensar modais no iOS 13+.
+
+```tsx
+// Exemplo: swipe-to-dismiss em modal React Native
+import { Animated, PanResponder } from 'react-native';
+
+function DismissableModal({ onDismiss, children }) {
+  const translateY = new Animated.Value(0);
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 5,
+    onPanResponderMove: (_, gesture) => {
+      if (gesture.dy > 0) translateY.setValue(gesture.dy);
+    },
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dy > 150) {
+        onDismiss();
+      } else {
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start();
+      }
+    },
+  });
+
+  return (
+    <Animated.View
+      style={{ transform: [{ translateY }] }}
+      {...panResponder.panHandlers}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+```
+
+## Bottom Sheets: Quando Usar e Quando Evitar
+
+Bottom sheets são um dos padrões mais usados — e mais abusados — no design mobile. Eles funcionam bem para conteúdo contextual que não justifica uma tela completa: um menu de compartilhamento, detalhes de um item, filtros de busca, confirmação de ação.
+
+**Quando usar:**
+- Ação que requer informação adicional antes de confirmar
+- Menu com 3–7 opções relacionadas a um item específico
+- Preview de conteúdo com opção de expandir para tela completa
+- Formulário curto (2–4 campos) em contexto de lista
+
+**Quando evitar:**
+- Fluxos com múltiplos passos (use navegação de pilha)
+- Conteúdo que precisa de scroll extenso (use tela dedicada)
+- Substituição de modais de confirmação simples (use um Alert nativo)
+- Como resposta ao toque em qualquer item de lista (overuse cria fadiga)
+
+Um bottom sheet bem implementado tem algumas características obrigatórias: pode ser dispensado com swipe para baixo, fecha ao tocar fora (backdrop), anima suavemente com spring physics (não ease linear), e bloqueia o scroll do conteúdo por baixo enquanto está aberto.
+
+| Padrão | Profundidade de conteúdo | Interação principal |
+|---|---|---|
+| Bottom Sheet | Superficial (1 nível) | Selecionar, confirmar |
+| Modal | Média (formulário) | Preencher, submeter |
+| Tela completa | Profunda (fluxo) | Completar fluxo |
+| Tooltip | Mínima (informação) | Ler, dispensar |
+
+## Haptic Feedback: A Dimensão Tátil da UX
+
+Haptic feedback é o menos discutido e um dos mais impactantes dos padrões de UX mobile. É o toque físico do app — a vibração que confirma que um botão foi pressionado, que um like foi registrado, que uma ação foi completada. Quando bem calibrado, desaparece na percepção do usuário — ele simplesmente sente que o app responde. Quando mal calibrado (intensidade errada, timing errado, usado em excesso), é irritante.
+
+iOS tem a melhor implementação de haptic feedback em hardware — o Taptic Engine oferece sensações distintas para diferentes tipos de feedback. Android varia muito por fabricante e geração de dispositivo.
+
+Em React Native com Expo:
+
+```typescript
+import * as Haptics from 'expo-haptics';
+
+// Seleção (suave) — ao navegar por opções
+await Haptics.selectionAsync();
+
+// Impacto leve — ao confirmar uma ação reversível
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+// Impacto médio — ao completar uma ação principal
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+// Impacto pesado — ao completar uma ação irreversível ou importante
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+// Notificação de sucesso — pagamento confirmado, upload concluído
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+// Notificação de erro — validação falhou, ação negada
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+```
+
+Onde o haptic feedback claramente adiciona valor: confirmação de pagamento, like em conteúdo social, completar um item de tarefa, mensagem enviada, erro de formulário. Onde deve ser evitado: scroll simples, navegação entre telas, loading states, qualquer ação que o usuário não iniciou intencionalmente.
+
+## Skeleton Screens: Percepção de Velocidade
+
+Skeleton screens não tornam o app mais rápido. Tornam a espera mais tolerável — o que, na prática, tem o mesmo efeito na percepção do usuário. Um estudo clássico de UX mostra que usuários toleram esperas maiores quando o conteúdo está "carregando visivelmente" do que quando veem um spinner genérico.
+
+A lógica é simples: o skeleton screen mostra a estrutura do conteúdo que vai aparecer. O usuário processa essa estrutura, se orienta, e percebe menos a espera porque seu cérebro já está "preparando" o contexto. Um spinner, por outro lado, não dá nenhuma informação sobre o que vai aparecer ou quando.
+
+Boas práticas para skeleton screens:
+- Use a mesma estrutura visual do conteúdo real (mesmos tamanhos, mesma hierarquia)
+- Anime com shimmer (gradiente que percorre o skeleton da esquerda para a direita)
+- Mostre múltiplos itens, não apenas um — simula uma lista que está preenchendo
+- Não use skeleton em conteúdo que carrega em menos de 300ms — é mais confuso do que útil
+- Transite suavemente do skeleton para o conteúdo real (fade in, não troca abrupta)
+
+Para estados de erro e estados vazios, o mesmo princípio se aplica: nunca deixe o usuário na dúvida se o app quebrou ou se não há dados. Um estado vazio bem desenhado, com ilustração e uma ação clara ("Adicionar primeiro produto"), retém o usuário. Uma tela em branco o faz desinstalar.
+
+## Conclusão
+
+Os padrões que aumentam retenção em apps mobile não são segredos bem guardados — eles são práticas documentadas, testadas e validadas por milhões de usuários ao longo de anos de evolução do ecossistema mobile. Gestos que seguem convenções, bottom sheets usados no contexto certo, haptic feedback calibrado, skeleton screens bem implementados. Cada um desses padrões contribui para uma única percepção: este app foi feito por alguém que entende como eu uso meu celular.
+
+Na SystemForge, design e desenvolvimento são parte do mesmo processo. Cada decisão de UX é implementada com fidelidade ao comportamento esperado — não apenas visual, mas também tátil, temporal e contextual. Se você está construindo um app e quer garantir que a experiência de uso seja tão boa quanto o produto em si, fale com a gente.
