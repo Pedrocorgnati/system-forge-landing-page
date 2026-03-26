@@ -20,7 +20,7 @@ interface ServiceCTAContent {
 }
 
 // Conteúdo contextual por serviço (INT-095)
-const ctaContentByService: Record<ServiceCategory, ServiceCTAContent> = {
+const ctaContentByService: Partial<Record<ServiceCategory, ServiceCTAContent>> = {
   [ServiceCategory.SAAS]: {
     title: 'Precisa de Desenvolvimento SaaS?',
     subtitle: 'A SystemForge constrói plataformas SaaS escaláveis do zero até o deploy.',

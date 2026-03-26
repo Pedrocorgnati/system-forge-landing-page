@@ -107,9 +107,9 @@ export function SearchBar() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 Tente termos diferentes ou{' '}
-                <a href="/blog" className="text-primary hover:underline">
+                <Link href="/blog" className="text-primary hover:underline">
                   navegue pelo blog
-                </a>
+                </Link>
               </p>
             </div>
           )}

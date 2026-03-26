@@ -27,6 +27,22 @@ const sanitizeSchema = {
   },
 }
 
+const serviceCategoryValues = [
+  ServiceCategory.SAAS,
+  ServiceCategory.MOBILE,
+  ServiceCategory.MARKETPLACE,
+  ServiceCategory.AI,
+  ServiceCategory.BOTS,
+  ServiceCategory.LANDING,
+  ServiceCategory.ECOMMERCE,
+  ServiceCategory.DASHBOARD,
+  ServiceCategory.API,
+  ServiceCategory.DESKTOP,
+  ServiceCategory.GESTAO,
+  ServiceCategory.ERP,
+  ServiceCategory.CONSULTORIA,
+] as const
+
 const blog = defineCollection({
   name: 'Article',
   pattern: 'blog/**/*.mdx',
@@ -47,7 +63,7 @@ const blog = defineCollection({
       // Autor: default para o autor principal
       author: s.string().default('SystemForge'),
       // Serviço relacionado: para CTAs contextualizados (INT-095)
-      relatedService: s.nativeEnum(ServiceCategory).optional(),
+      relatedService: s.enum(serviceCategoryValues).optional(),
       // Conteúdo MDX compilado com rehype-sanitize
       content: s.mdx(),
     })

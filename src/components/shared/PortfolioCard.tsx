@@ -8,7 +8,10 @@ interface PortfolioCardProps {
 }
 
 export function PortfolioCard({ project, className }: PortfolioCardProps) {
-  const statusCfg = STATUS_CONFIG[project.status]
+  const statusCfg =
+    STATUS_CONFIG[project.status as keyof typeof STATUS_CONFIG] ?? STATUS_CONFIG.completed
+  const techs = project.techs ?? project.technologies ?? []
+  const title = project.title ?? project.name ?? 'Projeto'
 
   return (
     <div
@@ -21,7 +24,7 @@ export function PortfolioCard({ project, className }: PortfolioCardProps) {
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <h3 className="font-semibold text-foreground leading-snug">{project.title}</h3>
+        <h3 className="font-semibold text-foreground leading-snug">{title}</h3>
         <span
           className={cn(
             'shrink-0 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
@@ -37,7 +40,7 @@ export function PortfolioCard({ project, className }: PortfolioCardProps) {
       </p>
 
       <div className="flex flex-wrap gap-1.5 mt-auto">
-        {project.techs.map((tech) => (
+        {techs.map((tech) => (
           <span
             key={tech}
             className="inline-flex items-center px-2 py-0.5 rounded-md text-xs bg-accent text-accent-foreground font-medium"

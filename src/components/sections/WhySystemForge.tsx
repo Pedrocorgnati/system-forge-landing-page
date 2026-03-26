@@ -56,22 +56,22 @@ function useCounter(target: number, active: boolean) {
   useEffect(() => {
     if (!active) return
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setCount(target)
-      return
+      const id = requestAnimationFrame(() => setCount(target))
+      return () => cancelAnimationFrame(id)
     }
-    let start = 0
     const duration = 1200
+    let rafId = 0
     const step = (timestamp: number, startTime: number) => {
       const elapsed = timestamp - startTime
       const progress = Math.min(elapsed / duration, 1)
       const eased = 1 - Math.pow(1 - progress, 3)
       setCount(Math.floor(eased * target))
       if (progress < 1) {
-        requestAnimationFrame((t) => step(t, startTime))
+        rafId = requestAnimationFrame((t) => step(t, startTime))
       }
     }
-    requestAnimationFrame((t) => step(t, t))
-    return () => setCount(target)
+    rafId = requestAnimationFrame((t) => step(t, t))
+    return () => cancelAnimationFrame(rafId)
   }, [active, target])
 
   return count

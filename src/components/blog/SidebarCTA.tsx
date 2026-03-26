@@ -15,7 +15,7 @@ interface SidebarCTAProps {
   relatedService?: ServiceCategory
 }
 
-const serviceNames: Record<ServiceCategory, string> = {
+const serviceNames: Partial<Record<ServiceCategory, string>> = {
   [ServiceCategory.SAAS]: 'Desenvolvimento SaaS',
   [ServiceCategory.MOBILE]: 'Aplicativo Mobile',
   [ServiceCategory.MARKETPLACE]: 'Marketplace',

@@ -15,8 +15,8 @@ function useCounter(target: number, active: boolean) {
   useEffect(() => {
     if (!active) return
     if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setCount(target)
-      return
+      const id = requestAnimationFrame(() => setCount(target))
+      return () => cancelAnimationFrame(id)
     }
     const duration = 1400
     let rafId: number

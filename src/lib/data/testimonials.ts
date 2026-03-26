@@ -5,7 +5,7 @@
  */
 import type { Testimonial } from '../types'
 
-export const testimonials: Testimonial[] = [
+const rawTestimonials = [
   {
     name: 'Mariana Costa',
     role: 'CEO',
@@ -55,3 +55,10 @@ export const testimonials: Testimonial[] = [
     projectSlug: 'integracao-erp-ecommerce',
   },
 ]
+
+export const testimonials: Testimonial[] = rawTestimonials.map((item, index) => ({
+  id: String(index + 1),
+  author: item.name,
+  content: item.text,
+  ...item,
+}))

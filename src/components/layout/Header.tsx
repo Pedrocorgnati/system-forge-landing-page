@@ -11,12 +11,10 @@ import { cn } from '@/lib/utils'
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
-  const [mounted, setMounted] = useState(false)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
   const { theme, setTheme } = useTheme()
 
   useEffect(() => {
-    setMounted(true)
     function handleScroll() {
       setIsScrolled(window.scrollY > 0)
     }
@@ -27,6 +25,8 @@ export function Header() {
   function toggleTheme() {
     setTheme(theme === 'dark' ? 'light' : 'dark')
   }
+
+  const isDark = theme === 'dark'
 
   return (
     <>
@@ -81,9 +81,9 @@ export function Header() {
                   'text-foreground hover:bg-accent transition-colors',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
                 )}
-                aria-label={mounted && theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
               >
-                {mounted && theme === 'dark' ? (
+                {isDark ? (
                   <Sun className="w-5 h-5" />
                 ) : (
                   <Moon className="w-5 h-5" />

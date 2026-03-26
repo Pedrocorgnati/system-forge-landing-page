@@ -48,3 +48,27 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
     },
   ]
 }
+
+export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
+  const message = context
+    ? `Olá! Tenho interesse em ${context}.`
+    : 'Olá! Vi o site da SystemForge e gostaria de saber mais.'
+
+  return {
+    action: ConversionAction.WHATSAPP,
+    label,
+    href: buildWhatsAppUrl(SITE.whatsapp, message),
+    variant: 'primary',
+    icon: '💬',
+  }
+}
+
+export function buildBudgetCTA(label: string, context?: string): CTAConfig {
+  const suffix = context ? `?context=${encodeURIComponent(context)}` : ''
+  return {
+    action: ConversionAction.BUDGET_ENGINE,
+    label,
+    href: `${SITE.budgetEngine}${suffix}`,
+    variant: 'secondary',
+  }
+}

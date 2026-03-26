@@ -92,7 +92,7 @@ export const services: Service[] = [
   },
 ]
 
-export const portfolioProjects: PortfolioProject[] = [
+const legacyPortfolioProjects = [
   {
     id: '1',
     title: 'ClinicaPro',
@@ -248,6 +248,14 @@ export const portfolioProjects: PortfolioProject[] = [
     status: ProjectStatus.COMPLETED,
   },
 ]
+
+export const portfolioProjects: PortfolioProject[] = legacyPortfolioProjects.map((project) => ({
+  ...project,
+  slug: project.id ?? project.title?.toLowerCase().replace(/\s+/g, '-'),
+  name: project.title,
+  categories: project.category ? [project.category] : [],
+  technologies: project.techs ?? [],
+}))
 
 export const testimonials: Testimonial[] = [
   {

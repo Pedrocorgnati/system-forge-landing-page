@@ -19,11 +19,7 @@ export function DevDataTestOverlay() {
   const [isActive, setIsActive] = useState(false)
   const [elements, setElements] = useState<Array<{ id: string; rect: DOMRect }>>([])
   const [copiedId, setCopiedId] = useState<string | null>(null)
-
-  // Camada 1: verificacao de ambiente (APOS hooks)
-  if (process.env.NODE_ENV !== 'development') {
-    return null
-  }
+  const isDevelopment = process.env.NODE_ENV === 'development'
 
   const scanDataTestIds = useCallback(() => {
     const allElements = document.querySelectorAll('[data-testid]')
@@ -75,6 +71,10 @@ export function DevDataTestOverlay() {
       window.removeEventListener('resize', handleUpdate)
     }
   }, [isActive, scanDataTestIds])
+
+  if (!isDevelopment) {
+    return null
+  }
 
   return (
     <>

@@ -28,20 +28,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const pageNum = parseInt(n, 10)
   const totalPages = Math.ceil(allArticles.length / BLOG_ITEMS_PER_PAGE)
 
-  const alternates: Metadata['alternates'] = {
-    canonical: ROUTES.BLOG_PAGE(pageNum),
-  }
-  if (pageNum > 2) alternates.previous = ROUTES.BLOG_PAGE(pageNum - 1)
-  if (pageNum === 2) alternates.previous = ROUTES.BLOG
-  if (pageNum < totalPages) alternates.next = ROUTES.BLOG_PAGE(pageNum + 1)
-
   return {
     ...generatePageMetadata({
       title: `Blog — Página ${pageNum} de ${totalPages}`,
       description: `Artigos sobre desenvolvimento de software, IA e estratégias de produto — página ${pageNum} do blog da SystemForge.`,
       path: ROUTES.BLOG_PAGE(pageNum),
     }),
-    alternates,
   }
 }
 

@@ -1,5 +1,5 @@
 import { ServiceCard } from '@/components/shared/ServiceCard'
-import type { ServiceData } from '@/lib/types'
+import type { Service, ServiceData } from '@/lib/types'
 
 interface ServicesListProps {
   services: ServiceData[]
@@ -26,7 +26,16 @@ export function ServicesList({ services }: ServicesListProps) {
     >
       {services.map((service) => (
         <div key={service.slug} role="listitem">
-          <ServiceCard service={service} />
+          <ServiceCard
+            service={{
+              slug: service.slug,
+              name: service.name ?? service.label ?? service.slug,
+              description: service.description,
+              longDescription: service.longDescription ?? service.description,
+              icon: service.icon,
+              category: service.category ?? service.slug,
+            } satisfies Service}
+          />
         </div>
       ))}
     </div>
