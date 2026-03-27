@@ -18,6 +18,24 @@
   # www → non-www redirect
   RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   RewriteRule ^ https://%1%{REQUEST_URI} [R=301,L]
+
+  # ----------------------------------------------------------------
+  # Next.js Static Export — roteamento de URLs sem extensão
+  # Problema: Next.js gera /blog.html mas a URL é /blog
+  # Apache vê /blog/ (diretório existente) e redireciona → 403
+  # Solução: desativar trailing slash automático e mapear para .html
+  # ----------------------------------------------------------------
+  Options -Indexes
+
+  # Desabilita o redirect automático para / (causaria /blog → /blog/ → 403)
+  DirectorySlash Off
+
+  # Se a URL não tem extensão e existe um arquivo .html correspondente → serve o .html
+  # Exemplo: /blog → /blog.html, /servicos → /servicos.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME}.html -f
+  RewriteRule ^(.+?)/?$ /$1.html [L]
 </IfModule>
 
 # ----------------------------------------------------------------
