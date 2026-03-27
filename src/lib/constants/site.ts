@@ -11,7 +11,7 @@ export const SITE = {
   domain: 'forjadesistemas.com.br',
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5541999999999',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
   calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge',
   budgetEngine: process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://forjadesistemas.com.br',
   linkedin: 'https://www.linkedin.com/company/systemforge',

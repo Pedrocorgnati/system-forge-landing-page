@@ -1,16 +1,26 @@
 'use client'
 
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import Image from 'next/image'
+import { ChevronLeft, ChevronRight, Quote } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { testimonials } from '@/lib/data'
 import { cn } from '@/lib/utils'
 
-function StarRating() {
+function StarRating({ animate = false }: { animate?: boolean }) {
   return (
     <div className="flex gap-0.5" aria-label="5 estrelas" role="img">
       {Array.from({ length: 5 }).map((_, i) => (
-        <svg key={i} className="w-4 h-4 text-warning fill-current" viewBox="0 0 24 24" aria-hidden="true">
+        <svg
+          key={i}
+          className={cn(
+            'w-4 h-4 text-warning fill-current',
+            animate && 'star-animate',
+          )}
+          style={animate ? { animationDelay: `${i * 60}ms` } : undefined}
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
         </svg>
       ))}
@@ -18,7 +28,21 @@ function StarRating() {
   )
 }
 
-function AvatarInitials({ name }: { name: string }) {
+function Avatar({ name, avatarUrl, isActive = false }: { name: string; avatarUrl?: string; isActive?: boolean }) {
+  const ringClass = isActive ? 'avatar-ring-active' : ''
+
+  if (avatarUrl) {
+    return (
+      <Image
+        src={avatarUrl}
+        alt={name}
+        width={40}
+        height={40}
+        className={cn('w-10 h-10 rounded-full object-cover shrink-0 transition-shadow duration-300', ringClass)}
+      />
+    )
+  }
+
   const initials = name
     .split(' ')
     .slice(0, 2)
@@ -39,8 +63,9 @@ function AvatarInitials({ name }: { name: string }) {
   return (
     <div
       className={cn(
-        'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0',
+        'w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0 transition-shadow duration-300',
         colors[colorIndex],
+        ringClass,
       )}
       aria-hidden="true"
     >
@@ -52,6 +77,7 @@ function AvatarInitials({ name }: { name: string }) {
 export function TestimonialsSection() {
   const [active, setActive] = useState(0)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
   const total = testimonials.length
 
   const goTo = useCallback(
@@ -73,6 +99,32 @@ export function TestimonialsSection() {
     }
   }, [resetTimer])
 
+  // Staggered grid reveal via IO
+  useEffect(() => {
+    const grid = gridRef.current
+    if (!grid) return
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      grid.querySelectorAll('.testimonial-reveal').forEach((el) => el.classList.add('is-visible'))
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible')
+            observer.unobserve(entry.target)
+          }
+        })
+      },
+      { threshold: 0.1, rootMargin: '0px 0px -40px 0px' },
+    )
+
+    grid.querySelectorAll('.testimonial-reveal').forEach((el) => observer.observe(el))
+    return () => observer.disconnect()
+  }, [])
+
   const handlePrev = () => {
     goTo(active - 1)
     resetTimer()
@@ -89,41 +141,58 @@ export function TestimonialsSection() {
     <section
       data-testid="section-testimonials"
       aria-label="Depoimentos de clientes"
-      className="w-full bg-surface py-16 md:py-20"
+      className="section-testimonials relative w-full bg-surface py-20 md:py-28"
     >
       <Container>
-        <div className="flex flex-col gap-10">
-          {/* Header */}
-          <div className="flex flex-col gap-2">
-            <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+        <div className="flex flex-col gap-12">
+          {/* Header — MC-2: pill badge + MC-6: refined typography */}
+          <div className="flex flex-col gap-4 max-w-2xl">
+            <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/8 border border-primary/15 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-primary w-fit">
               Depoimentos
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+            <h2
+              className="font-extrabold text-foreground leading-[1.15] tracking-[-0.02em]"
+              style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}
+            >
               O que nossos clientes dizem
             </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              Resultados reais de quem confiou na SystemForge para transformar ideias em software.
+            </p>
           </div>
 
-          {/* Carousel */}
+          {/* Carousel — MC-3: quote mark + MC-4: cross-fade + MC-6: avatar ring */}
           <div className="relative">
-            {/* Main testimonial */}
             <div
               key={active}
               data-testid="testimonial-card-active"
-              className="animate-fade-in flex flex-col gap-6 p-8 rounded-2xl border border-border bg-card"
+              className="testimonial-active-card relative flex flex-col gap-6 p-8 md:p-10 rounded-2xl border border-border bg-card overflow-hidden"
               role="article"
               aria-label={`Depoimento de ${current.author}`}
             >
-              <StarRating />
-              <blockquote className="text-lg text-foreground leading-relaxed">
-                &ldquo;{current.content}&rdquo;
-              </blockquote>
-              <div className="flex items-center gap-3">
-                <AvatarInitials name={current.author} />
-                <div>
-                  <p className="font-semibold text-foreground text-sm">{current.author}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {current.role} · {current.company}
-                  </p>
+              {/* MC-3: Oversized gradient quote mark */}
+              <Quote
+                size={80}
+                className="absolute top-4 left-6 text-primary/[0.07] pointer-events-none"
+                aria-hidden="true"
+                strokeWidth={1}
+              />
+
+              <div className="relative z-10 flex flex-col gap-6">
+                <StarRating animate />
+
+                <blockquote className="text-lg md:text-xl text-foreground leading-relaxed font-medium italic">
+                  &ldquo;{current.content}&rdquo;
+                </blockquote>
+
+                <div className="flex items-center gap-3">
+                  <Avatar name={current.author} avatarUrl={current.avatarUrl} isActive />
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{current.author}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {current.role} · {current.company}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -143,8 +212,8 @@ export function TestimonialsSection() {
                       resetTimer()
                     }}
                     className={cn(
-                      'h-2 rounded-full transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
-                      i === active ? 'w-6 bg-primary' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50',
+                      'h-2 rounded-full transition-all duration-300 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
+                      i === active ? 'w-8 bg-primary' : 'w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50',
                     )}
                   />
                 ))}
@@ -158,7 +227,7 @@ export function TestimonialsSection() {
                   aria-label="Depoimento anterior"
                   className={cn(
                     'w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center',
-                    'hover:border-primary/40 hover:bg-accent transition-all duration-150',
+                    'hover:border-primary/40 hover:bg-accent hover:-translate-y-0.5 transition-all duration-200',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
                   )}
                 >
@@ -170,7 +239,7 @@ export function TestimonialsSection() {
                   aria-label="Próximo depoimento"
                   className={cn(
                     'w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center',
-                    'hover:border-primary/40 hover:bg-accent transition-all duration-150',
+                    'hover:border-primary/40 hover:bg-accent hover:-translate-y-0.5 transition-all duration-200',
                     'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
                   )}
                 >
@@ -180,15 +249,16 @@ export function TestimonialsSection() {
             </div>
           </div>
 
-          {/* All testimonials grid — visible on larger screens */}
-          <div className="hidden lg:grid grid-cols-2 gap-4">
+          {/* Grid — MC-5: glassmorphic cards + MC-7: stagger reveal + MC-6: avatar ring */}
+          <div ref={gridRef} className="hidden lg:grid grid-cols-2 xl:grid-cols-3 gap-4">
             {testimonials.map((t, i) => (
               <div
                 key={t.id}
                 className={cn(
-                  'flex flex-col gap-4 p-6 rounded-xl border bg-card transition-all duration-200 cursor-pointer',
+                  'testimonial-reveal testimonial-card group relative flex flex-col gap-4 p-6 rounded-xl border bg-card cursor-pointer overflow-hidden',
+                  `tst-delay-${i}`,
                   i === active
-                    ? 'border-primary/40 shadow-md'
+                    ? 'border-primary/30 testimonial-card-active'
                     : 'border-border hover:border-primary/20',
                 )}
                 onClick={() => {
@@ -205,17 +275,27 @@ export function TestimonialsSection() {
                   }
                 }}
               >
-                <StarRating />
-                <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-                  &ldquo;{t.content}&rdquo;
-                </p>
-                <div className="flex items-center gap-3 mt-auto">
-                  <AvatarInitials name={t.author} />
-                  <div>
-                    <p className="font-medium text-foreground text-sm">{t.author}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {t.role} · {t.company}
-                    </p>
+                {/* Subtle quote mark per card */}
+                <Quote
+                  size={48}
+                  className="absolute top-3 right-3 text-primary/[0.05] pointer-events-none"
+                  aria-hidden="true"
+                  strokeWidth={1}
+                />
+
+                <div className="relative z-10 flex flex-col gap-4">
+                  <StarRating />
+                  <p className="text-sm text-foreground leading-relaxed line-clamp-3 italic">
+                    &ldquo;{t.content}&rdquo;
+                  </p>
+                  <div className="flex items-center gap-3 mt-auto">
+                    <Avatar name={t.author} avatarUrl={t.avatarUrl} isActive={i === active} />
+                    <div>
+                      <p className="font-medium text-foreground text-sm">{t.author}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {t.role} · {t.company}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,126 +1,190 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { MessageCircle, CalendarDays, Calculator, ArrowRight, Mail } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { buildWhatsAppUrl } from '@/lib/cta'
 import { SITE } from '@/lib/constants'
 
 const channels = [
   {
-    icon: '💬',
+    icon: MessageCircle,
     label: 'WhatsApp',
     description: 'Resposta rápida em horário comercial. Ideal para tirar dúvidas e obter orçamentos.',
     cta: 'Iniciar conversa',
     href: buildWhatsAppUrl(
-      '5541999999999',
+      '5512934859127',
       'Olá! Vi o site da SystemForge e gostaria de conversar sobre um projeto.',
     ),
     external: true,
     highlight: true,
+    accent: {
+      bg: 'bg-emerald-500/15',
+      text: 'text-emerald-400',
+      border: 'hover:border-emerald-500/40',
+      glow: 'bg-emerald-500/[0.07]',
+      shadow: 'hover:shadow-[0_8px_30px_rgba(34,197,94,0.15)]',
+    },
   },
   {
-    icon: '📅',
+    icon: CalendarDays,
     label: 'Agendar reunião',
     description: 'Marque uma call de 30 minutos para apresentar seu projeto com calma.',
     cta: 'Ver agenda',
     href: SITE.calendly,
     external: true,
     highlight: false,
+    accent: {
+      bg: 'bg-blue-500/15',
+      text: 'text-blue-400',
+      border: 'hover:border-blue-500/40',
+      glow: 'bg-blue-500/[0.07]',
+      shadow: 'hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]',
+    },
   },
   {
-    icon: '🧮',
+    icon: Calculator,
     label: 'Calcular orçamento',
     description: 'Use nossa calculadora interativa para ter uma estimativa instantânea.',
     cta: 'Calcular grátis',
     href: SITE.budgetEngine,
     external: true,
     highlight: false,
+    accent: {
+      bg: 'bg-amber-500/15',
+      text: 'text-amber-400',
+      border: 'hover:border-amber-500/40',
+      glow: 'bg-amber-500/[0.07]',
+      shadow: 'hover:shadow-[0_8px_30px_rgba(245,158,11,0.15)]',
+    },
   },
 ]
 
 export function ContactSection() {
+  const sectionRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.setAttribute('data-contact-visible', 'true')
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.15 },
+    )
+
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
     <section
+      ref={sectionRef}
       id="contato"
       data-testid="section-contact"
       aria-label="Entre em contato"
-      className="w-full bg-background py-16 md:py-20"
+      className="relative w-full overflow-hidden bg-[#0C1120] py-20 md:py-28"
     >
+      {/* Background layers */}
+      <div className="contact-grid-overlay pointer-events-none absolute inset-0 opacity-40" aria-hidden="true" />
+
+      {/* Gradient blobs — green, blue, amber */}
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <div className="absolute top-8 left-[10%] w-[300px] h-[300px] rounded-full bg-emerald-500/[0.06] blur-[120px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[300px] rounded-full bg-blue-500/[0.05] blur-[130px]" />
+        <div className="absolute bottom-12 right-[10%] w-[280px] h-[280px] rounded-full bg-amber-500/[0.06] blur-[110px]" />
+      </div>
+
       <Container>
-        <div className="flex flex-col gap-10">
+        <div className="relative z-10 flex flex-col gap-12">
           {/* Header */}
-          <div className="flex flex-col gap-3 max-w-2xl">
-            <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+          <div className="flex flex-col gap-4 max-w-2xl">
+            <span className="contact-stagger-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-white/40">
               Contato
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-              Vamos conversar sobre seu projeto?
+            <h2 className="contact-stagger-2 text-[clamp(1.75rem,5vw,2.75rem)] font-bold text-white leading-[1.15]">
+              Vamos conversar sobre{' '}
+              <span className="bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
+                seu projeto
+              </span>
+              ?
             </h2>
-            <p className="text-muted-foreground leading-relaxed">
+            <p className="contact-stagger-3 text-white/70 text-lg leading-relaxed">
               Escolha o canal que preferir. Respondemos em até 2 horas em dias úteis.
             </p>
           </div>
 
           {/* Channel cards */}
-          <div data-testid="contact-channels" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {channels.map((channel) => (
-              <a
-                key={channel.label}
-                data-testid={`contact-channel-${channel.label.toLowerCase().replace(/\s+/g, '-')}`}
-                href={channel.href}
-                target={channel.external ? '_blank' : undefined}
-                rel={channel.external ? 'noopener noreferrer' : undefined}
-                className={[
-                  'group flex flex-col gap-4 p-6 rounded-xl border transition-all duration-200',
-                  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
-                  channel.highlight
-                    ? 'border-primary bg-primary text-primary-foreground hover:bg-primary-hover'
-                    : 'border-border bg-card text-foreground hover:border-primary/40 hover:shadow-md',
-                ].join(' ')}
-              >
-                <span className="text-3xl leading-none" role="img" aria-label={channel.label}>
-                  {channel.icon}
-                </span>
-                <div className="flex flex-col gap-1.5">
-                  <h3
-                    className={[
-                      'font-semibold',
-                      channel.highlight ? 'text-primary-foreground' : 'text-foreground',
-                    ].join(' ')}
-                  >
-                    {channel.label}
-                  </h3>
-                  <p
-                    className={[
-                      'text-sm leading-relaxed',
-                      channel.highlight ? 'text-primary-foreground/80' : 'text-muted-foreground',
-                    ].join(' ')}
-                  >
-                    {channel.description}
-                  </p>
-                </div>
-                <span
+          <div data-testid="contact-channels" className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {channels.map((channel, index) => {
+              const Icon = channel.icon
+              return (
+                <a
+                  key={channel.label}
+                  data-testid={`contact-channel-${channel.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  href={channel.href}
+                  target={channel.external ? '_blank' : undefined}
+                  rel={channel.external ? 'noopener noreferrer' : undefined}
                   className={[
-                    'mt-auto text-sm font-medium inline-flex items-center gap-1',
-                    channel.highlight
-                      ? 'text-primary-foreground'
-                      : 'text-primary group-hover:underline',
+                    `contact-stagger-${index + 4}`,
+                    'contact-card-shine group flex flex-col gap-5 p-7 rounded-2xl',
+                    'backdrop-blur-xl bg-white/[0.04] border border-white/10',
+                    'transition-all duration-300 ease-out',
+                    'hover:-translate-y-1.5',
+                    channel.accent.border,
+                    channel.accent.shadow,
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/30',
                   ].join(' ')}
                 >
-                  {channel.cta} →
-                </span>
-              </a>
-            ))}
+                  {/* Icon */}
+                  <div className={[
+                    'flex items-center justify-center w-12 h-12 rounded-xl',
+                    channel.accent.bg,
+                  ].join(' ')}>
+                    <Icon size={22} className={`${channel.accent.text} contact-icon-glow`} aria-hidden="true" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex flex-col gap-2">
+                    <h3 className="font-semibold text-white text-lg">
+                      {channel.label}
+                    </h3>
+                    <p className="text-sm leading-relaxed text-white/60">
+                      {channel.description}
+                    </p>
+                  </div>
+
+                  {/* CTA */}
+                  <span className={[
+                    'mt-auto text-sm font-medium inline-flex items-center gap-2',
+                    channel.accent.text,
+                  ].join(' ')}>
+                    {channel.cta}
+                    <ArrowRight size={14} className="transition-transform duration-200 group-hover:translate-x-1" />
+                  </span>
+                </a>
+              )
+            })}
           </div>
 
-          {/* Email fallback */}
-          <p className="text-sm text-muted-foreground text-center">
-            Prefere e-mail?{' '}
+          {/* Email fallback — glassmorphic pill */}
+          <div className="contact-stagger-6 flex justify-center" aria-hidden="false">
             <a
               href={`mailto:${SITE.email}`}
               data-testid="contact-email-link"
-              className="text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-sm"
+              className="inline-flex items-center gap-2.5 px-5 py-3 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-sm hover:bg-white/[0.08] transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/30"
             >
-              {SITE.email}
+              <Mail size={14} className="text-white/40" aria-hidden="true" />
+              <span className="text-sm text-white/50">
+                Prefere e-mail?{' '}
+                <span className="text-blue-400 font-medium">{SITE.email}</span>
+              </span>
             </a>
-          </p>
+          </div>
         </div>
       </Container>
     </section>

@@ -110,6 +110,8 @@ export interface PortfolioProject {
   filters?: string[]
 }
 
+export type ServiceFilterGroup = 'produto' | 'mobile-ia' | 'dados'
+
 export interface Service {
   slug: string
   name: string
@@ -117,6 +119,10 @@ export interface Service {
   longDescription: string
   icon: string
   category: ServiceCategory
+  deliverables?: string[]
+  techHints?: string[]
+  deliveryWeeks?: string
+  filterGroup?: ServiceFilterGroup
 }
 
 export interface ServiceData {

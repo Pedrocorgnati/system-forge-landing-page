@@ -2,17 +2,18 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, Sun, Moon } from 'lucide-react'
-import { useTheme } from 'next-themes'
 import { NAV_LINKS, SITE } from '@/lib/constants'
 import { MobileNav } from './MobileNav'
+import { useTheme } from './ThemeProvider'
 import { cn } from '@/lib/utils'
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false)
   const hamburgerRef = useRef<HTMLButtonElement>(null)
-  const { theme, setTheme } = useTheme()
+  const { theme, mounted, toggleTheme } = useTheme()
 
   useEffect(() => {
     function handleScroll() {
@@ -22,11 +23,7 @@ export function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  function toggleTheme() {
-    setTheme(theme === 'dark' ? 'light' : 'dark')
-  }
-
-  const isDark = theme === 'dark'
+  const isDark = mounted && theme === 'dark'
 
   return (
     <>
@@ -46,10 +43,18 @@ export function Header() {
               href="/"
               data-testid="header-logo"
               className={cn(
-                'text-xl font-bold text-primary',
+                'flex items-center gap-2 text-xl font-bold text-primary',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md',
               )}
             >
+              <Image
+                src="/images/logo.png"
+                alt={`${SITE.name} logo`}
+                width={32}
+                height={32}
+                className="h-8 w-8 object-contain"
+                priority
+              />
               {SITE.name}
             </Link>
 

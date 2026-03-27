@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 
 /**
  * DevDataTestOverlay — Overlay visual de debug para data-testid
@@ -9,7 +9,7 @@ import { useState, useCallback, useEffect } from 'react'
  * Este componente NUNCA deve aparecer em producao.
  *
  * Funcionalidade:
- * - Botao flutuante [data-test] no canto superior direito
+ * - Botao flutuante [data-test] arrastavel (grab handle)
  * - Ao clicar, exibe overlays com todos os data-testid do DOM
  * - Ao clicar em um overlay, copia o data-testid para o clipboard
  * - Segundo clique no botao esconde todos os overlays
@@ -21,6 +21,11 @@ export function DevDataTestOverlay() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const isDevelopment = process.env.NODE_ENV === 'development'
 
+  const btnRef = useRef<HTMLButtonElement>(null)
+  const dragRef = useRef(false)
+  const hasMoved = useRef(false)
+  const offsetRef = useRef({ x: 0, y: 0 })
+
   const scanDataTestIds = useCallback(() => {
     const allElements = document.querySelectorAll('[data-testid]')
     const mapped = Array.from(allElements).map((el) => ({
@@ -31,6 +36,7 @@ export function DevDataTestOverlay() {
   }, [])
 
   const handleToggle = useCallback(() => {
+    if (hasMoved.current) return
     if (!isActive) {
       scanDataTestIds()
     }
@@ -57,6 +63,37 @@ export function DevDataTestOverlay() {
     }
   }, [])
 
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    const btn = e.currentTarget as HTMLElement
+    btn.setPointerCapture(e.pointerId)
+    const rect = btn.getBoundingClientRect()
+    offsetRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
+    dragRef.current = true
+    hasMoved.current = false
+  }, [])
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!dragRef.current) return
+    hasMoved.current = true
+    const btn = btnRef.current
+    if (!btn) return
+    const btnWidth = btn.offsetWidth
+    const newLeft = e.clientX - offsetRef.current.x
+    const newTop = e.clientY - offsetRef.current.y
+    btn.style.top = `${Math.max(0, newTop)}px`
+    btn.style.right = 'auto'
+    btn.style.left = `${Math.max(0, Math.min(window.innerWidth - btnWidth, newLeft))}px`
+    btn.style.transition = 'none'
+  }, [])
+
+  const handlePointerUp = useCallback(() => {
+    dragRef.current = false
+    const btn = btnRef.current
+    if (btn) {
+      btn.style.transition = 'background-color 150ms ease, color 150ms ease, border-color 150ms ease'
+    }
+  }, [])
+
   // Atualizar posicoes no scroll e resize
   useEffect(() => {
     if (!isActive) return
@@ -78,9 +115,13 @@ export function DevDataTestOverlay() {
 
   return (
     <>
-      {/* Botao flutuante */}
+      {/* Botao flutuante arrastavel */}
       <button
+        ref={btnRef}
         onClick={handleToggle}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
         style={{
           position: 'fixed',
           top: '12px',
@@ -95,14 +136,15 @@ export function DevDataTestOverlay() {
           borderRadius: '6px',
           backgroundColor: isActive ? '#ef4444' : '#ffffff',
           color: isActive ? '#ffffff' : '#ef4444',
-          cursor: 'pointer',
+          cursor: 'grab',
           boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-          transition: 'all 150ms ease',
+          transition: 'background-color 150ms ease, color 150ms ease, border-color 150ms ease',
           userSelect: 'none',
+          touchAction: 'none',
         }}
         aria-label={isActive ? 'Esconder data-testid overlays' : 'Mostrar data-testid overlays'}
       >
-        [data-test]
+        ⠿ [data-test]
       </button>
 
       {/* Overlays dos data-testid */}

@@ -106,7 +106,7 @@ export function PortfolioGallery() {
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {filtered.slice(0, 9).map((project) => (
-                <PortfolioCard key={project.id} project={project} />
+                <PortfolioCard key={project.slug} project={project} />
               ))}
             </div>
           ) : (

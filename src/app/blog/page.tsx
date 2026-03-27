@@ -1,7 +1,11 @@
 import type { Metadata } from 'next'
+import { blog as allArticles } from '@/.velite'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { BlogListPage } from '@/components/blog/BlogListPage'
 import { SITE, ROUTES } from '@/lib/constants'
+import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
+import type { ArticleFrontmatter } from '@/lib/types'
 
 export const metadata: Metadata = {
   title: 'Blog',
@@ -15,6 +19,21 @@ const breadcrumbs = [
 ]
 
 export default function BlogPage() {
+  const sorted = [...allArticles].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )
+  const totalPages = Math.ceil(sorted.length / BLOG_ITEMS_PER_PAGE)
+  const pageArticles = sorted.slice(0, BLOG_ITEMS_PER_PAGE) as ArticleFrontmatter[]
+
+  const tagCounts = sorted.flatMap((a) => a.tags).reduce<Record<string, number>>((acc, tag) => {
+    acc[tag] = (acc[tag] ?? 0) + 1
+    return acc
+  }, {})
+  const allCategories = Object.entries(tagCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8)
+    .map(([tag]) => tag)
+
   return (
     <div data-testid="page-blog" className="py-12 md:py-16 bg-background">
       <Container>
@@ -29,24 +48,12 @@ export default function BlogPage() {
             </p>
           </div>
 
-          {/* Empty state */}
-          <div className="flex flex-col items-center justify-center gap-4 py-20 rounded-2xl border border-border border-dashed bg-surface">
-            <div
-              className="w-20 h-20 rounded-full bg-accent flex items-center justify-center text-4xl"
-              aria-hidden="true"
-            >
-              ✍️
-            </div>
-            <div className="flex flex-col gap-2 text-center">
-              <h2 className="text-xl font-semibold text-foreground">
-                Artigos chegando em breve
-              </h2>
-              <p className="text-muted-foreground max-w-sm">
-                Estamos preparando conteúdo de qualidade sobre desenvolvimento de software,
-                IA e estratégias de produto. Em breve por aqui!
-              </p>
-            </div>
-          </div>
+          <BlogListPage
+            articles={pageArticles}
+            currentPage={1}
+            totalPages={totalPages}
+            allCategories={allCategories}
+          />
         </div>
       </Container>
     </div>
