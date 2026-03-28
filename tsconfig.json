@@ -2,7 +2,11 @@
   "compilerOptions": {
     "baseUrl": ".",
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,14 +24,30 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@config": ["./config/index"],
-      "@config/*": ["./config/*"],
-      "config/sites": ["./config/sites/index.ts"],
-      "config/sites/*": ["./config/sites/*"],
-      "@content/*": ["./content/*"],
-      "@/.velite": ["./.velite/index"],
-      "#site/*": ["./.velite/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@config": [
+        "./config/index"
+      ],
+      "@config/*": [
+        "./config/*"
+      ],
+      "config/sites": [
+        "./config/sites/index.ts"
+      ],
+      "config/sites/*": [
+        "./config/sites/*"
+      ],
+      "@content/*": [
+        "./content/*"
+      ],
+      "@/.velite": [
+        "./.velite/index"
+      ],
+      "#site/*": [
+        "./.velite/*"
+      ]
     }
   },
   "include": [
@@ -38,5 +58,9 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "cloudflare-worker"]
+  "exclude": [
+    "node_modules",
+    "cloudflare-worker",
+    "workers"
+  ]
 }
