@@ -30,8 +30,14 @@
   # Desabilita o redirect automático para / (causaria /blog → /blog/ → 403)
   DirectorySlash Off
 
-  # Se a URL não tem extensão e existe um arquivo .html correspondente → serve o .html
-  # Exemplo: /blog → /blog.html, /servicos → /servicos.html
+  # Caso 1: URL com trailing slash sobre um diretório real (ex: /blog/)
+  # O Apache retornaria 403 (Options -Indexes bloqueia listagem).
+  # Reescreve /blog/ → /blog.html (gerado pelo Next.js static export).
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^(.+)/$ /$1.html [L]
+
+  # Caso 2: URL sem extensão e sem trailing slash (ex: /blog, /servicos)
+  # Só reescreve se existe o arquivo .html correspondente.
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_FILENAME}.html -f
