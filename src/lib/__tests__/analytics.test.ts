@@ -92,9 +92,7 @@ describe('trackEvent()', () => {
       // @ts-expect-error — simulate browser
       globalThis.window = {}
     }
-    // gtag not defined on window
-    // @ts-expect-error — testing missing gtag
-    globalThis.window.gtag = undefined
+    // gtag not defined on window (gtag is optional, so naturally undefined)
 
     expect(() => trackEvent('test_event')).not.toThrow()
   })
@@ -109,7 +107,7 @@ describe('trackEvent()', () => {
       // @ts-expect-error — simulate browser
       globalThis.window = {}
     }
-    // @ts-expect-error — mock gtag
+    // gtag is now typed as optional, so assignment is straightforward
     globalThis.window.gtag = mockGtag
 
     trackEvent('cta_click', { label: 'whatsapp' })
@@ -132,7 +130,7 @@ describe('trackPageView()', () => {
       // @ts-expect-error — simulate browser
       globalThis.window = {}
     }
-    // @ts-expect-error — mock gtag
+    // gtag is now typed as optional, so assignment is straightforward
     globalThis.window.gtag = mockGtag
 
     trackPageView('/servicos')

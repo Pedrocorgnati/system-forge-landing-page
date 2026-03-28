@@ -1,17 +1,18 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { getSiteConfig, getActiveLocale, isLocale } from '../i18n'
 
 describe('i18n', () => {
-  const originalEnv = { ...process.env }
-
   beforeEach(() => {
-    // Reset to clean state before each test
-    delete process.env.NEXT_PUBLIC_LOCALE
-    delete process.env.NODE_ENV
+    // Reset to clean state before each test using Vitest's vi.stubEnv
+    // This avoids mutating readonly process.env directly
+    vi.unstubAllEnvs()
+    vi.stubEnv('NEXT_PUBLIC_LOCALE', '')
+    vi.stubEnv('NODE_ENV', 'development')
   })
 
   afterEach(() => {
-    process.env = { ...originalEnv }
+    // Clean up all environment variable stubs
+    vi.unstubAllEnvs()
   })
 
   // -------------------------------------------------------------------------
@@ -34,7 +35,7 @@ describe('i18n', () => {
     })
 
     it('throws Error with "Locale inválido" for unsupported locale', () => {
-      expect(() => getSiteConfig('fr-FR' as any)).toThrow('Locale inválido')
+      expect(() => getSiteConfig('fr-FR' as unknown as Parameters<typeof getSiteConfig>[0])).toThrow('Locale inválido')
     })
 
     it('returns itConfig even when NEXT_PUBLIC_LOCALE=pt-BR (arg has precedence)', () => {
@@ -49,12 +50,12 @@ describe('i18n', () => {
   // -------------------------------------------------------------------------
   describe('getActiveLocale', () => {
     it('throws in production when NEXT_PUBLIC_LOCALE is not set', () => {
-      process.env.NODE_ENV = 'production'
+      vi.stubEnv('NODE_ENV', 'production')
       expect(() => getActiveLocale()).toThrow('NEXT_PUBLIC_LOCALE não definido em produção')
     })
 
     it('returns pt-BR in development when NEXT_PUBLIC_LOCALE is not set', () => {
-      process.env.NODE_ENV = 'development'
+      vi.stubEnv('NODE_ENV', 'development')
       expect(getActiveLocale()).toBe('pt-BR')
     })
   })

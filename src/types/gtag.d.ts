@@ -7,7 +7,8 @@
  */
 
 interface Window {
-  gtag: (
+  // gtag is optional - may not exist before GA4 script loads (test and SSR scenarios)
+  gtag?: (
     command: 'event' | 'config' | 'set' | 'js',
     target: string | Date,
     params?: Record<string, string | number | boolean | undefined>,
