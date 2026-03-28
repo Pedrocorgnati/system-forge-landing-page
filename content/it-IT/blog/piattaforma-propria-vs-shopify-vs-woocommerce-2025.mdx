@@ -1,0 +1,102 @@
+---
+title: "Piattaforma propria vs Shopify vs WooCommerce nel 2025"
+slug: "piattaforma-propria-vs-shopify-vs-woocommerce-2025"
+date: "2024-07-20"
+description: "Come scegliere la piattaforma e-commerce giusta: Shopify, WooCommerce, PrestaShop, Magento o sviluppo custom — analisi per volume, personalizzazione e costo totale."
+tags: ["e-commerce", "shopify", "woocommerce", "prestashop", "piattaforma ecommerce"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come scegliere la piattaforma e-commerce giusta: Shopify, WooCommerce, PrestaShop o sviluppo custom — analisi per volume, personalizzazione e costo totale.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'plataforma-propria-vs-shopify-vs-vtex-2025'
+  - locale: 'it-IT'
+    slug: 'piattaforma-propria-vs-shopify-vs-woocommerce-2025'
+  - locale: 'en'
+    slug: 'custom-platform-vs-shopify-vs-woocommerce-2025'
+---
+
+Scegliere la piattaforma e-commerce sbagliata non è solo un problema tecnico — è una trappola strategica. I negozi che migrano piattaforma nel mezzo della crescita affrontano mesi di rilavorazione, perdita del SEO accumulato e interruzione delle operazioni. La decisione presa all'inizio definisce il tetto di crescita per anni.
+
+Nel 2025, il mercato europeo dispone di opzioni mature per ogni profilo operativo. Questa guida analizza le principali alternative — Shopify, WooCommerce, PrestaShop, Magento e sviluppo custom — con criteri oggettivi: volume degli ordini, necessità di personalizzazione, costo totale di proprietà e maturità tecnica del team.
+
+## Shopify: Per Chi è Ideale
+
+Shopify domina il mercato globale per ragioni concrete: onboarding rapido, ecosistema di app maturo e infrastruttura affidabile. Per un negozio che deve essere online in poche settimane, difficilmente esiste un'alternativa più efficiente.
+
+Il modello funziona bene per operazioni fino a €2 milioni di fatturato annuo. Al di sopra, le commissioni sulle transazioni (0,5% fino al 2% a seconda del piano, se non si utilizza Shopify Payments) iniziano a pesare. Il piano Advanced costa $299/mese più app essenziali come recensioni, bundle builder e loyalty, arrivando facilmente a $600-800/mese in costi fissi di piattaforma.
+
+Il vero limite di Shopify non è il prezzo — è la personalizzazione. Liquid (il linguaggio di template) impone un tetto di complessità. Flussi di checkout personalizzati, prezzi per cliente (B2B), logiche di sconto complesse o integrazioni con ERP legacy sono limitati a ciò che le app del marketplace offrono. E quando l'app di cui hai bisogno non esiste, sei bloccato.
+
+Per il DTC (direct-to-consumer) con prodotti fisici, catalogo relativamente semplice e team senza uno sviluppatore dedicato, Shopify è la risposta giusta nel 2025.
+
+## WooCommerce e PrestaShop: Le Alternative Open Source Europee
+
+WooCommerce (plugin WordPress) e PrestaShop dominano il mercato europeo per operazioni di medie dimensioni. Entrambe sono open source, il che significa zero costi di licenza e massima flessibilità di personalizzazione.
+
+**WooCommerce** è la scelta più diffusa per chi già utilizza WordPress. Ha un ecosistema enorme di plugin, supporto nativo per i principali gateway di pagamento europei (Stripe, PayPal, Klarna, Scalapay) e può essere ospitato su qualsiasi server. I costi sono principalmente legati all'hosting (€20-200/mese), ai plugin premium (€500-2.000/anno) e agli sviluppatori per le personalizzazioni.
+
+**PrestaShop** è più orientato al commercio rispetto a WordPress/WooCommerce, con una gestione nativa del catalogo più potente. È particolarmente popolare in Francia, Spagna e Italia per operazioni con migliaia di SKU. La curva di apprendimento è più ripida, ma la struttura è più robusta per operazioni complesse.
+
+| Criterio | Magento/Adobe Commerce | Shopify | WooCommerce |
+|----------|----------------------|---------|-------------|
+| Investimento iniziale | €150k+ | €0-30k | €0-20k |
+| Costo mensile (piattaforma) | €3k+ | €30-350 | €20-200 |
+| Multi-store nativo | Sì | Limitato | Con plugin |
+| Marketplace nativo | Sì | Via app | Via plugin |
+| Complessità di setup | Alta | Bassa | Media |
+| Volume raccomandato (GMV/anno) | €10M+ | €500k-5M | Fino a €3M |
+
+**Magento/Adobe Commerce** occupa la fascia enterprise: è potente, altamente personalizzabile e scala su volumi elevati. Ma il costo di implementazione (€150k+) e la necessità di un team tecnico dedicato lo rendono adatto solo a operazioni con fatturato superiore a €10 milioni.
+
+## Piattaforma Custom: Quando Vale l'Investimento
+
+Lo sviluppo custom non significa "costruire Shopify da zero". Significa costruire su basi solide — Next.js nel front-end, Node.js o Python nel backend, con integrazioni dirette con gateway di pagamento (Stripe, Klarna, Adyen), spedizionieri e ERP — e avere il controllo totale su ogni pixel e ogni flusso.
+
+Vale l'investimento quando:
+
+- Hai logiche di pricing complesse (B2B, tabelle per cliente, contratti)
+- Il prodotto è digitale o ha un flusso di consegna non convenzionale
+- L'esperienza d'acquisto è il vantaggio competitivo (lusso, personalizzazione, configuratore di prodotto)
+- Hai già un team tecnico e vuoi evitare le commissioni di piattaforma nel lungo periodo
+- L'integrazione con sistemi interni (ERP, WMS, CRM) è critica e i connettori disponibili non sono sufficienti
+
+Il costo di un e-commerce custom ben costruito parte da €70.000 e può arrivare a €250.000 per operazioni complesse. Il ritorno sull'investimento deriva dal risparmio sulle commissioni di piattaforma, dalla capacità di sperimentazione senza limiti e dalla velocità di iterazione quando il team padroneggia il codice.
+
+```typescript
+// Esempio: calcolo del prezzo personalizzato per cliente (impossibile con Shopify standard)
+async function calcolaPrezzo(
+  prodottoId: string,
+  clienteId: string,
+  quantita: number
+): Promise<PrezzoCalcolato> {
+  const [prodotto, contratto] = await Promise.all([
+    getProdotto(prodottoId),
+    getContrattoCliente(clienteId),
+  ]);
+
+  const prezzoBase = prodotto.prezzo;
+  const sconto = contratto?.scontoCategoria[prodotto.categoria] ?? 0;
+  const scontoVolume = calcolaScontoVolume(quantita, contratto?.tabellaVolume);
+
+  return {
+    prezzoUnitario: prezzoBase * (1 - sconto) * (1 - scontoVolume),
+    scontoApplicato: sconto + scontoVolume,
+    origine: contratto ? "contratto" : "listino_pubblico",
+  };
+}
+```
+
+Il punto critico è la manutenzione: una piattaforma custom richiede un team tecnico permanente o un partner di sviluppo affidabile. Non ha senso costruire un sistema eccellente e poi rimanere senza supporto quando deve evolvere.
+
+## Conclusione
+
+Non esiste una piattaforma universalmente corretta — esiste quella giusta per la tua fase di crescita, il modello di business e la capacità di investimento. L'errore più comune è scegliere per familiarità ("tutti usano Shopify") invece di analizzare i requisiti reali dell'operazione.
+
+Se sei all'inizio, WooCommerce o Shopify consentono di validare il mercato con costi controllati. Se stai crescendo e senti i limiti della piattaforma attuale, la migrazione deve essere pianificata con anticipo, non all'ultimo momento. Se hai requisiti che nessuna piattaforma standard soddisfa, lo sviluppo custom può essere la scelta più economica nel lungo periodo.
+
+In SystemForge, sviluppiamo e-commerce custom quando la piattaforma pronta diventa un ostacolo. Aiutiamo anche a valutare quale percorso abbia più senso per il tuo business prima di scrivere qualsiasi riga di codice. [Contattaci](/contatto) e analizzeremo insieme la tua operazione.

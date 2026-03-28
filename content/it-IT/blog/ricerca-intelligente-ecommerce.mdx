@@ -1,0 +1,116 @@
+---
+title: "Ricerca intelligente per e-commerce: oltre SQL LIKE"
+slug: "ricerca-intelligente-ecommerce"
+date: "2024-09-16"
+description: "Come implementare una ricerca rilevante per e-commerce con Elasticsearch, Algolia o Typesense — autocomplete, fuzzy search e ranking per vendite."
+tags: ["ricerca ecommerce", "elasticsearch", "algolia", "typesense", "search"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come implementare una ricerca rilevante per e-commerce con Elasticsearch, Algolia o Typesense — autocomplete, fuzzy search e ranking per vendite.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'busca-inteligente-ecommerce'
+  - locale: 'it-IT'
+    slug: 'ricerca-intelligente-ecommerce'
+  - locale: 'en'
+    slug: 'intelligent-search-ecommerce'
+---
+
+La ricerca è la funzionalità più utilizzata negli e-commerce con cataloghi superiori a qualche centinaio di prodotti. Quando funziona bene, è invisibile — il cliente digita, trova, acquista. Quando funziona male, il cliente digita "scarpe bianche", non trova le "Scarpe Bianche" presenti nel catalogo, e va ad acquistare dalla concorrenza. Le ricerche UX del Baymard Institute mostrano costantemente che una ricerca scadente è correlata con perdite di conversione fino al 30% tra gli utenti che la utilizzano.
+
+Il problema inizia quando gli e-commerce implementano la ricerca con `SQL LIKE '%scarpe%'`. Funziona per i casi esatti, fallisce per tutto il resto: accenti, plurale/singolare, errori di digitazione, sinonimi, ordine delle parole. La soluzione per una ricerca rilevante in produzione passa per motori specializzati.
+
+## Il Problema di SQL LIKE per le Ricerche in Produzione
+
+`LIKE` in SQL è una ricerca per sottostringa. Trova esattamente quello che hai digitato, nell'ordine in cui l'hai digitato, senza tolleranza alle variazioni. In pratica, questo significa:
+
+- "scarpe" non trova "Scarpe" (maiuscola)
+- "jeans bermuda" non trova "bermuda jeans" (ordine diverso)
+- "telefno" non trova "telefono" (errore di digitazione)
+- "smartphone" non trova "cellulare" (sinonimo)
+- Le performance degradano esponenzialmente con la crescita del catalogo
+
+Inoltre, `LIKE '%termine%'` non usa gli indici in modo efficiente — la query esegue una scansione full-table su tabelle grandi, generando lentezza che impatta direttamente l'esperienza.
+
+`ILIKE` di PostgreSQL e `FULLTEXT INDEX` di MySQL risolvono parte del problema (maiuscole/minuscole, ricerca per parole singole), ma non gestiscono ancora fuzzy search, sinonimi o ranking per rilevanza. Sono miglioramenti marginali su un approccio fondamentalmente inadeguato per una ricerca seria.
+
+## Elasticsearch vs Algolia vs Typesense: Confronto
+
+Le tre opzioni dominano il mercato della ricerca per e-commerce, con profili molto diversi:
+
+| Criterio | Elasticsearch | Algolia | Typesense |
+|---|---|---|---|
+| Modello | Self-hosted / Cloud | SaaS | Self-hosted / Cloud |
+| Costo (catalogo medio) | €50-200/mese (infra) | €500-2.000/mese | €30-100/mese (Cloud) |
+| Latenza di ricerca | 50-200ms | 1-10ms | 5-50ms |
+| Configurazione iniziale | Alta | Bassa | Media |
+| Fuzzy search | Configurabile | Automatico | Automatico |
+| Sinonimi | Sì | Sì | Sì |
+| Ranking personalizzato | Alto controllo | Medio controllo | Medio controllo |
+| Scalabilità | Molto alta | Alta (gestita) | Alta |
+| Ideale per | Operazioni complesse, alto volume | Team senza specialisti search | Alternativa open-source ad Algolia |
+
+**Elasticsearch** è la scelta per operazioni che necessitano controllo massimo: ranking personalizzato con segnali multipli (vendite, margine, stock, comportamento dell'utente), analisi dei log di ricerca, correlazione con altre fonti di dati. La curva di apprendimento è alta — configurare analizzatori di testo per l'italiano, mapping dei campi e strategie di rilevanza richiede competenze specializzate.
+
+**Algolia** è la scelta quando la velocità di implementazione conta più del controllo. L'API è semplice, il dashboard permette di regolare il ranking senza codice e le performance di 1-10ms sono difficili da battere. Il costo scala con il volume di operazioni, il che può renderlo caro per e-commerce ad alto traffico.
+
+**Typesense** è l'alternativa open-source con UX simile ad Algolia. Può essere self-hosted, eliminando il costo SaaS. La documentazione è eccellente e feature come fuzzy search e sinonimi funzionano bene senza configurazione estesa. Per team che vogliono il comfort di Algolia senza il costo, Typesense è la scelta naturale.
+
+## Autocomplete, Fuzzy Search e Sinonimi
+
+Tre feature che trasformano l'esperienza di ricerca:
+
+**Autocomplete** suggerisce termini mentre l'utente digita. L'implementazione efficiente usa un indice separato di suggerimenti (basato sulla cronologia delle ricerche convertite, non solo sul catalogo) con debounce di 200-300ms per evitare richieste eccessive. L'autocomplete dovrebbe dare priorità a categorie e marchi, non solo a singoli prodotti.
+
+```typescript
+// Ricerca con Typesense — fuzzy search + filtri + ranking
+const risultato = await typesense.collections("prodotti").documents().search({
+  q: termineDiRicerca,
+  query_by: "nome,descrizione,marca,categoria,tag",
+  query_by_weights: "4,2,3,2,1", // Peso maggiore per nome e marca
+  num_typos: 2,           // Tolleranza a 2 errori di digitazione
+  typo_tokens_threshold: 1,
+  filter_by: `stock:>0 && attivo:true`, // Solo prodotti disponibili
+  sort_by: "_text_match:desc,vendite_30g:desc,margine:desc",
+  facet_by: "categoria,marca,fascia_prezzo",
+  per_page: 24,
+  highlight_full_fields: "nome,marca",
+});
+```
+
+**Fuzzy search** gestisce gli errori di digitazione usando la distanza di modifica (algoritmo di Levenshtein o simile). Una fuzzy search con tolleranza di 1-2 caratteri risolve "camicia" vs "camiccia", "telefono" vs "telefno", "samsung" vs "samsng". La calibrazione è importante: una tolleranza troppo alta restituisce risultati irrilevanti.
+
+**I sinonimi** richiedono cura manuale ma hanno un alto impatto. "Smartphone" e "cellulare", "notebook" e "laptop", "scarpe" e "calzature" sono sinonimi che gli utenti alternano e che le ricerche letterali non risolvono. Molti motori permettono sinonimi bidirezionali e unidirezionali — "smartphone → cellulare" può essere unidirezionale se i prodotti sono indicizzati come "cellulare" ma gli utenti digitano "smartphone".
+
+## Ranking per Rilevanza, Vendite e Margine
+
+Ordinare i risultati per pura rilevanza testuale è insufficiente. Un prodotto che appare primo nei risultati ma ha zero vendite negli ultimi 30 giorni probabilmente non è quello che il cliente vuole. Il ranking in un e-commerce professionale combina segnali multipli:
+
+**Rilevanza testuale:** Il motore di ricerca calcola un punteggio di similarità tra il termine cercato e i campi indicizzati. Questo è il punto di partenza.
+
+**Segnali di popolarità:** Vendite negli ultimi 7/30/90 giorni, numero di visualizzazioni, click-through rate nei risultati di ricerca (CTR) e tasso di conversione dalla ricerca al prodotto. I prodotti popolari sono generalmente i più rilevanti per l'utente.
+
+**Segnali di business:** Margine di contribuzione, prodotti sponsorizzati, prodotti in promozione attiva, prodotti con alto stock (evitare la frustrazione dell'"esaurito" subito dopo aver cliccato). Il business può voler classificare i prodotti con margine maggiore sopra alternative ugualmente rilevanti.
+
+**Segnali di disponibilità:** I prodotti fuori stock dovrebbero apparire per ultimi o fuori dai risultati principali. Mostrare prodotti non disponibili in cima distrugge l'esperienza.
+
+La combinazione di questi segnali forma un punteggio composto. Strumenti come Elasticsearch permettono scripted query che calcolano punteggi personalizzati combinando tutti questi fattori. Algolia e Typesense hanno `sort_by` con più campi, ma meno flessibilità per scoring complesso.
+
+Un pattern efficace è creare un campo `ranking_score` calcolato offline (aggiornato quotidianamente o in tempo reale tramite evento di vendita) e usarlo per l'ordinamento:
+
+```
+ranking_score = rilevanza_testo * 0.4
+               + normalizzare(vendite_30g) * 0.3
+               + normalizzare(margine) * 0.2
+               + boost_promozione * 0.1
+```
+
+## Conclusione
+
+Una ricerca rilevante non è un lusso per grandi e-commerce — è una necessità per qualsiasi negozio con più di 200 prodotti. La differenza tra `SQL LIKE` e un motore dedicato si traduce direttamente in conversione: gli utenti che trovano quello che cercano acquistano; gli utenti che non trovano se ne vanno.
+
+L'implementazione corretta — scelta del motore adeguato al profilo dell'operazione, configurazione degli analizzatori di testo per l'italiano, sinonimi curati, ranking con segnali di business — richiede esperienza per evitare mesi di trial and error. In SystemForge, implementiamo soluzioni di ricerca per e-commerce da zero, inclusa l'integrazione con Elasticsearch, Algolia e Typesense, con dashboard di analytics per monitorare i termini senza risultati e le opportunità di cura. [Parla con il nostro team](/contato).

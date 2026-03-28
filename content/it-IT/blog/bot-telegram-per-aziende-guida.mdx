@@ -1,0 +1,224 @@
+---
+title: "Bot Telegram per aziende: guida completa"
+slug: "bot-telegram-per-aziende-guida"
+date: "2024-10-21"
+description: "Come creare un bot Telegram per automazione di notifiche, assistenza e integrazione con sistemi interni — esempi in Python e Node.js."
+tags: ["telegram bot", "telegram api", "chatbot", "notifiche", "automazione"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come creare un bot Telegram per automazione di notifiche, assistenza e integrazione con sistemi interni — esempi in Python e Node.js.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'bot-telegram-para-negocios-guia'
+  - locale: 'it-IT'
+    slug: 'bot-telegram-per-aziende-guida'
+  - locale: 'en'
+    slug: 'telegram-bot-for-business-complete-guide'
+---
+
+Telegram conta 900 milioni di utenti attivi e un'API per bot che è, tecnicamente, la migliore sul mercato tra le piattaforme di messaggistica. Nessuna restrizione di template come WhatsApp, nessuna approvazione dei contenuti, nessun costo per messaggio inviato. Nonostante ciò, la maggior parte delle aziende ignora Telegram come canale di business — un errore che diventa evidente quando si scopre cosa è possibile fare con un bot ben costruito.
+
+I bot Telegram sono ideali per notifiche interne (alert di errore, report automatici, approvazioni), assistenza a community tecniche (sviluppatori, utenti SaaS, appassionati), e integrazione con sistemi interni dove il canale di comunicazione è Telegram per scelta del team. Se la tua azienda usa Telegram internamente o il tuo pubblico è tech-savvy, vale davvero la pena esplorarlo.
+
+## Creare il Bot: BotFather e Configurazione Iniziale
+
+Il punto di partenza di qualsiasi bot Telegram è il BotFather — un bot ufficiale di Telegram che gestisce la creazione e la configurazione di altri bot. Per creare un nuovo bot:
+
+1. Apri Telegram e cerca `@BotFather`
+2. Invia `/newbot`
+3. Scegli un nome visualizzato (può avere spazi): "Sistema di Alert Azienda X"
+4. Scegli un username (senza spazi, termina in `bot`): `azienda_x_alert_bot`
+5. Il BotFather restituisce il token di accesso: `7234567890:AAFxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`
+
+Conserva questo token con cura — è la chiave di accesso all'API del tuo bot. Chiunque abbia questo token può inviare messaggi a nome del bot.
+
+Impostazioni aggiuntive via BotFather:
+- `/setdescription` — testo mostrato quando l'utente apre il bot per la prima volta
+- `/setabouttext` — bio breve del bot nel profilo
+- `/setcommands` — lista di comandi mostrata nel menu del bot
+
+Per il menu dei comandi, invia al BotFather qualcosa come:
+
+```
+start - Avviare il bot
+status - Vedere lo stato del sistema
+report - Report del giorno
+aiuto - Istruzioni d'uso
+```
+
+Questo popola il menu `/` che appare quando l'utente digita la barra nel campo messaggi.
+
+## Comandi, Inline Keyboards e Menu
+
+Con il token a disposizione, si sceglie la libreria per interagire con l'API. In Python, `python-telegram-bot` è lo standard della community. In Node.js, `telegraf` è l'opzione più popolare.
+
+Un bot base con comandi e tastiera inline in Python:
+
+```python
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Application, CommandHandler, CallbackQueryHandler, ContextTypes
+
+TOKEN = "IL_TUO_TOKEN_QUI"
+
+async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handler per /start — mostra il menu principale"""
+    keyboard = [
+        [
+            InlineKeyboardButton("Stato del Sistema", callback_data="status"),
+            InlineKeyboardButton("Report Giornaliero", callback_data="report"),
+        ],
+        [
+            InlineKeyboardButton("Ultimi Alert", callback_data="alert"),
+            InlineKeyboardButton("Aiuto", callback_data="aiuto"),
+        ],
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    await update.message.reply_text(
+        "Ciao! Sono il bot di monitoraggio di Azienda X.\n"
+        "Cosa vuoi vedere?",
+        reply_markup=reply_markup
+    )
+
+async def callback_bottone(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handler per i clic sui bottoni inline"""
+    query = update.callback_query
+    await query.answer()  # conferma il clic (rimuove il loading)
+
+    if query.data == "status":
+        # Recupera lo stato reale del sistema
+        status = await verificare_stato_sistemi()
+        await query.edit_message_text(
+            f"Stato dei sistemi:\n\n{status}",
+            parse_mode="Markdown"
+        )
+
+    elif query.data == "report":
+        report = await generare_report_giornaliero()
+        await query.edit_message_text(
+            f"📊 Report del {report['data']}:\n\n"
+            f"• Ordini: {report['ordini']}\n"
+            f"• Fatturato: €{report['fatturato']:.2f}\n"
+            f"• Nuovi clienti: {report['nuovi_clienti']}\n"
+            f"• Ticket medio: €{report['ticket_medio']:.2f}"
+        )
+
+def main():
+    app = Application.builder().token(TOKEN).build()
+    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CallbackQueryHandler(callback_bottone))
+    app.run_polling()
+
+if __name__ == "__main__":
+    main()
+```
+
+Le Inline Keyboards sono il meccanismo più versatile per l'interazione: ogni bottone ha un `callback_data` che il bot riceve quando l'utente clicca. È possibile creare flussi a più livelli modificando il messaggio con `query.edit_message_text` — sembra una conversazione fluida senza inviare più messaggi.
+
+Per flussi di raccolta dati (moduli all'interno di Telegram), usa `ConversationHandler`: gestisce gli stati della conversazione e raccoglie le risposte in sequenza, come un modulo a più passaggi.
+
+## Integrazione con API Interne: Alert e Report
+
+L'uso più immediato e di maggior valore di un bot Telegram in azienda è come canale di notifiche interne. Invece di email che nessuno legge o dashboard che nessuno apre, gli alert arrivano dove il team si trova.
+
+Per inviare messaggi in modo proattivo (senza che l'utente abbia avviato la conversazione), serve il `chat_id` del destinatario o del gruppo. Per i gruppi, aggiungi il bot al gruppo e invia `/start` — il bot riceverà il chat_id del gruppo.
+
+Esempio di servizio di alert che monitora le API e notifica via Telegram:
+
+```python
+import httpx
+import asyncio
+from telegram import Bot
+
+bot = Bot(token="IL_TUO_TOKEN")
+CHAT_ID_TEAM = -1001234567890  # ID negativo = gruppo
+
+async def verificare_endpoint(url: str, nome: str, threshold_ms: int = 2000):
+    """Verifica la latenza dell'endpoint e avvisa se supera la soglia"""
+    try:
+        import time
+        inizio = time.time()
+        async with httpx.AsyncClient(timeout=10) as client:
+            response = await client.get(url)
+        latenza_ms = (time.time() - inizio) * 1000
+
+        if response.status_code >= 500:
+            await bot.send_message(
+                chat_id=CHAT_ID_TEAM,
+                text=(
+                    f"🔴 ERRORE 5xx su {nome}\n"
+                    f"Status: {response.status_code}\n"
+                    f"URL: {url}\n"
+                    f"Orario: {datetime.now().strftime('%H:%M:%S')}"
+                )
+            )
+        elif latenza_ms > threshold_ms:
+            await bot.send_message(
+                chat_id=CHAT_ID_TEAM,
+                text=(
+                    f"🟡 Latenza alta su {nome}\n"
+                    f"Latenza: {latenza_ms:.0f}ms (soglia: {threshold_ms}ms)\n"
+                    f"URL: {url}"
+                )
+            )
+
+    except httpx.TimeoutException:
+        await bot.send_message(
+            chat_id=CHAT_ID_TEAM,
+            text=f"🔴 TIMEOUT su {nome}\nURL: {url}"
+        )
+
+async def inviare_report_giornaliero():
+    """Inviato automaticamente ogni giorno alle 8 via cron"""
+    dati = await recuperare_dati_del_giorno()
+    await bot.send_message(
+        chat_id=CHAT_ID_TEAM,
+        text=(
+            f"📊 *Report Giornaliero — {dati['data']}*\n\n"
+            f"Ordini: {dati['ordini']}\n"
+            f"Ricavi: €{dati['ricavi']:,.2f}\n"
+            f"Ticket medio: €{dati['ticket_medio']:,.2f}\n"
+            f"Conversione: {dati['conversione']}%"
+        ),
+        parse_mode="Markdown"
+    )
+```
+
+Telegram supporta la formattazione Markdown e HTML nei messaggi — grassetto, corsivo, codice inline e blocchi di codice. Per i report, questo fa una differenza visiva enorme rispetto al testo normale.
+
+## Hosting: Webhook vs Long Polling in Produzione
+
+Ci sono due modi in cui il bot può ricevere messaggi dagli utenti:
+
+**Long Polling** è più semplice da configurare: il bot rimane in un ciclo chiedendo a Telegram "ci sono nuovi messaggi?" ogni secondo. Ideale per lo sviluppo locale e per bot che sono principalmente sender (inviano molto, ricevono poco).
+
+**Webhook** è la modalità corretta per la produzione: si registra un URL pubblico su Telegram, e Telegram fa POST a quell'URL ogni volta che arriva un messaggio. Molto più efficiente, specialmente per bot con alto volume di interazioni.
+
+Per configurare il webhook:
+
+```bash
+# Registrare il webhook (eseguire una volta)
+curl -F "url=https://tuodominio.com/webhook/telegram" \
+     "https://api.telegram.org/bot{TOKEN}/setWebhook"
+
+# Verificare che sia registrato correttamente
+curl "https://api.telegram.org/bot{TOKEN}/getWebhookInfo"
+```
+
+Sul server, l'endpoint che riceve il webhook deve rispondere 200 in meno di 60 secondi. Se non risponde, Telegram riprova — lo stesso principio di resilienza di qualsiasi webhook.
+
+Per bot di sola notifica (che inviano messaggi senza mai riceverli), nessuno dei due è necessario: basta usare `bot.send_message()` da qualsiasi script o cron job.
+
+Una soluzione di hosting semplice ed economica per bot di notifica: un VPS da €5/mese su Hetzner o DigitalOcean con lo script Python eseguito via cron. Per bot interattivi con webhook, qualsiasi piattaforma con HTTPS nativo funziona — Railway, Render, Fly.io hanno piani gratuiti che vanno benissimo.
+
+## Conclusione
+
+Telegram è un canale sottovalutato che combina la familiarità della chat con un'API bot molto più libera e potente di WhatsApp. Per notifiche interne, monitoraggio di sistemi, report automatici e assistenza a pubblici tech-savvy, è difficile battere la combinazione di costo zero e facilità di implementazione.
+
+Il percorso più breve dallo zero a un bot funzionante è: BotFather → token → python-telegram-bot → deploy su VPS → cron per notifiche pianificate. In una giornata di lavoro hai un bot in produzione che invia alert reali al tuo team.
+
+In **SystemForge** sviluppiamo bot Telegram personalizzati integrati con sistemi interni — dai dashboard inviati automaticamente ai flussi di approvazione interattivi. [Contattaci](/contato) se vuoi mettere in produzione il tuo primo bot.

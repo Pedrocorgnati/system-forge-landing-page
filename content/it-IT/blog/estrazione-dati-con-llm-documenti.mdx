@@ -1,0 +1,170 @@
+---
+title: "Estrazione dati con LLM: dai PDF al JSON"
+slug: "estrazione-dati-con-llm-documenti"
+date: "2024-09-26"
+description: "Come usare i LLM per estrarre dati strutturati da documenti — contratti, fatture e moduli — con validazione dello schema e gestione degli errori."
+tags: ["estrazione dati", "llm", "ocr", "pdf", "dati strutturati"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come usare i LLM per estrarre dati strutturati da documenti — contratti, fatture e moduli — con validazione dello schema e gestione degli errori.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'extracao-de-dados-com-llm-documentos'
+  - locale: 'it-IT'
+    slug: 'estrazione-dati-con-llm-documenti'
+  - locale: 'en'
+    slug: 'data-extraction-with-llm-from-pdfs-to-json'
+---
+
+I documenti sono il luogo in cui i dati aziendali importanti rimangono intrappolati. Contratti con scadenze, fatture con importi e fornitori, moduli di registrazione digitalizzati, relazioni tecniche con specifiche — tutto in PDF, immagine o testo non strutturato. Estrarre questi dati manualmente è lento, costoso e soggetto a errori. Automatizzare questa estrazione con i LLM è una delle applicazioni pratiche più dirette dell'IA generativa, con il ROI più rapido.
+
+Il pipeline di estrazione di documenti è cambiato radicalmente negli ultimi due anni. L'OCR tradizionale estraeva testo ma non capiva il contesto. Le regex catturavano pattern fissi ma si rompevano a qualsiasi variazione di formato. I LLM comprendono il documento semanticamente — riescono a estrarre "valore totale del contratto" anche quando il campo è denominato "importo globale del negozio" in un documento legale specifico.
+
+## LLM vs OCR Tradizionale: Quando Ognuno Vince
+
+OCR (Optical Character Recognition) converte immagini in testo. I LLM comprendono il testo ed estraggono significato. Sono tecnologie complementari, non concorrenti: i documenti digitalizzati hanno bisogno prima dell'OCR, poi del LLM per l'estrazione semantica.
+
+| Criterio | OCR + Regex | LLM (GPT-4o Vision / Claude) |
+|----------|-------------|------------------------------|
+| Costo per documento | Molto basso | Medio (dipende dalla dimensione) |
+| Velocità | Molto rapido | Moderato (latenza API) |
+| Formati fissi | Eccellente | Buono (overhead non necessario) |
+| Formati variabili | Scarso (si rompe alle variazioni) | Eccellente |
+| Documenti manoscritti | Scarso | Buono (GPT-4o Vision) |
+| Tabelle complesse | Discreto | Buono |
+| Ragionamento contestuale | Assente | Eccellente |
+
+Per le fatture elettroniche (formato XML standardizzato come SDI in Italia), il parsing diretto dell'XML è migliore del LLM — più veloce, più economico e senza variazioni. Per contratti legali, referti medici o moduli legacy digitalizzati, il LLM vince su tutti i criteri rilevanti.
+
+La decisione pratica: usa regex/parser quando il formato è 100% prevedibile. Usa LLM quando c'è variazione di layout, terminologia o lingua.
+
+## Structured Output con Zod e Instructor
+
+La sfida principale dell'estrazione con LLM non è estrarre — è garantire che l'output sia sempre un JSON valido e conforme allo schema atteso. Un modello che risponde "Ho trovato le seguenti informazioni: valore = € 1.500,00..." è inutile per un pipeline automatizzato.
+
+La soluzione è forzare il modello a generare output strutturato con validazione tramite schema. In TypeScript, `zod` definisce lo schema; in Python, `pydantic` + `instructor` fanno lo stesso.
+
+```typescript
+import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
+const SchemaFattura = z.object({
+  numero_fattura: z.string(),
+  data_emissione: z.string().describe("Formato YYYY-MM-DD"),
+  partita_iva_emittente: z.string(),
+  nome_emittente: z.string(),
+  partita_iva_destinatario: z.string().nullable(),
+  nome_destinatario: z.string().nullable(),
+  righe: z.array(z.object({
+    descrizione: z.string(),
+    quantita: z.number(),
+    prezzo_unitario: z.number(),
+    totale_riga: z.number(),
+  })),
+  totale_fattura: z.number(),
+  imposte: z.object({
+    iva: z.number().nullable(),
+    ritenuta: z.number().nullable(),
+  }).nullable(),
+});
+
+type Fattura = z.infer<typeof SchemaFattura>;
+
+const client = new OpenAI();
+
+async function estrairFattura(testoDocumento: string): Promise<Fattura> {
+  const response = await client.beta.chat.completions.parse({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "Estrai i dati dalla fattura. Per i campi non trovati, usa null. I valori monetari in numero decimale (es: 1500.00).",
+      },
+      { role: "user", content: testoDocumento },
+    ],
+    response_format: zodResponseFormat(SchemaFattura, "fattura"),
+  });
+
+  return response.choices[0].message.parsed!;
+}
+```
+
+Il `zodResponseFormat` fa aderire il modello allo schema per costruzione — non è un prompt che chiede di restituire JSON, è un constraint a livello di protocollo. Il risultato è molto più affidabile.
+
+## Pipeline di Elaborazione Documenti
+
+Un pipeline di produzione per l'estrazione di documenti ha più fasi rispetto al semplice "chiamare l'API":
+
+```
+PDF/Immagine → Pre-elaborazione → Estrazione testo → Chunking → LLM → Validazione → Database
+```
+
+**Pre-elaborazione:** i PDF nativi (generati digitalmente) vengono estratti direttamente. I PDF di immagine necessitano di OCR. Usa `pdfplumber` per i PDF nativi e `pytesseract` o AWS Textract per i documenti digitalizzati.
+
+**Estrazione testo:** per documenti lunghi, non puoi inserire il testo completo nel prompt per limiti di contesto e costo. Dividi il documento in sezioni ed elabora ciascuna separatamente, poi consolida.
+
+**LLM con structured output:** la fase centrale descritta sopra.
+
+**Validazione post-estrazione:** valida il JSON estratto oltre lo schema. Una data "2024-02-30" passa la validazione di stringa ma è invalida come data. Una Partita IVA con formato corretto ma cifre di controllo errate passa la regex ma è invalida.
+
+```python
+from datetime import datetime
+import re
+
+def valida_partita_iva(piva: str) -> bool:
+    # Rimuove formattazione
+    piva = re.sub(r'\D', '', piva)
+    if len(piva) != 11:
+        return False
+    # Logica cifre di controllo qui
+    return True
+
+def valida_dati_estratti(dati: dict) -> list[str]:
+    errori = []
+
+    try:
+        datetime.strptime(dati["data_emissione"], "%Y-%m-%d")
+    except ValueError:
+        errori.append(f"Data non valida: {dati['data_emissione']}")
+
+    if dati.get("partita_iva_emittente") and not valida_partita_iva(dati["partita_iva_emittente"]):
+        errori.append(f"Partita IVA emittente non valida: {dati['partita_iva_emittente']}")
+
+    # Valida somma righe vs totale
+    somma_righe = sum(riga["totale_riga"] for riga in dati.get("righe", []))
+    totale_fattura = dati.get("totale_fattura", 0)
+    if abs(somma_righe - totale_fattura) > 0.02:  # tolleranza di € 0,02 per arrotondamento
+        errori.append(f"Totale incoerente: somma righe={somma_righe:.2f}, totale fattura={totale_fattura:.2f}")
+
+    return errori
+```
+
+## Validazione e Gestione degli Errori di Estrazione
+
+Anche con structured output, gli errori accadono. Il modello può estrarre un campo incorrettamente, interpretare un'abbreviazione in modo errato o semplicemente non trovare un'informazione presente nel documento.
+
+Tre strategie per gestirlo:
+
+**Confidenza per campo:** istruisci il modello a includere un score di confidenza per ogni campo critico. I campi con bassa confidenza vanno in revisione umana invece di andare direttamente nel database.
+
+**Retry automatico:** se la validazione fallisce, ripeti l'estrazione con un prompt diverso, includendo il messaggio di errore come contesto: "Nell'estrazione precedente, il totale estratto (€ 1.500) non corrisponde alla somma delle righe (€ 1.650). Rivedi e correggi."
+
+**Human-in-the-loop per bassa confidenza:** costruisci una coda di revisione per i documenti in cui l'estrazione automatica è rimasta sotto il threshold di confidenza. I revisori umani gestiscono solo i casi difficili, non tutti i documenti.
+
+| Confidenza | Azione |
+|------------|--------|
+| > 0.95 | Accettazione automatica |
+| 0.80 - 0.95 | Accettazione con flag per audit campionario |
+| 0.65 - 0.80 | Revisione umana obbligatoria |
+| < 0.65 | Rielaborazione automatica, poi revisione |
+
+## Conclusione
+
+L'estrazione dati con LLM trasforma i documenti da silos di informazione in dati strutturati che alimentano sistemi, report e automazioni. Il ROI è tipicamente rapido: un'azienda che elabora 500 documenti al mese manualmente può automatizzare l'80-90% di quel volume con una precisione superiore al 95% dopo un pipeline ben configurato.
+
+In **SystemForge**, costruiamo pipeline di estrazione documenti per aziende che devono trasformare grandi volumi di PDF e moduli in dati utilizzabili. Se hai documenti accumulati in attesa di essere elaborati, contattaci — probabilmente riusciamo ad automatizzare più di quanto immagini.

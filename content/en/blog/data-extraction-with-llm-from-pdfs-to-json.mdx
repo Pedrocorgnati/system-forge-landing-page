@@ -1,0 +1,170 @@
+---
+title: "Data Extraction with LLMs: From PDFs to JSON"
+slug: "data-extraction-with-llm-from-pdfs-to-json"
+date: "2024-09-26"
+description: "How to use LLMs to extract structured data from documents — contracts, invoices, and forms — with schema validation and error handling."
+tags: ["data extraction", "llm", "ocr", "pdf", "structured data"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to use LLMs to extract structured data from documents — contracts, invoices, and forms — with schema validation and error handling.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'extracao-de-dados-com-llm-documentos'
+  - locale: 'it-IT'
+    slug: 'estrazione-dati-con-llm-documenti'
+  - locale: 'en'
+    slug: 'data-extraction-with-llm-from-pdfs-to-json'
+---
+
+Documents are where important business data gets trapped. Contracts with expiration dates, invoices with amounts and vendors, digitized registration forms, technical reports with specifications — all in PDF, image, or unstructured text. Extracting this data manually is slow, expensive, and error-prone. Automating that extraction with LLMs is one of the most direct practical applications of generative AI, with the fastest ROI.
+
+The document extraction pipeline has changed radically over the last two years. Traditional OCR extracted text but didn't understand context. Regex captured fixed patterns but broke on any format variation. LLMs understand the document semantically — they can extract "total contract value" even when the field is labeled "aggregate consideration amount" in a specific legal document.
+
+## LLM vs Traditional OCR: When Each Wins
+
+OCR (Optical Character Recognition) converts images to text. LLMs understand text and extract meaning. They're complementary technologies, not competing ones: scanned documents need OCR first, then an LLM for semantic extraction.
+
+| Criterion | OCR + Regex | LLM (GPT-4o Vision / Claude) |
+|-----------|-------------|------------------------------|
+| Cost per document | Very low | Medium (depends on size) |
+| Speed | Very fast | Moderate (API latency) |
+| Fixed formats | Excellent | Good (unnecessary overhead) |
+| Variable formats | Poor (breaks on variations) | Excellent |
+| Handwritten documents | Poor | Good (GPT-4o Vision) |
+| Complex tables | Moderate | Good |
+| Contextual reasoning | None | Excellent |
+
+For standardized electronic invoice formats (like XML-based standards), direct XML parsing beats LLM — faster, cheaper, and no variation. For legal contracts, medical reports, or legacy digitized forms, LLM wins on every relevant criterion.
+
+The practical rule: use regex/parsers when the format is 100% predictable. Use LLM when there's variation in layout, terminology, or language.
+
+## Structured Output with Zod and Instructor
+
+The biggest challenge in LLM-based extraction isn't extracting — it's guaranteeing that the output is always valid JSON conforming to the expected schema. A model that responds "I found the following information: amount = $1,500.00..." is useless for an automated pipeline.
+
+The solution is to force the model to generate structured output with schema validation. In TypeScript, `zod` defines the schema; in Python, `pydantic` + `instructor` do the same.
+
+```typescript
+import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
+const InvoiceSchema = z.object({
+  invoice_number: z.string(),
+  issue_date: z.string().describe("Format YYYY-MM-DD"),
+  vendor_tax_id: z.string(),
+  vendor_name: z.string(),
+  buyer_tax_id: z.string().nullable(),
+  buyer_name: z.string().nullable(),
+  line_items: z.array(z.object({
+    description: z.string(),
+    quantity: z.number(),
+    unit_price: z.number(),
+    line_total: z.number(),
+  })),
+  invoice_total: z.number(),
+  taxes: z.object({
+    sales_tax: z.number().nullable(),
+    withholding: z.number().nullable(),
+  }).nullable(),
+});
+
+type Invoice = z.infer<typeof InvoiceSchema>;
+
+const client = new OpenAI();
+
+async function extractInvoice(documentText: string): Promise<Invoice> {
+  const response = await client.beta.chat.completions.parse({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "Extract the invoice data. For fields not found, use null. Monetary values as decimal numbers (e.g., 1500.00).",
+      },
+      { role: "user", content: documentText },
+    ],
+    response_format: zodResponseFormat(InvoiceSchema, "invoice"),
+  });
+
+  return response.choices[0].message.parsed!;
+}
+```
+
+The `zodResponseFormat` makes the model adhere to the schema by construction — it's not a prompt asking for JSON, it's a protocol-level constraint. The result is far more reliable.
+
+## Document Processing Pipeline
+
+A production pipeline for document extraction has more steps than just "call the API":
+
+```
+PDF/Image → Pre-processing → Text extraction → Chunking → LLM → Validation → Database
+```
+
+**Pre-processing:** native PDFs (digitally generated) are extracted directly. Image PDFs need OCR. Use `pdfplumber` for native PDFs and `pytesseract` or AWS Textract for scanned documents.
+
+**Text extraction:** for long documents, you can't dump the full text into the prompt due to context limits and cost. Split the document into sections and process each separately, then consolidate.
+
+**LLM with structured output:** the central step described above.
+
+**Post-extraction validation:** validate the extracted JSON beyond the schema. A date "2024-02-30" passes string validation but is an invalid date. A tax ID with correct format but wrong check digits passes regex but is invalid.
+
+```python
+from datetime import datetime
+import re
+
+def validate_ein(ein: str) -> bool:
+    # Remove formatting
+    ein = re.sub(r'\D', '', ein)
+    if len(ein) != 9:
+        return False
+    # Check digit logic here
+    return True
+
+def validate_extracted_data(data: dict) -> list[str]:
+    errors = []
+
+    try:
+        datetime.strptime(data["issue_date"], "%Y-%m-%d")
+    except ValueError:
+        errors.append(f"Invalid date: {data['issue_date']}")
+
+    if data.get("vendor_tax_id") and not validate_ein(data["vendor_tax_id"]):
+        errors.append(f"Invalid vendor tax ID: {data['vendor_tax_id']}")
+
+    # Validate line items sum vs total
+    line_sum = sum(item["line_total"] for item in data.get("line_items", []))
+    invoice_total = data.get("invoice_total", 0)
+    if abs(line_sum - invoice_total) > 0.02:  # $0.02 tolerance for rounding
+        errors.append(f"Total mismatch: line sum={line_sum:.2f}, invoice total={invoice_total:.2f}")
+
+    return errors
+```
+
+## Validation and Error Handling
+
+Even with structured output, errors happen. The model may extract a field incorrectly, misinterpret an abbreviation, or simply fail to find information that exists in the document.
+
+Three strategies to handle this:
+
+**Per-field confidence scores:** instruct the model to include a confidence score for each critical field. Low-confidence fields go to human review instead of directly to the database.
+
+**Automatic retry:** if validation fails, redo the extraction with a different prompt, including the error message as context: "In the previous extraction, the extracted total ($1,500) doesn't match the sum of line items ($1,650). Review and correct."
+
+**Human-in-the-loop for low confidence:** build a review queue for documents where automatic extraction fell below the confidence threshold. Humans review only the hard cases, not every document.
+
+| Confidence | Action |
+|------------|--------|
+| > 0.95 | Auto-accept |
+| 0.80 – 0.95 | Accept with flag for sample audit |
+| 0.65 – 0.80 | Mandatory human review |
+| < 0.65 | Auto-reprocess, then review |
+
+## Conclusion
+
+LLM-based data extraction transforms documents from information silos into structured data that feeds systems, reports, and automations. The ROI is typically fast: a company that manually processes 500 documents per month can automate 80–90% of that volume with over 95% accuracy after a well-configured pipeline.
+
+At **SystemForge**, we build document extraction pipelines for companies that need to transform large volumes of PDFs and forms into usable data. If you have a backlog of documents waiting to be processed, reach out — we can probably automate more than you'd expect.

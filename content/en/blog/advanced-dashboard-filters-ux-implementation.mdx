@@ -1,0 +1,319 @@
+---
+title: "Advanced Dashboard Filters: UX and Implementation"
+slug: "advanced-dashboard-filters-ux-implementation"
+date: "2024-10-23"
+description: "How to design and implement advanced dashboard filters — date range picker, chained filters, URL state, and optimized database queries."
+tags: ["filters", "dashboard", "ux", "date range", "url state"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to design and implement advanced dashboard filters — date range picker, chained filters, URL state, and optimized database queries.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'filtros-avancados-dashboard-ux-implementacao'
+  - locale: 'it-IT'
+    slug: 'filtri-avanzati-dashboard-ux-implementazione'
+  - locale: 'en'
+    slug: 'advanced-dashboard-filters-ux-implementation'
+---
+
+If you watch users interact with B2B dashboards using eye-tracking, you'll notice a consistent pattern: their eyes go to the filter within the first few seconds. Before reading any number, before looking at any chart, the user checks "what period am I looking at? which unit? which status?" Filters are the context anchor of a dashboard.
+
+When filters are confusing, poorly positioned, or behave inconsistently, all trust in the dashboard is undermined. A user who isn't sure which data set they're looking at won't trust the numbers — they'll open a spreadsheet to verify.
+
+## Date Range Picker: Presets + Custom with Correct UX
+
+The period selector is the most-used filter in any dashboard with a time dimension. The most important UX decision is the balance between presets (yesterday, this week, this month, last 30 days, this quarter, this year) and custom selection.
+
+Presets cover 80% of use cases with a single click. Custom selection handles the remaining 20%. A date range picker that only offers custom selection forces the user to click twice to choose an interval every single time.
+
+```typescript
+// components/filters/DateRangePicker.tsx
+'use client';
+import { useState } from 'react';
+import { format, subDays, startOfWeek, endOfWeek,
+         startOfMonth, endOfMonth, startOfQuarter,
+         endOfQuarter, startOfYear, endOfYear } from 'date-fns';
+
+type DateRange = { from: Date; to: Date };
+
+const PRESETS: Array<{ label: string; getValue: () => DateRange }> = [
+  {
+    label: 'Today',
+    getValue: () => ({ from: new Date(), to: new Date() })
+  },
+  {
+    label: 'Yesterday',
+    getValue: () => ({ from: subDays(new Date(), 1), to: subDays(new Date(), 1) })
+  },
+  {
+    label: 'This week',
+    getValue: () => ({ from: startOfWeek(new Date(), { weekStartsOn: 1 }), to: endOfWeek(new Date(), { weekStartsOn: 1 }) })
+  },
+  {
+    label: 'This month',
+    getValue: () => ({ from: startOfMonth(new Date()), to: endOfMonth(new Date()) })
+  },
+  {
+    label: 'Last 30 days',
+    getValue: () => ({ from: subDays(new Date(), 29), to: new Date() })
+  },
+  {
+    label: 'This quarter',
+    getValue: () => ({ from: startOfQuarter(new Date()), to: endOfQuarter(new Date()) })
+  },
+  {
+    label: 'This year',
+    getValue: () => ({ from: startOfYear(new Date()), to: endOfYear(new Date()) })
+  },
+];
+
+interface DateRangePickerProps {
+  value: DateRange;
+  onChange: (range: DateRange) => void;
+}
+
+export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+  const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<'presets' | 'custom'>('presets');
+
+  const displayLabel = () => {
+    const preset = PRESETS.find(p => {
+      const pv = p.getValue();
+      return format(pv.from, 'yyyy-MM-dd') === format(value.from, 'yyyy-MM-dd')
+          && format(pv.to, 'yyyy-MM-dd') === format(value.to, 'yyyy-MM-dd');
+    });
+    if (preset) return preset.label;
+    return `${format(value.from, 'MM/dd/yyyy')} – ${format(value.to, 'MM/dd/yyyy')}`;
+  };
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex items-center gap-2 px-3 py-2 border rounded-lg text-sm hover:bg-gray-50"
+      >
+        <CalendarIcon className="w-4 h-4 text-gray-500" />
+        <span>{displayLabel()}</span>
+        <ChevronDownIcon className="w-4 h-4 text-gray-400" />
+      </button>
+
+      {open && (
+        <div className="absolute top-full mt-1 z-50 bg-white border rounded-xl shadow-lg p-4 min-w-[280px]">
+          <div className="flex gap-2 mb-3">
+            <button
+              onClick={() => setMode('presets')}
+              className={`text-xs px-2 py-1 rounded ${mode === 'presets' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500'}`}
+            >
+              Presets
+            </button>
+            <button
+              onClick={() => setMode('custom')}
+              className={`text-xs px-2 py-1 rounded ${mode === 'custom' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-500'}`}
+            >
+              Custom
+            </button>
+          </div>
+
+          {mode === 'presets' && (
+            <div className="space-y-1">
+              {PRESETS.map(preset => (
+                <button
+                  key={preset.label}
+                  onClick={() => { onChange(preset.getValue()); setOpen(false); }}
+                  className="w-full text-left text-sm px-3 py-2 rounded hover:bg-gray-50"
+                >
+                  {preset.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {mode === 'custom' && (
+            <CalendarInput value={value} onChange={(r) => { onChange(r); setOpen(false); }} />
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+```
+
+One important UX detail: **clearly show the selected period** across all dashboard components. If the user selected "This month" and every card header shows "October 2024 (10/01 – 10/31)", they know exactly what data they're looking at. Period ambiguity is one of the leading causes of distrust in dashboards.
+
+## Chained Filters: Dependency Between Selectors
+
+Chained filters are selectors where the available options in one depend on the value selected in another. Region → State → City. Company → Department → User. Channel → Campaign → Ad.
+
+The classic mistake is showing all options regardless of the previous selection. The user selects "West" and the State selector still shows Maine, Vermont, and New Hampshire — creating confusion and potentially invalid combinations.
+
+```typescript
+// hooks/useChainedFilters.ts
+import { useState, useEffect } from 'react';
+
+interface ChainedFilterState {
+  region: string | null;
+  state: string | null;
+  city: string | null;
+}
+
+export function useChainedFilters() {
+  const [filters, setFilters] = useState<ChainedFilterState>({
+    region: null, state: null, city: null
+  });
+
+  const [options, setOptions] = useState({
+    regions: [] as string[],
+    states: [] as string[],
+    cities: [] as string[],
+  });
+
+  // Load regions on mount
+  useEffect(() => {
+    fetchRegions().then(regions => setOptions(prev => ({ ...prev, regions })));
+  }, []);
+
+  // States depend on region
+  useEffect(() => {
+    if (!filters.region) {
+      setOptions(prev => ({ ...prev, states: [], cities: [] }));
+      return;
+    }
+    fetchStatesByRegion(filters.region).then(states => {
+      setOptions(prev => ({ ...prev, states, cities: [] }));
+    });
+    // Clear dependent selections when region changes
+    setFilters(prev => ({ ...prev, state: null, city: null }));
+  }, [filters.region]);
+
+  // Cities depend on state
+  useEffect(() => {
+    if (!filters.state) {
+      setOptions(prev => ({ ...prev, cities: [] }));
+      return;
+    }
+    fetchCitiesByState(filters.state).then(cities => {
+      setOptions(prev => ({ ...prev, cities }));
+    });
+    setFilters(prev => ({ ...prev, city: null }));
+  }, [filters.state]);
+
+  const setRegion = (region: string | null) =>
+    setFilters(prev => ({ ...prev, region }));
+
+  const setState = (state: string | null) =>
+    setFilters(prev => ({ ...prev, state }));
+
+  const setCity = (city: string | null) =>
+    setFilters(prev => ({ ...prev, city }));
+
+  return { filters, options, setRegion, setState, setCity };
+}
+```
+
+Automatically clearing dependent filters when a parent changes is critical. If the user switches from "California" to "New York" in the state filter, the selected city (which was "Los Angeles") must be automatically cleared — Los Angeles doesn't exist in New York.
+
+## URL State: Filters That Can Be Shared
+
+Keeping filter state in the URL is one of the highest perceived-value features in enterprise dashboards — and one of the least implemented.
+
+When filters live in the URL, an analyst can copy the dashboard link exactly as they've configured it and send it to an executive before a meeting. The executive will see exactly the same data slice. No screenshots, no verbal descriptions of "filter by October, then click on West, then...".
+
+```typescript
+// hooks/useURLFilters.ts
+'use client';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useCallback } from 'react';
+import { format } from 'date-fns';
+
+export interface DashboardFilters {
+  dateFrom: string;   // ISO: '2024-10-01'
+  dateTo: string;     // ISO: '2024-10-31'
+  region: string | null;
+  status: string[];
+}
+
+export function useURLFilters(): [DashboardFilters, (filters: Partial<DashboardFilters>) => void] {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const filters: DashboardFilters = {
+    dateFrom: searchParams.get('from') ?? format(new Date(), 'yyyy-MM-01'),
+    dateTo: searchParams.get('to') ?? format(new Date(), 'yyyy-MM-dd'),
+    region: searchParams.get('region'),
+    status: searchParams.get('status')?.split(',').filter(Boolean) ?? ['active'],
+  };
+
+  const setFilters = useCallback((updates: Partial<DashboardFilters>) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (updates.dateFrom !== undefined) params.set('from', updates.dateFrom);
+    if (updates.dateTo !== undefined) params.set('to', updates.dateTo);
+    if (updates.region !== undefined) {
+      updates.region ? params.set('region', updates.region) : params.delete('region');
+    }
+    if (updates.status !== undefined) {
+      updates.status.length > 0
+        ? params.set('status', updates.status.join(','))
+        : params.delete('status');
+    }
+
+    // replaceState avoids polluting the browser history
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [router, pathname, searchParams]);
+
+  return [filters, setFilters];
+}
+```
+
+With URL state, the dashboard's "share filters" button is simply copying the current URL. No additional logic required.
+
+## Optimized Queries: Indexes and Query Planning per Filter
+
+Dashboard filters translate into `WHERE` clauses in database queries. Without proper indexes, every filter application results in a full table scan.
+
+| Dashboard filter | Required index |
+|-----------------|----------------|
+| Period (date range) | `(tenant_id, created_at DESC)` |
+| Status | `(tenant_id, status)` |
+| Region + period | `(tenant_id, region, created_at)` |
+| Status + period | `(tenant_id, status, created_at)` |
+| Free text (search) | `GIN (to_tsvector('english', name))` |
+
+For filters that are rarely used together, separate indexes are more efficient than one giant composite index. PostgreSQL's planner can combine multiple indexes with `BitmapAnd`.
+
+The `EXPLAIN (ANALYZE, BUFFERS)` command is your main tool for verifying that filters are using indexes:
+
+```sql
+-- Typical dashboard filter: period + region + status
+EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
+SELECT
+  DATE_TRUNC('day', created_at) AS date,
+  COUNT(*) AS orders,
+  SUM(total_amount) AS revenue
+FROM orders
+WHERE
+  tenant_id = 'uuid-here'
+  AND created_at BETWEEN '2024-10-01' AND '2024-10-31'
+  AND region = 'West'
+  AND status = 'completed'
+GROUP BY 1
+ORDER BY 1;
+
+-- The ideal plan shows:
+-- "Index Scan using idx_orders_tenant_date_region on orders"
+-- Buffers: shared hit=42 (data in cache, no disk I/O)
+-- Actual rows: 847, Actual time: 0.284 ms
+```
+
+## Conclusion
+
+Well-implemented advanced filters are what transform a dashboard from a "static report" into an "analysis tool." The investment in date range pickers with presets, chained filters with automatic clearing, shareable URL state, and filter-optimized queries translates directly into user adoption and trust.
+
+The detail that separates good dashboards from great ones is consistency: filters that clearly indicate the current state, applied uniformly across all widgets, and that remain accessible as the user navigates the dashboard.
+
+At SystemForge, filter specifications are part of the documented UX design before implementation — including default presets, dependencies between filters, and the state persistence strategy. This avoids the rework of adding URL state months later after living with in-memory filters.

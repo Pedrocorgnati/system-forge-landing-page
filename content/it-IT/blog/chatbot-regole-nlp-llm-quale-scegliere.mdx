@@ -1,0 +1,127 @@
+---
+title: "Chatbot: regole, NLP o LLM — quale scegliere"
+slug: "chatbot-regole-nlp-llm-quale-scegliere"
+date: "2024-08-26"
+description: "Confronto tra chatbot basati su regole, NLP (Rasa, Dialogflow) e LLM (GPT-4, Claude) — costo, manutenzione e qualità delle risposte per caso d'uso."
+tags: ["chatbot", "nlp", "llm", "dialogflow", "rasa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Confronto tra chatbot basati su regole, NLP (Rasa, Dialogflow) e LLM (GPT-4, Claude) — costo, manutenzione e qualità delle risposte per caso d'uso.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'chatbot-regras-vs-nlp-vs-llm'
+  - locale: 'it-IT'
+    slug: 'chatbot-regole-nlp-llm-quale-scegliere'
+  - locale: 'en'
+    slug: 'chatbot-rules-nlp-llm-which-to-choose'
+---
+
+Quando qualcuno dice "mettiamo un chatbot sul nostro sito", la domanda che dovrebbe seguire immediatamente è: "che tipo di chatbot?". La risposta cambia radicalmente il costo, la complessità di manutenzione e la qualità dell'esperienza utente. Esistono chatbot economici e chatbot che costano migliaia di euro al mese — ed entrambi possono essere la scelta giusta a seconda del contesto.
+
+Esistono tre architetture principali oggi: basata su regole, basata su NLP (natural language processing) e basata su LLM (large language model come GPT-4 e Claude). Ognuna risolve problemi diversi, ha costi diversi e richiede livelli diversi di maturità tecnica per operare. In questo articolo demistifichiamo tutte e tre.
+
+## Chatbot Basati su Regole: Semplici e Prevedibili
+
+Il chatbot basato su regole è il più antico e ancora il più diffuso. Funziona con un insieme fisso di flussi: se l'utente digita X, risponde Y. Se digita Z, risponde W. La logica è un albero decisionale — menu, bottoni, risposte predefinite.
+
+Strumenti come Typebot, Landbot e ManyChat sono la versione visuale di questo approccio. Si trascinano blocchi, si collegano condizioni e si pubblica. In poche ore si ha un bot funzionante che raccoglie lead, qualifica clienti o risponde alle dieci domande più frequenti.
+
+I vantaggi sono chiari: costo bassissimo (molti strumenti hanno un piano gratuito), comportamento 100% prevedibile, facile da auditare e correggere, nessun rischio di "allucinazioni" e conformità semplice al GDPR perché il bot non genera mai contenuto proprio.
+
+Anche i limiti sono chiari: il bot non capisce le variazioni del linguaggio. Se il flusso si aspetta "fissare un appuntamento" e l'utente scrive "vorrei prenotare", il bot non sa cosa fare. Qualsiasi deviazione dallo script previsto produce una risposta generica di fallback.
+
+Quando usarlo: FAQ statica, qualificazione di lead con domande predefinite, prenotazioni con opzioni fisse, raccolta di dati strutturati (nome, email, azienda). Qualsiasi flusso in cui le risposte possibili sono note e finite.
+
+## NLP con Rasa e Dialogflow: Intenzioni ed Entità
+
+Il salto verso l'NLP risolve il problema delle variazioni linguistiche. Invece di mappare frasi esatte, si addestra il modello a riconoscere *intenzioni* (cosa vuole l'utente) ed *entità* (i dati rilevanti nel messaggio).
+
+"Voglio prenotare per martedì alle 14" → intenzione: `prenotare_appuntamento`, entità: `data=martedì`, entità: `orario=14:00`
+
+"Mi fissa la settimana prossima di mattina" → stessa intenzione: `prenotare_appuntamento`, entità: `data=settimana prossima`, entità: `orario=mattina`
+
+**Dialogflow** (Google) è il più semplice con cui iniziare. Interfaccia visiva per creare intenzioni, supporto nativo all'italiano, integrazione diretta con Google Assistant, Telegram, Slack e WhatsApp. La versione CX (Customer Experience) ha flussi conversazionali più complessi ed è quella consigliata per progetti seri. Il costo è basato sul volume di richieste — accessibile per volumi medi.
+
+**Rasa** è l'alternativa open-source. Si ospita sul proprio server, si addestrano modelli propri, si ha il controllo totale dei dati. È più complessa da configurare (richiede conoscenza di Python e concetti ML), ma il costo operativo è molto inferiore ad alto volume e la privacy dei dati è garantita — nulla va a server di terze parti.
+
+Il punto debole dell'NLP classico è che fallisce ancora nelle conversazioni aperte e nei contesti inaspettati. Riconosce le intenzioni addestrate, ma se l'utente fa una domanda fuori dall'insieme di intenzioni, il bot non sa rispondere. La manutenzione è costante: occorre rivedere i log, identificare i fallimenti di riconoscimento e aggiungere regolarmente esempi di addestramento.
+
+## LLM: Alta Qualità, Alto Costo e Controllo Basso
+
+I large language model hanno cambiato ciò che è possibile in un chatbot. Con GPT-4, Claude o Gemini si ha un bot che:
+
+- Capisce domande in qualsiasi forma
+- Mantiene il contesto di conversazioni lunghe
+- Risponde con linguaggio naturale fluente
+- Può ragionare su documenti, FAQ e basi di conoscenza
+
+L'architettura più comune per chatbot di assistenza con LLM è RAG (Retrieval-Augmented Generation): si indicizza la documentazione, le domande frequenti e le policy in un database vettoriale (Pinecone, Weaviate, pgvector). Quando l'utente fa una domanda, il sistema cerca i tratti più rilevanti e li passa all'LLM insieme alla domanda. Il modello risponde basandosi su quel contesto.
+
+```python
+from openai import OpenAI
+from typing import Optional
+
+client = OpenAI()
+
+SYSTEM_PROMPT = """Sei l'assistente virtuale di Azienda X.
+Rispondi solo sulla base delle informazioni fornite nel contesto.
+Se non conosci la risposta, di' che collegherai con un operatore umano.
+Sii sempre cordiale e conciso. Rispondi in italiano."""
+
+def rispondere_utente(
+    domanda: str,
+    contesto_recuperato: str,
+    storico: list[dict]
+) -> str:
+    messaggi = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        *storico,
+        {
+            "role": "user",
+            "content": f"Contesto rilevante:\n{contesto_recuperato}\n\nDomanda: {domanda}"
+        }
+    ]
+
+    risposta = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=messaggi,
+        temperature=0.3,  # basso per risposte più coerenti
+        max_tokens=500
+    )
+
+    return risposta.choices[0].message.content
+```
+
+I problemi degli LLM sono reali e devono essere gestiti attivamente. Le allucinazioni accadono — il modello può inventare informazioni con sicurezza. Il costo per messaggio è ordini di grandezza maggiore rispetto all'NLP classico. La latenza è più alta. E il comportamento non è 100% deterministico, il che rende difficili i test automatizzati.
+
+Il costo ad alto volume è il principale freno: 1 milione di messaggi al mese con GPT-4o può costare diverse migliaia di euro. Per volumi inferiori e casi d'uso ad alto valore (supporto tecnico complesso, vendite consultive), il ROI giustifica. Per FAQ base di un e-commerce, no.
+
+## Matrice Decisionale per Caso d'Uso
+
+| Caso d'Uso | Regole | NLP | LLM |
+|---|---|---|---|
+| FAQ statica (10-30 domande) | Ideale | Eccessivo | Eccessivo |
+| Qualificazione di lead | Ideale | Buono | Non necessario |
+| Prenotazione con opzioni fisse | Ideale | Buono | Non necessario |
+| Supporto tecnico con variazioni | Scarso | Buono | Eccellente |
+| Assistenza in linguaggio libero | Scarso | Discreto | Eccellente |
+| Vendite consultive complesse | Scarso | Scarso | Eccellente |
+| Risposta su documenti interni | Non funziona | Discreto | Eccellente (RAG) |
+| Alto volume (1M+ msg/mese) | Ideale | Buono | Costoso |
+| Dati sensibili (salute, legale) | Sicuro | Sicuro (Rasa) | Rischio |
+
+La logica centrale è: usa le regole per flussi prevedibili, l'NLP per variazioni del linguaggio naturale in domini noti, e gli LLM per conversazioni aperte dove la qualità della risposta è critica e il costo è giustificabile.
+
+Un approccio ibrido spesso ha più senso: il primo livello usa le regole per i flussi più comuni (che rappresentano l'80% del volume), e il fallback per tutto il resto usa un LLM. Questo controlla il costo e mantiene la qualità dove conta.
+
+## Conclusione
+
+Non esiste il chatbot ideale — esiste il chatbot adeguato al contesto. La decisione tra regole, NLP e LLM è una decisione ingegneristica che deve considerare volume di messaggi, complessità delle domande, sensibilità dei dati, budget e tolleranza agli errori.
+
+L'errore più costoso è scegliere un'architettura più complessa del necessario — implementare un LLM per rispondere "qual è l'orario di apertura" è uno spreco. Il secondo errore più costoso è scegliere un'architettura troppo semplice per un problema complesso — mettere un chatbot a regole per il supporto tecnico di un SaaS frustrerà i clienti senza risolvere nulla.
+
+In SystemForge, facciamo questa analisi prima di scrivere qualsiasi riga di codice. Mappiamo i casi d'uso, stimiamo il volume, valutiamo la sensibilità dei dati e raccomandiamo l'architettura che offre il massimo risultato al minor costo operativo. [Parlaci](/contato) del tuo progetto.

@@ -1,0 +1,132 @@
+---
+title: "Come prevenire le frodi nei marketplace"
+slug: "come-prevenire-frodi-marketplace"
+date: "2024-09-26"
+description: "Strategie e strumenti per prevenire le frodi nei marketplace: chargeback, account falsi, triangolazione e bypass KYC — con tecniche di rilevamento."
+tags: ["fraud prevention", "marketplace", "chargeback", "sicurezza", "antifrode"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Strategie e strumenti per prevenire le frodi nei marketplace — chargeback, account falsi, triangolazione e bypass KYC — con tecniche di rilevamento.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'prevenir-fraudes-marketplace'
+  - locale: 'it-IT'
+    slug: 'come-prevenire-frodi-marketplace'
+  - locale: 'en'
+    slug: 'how-to-prevent-marketplace-fraud'
+---
+
+Le frodi nei marketplace erodono margini e reputazione in modi che spesso non emergono nei dashboard fino a quando il danno è già fatto. Un chargeback non è solo la perdita del valore della vendita — è la perdita del prodotto (già spedito), la commissione per il chargeback addebitata dal gateway, il costo operativo di contestare o accettare, e l'impatto sul punteggio del proprio account merchant presso l'acquirer. Quando questo indice supera l'1%, i gateway iniziano ad applicare commissioni aggiuntive. Oltre il 2%, il rischio è la chiusura dell'account.
+
+I marketplace sono particolarmente vulnerabili perché la superficie d'attacco è più ampia: c'è il lato del compratore, il lato del venditore e la piattaforma stessa. I truffatori sofisticati attaccano tutti e tre contemporaneamente.
+
+## Tipi di Frode più Comuni nei Marketplace
+
+Comprendere i vettori è il primo passo per costruire difese adeguate.
+
+**Frode del compratore (chargeback fraudolento):** il compratore effettua un acquisto con una carta legittima o rubata e in seguito contatta la banca sostenendo di non riconoscere l'addebito. In molti casi, il prodotto è già stato consegnato. Il marketplace subisce una perdita doppia: niente prodotto e niente denaro.
+
+**Frode del venditore (scam):** un venditore registra prodotti che non ha in stock, incassa i pagamenti e sparisce. Variante: il venditore spedisce prodotti contraffatti o di qualità molto inferiore a quanto pubblicizzato.
+
+**Triangolazione:** un truffatore usa il marketplace come intermediario tra un compratore legittimo e un fornitore legittimo, pagando il fornitore con una carta rubata. Il compratore riceve il prodotto ed è soddisfatto. Il fornitore riceve il pagamento ed è soddisfatto. Il truffatore tiene la differenza. Il chargeback arriva settimane dopo.
+
+**Manipolazione delle recensioni:** utilizzo di account falsi per gonfiare le valutazioni di prodotti o venditori, o per attaccare i concorrenti con recensioni negative. Non è una frode finanziaria diretta, ma distrugge l'affidabilità della piattaforma.
+
+**Abuso di promozioni:** creazione di più account per sfruttare coupon di "primo accesso" o promozioni per utente unico. Nelle piattaforme con cashback o crediti, questo vettore può essere molto redditizio per truffatori organizzati.
+
+**Bypass KYC:** utilizzo di identità acquistate sul mercato nero (documenti di terzi con documenti falsificati) per creare account venditore e operare senza rischi immediati.
+
+## Fingerprinting del Dispositivo e Rilevamento di Bot
+
+La prima linea di difesa consiste nel capire chi sta accedendo alla tua piattaforma prima che avvenga qualsiasi transazione. Il fingerprinting del dispositivo crea un identificatore unico per ciascun dispositivo basandosi su decine di attributi raccolti dal browser o dall'app.
+
+```typescript
+// Implementazione base con FingerprintJS Pro
+import FingerprintJS from '@fingerprintjs/fingerprintjs-pro';
+
+const fpPromise = FingerprintJS.load({
+  apiKey: process.env.NEXT_PUBLIC_FPJS_API_KEY,
+  region: 'eu', // preferire 'eu' per la conformità GDPR
+});
+
+async function getVisitorData() {
+  const fp = await fpPromise;
+  const result = await fp.get({
+    extendedResult: true,
+  });
+
+  return {
+    visitorId: result.visitorId,          // ID stabile del dispositivo
+    confidence: result.confidence.score,  // da 0 a 1
+    ipAddress: result.ip,
+    vpnDetected: result.vpn?.result,
+    botDetected: result.bot?.result,
+    incognito: result.incognito,
+  };
+}
+
+// Inviare insieme al checkout per l'analisi del rischio
+async function processCheckout(order: OrderInput, visitorData: VisitorData) {
+  const riskScore = await calculateRiskScore({
+    ...order,
+    deviceId: visitorData.visitorId,
+    isVpn: visitorData.vpnDetected,
+    isBot: visitorData.botDetected,
+    isIncognito: visitorData.incognito,
+  });
+
+  if (riskScore > RISK_THRESHOLD_BLOCK) {
+    throw new Error('TRANSACTION_BLOCKED');
+  }
+
+  if (riskScore > RISK_THRESHOLD_REVIEW) {
+    await flagForManualReview(order.id);
+  }
+}
+```
+
+Gli attributi rilevanti per il fingerprinting includono: user agent, fuso orario, plugin installati, risoluzione dello schermo, font disponibili, renderer WebGL, capacità audio e comportamento del mouse/touch. La combinazione di questi dati crea un identificatore con precisione superiore al 99% anche in modalità anonima.
+
+Per i bot, l'analisi comportamentale è complementare: velocità di digitazione, pattern di clic, tempo tra le azioni e sequenza di interazione con il modulo sono indicatori affidabili.
+
+## Regole di Rischio: Velocità, Posizione e Comportamento
+
+Le regole di rischio sono la logica che combina più segnali per calcolare un punteggio di rischio per transazione. Sono il nucleo di qualsiasi sistema antifrode.
+
+| Regola | Segnale | Score di rischio |
+|--------|---------|-----------------|
+| Più carte sullo stesso dispositivo | >3 carte in 24h | +30 |
+| Velocità di acquisto | <30 secondi al checkout | +20 |
+| Geolocalizzazione IP vs indirizzo di consegna | Distanza >500km | +15 |
+| VPN o proxy rilevato | Sì | +25 |
+| Primo ordine di alto valore | >€200 su account nuovo | +20 |
+| Stesso indirizzo di consegna, account diversi | >3 account | +35 |
+| Orario insolito | 2:00-5:00 (orario locale) | +10 |
+| Browser in modalità incognito | Sì | +10 |
+| Email usa e getta | Dominio temporaneo | +20 |
+
+I punteggi superiori a 70 devono essere bloccati automaticamente. Tra 40 e 70, inviare alla revisione manuale o applicare frizione aggiuntiva (3D Secure, conferma via email, SMS OTP). Sotto 40, approvare normalmente.
+
+Le regole devono essere riviste mensilmente. I truffatori si adattano alle regole note, e un sistema che non evolve diventa rapidamente inefficace.
+
+## Strumenti: Stripe Radar, Kount e Soluzioni Open Source
+
+**Stripe Radar:** integrato automaticamente nelle transazioni tramite Stripe. Utilizza ML addestrato su miliardi di transazioni globali. Configurabile tramite regole personalizzate nella dashboard. Costo: nessuna tariffa aggiuntiva nel piano standard; $0,05 per transazione aggiuntiva nel piano Radar for Fraud Teams.
+
+**Kount (Equifax):** soluzione enterprise per marketplace di medie e grandi dimensioni. Forte analisi comportamentale e rete di dati condivisi tra merchant. Particolarmente efficace per operazioni cross-border europee.
+
+**Seon:** soluzione SaaS europea per la prevenzione delle frodi, con ottima copertura per il mercato GDPR. API semplice, analisi dell'email e dei social network, prezzi competitivi per startup.
+
+**Soluzione open source:** per i team che vogliono il controllo totale, è possibile costruire un sistema di base con regole personalizzate usando Redis per il controllo della velocità e PostgreSQL per la cronologia delle transazioni. Non sostituisce il ML specializzato, ma è efficace contro le frodi semplici.
+
+La raccomandazione pratica per i marketplace in crescita è iniziare con Stripe Radar (costo zero all'inizio) e aggiungere Kount o Seon quando il volume dei chargeback indica che il ML di base non è sufficiente.
+
+## Conclusione
+
+Le frodi non sono un problema che emerge "quando la piattaforma sarà cresciuta". Cominciano il primo giorno, con i primi venditori e compratori. I team che rimandano l'antifrode alla Fase 2 spesso scoprono di aver già accumulato abbastanza chargeback da compromettere l'account presso l'acquirer prima di aver implementato qualsiasi difesa.
+
+SystemForge incorpora la sicurezza fin dalla fase di documentazione — con modellazione delle minacce, analisi dei rischi per flusso e User Story che coprono gli scenari di frode prima dell'implementazione. Il risultato è un sistema costruito con le difese giuste fin dall'inizio, non rappezzato dopo che il danno è già avvenuto.
