@@ -1,0 +1,139 @@
+---
+title: "Gestione delle scorte nell'e-commerce: evitare l'overselling"
+slug: "gestione-scorte-ecommerce-evitare-overselling"
+date: "2024-10-28"
+description: "Come progettare la gestione delle scorte in un e-commerce per evitare l'overselling — prenotazione ottimistica vs pessimistica, sincronizzazione multi-canale e alert automatici."
+tags: ["gestione scorte", "e-commerce", "overselling", "inventario", "operazioni ecommerce"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come progettare la gestione delle scorte in un e-commerce per evitare l'overselling — prenotazione ottimistica vs pessimistica, sincronizzazione multi-canale e alert automatici.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-estoque-ecommerce-evitar-overselling'
+  - locale: 'it-IT'
+    slug: 'gestione-scorte-ecommerce-evitare-overselling'
+  - locale: 'en'
+    slug: 'inventory-management-ecommerce-avoid-overselling'
+---
+
+L'overselling si verifica quando un e-commerce vende più unità di un prodotto di quante ne abbia in magazzino. Quello che succede dopo è sempre negativo: l'ordine deve essere annullato, il cliente è frustrato, arrivano recensioni negative e, su piattaforme come Amazon o eBay, il seller score scende — impattando direttamente la visibilità degli annunci. Nei casi gravi, il consumatore può aprire una disputa o segnalare il venditore per pratiche scorrette.
+
+Il problema è più comune di quanto sembri, specialmente nelle operazioni multi-canale (negozio proprio + marketplace) dove lo stesso magazzino fisico alimenta più canali di vendita. La soluzione tecnica esiste, ma richiede un'architettura attenta e la comprensione dei trade-off.
+
+## Prenotazione Pessimistica vs Ottimistica: Trade-off di Conversione
+
+Esistono due approcci fondamentali per la prenotazione delle scorte: pessimistico e ottimistico.
+
+**Prenotazione pessimistica:** decrementa lo stock disponibile nel momento in cui il prodotto viene aggiunto al carrello. Se 10 clienti mettono l'ultimo articolo nel carrello, solo il primo vede il prodotto disponibile — gli altri 9 vedono "esaurito" prima ancora di iniziare il checkout.
+
+Vantaggio: l'overselling è praticamente impossibile. Svantaggio: il tasso di conversione scende, poiché i carrelli abbandonati "bloccano" le scorte. Un cliente che aggiunge al carrello e non acquista mantiene il prodotto "prenotato" per il tempo configurato (di solito 15-60 minuti), impedendo ad altri di acquistare.
+
+**Prenotazione ottimistica:** mantiene le scorte disponibili durante tutta la navigazione e le decrementa solo al momento della conferma del pagamento. Più clienti possono "vedere" lo stesso prodotto disponibile simultaneamente.
+
+Vantaggio: conversione più alta, poiché non ci sono falsi allarmi di "esaurito". Svantaggio: due clienti possono completare il checkout dello stesso prodotto simultaneamente, generando overselling se non c'è un adeguato controllo transazionale.
+
+La maggior parte degli e-commerce con un'operazione sana usa un **approccio ibrido**: prenotazione temporanea all'inizio del checkout (non all'aggiunta al carrello) con scadenza automatica entro 15-20 minuti se il pagamento non viene confermato.
+
+```sql
+-- Tabella prenotazioni scorte
+CREATE TABLE prenotazioni_scorte (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prodotto_id UUID NOT NULL REFERENCES prodotti(id),
+  variante_id UUID REFERENCES varianti(id),
+  quantita INT NOT NULL,
+  ordine_id UUID REFERENCES ordini(id),
+  sessione_id VARCHAR(64),             -- Per prenotazioni anonime (prima del login)
+  scade_il TIMESTAMPTZ NOT NULL,       -- Scadenza automatica
+  stato VARCHAR(20) DEFAULT 'attiva',  -- attiva | confermata | scaduta | annullata
+  creata_il TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Vista scorte disponibili (tiene conto delle prenotazioni attive)
+CREATE VIEW scorte_disponibili AS
+SELECT
+  s.prodotto_id,
+  s.variante_id,
+  s.quantita_fisica
+    - COALESCE(SUM(p.quantita) FILTER (WHERE p.stato = 'attiva' AND p.scade_il > NOW()), 0)
+    AS disponibile
+FROM scorte s
+LEFT JOIN prenotazioni_scorte p USING (prodotto_id, variante_id)
+GROUP BY s.prodotto_id, s.variante_id, s.quantita_fisica;
+```
+
+## Scorte Multi-canale: Il Problema di Sincronizzazione
+
+La sfida maggiore di overselling nel 2025 non è il negozio proprio — è l'operazione multi-canale. Quando lo stesso magazzino fisico alimenta negozio proprio, Amazon, eBay e Zalando, qualsiasi vendita su qualsiasi canale deve essere riflessa su tutti gli altri in tempo reale (o il più vicino possibile).
+
+Il problema di sincronizzazione multi-canale è fondamentalmente un problema di consistenza distribuita. Hai N sistemi esterni (ogni marketplace è un sistema indipendente) e devi garantire che le scorte mostrate su ciascuno riflettano la realtà del magazzino centrale.
+
+Gli approcci variano in complessità e affidabilità:
+
+| Approccio | Latenza di sync | Affidabilità | Complessità |
+|---|---|---|---|
+| Polling periodico (ogni 5 min) | Alta (fino a 5 min di ritardo) | Bassa | Bassa |
+| Webhook + coda messaggi | Bassa (secondi) | Alta | Media |
+| Buffer di scorte per canale | Bassa (virtuale) | Alta | Bassa-media |
+| Scorte unificate con lock | Molto bassa | Molto alta | Alta |
+
+L'approccio più pratico per le operazioni di medio livello è il **buffer di scorte per canale**: non si sincronizzano le scorte reali, ma si assegna una quota di scorte a ciascun canale. Se hai 100 unità, ne configuri 40 per il negozio proprio, 35 per Amazon, 25 per eBay. Quando un canale esaurisce la sua quota, redistribuisci manualmente o tramite regola automatica.
+
+Questo approccio sacrifica l'utilizzo ottimale delle scorte (in scenari estremi, eBay può avere 0 di quota mentre il negozio proprio ha 40 unità ferme), ma elimina il rischio di overselling in scenari ad alta concorrenza per unità.
+
+## Lock del Database vs Code di Messaggi
+
+Per il negozio proprio, il controllo dell'overselling al momento della conferma del pagamento è un classico problema di concorrenza. Due utenti che completano il checkout dello stesso prodotto simultaneamente possono generare overselling se non c'è controllo.
+
+La soluzione con **lock del database** (SELECT FOR UPDATE) garantisce l'esclusività a livello di transazione:
+
+```typescript
+async function confermaOrdine(ordineId: string): Promise<void> {
+  await db.transaction(async (trx) => {
+    // Lock sulla riga delle scorte — blocca altre transazioni simultanee
+    const [scorte] = await trx
+      .select()
+      .from("scorte")
+      .where({ prodotto_id: ordine.prodottoId })
+      .forUpdate() // SELECT ... FOR UPDATE
+      .noWait();   // Fallisce immediatamente se già lockato
+
+    if (scorte.disponibile < ordine.quantita) {
+      throw new ScorteInsufficientError(ordine.prodottoId);
+    }
+
+    await trx("scorte")
+      .where({ prodotto_id: ordine.prodottoId })
+      .decrement("disponibile", ordine.quantita);
+
+    await trx("ordini")
+      .where({ id: ordineId })
+      .update({ stato: "confermato", confermato_il: new Date() });
+  });
+}
+```
+
+I lock funzionano bene per volumi moderati, ma hanno limitazioni ad alta concorrenza: le transazioni in attesa si accumulano, aumentando la latenza. Per eventi come il Black Friday o lanci ad alta domanda simultanea, le **code di messaggi** (RabbitMQ, SQS, Redis Streams) sono più scalabili — gli ordini entrano in coda, un worker li elabora uno alla volta, senza concorrenza nel database.
+
+## Alert di Riordino e Integrazione con ERP
+
+Controllare l'overselling è metà del problema; l'altro aspetto è garantire che le scorte vengano riassortite prima di esaurirsi. Gli alert di riordino automatici sono essenziali per le operazioni che dipendono da fornitori con lead time.
+
+Il punto di riordino (ROP — Reorder Point) viene calcolato in base al consumo medio e al lead time del fornitore:
+
+```
+ROP = (Vendite medie al giorno × Lead time in giorni) + Scorta di sicurezza
+```
+
+Un prodotto che vende 10 unità/giorno e ha un lead time di 7 giorni con il fornitore necessita di un alert quando le scorte raggiungono 70 unità (+ scorta di sicurezza del 20% = 84 unità). Se aspetti che le scorte si azzerino per fare l'ordine, rimarrai 7 giorni senza vendere.
+
+L'integrazione con ERP (SAP Business One, TeamSystem, Zucchetti) chiude il ciclo: gli alert automatici generano ordini di acquisto nell'ERP, che aggiorna le scorte previste, che vengono riflesse nell'e-commerce con disponibilità futura ("Disponibile tra 7 giorni"). Comunicare proattivamente la disponibilità futura converte clienti che sarebbero andati via per mancanza di scorte.
+
+## Conclusione
+
+L'overselling non è solo un problema tecnico — è un problema di reputazione, di rapporto con i marketplace e, nei casi estremi, un problema legale. La giusta architettura delle scorte dipende dal profilo dell'operazione: prenotazione ibrida (all'inizio del checkout, con scadenza), buffer di quote per il multi-canale e lock transazionali per la conferma del pagamento sono i blocchi essenziali.
+
+La complessità aumenta con la crescita: più canali, più SKU, più picchi di domanda richiedono soluzioni progressivamente più robuste. In SystemForge, progettiamo moduli di gestione delle scorte dal negozio proprio alle integrazioni con più marketplace ed ERP, con l'architettura adeguata alla fase del business. [Parla con il nostro team](/contatto).

@@ -1,0 +1,132 @@
+---
+title: "How to Prevent Marketplace Fraud"
+slug: "how-to-prevent-marketplace-fraud"
+date: "2024-09-26"
+description: "Strategies and tools to prevent marketplace fraud: chargebacks, fake accounts, triangulation, and KYC bypass — with detection techniques."
+tags: ["fraud prevention", "marketplace", "chargeback", "security", "anti-fraud"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Strategies and tools to prevent marketplace fraud — chargebacks, fake accounts, triangulation, and KYC bypass — with detection techniques.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'prevenir-fraudes-marketplace'
+  - locale: 'it-IT'
+    slug: 'come-prevenire-frodi-marketplace'
+  - locale: 'en'
+    slug: 'how-to-prevent-marketplace-fraud'
+---
+
+Marketplace fraud erodes margin and reputation in ways that often don't show up in dashboards until the damage is already done. A chargeback isn't just the loss of the sale amount — it's the loss of the product (already shipped), the chargeback fee charged by the gateway, the operational cost of disputing or accepting it, and the impact on your merchant account score with the acquirer. When this rate exceeds 1%, gateways start charging additional fees. Above 2%, the risk is account termination.
+
+Marketplaces are particularly vulnerable because the attack surface is larger: there's the buyer side, the seller side, and the platform itself. Sophisticated fraudsters attack all three simultaneously.
+
+## Most Common Fraud Types in Marketplaces
+
+Understanding the attack vectors is the first step to building adequate defenses.
+
+**Buyer fraud (friendly fraud):** the buyer makes a purchase with a legitimate or stolen card and later contacts their bank claiming they don't recognize the charge. In many cases, the product has already been delivered. The marketplace takes a double loss: no product and no money.
+
+**Seller fraud (scam):** a seller lists products they have no stock to ship, collects payments, and disappears. Variation: the seller ships counterfeit products or items significantly lower quality than advertised.
+
+**Triangulation:** a fraudster uses the marketplace as an intermediary between a legitimate buyer and a legitimate supplier, paying the supplier with a stolen card. The buyer receives the product and is satisfied. The supplier receives the payment and is satisfied. The fraudster pockets the difference. The chargeback arrives weeks later.
+
+**Review manipulation:** use of fake accounts to inflate ratings for products or sellers, or to attack competitors with negative reviews. This isn't direct financial fraud, but it destroys platform trustworthiness.
+
+**Promotion abuse:** creating multiple accounts to exploit "first access" coupons or per-user promotions. On platforms with cashback or credits, this vector can be highly profitable for organized fraudsters.
+
+**KYC bypass:** using identities purchased on the black market (third-party documents) to create seller accounts and operate without immediate risk.
+
+## Device Fingerprinting and Bot Detection
+
+The first line of defense is understanding who's accessing your platform before any transaction happens. Device fingerprinting creates a unique identifier for each device based on dozens of attributes collected by the browser or app.
+
+```typescript
+// Basic implementation with FingerprintJS Pro
+import FingerprintJS from '@fingerprintjs/fingerprintjs-pro';
+
+const fpPromise = FingerprintJS.load({
+  apiKey: process.env.NEXT_PUBLIC_FPJS_API_KEY,
+  region: 'us', // or 'eu' for GDPR compliance
+});
+
+async function getVisitorData() {
+  const fp = await fpPromise;
+  const result = await fp.get({
+    extendedResult: true,
+  });
+
+  return {
+    visitorId: result.visitorId,          // stable device ID
+    confidence: result.confidence.score,  // 0 to 1
+    ipAddress: result.ip,
+    vpnDetected: result.vpn?.result,
+    botDetected: result.bot?.result,
+    incognito: result.incognito,
+  };
+}
+
+// Send along with checkout for risk analysis
+async function processCheckout(order: OrderInput, visitorData: VisitorData) {
+  const riskScore = await calculateRiskScore({
+    ...order,
+    deviceId: visitorData.visitorId,
+    isVpn: visitorData.vpnDetected,
+    isBot: visitorData.botDetected,
+    isIncognito: visitorData.incognito,
+  });
+
+  if (riskScore > RISK_THRESHOLD_BLOCK) {
+    throw new Error('TRANSACTION_BLOCKED');
+  }
+
+  if (riskScore > RISK_THRESHOLD_REVIEW) {
+    await flagForManualReview(order.id);
+  }
+}
+```
+
+Relevant fingerprinting attributes include: user agent, timezone, installed plugins, screen resolution, available fonts, WebGL renderer, audio capability, and mouse/touch behavior. The combination of these data points creates an identifier with 99%+ accuracy even in incognito mode.
+
+For bots, behavioral analysis is complementary: typing speed, click patterns, time between actions, and interaction sequence with the form are reliable indicators.
+
+## Risk Rules: Velocity, Location, and Behavior
+
+Risk rules are the logic that combines multiple signals to calculate a risk score per transaction. They're the core of any anti-fraud system.
+
+| Rule | Signal | Risk score |
+|------|--------|-----------|
+| Multiple cards on same device | >3 cards in 24h | +30 |
+| Purchase velocity | <30 seconds at checkout | +20 |
+| IP geolocation vs. delivery address | Distance >500km | +15 |
+| VPN or proxy detected | Yes | +25 |
+| First high-value order | >$200 on new account | +20 |
+| Same delivery address, different accounts | >3 accounts | +35 |
+| Unusual hours | 2am–5am (local time) | +10 |
+| Browser in incognito mode | Yes | +10 |
+| Disposable email | Temporary domain | +20 |
+
+Scores above 70 should be automatically blocked. Between 40 and 70, send for manual review or apply additional friction (3D Secure, email confirmation, SMS OTP). Below 40, approve normally.
+
+Rules must be reviewed monthly. Fraudsters adapt to known rules, and a system that doesn't evolve quickly becomes ineffective.
+
+## Tools: Stripe Radar, Kount, and Open Source Solutions
+
+**Stripe Radar:** automatically integrated in Stripe transactions. Uses ML trained on billions of global transactions. Configurable via custom rules in the dashboard. Cost: no additional fee on the standard plan; $0.05 per transaction on the Radar for Fraud Teams plan.
+
+**Kount (Equifax):** enterprise solution for mid-to-large marketplaces. Strong behavioral analysis and shared data network across merchants. Particularly effective for cross-border operations.
+
+**Seon:** SaaS fraud prevention platform with email and social media analysis. Simple API, competitive pricing for startups, well-documented.
+
+**Open source solution:** for teams that want full control, it's possible to build a basic system with custom rules using Redis for velocity control and PostgreSQL for transaction history. It doesn't replace specialized ML, but is effective against simple fraud patterns.
+
+The practical recommendation for growing marketplaces is to start with Stripe Radar (zero cost initially) and add Kount or Seon when chargeback volume indicates that basic ML is no longer sufficient.
+
+## Conclusion
+
+Fraud isn't a problem that appears "after the platform grows." It starts on day one, with the first sellers and buyers. Teams that defer anti-fraud to Phase 2 often discover they've already accumulated enough chargebacks to compromise their acquirer account before implementing any defense.
+
+SystemForge incorporates security from the documentation phase — with threat modeling, per-flow risk analysis, and user stories that cover fraud scenarios before implementation. The result is a system built with the right defenses from the start, not patched after the damage has already happened.
