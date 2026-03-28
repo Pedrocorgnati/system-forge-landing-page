@@ -36,14 +36,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Download build artifact (pt-BR)
-        uses: actions/download-artifact@v4
-        with:
-          name: build-pt-BR
-          path: out/
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
-
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -53,6 +45,14 @@ jobs:
             package-lock.json
             tsconfig.json
           sparse-checkout-cone-mode: false
+
+      - name: Download build artifact (pt-BR)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-pt-BR
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -121,14 +121,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Download build artifact (it-IT)
-        uses: actions/download-artifact@v4
-        with:
-          name: build-it-IT
-          path: out/
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
-
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -138,6 +130,14 @@ jobs:
             package-lock.json
             tsconfig.json
           sparse-checkout-cone-mode: false
+
+      - name: Download build artifact (it-IT)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-it-IT
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -206,14 +206,6 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Download build artifact (en)
-        uses: actions/download-artifact@v4
-        with:
-          name: build-en
-          path: out/
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
-
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -223,6 +215,14 @@ jobs:
             package-lock.json
             tsconfig.json
           sparse-checkout-cone-mode: false
+
+      - name: Download build artifact (en)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-en
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
