@@ -1,0 +1,141 @@
+---
+title: "Sistema gestionale per ottici: dal registro al magazzino"
+slug: "sistema-gestionale-per-ottici"
+date: "2024-10-05"
+description: "Requisiti del software di gestione per ottici: registrazione delle prescrizioni ottiche, storico del cliente, gestione montature/lenti e integrazione con laboratori."
+tags: ["ottica", "gestione settoriale", "software ottica", "magazzino", "prescrizione ottica"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Requisiti del software di gestione per ottici: prescrizioni ottiche, storico cliente, gestione montature/lenti e integrazione con laboratori.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-gestao-para-oticas'
+  - locale: 'it-IT'
+    slug: 'sistema-gestionale-per-ottici'
+  - locale: 'en'
+    slug: 'management-system-for-optical-stores'
+---
+
+Quando un'ottica tenta di usare un sistema di gestione generico — sia un ERP retail o uno strumento di controllo finanziario — si scontra inevitabilmente con un problema fondamentale: i sistemi generici non sanno cos'è una prescrizione ottica. Non capiscono diottrie, assi, addizioni e distanza pupillare. Non sanno che una montatura taglia 52 non va bene con qualsiasi lente, che un ordine di lente progressiva ha un lead time diverso da una lente semplice, o che la storia prescrizionale di un cliente è importante quanto la sua storia di acquisti.
+
+Il risultato è la proliferazione di fogli di calcolo paralleli, ricette su carta che si perdono, gestione del magazzino imprecisa e ordini ai laboratori inviati su WhatsApp. Il costo invisibile di queste inefficienze — in rilavorazioni, errori d'ordine e tempo dell'ottico — supera spesso l'investimento in un sistema specializzato.
+
+Questo articolo dettaglia i requisiti tecnici e operativi di un sistema di gestione per ottici: dal modello dati della prescrizione ottica all'integrazione con i laboratori partner.
+
+## Modello Dati: Prescrizione Ottica, Montatura e Lente
+
+Il nucleo tecnico di un sistema per ottici è la struttura dati della prescrizione ottica. Una prescrizione ottica non è un testo libero — è un insieme di campi numerici e categoriali con validazioni specifiche che devono essere trattati come dati strutturati per essere utili.
+
+La struttura base di una prescrizione ottica per occhiali da vista:
+
+```sql
+CREATE TABLE prescrizioni_ottiche (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cliente_id UUID NOT NULL REFERENCES clienti(id),
+  ottico VARCHAR(200),
+  numero_albo VARCHAR(20),
+  data_prescrizione DATE NOT NULL,
+  scadenza DATE,
+
+  -- Occhio Destro (OD)
+  od_sfera DECIMAL(4,2),     -- Sfera: da -20.00 a +20.00, step 0.25
+  od_cilindro DECIMAL(4,2),  -- Cilindro: da -8.00 a +8.00, step 0.25
+  od_asse SMALLINT,          -- Asse: da 0 a 180 gradi
+  od_addizione DECIMAL(3,2), -- Addizione (bifocale/progressiva): da +0.75 a +4.00
+  od_dp DECIMAL(4,1),        -- Distanza pupillare OD (mm)
+
+  -- Occhio Sinistro (OS)
+  os_sfera DECIMAL(4,2),
+  os_cilindro DECIMAL(4,2),
+  os_asse SMALLINT,
+  os_addizione DECIMAL(3,2),
+  os_dp DECIMAL(4,1),
+
+  -- Dati complementari
+  dp_totale DECIMAL(4,1),        -- DP binoculare (può essere OD+OS)
+  altezza_montaggio SMALLINT,    -- per lenti progressive (mm)
+  note TEXT,
+  uso VARCHAR(20),               -- 'lontano', 'vicino', 'multifocale', 'solare'
+  creato_il TIMESTAMPTZ DEFAULT NOW(),
+  firma_medico BOOLEAN DEFAULT FALSE
+);
+```
+
+Per le lenti a contatto, lo schema è diverso — include campi come curvatura base (BC), diametro (DIA), potenza (PWR), cilindro e asse per lenti toriche.
+
+Il modello di montature e lenti deve gestire il magazzino con granularità di taglia. Una montatura non esiste solo come "modello X marca Y" — esiste in combinazioni specifiche di colore, cerchio e taglia. Analogamente, le lenti esistono in indici di rifrazione diversi (1.53, 1.56, 1.60, 1.67, 1.74), trattamenti (AR, Blue Light, fotocromatica) e design (sferica, asferica, progressiva).
+
+| Attributo | Montatura | Lente |
+|-----------|---------|-------|
+| SKU base | Marca + modello + colore | Produttore + design + indice |
+| Variazione | Taglia del cerchio (48, 50, 52...) | Gradazione (sfera/cilindro) + trattamento |
+| Magazzino | Per taglia e colore | Per fascia di gradazione disponibile |
+| Riassortimento | Ordine al fornitore | Ordine al laboratorio o fornitore |
+
+## Storico del Cliente: Evoluzione della Prescrizione nel Tempo
+
+Una delle funzionalità che più distingue i sistemi specializzati per ottici è la visualizzazione dell'evoluzione della prescrizione nel corso del tempo. Per l'ottico o per l'addetto che sta preparando un ordine, poter vedere che il cliente è passato da -1.50 a -2.25 negli ultimi due anni è un'informazione clinicamente rilevante.
+
+Il sistema deve offrire:
+
+**Linea temporale delle prescrizioni**: visualizzazione cronologica di tutte le prescrizioni del cliente con indicazione delle variazioni significative (variazione superiore a 0.50D in qualsiasi campo).
+
+**Alert per prescrizione scaduta**: le prescrizioni ottiche hanno una validità medica (generalmente 12 mesi). Il sistema deve allertare automaticamente quando un cliente torna per un acquisto e la sua ultima prescrizione è scaduta.
+
+**Confronto visivo**: visualizzazione affiancata della prescrizione attuale vs precedente, con evidenziazione dei campi modificati.
+
+**Integrazione con l'ordine**: all'avvio di un ordine, il sistema deve pre-compilare i campi della gradazione dalla prescrizione più recente valida, riducendo gli errori di digitazione.
+
+## Ordine al Laboratorio: Integrazione e Tracciamento
+
+Il flusso dell'ordine di lenti al laboratorio è un punto critico dell'operatività dell'ottica. Il laboratorio riceve l'ordine (generalmente con la montatura fisica o le misure), lavora la lente e restituisce gli occhiali montati.
+
+Un sistema ben strutturato deve coprire:
+
+**Creazione dell'ordine con dati completi**: l'ordine deve contenere tutti i dati necessari al laboratorio senza ambiguità — prescrizione completa, specifica della lente (indice, design, trattamento), dati della montatura (modello, taglia, materiale del cerchio), altezza di montaggio e qualsiasi istruzione speciale.
+
+**Invio digitale**: i laboratori maggiori (Essilor, Zeiss, Indo, Shamir) offrono API o portali web per l'invio digitale degli ordini, eliminando WhatsApp e riducendo gli errori di trascrizione.
+
+**Tracciamento dello stato**: l'ordine nel sistema deve riflettere lo stato nel laboratorio — ricevuto, in lavorazione, in attesa di montatura, pronto per il ritiro, inviato, consegnato.
+
+**Controllo delle scadenze e alert**: il sistema deve calcolare la data prevista di consegna in base al tipo di lente e al laboratorio, e allertare automaticamente quando la scadenza si avvicina senza conferma di completamento.
+
+```
+Flusso tipico dell'ordine:
+
+[Vendita approvata]
+    → [Ordine creato nel sistema]
+    → [Montatura separata in magazzino ed etichettata]
+    → [Ordine inviato al laboratorio]
+    → [Conferma di ricezione]
+    → [Stato: in produzione]
+    → [Notifica: pronto]
+    → [Ricezione verificata]
+    → [Montaggio e controllo qualità]
+    → [Avviso al cliente: pronto per il ritiro]
+    → [Consegna con conferma]
+```
+
+## Magazzino Specializzato: Griglia Lenti e Montature
+
+**Magazzino montature per griglia**: una montatura in color argento taglia 50 è un articolo diverso dalla stessa montatura in color oro taglia 52. Il sistema deve controllare il magazzino in combinazioni di attributi (colore × taglia × materiale), non solo per modello.
+
+**Magazzino lenti pronte**: le ottiche che lavorano con lenti di gradazione finita (principalmente per gradazioni semplici ad alta rotazione) devono controllare il magazzino per fascia di gradazione. Una lente -2.00 sferica indice 1.56 AR è uno SKU specifico con quantità in magazzino.
+
+**Conto deposito**: parte del magazzino di montature può essere in conto deposito con i fornitori — l'ottica paga solo quando vende. Il sistema deve distinguere il magazzino proprio da quello in deposito e generare il report di resa periodico con il fornitore.
+
+**Punto d'ordine automatico**: basato sulla storia di rotazione di ogni prodotto, il sistema deve calcolare il punto di riassortimento e generare alert o ordini automatici quando il magazzino raggiunge il livello minimo.
+
+**Rintracciabilità della montatura**: ogni montatura ha un numero di riferimento o codice a barre. Il sistema deve permettere di tracciare la montatura dall'ingresso in magazzino all'uscita per il laboratorio (con numero ordine) e alla consegna al cliente.
+
+## Conclusione
+
+Un sistema di gestione per ottici deve essere costruito da chi capisce che il business dell'ottica non è solo retail — è una combinazione di commercio, servizio tecnico e (per le ottiche con ottico optometrista) salute visiva. Il software deve parlare il linguaggio del settore: diottrie, assi, addizioni, DP, indice di rifrazione, trattamenti.
+
+I sistemi generici possono coprire le parti di finanziario e gestione base, ma falliscono nei processi core che generano efficienza operativa: la registrazione strutturata delle prescrizioni, l'integrazione con i laboratori, il controllo del magazzino per griglia e la storia prescrizionale del cliente.
+
+SystemForge sviluppa sistemi settoriali con modellazione dati specifica per ogni verticale.

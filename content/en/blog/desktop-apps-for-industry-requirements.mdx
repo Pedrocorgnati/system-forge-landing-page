@@ -1,0 +1,226 @@
+---
+title: "Desktop Apps for Industry: Requirements and Challenges"
+slug: "desktop-apps-for-industry-requirements"
+date: "2024-11-29"
+description: "Specific requirements for desktop apps in industrial environments: serial communication, OPC-UA/MODBUS protocols, high availability, and operator UX."
+tags: ["industrial desktop", "opc ua", "modbus", "industrial automation", "desktop app"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Specific requirements for desktop apps in industrial environments: serial communication, OPC-UA/MODBUS protocols, high availability, and operator UX.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'apps-desktop-para-industria-requisitos'
+  - locale: 'it-IT'
+    slug: 'app-desktop-industria-requisiti'
+  - locale: 'en'
+    slug: 'desktop-apps-for-industry-requirements'
+---
+
+An industrial control system is not a web dashboard on a bigger screen. The requirements are fundamentally different in almost every dimension: the hardware it needs to communicate with wasn't designed with REST APIs in mind, the expected availability is measured in years without unplanned interruptions, operators work with gloves in noisy environments on screens not positioned for visual comfort, and a software failure can stop an entire production line with costs of tens of thousands of dollars per hour.
+
+Building software for industry using the same practices and tools used for a B2B SaaS is a recipe for failure. The best practices are different. The trade-offs are different. What counts as "working" is different.
+
+This article describes the specific technical requirements that distinguish industrial desktop apps and how to approach them realistically.
+
+## Serial Communication: RS232/RS485 with Node.js serialport
+
+Much of the industrial hardware — scales, industrial barcode scanners, temperature controllers, older PLCs — communicates via RS232 or RS485 serial ports. These protocols are decades old, but the hardware using them has a 15-20 year service life in industrial environments. Replacement isn't on anyone's roadmap.
+
+The `serialport` library for Node.js is the standard solution for serial communication in Electron apps. It supports RS232 and RS485, allows configuring all communication parameters (baud rate, data bits, parity, stop bits, flow control), and has multi-platform support.
+
+```javascript
+// main/serial-communication.js
+const { SerialPort } = require('serialport')
+const { ReadlineParser } = require('@serialport/parser-readline')
+const { ipcMain } = require('electron')
+
+class SerialDevice {
+  constructor(portPath, options = {}) {
+    this.portPath = portPath
+    this.port = null
+    this.parser = null
+    this.reconnectInterval = null
+    this.options = {
+      baudRate: 9600,
+      dataBits: 8,
+      parity: 'none',
+      stopBits: 1,
+      ...options
+    }
+  }
+
+  connect() {
+    this.port = new SerialPort({
+      path: this.portPath,
+      ...this.options,
+      autoOpen: false
+    })
+
+    // Parser for devices that send lines terminated with \r\n
+    this.parser = this.port.pipe(new ReadlineParser({ delimiter: '\r\n' }))
+
+    this.port.open((err) => {
+      if (err) {
+        console.error(`Error opening port ${this.portPath}:`, err.message)
+        this._scheduleReconnect()
+        return
+      }
+      console.log(`Port ${this.portPath} connected`)
+      this._clearReconnect()
+    })
+
+    this.parser.on('data', (line) => {
+      const reading = this._parseLine(line)
+      if (reading !== null) {
+        // Emit to renderer process via IPC
+        ipcMain.emit('serial-reading', reading)
+      }
+    })
+
+    this.port.on('error', (err) => {
+      console.error('Serial port error:', err.message)
+    })
+
+    this.port.on('close', () => {
+      console.log('Serial port closed, trying to reconnect...')
+      this._scheduleReconnect()
+    })
+  }
+
+  _scheduleReconnect() {
+    if (this.reconnectInterval) return
+    this.reconnectInterval = setInterval(() => {
+      console.log(`Attempting to reconnect ${this.portPath}...`)
+      this.connect()
+    }, 5000)
+  }
+
+  _clearReconnect() {
+    if (this.reconnectInterval) {
+      clearInterval(this.reconnectInterval)
+      this.reconnectInterval = null
+    }
+  }
+
+  _parseLine(line) {
+    // Device-specific protocol parsing
+    // Example: scale that sends "  1.234 kg\r\n"
+    const match = line.trim().match(/^([\d.]+)\s*kg$/)
+    if (match) return { value: parseFloat(match[1]), unit: 'kg', timestamp: Date.now() }
+    return null
+  }
+}
+```
+
+The automatic reconnection logic is critical. Industrial hardware can be restarted, cables disconnected and reconnected during maintenance, and the serial port can be momentarily occupied by another process. The app needs to recover from these situations automatically without requiring operator intervention.
+
+## Industrial Protocols: OPC-UA and MODBUS in Electron
+
+For communication with more modern equipment or SCADA systems, the industry standard protocols are OPC-UA and MODBUS TCP/RTU.
+
+**MODBUS** is a simple and robust protocol created in 1979, still widely used in PLCs, variable frequency drives, sensors, and actuators. It works with an addressable register model: the client reads or writes to specific addresses on the device. The `modbus-serial` library for Node.js covers both MODBUS RTU (serial) and MODBUS TCP (ethernet):
+
+```javascript
+// Reading MODBUS TCP registers
+const ModbusRTU = require('modbus-serial')
+
+const client = new ModbusRTU()
+await client.connectTCP('192.168.1.100', { port: 502 })
+client.setID(1) // Device address
+
+// Read 10 holding registers starting from address 0
+const data = await client.readHoldingRegisters(0, 10)
+console.log(data.data) // Array of integer values
+
+// Write to a coil (digital output)
+await client.writeCoil(10, true)
+```
+
+**OPC-UA** is the most modern and comprehensive standard for industrial communication. It supports device discovery, security (authentication, encryption), a rich information model with namespaces and complex types. The `node-opcua` library is the OPC-UA implementation for Node.js with full specification support.
+
+Industrial communication configuration must be isolated in a dedicated module, with detailed logging of all readings and errors. In industrial environments, data traceability is often a regulatory requirement — knowing exactly when and from which equipment each reading came must be auditable.
+
+## High Availability: Watchdog, Auto-restart, and Logging
+
+An industrial app that needs manual restart regularly isn't in production — it's in evaluation. The expectation in serious industrial environments is that software runs continuously, recovers from failures on its own, and maintains logs that enable post-mortem diagnosis when something goes wrong.
+
+The three-layer strategy:
+
+**Watchdog in the main process:** Electron's main process monitors the renderer. If the renderer process hangs or crashes, the main process restarts it automatically.
+
+**External process manager:** The Electron app as a whole runs under a process manager — PM2 on Linux, NSSM on Windows — which restarts it automatically if the process dies completely for any reason.
+
+**Structured logging:** All relevant events are recorded in a file with automatic rotation. Not just errors, but hardware readings, state changes, user actions. In case of an incident, the log tells you what happened before the failure.
+
+```javascript
+// main/process-health.js — simple watchdog
+const { app } = require('electron')
+const log = require('electron-log')
+
+let rendererHealthy = true
+let healthCheckInterval = null
+let lastHeartbeat = Date.now()
+
+// Renderer sends heartbeat via IPC every 5 seconds
+ipcMain.on('renderer-heartbeat', () => {
+  lastHeartbeat = Date.now()
+  rendererHealthy = true
+})
+
+function startHealthMonitor(mainWindow) {
+  healthCheckInterval = setInterval(() => {
+    const timeSinceHeartbeat = Date.now() - lastHeartbeat
+
+    if (timeSinceHeartbeat > 15000) {
+      log.error(`Renderer unresponsive for ${timeSinceHeartbeat}ms — reloading`)
+      rendererHealthy = false
+      lastHeartbeat = Date.now()
+
+      // Reload the window
+      mainWindow.reload()
+    }
+  }, 5000)
+}
+
+// Log health metrics periodically
+setInterval(() => {
+  const mem = process.memoryUsage()
+  log.info('health-check', {
+    heapUsed: Math.round(mem.heapUsed / 1024 / 1024) + 'MB',
+    rendererHealthy,
+    uptime: Math.round(process.uptime()) + 's'
+  })
+}, 60000)
+```
+
+`electron-log` persists logs to a file in the app's data directory (`userData`), with automatic rotation by size. These logs are the first resource when an operator reports a problem — often the diagnosis is right there.
+
+## UX for Operators: Gloves, Noise, and Large Screens
+
+Industrial operators are not office users. Usage conditions are radically different, and ignoring this produces interfaces that technically work but are unusable in practice.
+
+The physical challenges of the industrial environment:
+
+- **Work gloves:** Capacitive touchscreens don't respond well with thick gloves. UI elements need to be large enough to be operated with a gloved finger — the minimum 48px height for interactive buttons is insufficient; in industrial environments, 72px to 96px is more appropriate.
+
+- **Ambient noise:** Sound feedback doesn't work on the factory floor. Visual feedback must be unambiguous — high-contrast status colors, clear "processing" and "completed" animations.
+
+- **Variable lighting:** Screens may be in environments with direct sunlight or in dark environments. The theme needs adequate contrast in both conditions, and brightness (automatic or manual) must be configurable.
+
+- **Reading distance:** Operators often read the screen from 60 to 90 cm away, or sometimes even farther. Status texts and critical values should have larger font sizes than office applications — 18px to 24px for primary information.
+
+- **Minimal data entry:** Every field an operator must fill in manually is an opportunity for error and a slowdown point. Barcode scanners, RFID, and values automatically captured from sensors should replace manual entry whenever possible.
+
+A good heuristic for evaluating an industrial interface: can an operator wearing rubber gloves, standing in a noisy area, complete the main flow in less than 30 seconds without hesitating? If not, the interface needs to be redesigned.
+
+## Conclusion
+
+Industrial desktop apps are a specific technical domain with requirements that don't appear in web development tutorials or React courses. Serial communication and industrial protocols require specialized knowledge. High availability requires a resilience architecture from the start. UX for operators requires real research into the usage environment.
+
+The result, when done correctly, is a system that goes unnoticed — because it simply works, every day, without constant maintenance, without support calls for manual restarts, without lost data when the network drops.
+
+At SystemForge, we develop desktop systems for industrial environments — from production control systems to quality inspection tools integrated with specialized hardware. If you're mapping the requirements of an industrial project and want a realistic technical assessment of what it takes to build it right, reach out.

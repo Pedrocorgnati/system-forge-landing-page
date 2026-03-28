@@ -1,0 +1,282 @@
+---
+title: "Onboarding SaaS B2B: strumentazione e attivazione"
+slug: "onboarding-saas-b2b-strumentazione-attivazione"
+date: "2024-11-06"
+description: "Come strumentare l'onboarding di SaaS B2B per misurare l'attivazione per ruolo, identificare i drop-off e attivare interventi umani al momento giusto."
+tags: ["onboarding saas", "b2b", "product analytics", "attivazione", "strumentazione"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come strumentare l'onboarding di SaaS B2B per misurare l'attivazione per ruolo, identificare i drop-off e attivare interventi umani al momento giusto.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'onboarding-saas-b2b-instrumentacao-ativacao'
+  - locale: 'it-IT'
+    slug: 'onboarding-saas-b2b-strumentazione-attivazione'
+  - locale: 'en'
+    slug: 'saas-b2b-onboarding-instrumentation-activation'
+---
+
+Nel SaaS B2C, l'attivazione è relativamente semplice da definire: un singolo utente completa un insieme di azioni e "si attiva". Nel SaaS B2B, l'account che ha acquistato è un'azienda, ma gli utenti sono più persone con ruoli diversi. Un admin che configura l'account non usa il prodotto nello stesso modo di un analista che genera report quotidianamente o di un operatore che registra dati sul campo.
+
+Questo crea un problema di strumentazione: attivazione dell'account vs attivazione dell'utente vs attivazione per ruolo. Un account può avere l'admin attivato e tutti gli analisti inattivi — il che è altrettanto problematico di nessuna attivazione, perché i decision maker (analisti) non stanno usando il prodotto, e al prossimo ciclo di rinnovo non difenderanno lo strumento.
+
+## Definire l'Attivazione per Ruolo: Admin, Operatore e Analista
+
+L'attivazione non è un evento unico — è un insieme di comportamenti che segnalano che l'utente ha compreso il valore del prodotto e ha iniziato a ottenere un ritorno dal suo utilizzo. Questo insieme di comportamenti è diverso per ciascun ruolo.
+
+| Ruolo | Definizione di Attivazione | Finestra Temporale |
+|-------|---------------------------|-------------------|
+| Admin | Ha configurato almeno 1 integrazione + invitato almeno 2 utenti | 7 giorni dalla registrazione |
+| Analista | Ha creato almeno 1 dashboard + esportato 1 report | 14 giorni dal primo accesso |
+| Operatore | Ha registrato almeno 5 transazioni/eventi nel sistema | 7 giorni dal primo accesso |
+| Viewer | Ha aperto almeno 3 dashboard diverse | 30 giorni dall'invito |
+
+La finestra temporale fa parte della definizione. Un analista che esporta un report 60 giorni dopo la registrazione è probabilmente stato recuperato da un intervento del CS — non si è attivato organicamente. Queste attivazioni tardive hanno un profilo di retention diverso da quelle precoci.
+
+Per strumentare l'attivazione per ruolo, è necessario tracciare gli eventi a livello del singolo utente, non solo dell'account:
+
+```typescript
+// lib/analytics/activation.ts
+import { analytics } from './client'; // es: Segment, Mixpanel, PostHog
+
+export type UserRole = 'admin' | 'analyst' | 'operator' | 'viewer';
+
+interface ActivationEvent {
+  userId: string;
+  tenantId: string;
+  role: UserRole;
+  event: string;
+  properties?: Record<string, unknown>;
+}
+
+// Mappa degli eventi che contano per l'attivazione per ruolo
+const ACTIVATION_EVENTS: Record<UserRole, string[]> = {
+  admin: [
+    'integration.connected',
+    'user.invited',
+    'workspace.configured',
+  ],
+  analyst: [
+    'dashboard.created',
+    'report.exported',
+    'filter.saved',
+  ],
+  operator: [
+    'transaction.created',
+    'record.submitted',
+    'form.completed',
+  ],
+  viewer: [
+    'dashboard.viewed',
+    'report.opened',
+  ],
+};
+
+export async function trackActivationEvent({
+  userId,
+  tenantId,
+  role,
+  event,
+  properties
+}: ActivationEvent) {
+  // Invia l'evento agli analytics
+  analytics.track({
+    userId,
+    event,
+    properties: {
+      tenantId,
+      role,
+      timestamp: new Date().toISOString(),
+      ...properties,
+    }
+  });
+
+  // Verifica se l'evento conta per l'attivazione
+  if (ACTIVATION_EVENTS[role]?.includes(event)) {
+    await checkAndUpdateActivationStatus(userId, tenantId, role);
+  }
+}
+
+async function checkAndUpdateActivationStatus(
+  userId: string,
+  tenantId: string,
+  role: UserRole
+) {
+  // Recupera gli eventi di attivazione dell'utente negli ultimi N giorni
+  const window = role === 'viewer' ? 30 : role === 'analyst' ? 14 : 7;
+  const since = new Date(Date.now() - window * 24 * 60 * 60 * 1000);
+
+  const completedEvents = await db.analyticsEvent.findMany({
+    where: {
+      userId,
+      event: { in: ACTIVATION_EVENTS[role] },
+      createdAt: { gte: since },
+    },
+    select: { event: true },
+    distinct: ['event'],
+  });
+
+  const requiredCount = role === 'operator' ? 5 : 2; // l'operatore richiede più eventi
+  const isActivated = completedEvents.length >= requiredCount;
+
+  if (isActivated) {
+    await db.user.update({
+      where: { id: userId },
+      data: {
+        activatedAt: new Date(),
+        activationRole: role,
+      }
+    });
+
+    // Identifica negli analytics per segmentazione futura
+    analytics.identify(userId, {
+      activated: true,
+      activatedAt: new Date().toISOString(),
+      activationRole: role,
+    });
+  }
+}
+```
+
+## Eventi di Strumentazione: Cosa Tracciare nell'Onboarding
+
+La tentazione nell'onboarding è tracciare tutto. Il problema è che molti eventi senza analisi non producono insight — producono rumore. Inizia con eventi ad alto segnale, quelli che storicamente correlano con la retention a 90 giorni.
+
+**Eventi obbligatori nell'onboarding:**
+
+```typescript
+// Checklist degli eventi per fase dell'onboarding
+
+// Fase 1: Configurazione iniziale (admin)
+'account.created'         // account creato
+'profile.completed'       // nome, ruolo, telefono compilati
+'integration.attempted'   // tentativo di connettere un'integrazione
+'integration.connected'   // integrazione connessa con successo
+'user.invited'            // primo invito inviato
+'team.size.reached_3'     // almeno 3 utenti attivi
+
+// Fase 2: Primo valore (tutti i ruoli)
+'dashboard.first_view'    // primo dashboard aperto
+'filter.first_applied'    // primo filtro applicato
+'insight.first_shared'    // prima condivisione o commento
+'report.first_export'     // prima esportazione
+
+// Fase 3: Abitudine (retention)
+'session.day_7'           // ha fatto ritorno il giorno 7
+'session.day_14'          // ha fatto ritorno il giorno 14
+'session.day_30'          // ha fatto ritorno il giorno 30
+'feature.advanced_used'   // ha usato una funzionalità avanzata (drill-down, dashboard custom)
+```
+
+Per ogni evento, strumenta anche le proprietà di contesto:
+
+```typescript
+analytics.track('dashboard.first_view', {
+  userId: user.id,
+  tenantId: user.tenantId,
+  role: user.role,
+  daysAfterSignup: daysSince(user.createdAt),
+  dashboardType: dashboard.type,           // 'template' | 'custom'
+  referrer: 'onboarding_checklist' | 'nav' | 'direct',
+  sessionCount: user.sessionCount,
+});
+```
+
+Le proprietà di contesto consentono analisi come "gli utenti che hanno raggiunto il primo dashboard tramite checklist di onboarding si attivano il 40% in più rispetto agli utenti che ci sono arrivati tramite navigazione diretta".
+
+## Drop-off Detection: Identificare gli Utenti Bloccati
+
+La drop-off detection è il processo di identificazione degli utenti che si sono fermati a una fase specifica dell'onboarding senza completare quella successiva. La query canonica è: "quali utenti hanno completato l'evento X ma non hanno completato l'evento Y negli ultimi N giorni?".
+
+```sql
+-- Utenti che hanno creato un account ma non hanno mai connesso un'integrazione
+-- da più di 3 giorni e meno di 14 giorni (finestra di intervento utile)
+
+WITH signup_cohort AS (
+  SELECT user_id, tenant_id, MIN(created_at) AS signup_date
+  FROM analytics_events
+  WHERE event = 'account.created'
+    AND created_at BETWEEN NOW() - INTERVAL '14 days' AND NOW() - INTERVAL '3 days'
+  GROUP BY 1, 2
+),
+connected_integration AS (
+  SELECT DISTINCT user_id
+  FROM analytics_events
+  WHERE event = 'integration.connected'
+),
+user_profile AS (
+  SELECT u.id, u.email, u.name, u.role, t.name AS tenant_name,
+         t.plan, u.session_count, u.last_seen_at
+  FROM users u
+  JOIN tenants t ON t.id = u.tenant_id
+  WHERE u.role = 'admin'
+)
+SELECT
+  s.user_id,
+  p.email,
+  p.name,
+  p.tenant_name,
+  p.plan,
+  s.signup_date,
+  DATE_PART('day', NOW() - s.signup_date) AS days_since_signup,
+  p.session_count,
+  p.last_seen_at
+FROM signup_cohort s
+JOIN user_profile p ON p.id = s.user_id
+LEFT JOIN connected_integration ci ON ci.user_id = s.user_id
+WHERE ci.user_id IS NULL  -- non ha mai connesso un'integrazione
+ORDER BY s.signup_date ASC;
+```
+
+Questa query alimenta un elenco di utenti bloccati che può essere utilizzato da automazioni email o dalla coda di lavoro del team CS.
+
+Per dashboard di onboarding in tempo reale, l'architettura consigliata è avere una tabella materializzata `user_onboarding_status` che viene aggiornata a ogni evento di attivazione:
+
+```typescript
+// Struttura della tabella user_onboarding_status
+interface UserOnboardingStatus {
+  userId: string;
+  tenantId: string;
+  role: UserRole;
+  // Fasi completate (timestamp o null)
+  profileCompleted: Date | null;
+  integrationConnected: Date | null;
+  firstDashboardViewed: Date | null;
+  firstReportExported: Date | null;
+  activated: Date | null;
+  // Calcolati
+  currentStep: number;       // 1-5
+  daysInCurrentStep: number; // giorni senza avanzare
+  dropoffRisk: 'low' | 'medium' | 'high';
+}
+```
+
+## Intervento Umano: Quando il CS Deve Intervenire
+
+L'onboarding del SaaS B2B quasi mai è completamente automatizzato. I prodotti con ticket medio superiore a €500/mese per utente traggono generalmente beneficio dall'intervento umano del team di Customer Success in punti strategici.
+
+La questione non è se intervenire, ma quando. Intervenire troppo presto è fastidioso (l'utente sta ancora esplorando). Intervenire troppo tardi è inefficace (l'utente ha già rinunciato mentalmente).
+
+**Trigger di intervento raccomandati:**
+
+| Trigger | Termine | Canale | Messaggio |
+|---------|---------|--------|-----------|
+| Admin registrato ma nessun invito inviato | 3 giorni | Email automatica | "Come configurare il tuo team" |
+| Admin ha invitato utenti ma nessuno si è attivato | 7 giorni | Chat proattiva o chiamata CS | Offrire sessione di onboarding live |
+| Analista ha tentato di esportare e ha fallito | Immediato | Notifica in-app | Link alla documentazione + chat di supporto |
+| Account con >5 utenti, 0 attivazioni in 10 giorni | 10 giorni | Email all'admin + task CS | Revisione della configurazione dell'account |
+| Trial scade in 3 giorni, attivazione <50% | 3 giorni | Email al decision maker | Estensione del trial o demo con CS |
+
+Il trigger "ha tentato di esportare e ha fallito" merita attenzione speciale: è il momento di maggiore frustrazione, quando l'utente sta cercando di ottenere valore e si imbatte in un blocco. L'intervento immediato in quel momento ha un tasso di risoluzione molto più alto rispetto all'intervento giorni dopo.
+
+## Conclusione
+
+Una strumentazione dell'onboarding B2B ben realizzata trasforma i dati di prodotto in azioni del team CS e del team di prodotto. Senza strumentazione, sai che il tasso di attivazione è X% ma non sai dove gli utenti si bloccano. Con la strumentazione, riesci a identificare che il 60% dei drop-off avviene tra "primo login" e "prima integrazione connessa" — e questo insight indica esattamente dove migliorare il prodotto o intensificare il supporto umano.
+
+La difficoltà tecnica di strumentare correttamente — definire gli eventi giusti, tracciare per ruolo, calcolare l'attivazione per finestra temporale, rilevare i drop-off in tempo reale — è reale. Ma è un investimento con ritorno diretto in retention e riduzione del churn.
+
+In SystemForge, la specifica di analytics e onboarding fa parte del PRD dei prodotti SaaS B2B fin dal primo modulo. Gli eventi di strumentazione vengono documentati insieme alle user story, e la query canonica di attivazione viene validata con lo stakeholder prima di qualsiasi implementazione. L'onboarding ben strumentato non è un dettaglio — è ciò che distingue i SaaS che trattengono i clienti da quelli che li perdono nel primo mese.

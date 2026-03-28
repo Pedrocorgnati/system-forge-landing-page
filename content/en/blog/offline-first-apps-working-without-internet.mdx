@@ -1,0 +1,186 @@
+---
+title: "Offline-First Apps: Working Without Internet"
+slug: "offline-first-apps-working-without-internet"
+date: "2024-10-21"
+description: "How to build offline-first React Native apps — WatermelonDB, server sync, conflict resolution, and UX for no-connection states."
+tags: ["offline first", "react native", "watermelondb", "synchronization", "mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to build offline-first React Native apps — WatermelonDB, server sync, conflict resolution, and UX for no-connection states.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-apps-sem-internet'
+  - locale: 'it-IT'
+    slug: 'offline-first-app-senza-internet'
+  - locale: 'en'
+    slug: 'offline-first-apps-working-without-internet'
+---
+
+Apps that require internet to function lose users in the subway, on planes, in areas with poor coverage, and in all those moments when connectivity drops but the user still wants to use the product. This loss doesn't show up dramatically — the user doesn't uninstall at the moment the signal drops. They simply associate the app with a frustrating experience and open it less and less.
+
+The offline-first approach inverts the premise: the app works fully with local data, and server sync happens as an additional benefit, not a prerequisite for using the product.
+
+## WatermelonDB: Reactive Local Database for React Native
+
+WatermelonDB is a local database for React Native built on top of SQLite, with a reactive API that integrates naturally with React. It's designed specifically for the offline-first use case: local operations are synchronous and immediate, and backend sync is a separate process.
+
+```bash
+npx expo install @nozbe/watermelondb @nozbe/with-observables
+# For Expo bare workflow:
+cd ios && pod install
+```
+
+Schema and model definition:
+
+```typescript
+// database/schema.ts
+import { appSchema, tableSchema } from '@nozbe/watermelondb';
+
+export const schema = appSchema({
+  version: 1,
+  tables: [
+    tableSchema({
+      name: 'tasks',
+      columns: [
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'string', isOptional: true },
+        { name: 'completed', type: 'boolean' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+        { name: 'server_id', type: 'string', isOptional: true },
+        { name: 'is_deleted', type: 'boolean' }, // soft delete for sync
+      ],
+    }),
+  ],
+});
+
+// models/Task.ts
+import { Model } from '@nozbe/watermelondb';
+import { field, date } from '@nozbe/watermelondb/decorators';
+
+export class Task extends Model {
+  static table = 'tasks';
+
+  @field('title') title!: string;
+  @field('description') description!: string | null;
+  @field('completed') completed!: boolean;
+  @date('created_at') createdAt!: Date;
+  @date('updated_at') updatedAt!: Date;
+  @field('server_id') serverId!: string | null;
+  @field('is_deleted') isDeleted!: boolean;
+}
+```
+
+WatermelonDB uses observables — React components automatically re-render when data changes:
+
+```typescript
+import { withObservables } from '@nozbe/with-observables';
+import { database } from '../database';
+import { Task } from '../models/Task';
+import { Q } from '@nozbe/watermelondb';
+
+const enhance = withObservables([], () => ({
+  tasks: database
+    .get<Task>('tasks')
+    .query(Q.where('is_deleted', false), Q.sortBy('created_at', Q.desc))
+    .observe(),
+}));
+
+export const TaskList = enhance(TaskListComponent);
+```
+
+## Sync Strategy: Conflict-Free vs Manual
+
+WatermelonDB offers a `synchronize` API that expects two backend endpoints: a `pullChanges` that returns what changed on the server, and a `pushChanges` that receives local changes:
+
+```typescript
+import { synchronize } from '@nozbe/watermelondb/sync';
+import { database } from './database';
+
+async function syncWithServer() {
+  await synchronize({
+    database,
+    pullChanges: async ({ lastPulledAt }) => {
+      const response = await fetch(
+        `/api/sync/pull?last_pulled_at=${lastPulledAt ?? 0}`,
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      const { changes, timestamp } = await response.json();
+      return { changes, timestamp };
+    },
+    pushChanges: async ({ changes, lastPulledAt }) => {
+      await fetch('/api/sync/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${await getToken()}`,
+        },
+        body: JSON.stringify({ changes, lastPulledAt }),
+      });
+    },
+  });
+}
+```
+
+| Strategy | Complexity | Use case |
+|----------|------------|----------|
+| Last Write Wins | Low | Personal app, non-collaborative data |
+| Server Wins | Low | Authoritative server data (e.g., balance) |
+| Client Wins | Low | Drafts, user data |
+| Field-level merge | High | Collaborative apps |
+| CRDT | Very high | Real-time documents (like Notion) |
+
+## Offline UX: Indicators, Queues, and Feedback
+
+```typescript
+import NetInfo from '@react-native-community/netinfo';
+import { useEffect, useState } from 'react';
+
+function useConnectionStatus() {
+  const [isConnected, setIsConnected] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      const connected = state.isConnected && state.isInternetReachable;
+      setIsConnected(!!connected);
+
+      if (connected) {
+        setIsSyncing(true);
+        await syncWithServer();
+        setIsSyncing(false);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return { isConnected, isSyncing };
+}
+```
+
+Never block local actions due to lack of connectivity. User created a task offline? Create it locally and sync later. Never show "No internet — action blocked" for operations that can be queued.
+
+## Partial Offline Mode: What Works and What Doesn't
+
+**Works well offline:**
+- Reading already-loaded content (articles, viewed products, history)
+- Creating and editing user data (notes, tasks, forms)
+- Actions that can be queued (likes, comments, add to cart)
+- Navigation and search on local data
+
+**Requires connectivity by nature:**
+- Payment processing
+- Authentication (first time — token refresh can be local)
+- Large file uploads
+- Media streaming
+
+## Conclusion
+
+Offline-first isn't a feature — it's an architectural decision that needs to be made before writing the first line of code. Implementing it later is possible, but much more costly.
+
+At SystemForge, apps that need offline resilience are designed with this architecture from the planning phase. If you're building an app for users frequently on the move — field work, logistics, sales, healthcare — and want to guarantee a consistent experience with or without internet, our team can help you structure the right solution.

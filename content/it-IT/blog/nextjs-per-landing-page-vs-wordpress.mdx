@@ -1,0 +1,91 @@
+---
+title: "Next.js per landing page: perché non WordPress"
+slug: "nextjs-per-landing-page-vs-wordpress"
+date: "2024-09-13"
+description: "Perché Next.js con esportazione statica supera WordPress in performance, sicurezza e SEO per landing page istituzionali — con comparativo tecnico."
+tags: ["nextjs", "landing page", "wordpress", "performance", "jamstack"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Perché Next.js con esportazione statica supera WordPress in performance, sicurezza e SEO per landing page istituzionali — con comparativo tecnico.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'nextjs-para-landing-pages-vs-wordpress'
+  - locale: 'it-IT'
+    slug: 'nextjs-per-landing-page-vs-wordpress'
+  - locale: 'en'
+    slug: 'nextjs-for-landing-pages-vs-wordpress'
+---
+
+WordPress alimenta il 43% di tutti i siti internet. Usarlo come argomento a favore della piattaforma è come dire che un'utilitaria è una buona scelta per la Formula 1 perché il 90% delle persone guida un'utilitaria. Popolarità e adeguatezza all'obiettivo sono cose diverse.
+
+Per le landing page — specialmente quelle istituzionali, di prodotto o focalizzate sulla conversione tramite traffico a pagamento — WordPress porta un insieme di limitazioni strutturali che lo rendono la scelta sbagliata. E le alternative moderne, in particolare Next.js con esportazione statica, eliminano queste limitazioni mantenendo il meglio di WordPress: l'accessibilità per i non sviluppatori.
+
+## WordPress: Perché Domina Ancora e i Suoi Limiti
+
+WordPress domina perché ha azzerato la barriera tecnica per pubblicare un sito. Nel 2005, questo era rivoluzionario. Nel 2024, questo legacy è diventato un peso.
+
+L'architettura di WordPress è PHP server-side con database MySQL. Ogni richiesta di pagina genera una query al database, elabora template PHP e restituisce l'HTML. Questo significa:
+
+- **TTFB alto per impostazione predefinita:** anche con cache configurata, WordPress deve invalidare e rigenerare la cache costantemente.
+- **Stack di plugin che si annullano a vicenda:** installare un plugin SEO, uno per la performance, uno per la sicurezza, uno per la cache e uno per i form — e avete quattro livelli di JavaScript e PHP che spesso entrano in conflitto.
+- **Superficie di attacco enorme:** WordPress ha oltre 60.000 plugin pubblici, molti obsoleti e con vulnerabilità note.
+
+## Next.js Static Export: Performance Impossibile in WordPress
+
+Con il flag `output: 'export'` in Next.js, l'intero sito viene pre-renderizzato in HTML statico al momento del build. Il risultato è un insieme di file HTML, CSS e JavaScript che possono essere serviti da qualsiasi CDN — senza server, senza database, senza PHP.
+
+```
+WordPress (senza cache):        TTFB ~400-800ms, LCP ~3-5s
+WordPress (cache aggressiva):   TTFB ~80-150ms,  LCP ~1.5-2.5s
+Next.js static + CDN edge:      TTFB ~10-50ms,   LCP ~0.6-1.2s
+```
+
+Queste non sono stime teoriche. Sono misurazioni reali di PageSpeed Insights su siti di complessità simile. La differenza tra un TTFB di 800ms e uno di 10ms è la differenza tra un server che elabora PHP e un file HTML già pronto servito da un nodo CDN a 15ms dall'utente.
+
+Next.js offre anche ottimizzazioni automatiche che WordPress richiede plugin per tentare di replicare (quasi sempre in modo inferiore):
+
+| Feature | Next.js (nativo) | WordPress (via plugin) |
+|---------|-----------------|----------------------|
+| Ottimizzazione immagini (WebP/AVIF) | `next/image` — automatico | ShortPixel, Smush — a pagamento, parziale |
+| Code splitting automatico | Sì — per route | No — tutto il JS carica ovunque |
+| Prefetch dei link | Sì — automatico | Non disponibile |
+| Font optimization | `next/font` — zero layout shift | Plugin variabili, risultati inconsistenti |
+| TypeScript nativo | Sì | No |
+
+## Sicurezza: Superficie di Attacco a Confronto
+
+Una landing page Next.js esportata staticamente e ospitata su CDN ha una superficie di attacco vicina allo zero. Non c'è un server applicativo in esecuzione, non c'è un database, non c'è codice PHP eseguito a runtime.
+
+WordPress, al contrario, è il bersaglio più frequente di attacchi automatizzati sul web. I bot scansionano costantemente internet alla ricerca di installazioni WordPress con versioni obsolete di plugin o temi. Gli attacchi più comuni includono:
+
+- **SQL Injection tramite plugin vulnerabili**
+- **Vulnerabilità di upload file** — consentono l'upload di shell PHP tramite form di contatto
+- **Brute force su wp-admin** — indirizzo prevedibile `/wp-admin` soggetto ad attacchi automatici
+- **Exploit XML-RPC** — endpoint attivato per impostazione predefinita, usato per attacchi DDoS e spam
+
+## Costo di Manutenzione nel Lungo Periodo
+
+Il costo iniziale di un sito WordPress può essere inferiore. Il costo totale nell'arco di 2-3 anni raramente lo è.
+
+Considera i costi ricorrenti di un WordPress in produzione:
+
+- Hosting condiviso o VPS: €60-€300/mese (per garantire prestazioni adeguate)
+- Plugin premium (SEO, form, cache, sicurezza, backup): €800-€2.000/anno
+- Sviluppatore per aggiornamenti di sicurezza: 2-4h/mese
+- Recupero da hack (statisticamente frequente): €600-€2.500/incidente
+
+Un sito Next.js statico ospitato su Vercel o Cloudflare Pages:
+
+- Hosting: €0 sul piano gratuito, o €80-€150/mese sul piano pro
+- Nessun plugin, nessun aggiornamento di sicurezza ricorrente
+- Manutenzione dei contenuti tramite Git o CMS headless (Contentful, Sanity)
+
+## Conclusione
+
+WordPress ha ancora senso per progetti con requisiti specifici: blog con alto volume di contenuti gestiti da team non tecnici, piccoli e-commerce che hanno bisogno di WooCommerce, o progetti dove l'ecosistema di plugin è genuinamente necessario. Per le landing page di prodotto o servizio con focus su conversione, performance e SEO, Next.js con esportazione statica non è un'alternativa — è la scelta tecnicamente superiore in tutte le dimensioni rilevanti.
+
+Nel [SystemForge](/), sviluppiamo esclusivamente in Next.js perché i nostri clienti non vogliono un sito che richiede manutenzione costante — vogliono una landing page che converte, si posiziona e non si rompe.

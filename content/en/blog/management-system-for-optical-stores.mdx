@@ -1,0 +1,141 @@
+---
+title: "Management System for Optical Stores: From Prescriptions to Inventory"
+slug: "management-system-for-optical-stores"
+date: "2024-10-05"
+description: "Software requirements for optical store management: optical prescription records, client history, frame/lens inventory, and lab integration."
+tags: ["optical store", "sector management", "optical software", "inventory", "optical prescription"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Software requirements for optical store management: optical prescription records, client history, frame/lens inventory, and lab integration.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-gestao-para-oticas'
+  - locale: 'it-IT'
+    slug: 'sistema-gestionale-per-ottici'
+  - locale: 'en'
+    slug: 'management-system-for-optical-stores'
+---
+
+When an optical store tries to use a generic management system — whether a retail ERP or a financial control tool — it inevitably runs into a fundamental problem: generic systems don't know what an optical prescription is. They don't understand sphere, cylinder, axis, addition, and pupillary distance. They don't know that a frame size 52 doesn't work with any lens, that a progressive lens order has a different lead time than a single-vision lens, or that a client's prescription history is as important as their purchase history.
+
+The result is a proliferation of parallel spreadsheets, paper prescriptions that get lost, imprecise inventory control, and lab orders sent over WhatsApp. The invisible cost of these inefficiencies — in rework, order errors, and optician time — often exceeds the investment in a specialized system.
+
+This article details the technical and operational requirements of an optical store management system: from the optical prescription data model to lab partner integration.
+
+## Data Model: Optical Prescription, Frame, and Lens
+
+The technical core of an optical store system is the optical prescription data structure. An optical prescription isn't free text — it's a set of numeric and categorical fields with specific validations that must be treated as structured data to be useful.
+
+The basic structure of an optical prescription for eyeglasses:
+
+```sql
+CREATE TABLE optical_prescriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  client_id UUID NOT NULL REFERENCES clients(id),
+  optometrist VARCHAR(200),
+  license_number VARCHAR(20),
+  prescription_date DATE NOT NULL,
+  expiry_date DATE,
+
+  -- Right Eye (OD)
+  od_sphere DECIMAL(4,2),     -- Sphere: -20.00 to +20.00, steps of 0.25
+  od_cylinder DECIMAL(4,2),   -- Cylinder: -8.00 to +8.00, steps of 0.25
+  od_axis SMALLINT,           -- Axis: 0 to 180 degrees
+  od_add DECIMAL(3,2),        -- Addition (bifocal/progressive): +0.75 to +4.00
+  od_pd DECIMAL(4,1),         -- Pupillary distance OD (mm)
+
+  -- Left Eye (OS)
+  os_sphere DECIMAL(4,2),
+  os_cylinder DECIMAL(4,2),
+  os_axis SMALLINT,
+  os_add DECIMAL(3,2),
+  os_pd DECIMAL(4,1),
+
+  -- Supplementary data
+  total_pd DECIMAL(4,1),           -- Binocular PD (can be OD+OS)
+  fitting_height SMALLINT,         -- for progressive lenses (mm)
+  notes TEXT,
+  use VARCHAR(20),                 -- 'distance', 'near', 'multifocal', 'sunglasses'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  doctor_signed BOOLEAN DEFAULT FALSE
+);
+```
+
+For contact lenses, the schema is different — it includes fields like base curve (BC), diameter (DIA), power (PWR), cylinder, and axis for toric lenses.
+
+The frame and lens model needs to track inventory with attribute-level granularity. A frame doesn't exist just as "model X brand Y" — it exists in specific combinations of color, rim size, and dimensions. Similarly, lenses exist in different refractive indices (1.53, 1.56, 1.60, 1.67, 1.74), coatings (AR, Blue Light, photochromic), and designs (spherical, aspherical, progressive).
+
+| Attribute | Frame | Lens |
+|-----------|-------|------|
+| Base SKU | Brand + model + color | Manufacturer + design + index |
+| Variation | Rim size (48, 50, 52...) | Prescription (sph/cyl) + coating |
+| Inventory | By size and color | By available prescription range |
+| Replenishment | Supplier order | Lab or supplier order |
+
+## Client History: Prescription Evolution Over Time
+
+One of the features that most distinguishes specialized optical store systems is the visualization of prescription evolution over time. For the optometrist or clerk preparing an order, being able to see that a client's prescription changed from -1.50 to -2.25 in the last two years is clinically relevant information.
+
+The system should offer:
+
+**Prescription timeline**: chronological view of all client prescriptions with indication of significant changes (variation greater than 0.50D in any field).
+
+**Expired prescription alerts**: optical prescriptions have medical validity (generally 12 months). The system should automatically alert when a client returns for a purchase and their last prescription is expired.
+
+**Visual comparison**: side-by-side display of current vs previous prescription, with highlights on changed fields.
+
+**Order integration**: when starting an order, the system should pre-fill prescription fields from the most recent valid prescription, reducing typing errors and speeding up service.
+
+## Lab Orders: Integration and Tracking
+
+The lens order flow to the lab is a critical operational point for the optical store. The lab receives the order (generally with the physical frame or measurements), processes the lens, and returns the assembled glasses.
+
+A well-structured system should cover:
+
+**Order creation with complete data**: the order must contain all data the lab needs without ambiguity — complete prescription, lens specification (index, design, coating), frame data (model, size, rim material), fitting height, and any special instructions.
+
+**Digital submission**: larger labs (Essilor, Zeiss, Indo, Shamir) offer APIs or web portals for digital order submission, eliminating WhatsApp and reducing transcription errors.
+
+**Status tracking**: the order in the system should reflect the lab status — received, in processing, awaiting frame, ready for pickup, shipped, delivered.
+
+**Deadline control and alerts**: the system should calculate the expected delivery date based on lens type and lab, and automatically alert when the deadline is approaching without completion confirmation.
+
+```
+Typical order flow:
+
+[Sale approved]
+    → [Order created in system]
+    → [Frame separated in inventory and labeled]
+    → [Order sent to lab]
+    → [Receipt confirmation]
+    → [Status: in production]
+    → [Notification: ready]
+    → [Receipt checked]
+    → [Assembly and quality control]
+    → [Client notification: ready for pickup]
+    → [Delivery with confirmation]
+```
+
+## Specialized Inventory: Lens and Frame Grids
+
+**Frame inventory by grid**: a silver frame in size 50 is a different item from the same frame in gold in size 52. The system must control inventory in attribute combinations (color × size × material), not just by model.
+
+**Ready-made lens inventory**: optical stores that work with finished lenses (mainly for simple high-turnover prescriptions) need to control inventory by prescription range. A -2.00 spherical 1.56 AR lens is a specific SKU with a quantity in stock.
+
+**Consignment**: part of the frame inventory may be on consignment with suppliers — the optical store only pays when it sells. The system must distinguish owned inventory from consigned and generate periodic reconciliation reports with the supplier.
+
+**Automatic reorder point**: based on the turnover history of each product, the system should calculate the replenishment point and generate alerts or automatic orders when inventory reaches the minimum level.
+
+**Frame traceability**: each frame has a reference number or barcode. The system should allow tracking the frame from inventory entry to lab shipment (with order number) and client delivery.
+
+## Conclusion
+
+An optical store management system must be built by someone who understands that the optical business isn't just retail — it's a combination of commerce, technical service, and (for stores with an optometrist) vision health. The software must speak the industry's language: diopters, axes, additions, PD, refractive index, coatings.
+
+Generic systems can cover financial and basic management parts, but they fail at the core processes that generate operational efficiency: structured prescription records, lab integration, attribute-level inventory control, and client prescription history.
+
+SystemForge develops sector-specific systems with data modeling tailored to each vertical.

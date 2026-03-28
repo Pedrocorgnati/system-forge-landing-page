@@ -1,0 +1,180 @@
+---
+title: "RPA con Python: automatizzare senza strumenti enterprise"
+slug: "rpa-con-python-automatizzare-senza-investimento"
+date: "2024-08-12"
+description: "Come usare Python per la Robotic Process Automation senza UiPath o Automation Anywhere — Playwright, Selenium e PyAutoGUI con esempi reali."
+tags: ["rpa", "python", "automazione", "playwright", "selenium"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come usare Python per l'automazione robotica dei processi senza ricorrere a UiPath o Automation Anywhere — con esempi pratici.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rpa-com-python-automatize-tarefas-repetitivas'
+  - locale: 'it-IT'
+    slug: 'rpa-con-python-automatizzare-senza-investimento'
+  - locale: 'en'
+    slug: 'rpa-with-python-automate-without-enterprise-tools'
+---
+
+RPA — Robotic Process Automation — è diventata sinonimo di UiPath, Automation Anywhere e Blue Prism: piattaforme enterprise con contratti annuali a sei cifre, team di implementazione e curve di apprendimento ripide. Ma la verità è che la maggior parte delle aziende non ha bisogno di nulla di tutto ciò. Se il processo può essere descritto in passaggi logici e avviene su un computer, Python risolve.
+
+Il presupposto dell'RPA è semplice: automatizzare il lavoro ripetitivo che un essere umano svolge davanti al computer. Login nei sistemi, estrazione di dati da fogli di calcolo, compilazione di moduli, invio di e-mail basate su regole, generazione di report — tutto questo può essere fatto da uno script Python che gira in background, senza costo di licenza, senza vendor lock-in e con il pieno controllo del codice.
+
+In questo articolo vedrai quali strumenti usare per ogni tipo di automazione e come strutturare script che non si rompono al primo cambiamento di layout.
+
+## Playwright vs Selenium vs PyAutoGUI: quando usare ciascuno
+
+Prima di scrivere una riga di codice, devi scegliere lo strumento giusto per il tipo di interazione che vuoi automatizzare.
+
+**Playwright** è la scelta per l'automazione web moderna. Sviluppato da Microsoft, controlla browser reali (Chromium, Firefox, WebKit) con un'API asincrona e funzionalità che Selenium non ha mai avuto: auto-wait, intercettazione di rete, contesti browser multipli e screenshot/video nativi. È più veloce da sviluppare e più stabile in produzione.
+
+**Selenium** ha ancora senso quando hai bisogno di compatibilità con codice legacy o quando il sistema target ha comportamenti specifici che funzionano solo con versioni precedenti di Chrome. Per nuovi progetti, preferisci Playwright.
+
+**PyAutoGUI** è diverso dagli altri due: non controlla il browser, controlla l'intero computer. Muove il mouse, clicca su posizioni dello schermo, digita testo, preme tasti. È l'unica opzione per sistemi senza interfaccia web — applicazioni desktop legacy, SAP GUI, sistemi ERP installati localmente. Il compromesso è che è fragile: qualsiasi cambiamento di risoluzione, tema o posizione della finestra può rompere lo script.
+
+```
+Sistema target            → Strumento consigliato
+─────────────────────────────────────────────
+Sito / Web App            → Playwright
+Sistema web legacy        → Selenium (compatibilità)
+App desktop / ERP         → PyAutoGUI
+PDF / Foglio di calcolo   → pdfplumber + openpyxl (senza RPA)
+API disponibile           → requests + httpx (senza RPA)
+```
+
+Regola pratica: se esiste un'API, usa l'API. L'RPA è l'ultima risorsa, non la prima.
+
+## Automazione Web: Login, Estrazione Dati e Form
+
+Il caso d'uso più comune di RPA web è accedere a un portale senza API, fare login, estrarre o inviare dati e uscire. Con Playwright in Python:
+
+```python
+from playwright.sync_api import sync_playwright
+import json
+
+def estrai_ordini_portale(utente: str, password: str) -> list[dict]:
+    ordini = []
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+
+        # Login
+        page.goto("https://portale-fornitore.esempio.com/login")
+        page.fill("#username", utente)
+        page.fill("#password", password)
+        page.click("button[type='submit']")
+        page.wait_for_url("**/dashboard")
+
+        # Naviga agli ordini
+        page.click("nav >> text=Ordini")
+        page.wait_for_selector("table.ordini-table")
+
+        # Estrae le righe della tabella
+        righe = page.query_selector_all("table.ordini-table tbody tr")
+        for riga in righe:
+            colonne = riga.query_selector_all("td")
+            ordini.append({
+                "numero": colonne[0].inner_text(),
+                "data": colonne[1].inner_text(),
+                "valore": colonne[2].inner_text(),
+                "stato": colonne[3].inner_text(),
+            })
+
+        browser.close()
+
+    return ordini
+
+if __name__ == "__main__":
+    dati = estrai_ordini_portale("mio_utente", "mia_password")
+    print(json.dumps(dati, ensure_ascii=False, indent=2))
+```
+
+Punti importanti nello script: `headless=True` fa girare il browser senza finestra visibile (ideale per server). `wait_for_url` e `wait_for_selector` evitano race condition — l'errore più comune negli script RPA fragili è avanzare prima che la pagina sia caricata.
+
+## Automazione Desktop: Fogli di Calcolo, PDF e Sistemi Legacy
+
+Per i sistemi desktop, PyAutoGUI è la strada. L'approccio più robusto usa `pyautogui.locateOnScreen()` — invece di coordinate fisse, si passa uno screenshot del pulsante/campo che si vuole cliccare e PyAutoGUI trova dove si trova nello schermo corrente:
+
+```python
+import pyautogui
+import time
+
+def compila_modulo_erp(dati: dict):
+    # Apre il sistema tramite scorciatoia o doppio click sull'icona
+    pyautogui.hotkey("win", "r")
+    pyautogui.write("C:\\SistemaERP\\erp.exe", interval=0.05)
+    pyautogui.press("enter")
+    time.sleep(3)  # attende l'apertura del sistema
+
+    # Localizza il campo "Codice Cliente" tramite immagine di riferimento
+    campo_codice = pyautogui.locateOnScreen(
+        "assets/campo_codice_cliente.png",
+        confidence=0.9  # tolleranza del 90% di similarità
+    )
+
+    if campo_codice:
+        pyautogui.click(campo_codice)
+        pyautogui.write(dati["codice_cliente"], interval=0.05)
+        pyautogui.press("tab")
+        pyautogui.write(dati["nome"], interval=0.05)
+        pyautogui.hotkey("ctrl", "s")  # salva
+    else:
+        raise RuntimeError("Campo 'Codice Cliente' non trovato nello schermo")
+```
+
+Per i fogli Excel, PyAutoGUI non è nemmeno necessario: `openpyxl` legge e scrive file `.xlsx` direttamente, senza aprire Excel. Per i PDF con testo, `pdfplumber` estrae il contenuto con precisione. Queste librerie sono più veloci, più affidabili e non dipendono dallo schermo.
+
+## Pianificazione con Cron e Monitoraggio Errori
+
+Uno script RPA che gira una volta manualmente ha poco valore. Il valore reale deriva da script pianificati che girano da soli — tutte le notti, ogni ora, ogni 15 minuti.
+
+Su Linux e macOS, lo scheduler nativo è cron. Per uno script Python che gira ogni giorno alle 6:
+
+```bash
+# modifica con: crontab -e
+# minuto ora giorno mese giorno_settimana comando
+0 6 * * * /usr/bin/python3 /home/utente/rpa/estrai_ordini.py >> /var/log/rpa/ordini.log 2>&1
+```
+
+Il monitoraggio degli errori è dove la maggior parte degli script amatoriali fallisce silenziosamente. La soluzione minima è inviare un alert in caso di eccezione:
+
+```python
+import traceback
+import smtplib
+from email.message import EmailMessage
+
+def invia_alert_errore(errore: Exception, contesto: str):
+    msg = EmailMessage()
+    msg["Subject"] = f"[RPA] Errore in: {contesto}"
+    msg["From"] = "rpa@azienda.com"
+    msg["To"] = "team@azienda.com"
+    msg.set_content(f"Errore:\n{traceback.format_exc()}")
+
+    with smtplib.SMTP("smtp.azienda.com", 587) as smtp:
+        smtp.login("utente", "password")
+        smtp.send_message(msg)
+
+def esegui_con_retry(func, tentativi=3, contesto=""):
+    for i in range(tentativi):
+        try:
+            return func()
+        except Exception as e:
+            if i == tentativi - 1:
+                invia_alert_errore(e, contesto)
+                raise
+```
+
+Per chi preferisce soluzioni pronte, Sentry monitora le eccezioni Python in produzione con contesto completo (stack trace, variabili locali, breadcrumb) e si integra con Slack e PagerDuty.
+
+## Conclusione
+
+L'RPA con Python non è la soluzione per tutto, ma è la soluzione giusta per i processi ripetitivi in sistemi senza API disponibile. La combinazione di Playwright per il web, PyAutoGUI per il desktop, pianificazione via cron e monitoraggio degli errori copre il 90% dei casi d'uso che le aziende di medie dimensioni affrontano — senza il costo di licenza delle piattaforme enterprise.
+
+Il segreto sta nello scrivere script resilienti: auto-wait invece di sleep fissi, localizzazione per immagine invece che per coordinate, retry con notifica di errore. Script ben scritti girano per mesi senza intervento.
+
+In SystemForge implementiamo automazioni RPA su misura — mappiamo i tuoi processi manuali, identifichiamo cosa può essere automatizzato in sicurezza e consegniamo script pronti per la produzione con monitoraggio incluso.

@@ -1,0 +1,169 @@
+---
+title: "Valutazione degli LLM: come scegliere il modello giusto"
+slug: "valutazione-llm-come-scegliere-modello"
+date: "2024-11-07"
+description: "Come valutare e scegliere tra GPT-4o, Claude, Gemini e modelli open-source — benchmark, costo per token, contesto, velocità e casi d'uso ideali."
+tags: ["valutazione llm", "gpt-4", "claude", "gemini", "llama"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come valutare e scegliere tra GPT-4o, Claude, Gemini e modelli open-source — benchmark, costo per token, contesto, velocità e casi d'uso ideali.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'avaliacao-de-llms-como-escolher-o-modelo-certo'
+  - locale: 'it-IT'
+    slug: 'valutazione-llm-come-scegliere-modello'
+  - locale: 'en'
+    slug: 'llm-evaluation-how-to-choose-the-right-model'
+---
+
+"Qual è il miglior LLM?" è una delle domande più frequenti di chi inizia a costruire sistemi con l'IA. Ed è la domanda sbagliata. La risposta corretta è sempre: dipende da cosa stai facendo, dal volume, dal budget e dalla tolleranza al rischio. Non esiste un modello universalmente superiore — esiste il modello giusto per il problema giusto.
+
+Questo articolo non è una classifica statica che diventerà obsoleta in settimane. È un framework per valutare i modelli per il tuo caso d'uso specifico — perché questa valutazione deve essere fatta con i tuoi dati, i tuoi task e i tuoi vincoli.
+
+## Benchmark Pubblici vs Performance Reale
+
+I benchmark pubblici come MMLU, HumanEval, MATH e HellaSwag sono ampiamente citati negli annunci di nuovi modelli. Misurano capacità generali su task standardizzati e servono per confronti baseline. Ma esiste un problema fondamentale: **le performance sui benchmark raramente predicono le performance nella tua applicazione specifica**.
+
+Un modello può avere il 92% su MMLU e generare risposte scadenti per contratti legali. Un altro può avere l'87% sullo stesso benchmark e funzionare eccezionalmente bene per la classificazione delle intenzioni nell'assistenza clienti.
+
+Il motivo: i benchmark testano task generici in inglese. La tua applicazione probabilmente ha:
+
+- Una lingua specifica (italiano con le sue particolarità, terminologia tecnica di settore)
+- Un dominio specifico (legale, medico, finanziario, tecnico)
+- Un formato di output specifico (JSON strutturato, testo formattato, codice)
+- Un livello di ragionamento specifico (semplice/complesso)
+
+L'unica valutazione che conta è la **valutazione offline con i tuoi esempi**. Raccogli 50-200 coppie di (input, output atteso), definisci metriche chiare (BLEU, ROUGE, accuratezza, o valutazione umana) e testa ogni modello candidato su quella base prima di scegliere.
+
+```python
+import json
+from openai import OpenAI
+from anthropic import Anthropic
+
+def evaluate_model(model: str, examples: list[dict]) -> dict:
+    """
+    examples: list of {"input": str, "expected_output": str}
+    Returns evaluation metrics
+    """
+    correct = 0
+    results = []
+
+    for ex in examples:
+        if "gpt" in model:
+            client = OpenAI()
+            response = client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": ex["input"]}],
+                temperature=0,
+            )
+            output = response.choices[0].message.content
+        elif "claude" in model:
+            client = Anthropic()
+            response = client.messages.create(
+                model=model,
+                max_tokens=1024,
+                messages=[{"role": "user", "content": ex["input"]}],
+            )
+            output = response.content[0].text
+
+        # Simplified evaluation - use more sophisticated metrics in production
+        is_correct = ex["expected_output"].lower() in output.lower()
+        if is_correct:
+            correct += 1
+
+        results.append({
+            "input": ex["input"],
+            "expected": ex["expected_output"],
+            "obtained": output,
+            "correct": is_correct
+        })
+
+    return {
+        "model": model,
+        "accuracy": correct / len(examples),
+        "total": len(examples),
+        "correct": correct,
+        "results": results
+    }
+```
+
+## GPT-4o, Claude e Gemini: Punti di Forza di Ciascuno
+
+Confronto dei principali modelli proprietari basato su caratteristiche osservate nell'uso reale:
+
+| Caratteristica | GPT-4o | Claude 3.5 Sonnet | Gemini 1.5 Pro |
+|---------------|--------|------------------|----------------|
+| Ragionamento generale | Eccellente | Eccellente | Molto buono |
+| Generazione di codice | Eccellente | Eccellente | Molto buono |
+| Seguire istruzioni | Molto buono | Eccellente | Molto buono |
+| Finestra di contesto | 128K token | 200K token | 1M token |
+| Velocità | Veloce | Veloce | Moderato |
+| Costo (input/1M token) | ~$5 | ~$3 | ~$3,50 |
+| Multimodale (immagini) | Sì | Sì | Sì |
+| Tool use / Function calling | Eccellente | Eccellente | Molto buono |
+
+**GPT-4o** è la scelta più sicura per i team che già usano l'ecosistema OpenAI. Ha il più grande ecosistema di strumenti, la documentazione più estesa e il supporto più maturo. Funziona molto bene per la generazione di codice e i task di ragionamento.
+
+**Claude (Anthropic)** si distingue nel seguire istruzioni complesse con precisione, nei task che richiedono un lungo contesto e nei testi lunghi e coerenti. Molti sviluppatori riferiscono che Claude è più "prevedibile" nel rispettare i vincoli e nel formato dell'output.
+
+**Gemini (Google)** ha la più grande finestra di contesto disponibile (1M token nel 1.5 Pro), rendendolo unico per casi d'uso con documenti molto lunghi. L'integrazione nativa con Google Workspace è un vantaggio per le aziende già nell'ecosistema Google.
+
+## Modelli Open-source: Llama, Mistral e Alternative
+
+I modelli open-source hanno cambiato il panorama nel 2023-2024. Llama 3 (Meta), Mistral, Qwen e Gemma offrono performance paragonabili ai modelli proprietari della generazione precedente, con il vantaggio di poter essere eseguiti sull'infrastruttura propria.
+
+I principali vantaggi dell'open-source:
+
+**Controllo dei dati:** per le aziende con dati sensibili (sanitario, legale, finanziario), elaborare i dati in un LLM proprietario nel cloud può essere un ostacolo normativo o di compliance. Eseguire un modello in locale risolve questo problema.
+
+**Costo ad alto volume:** oltre una certa scala, gestire la propria infrastruttura con modelli open-source è più economico che pagare per token.
+
+**Personalizzazione:** il fine-tuning sui modelli open-source è più flessibile e più economico del fine-tuning sui modelli proprietari.
+
+Gli svantaggi:
+
+**Infrastruttura:** eseguire un modello da 70B parametri richiede GPU A100 o H100. Il costo dell'infrastruttura e dell'operazione deve essere incluso nel calcolo.
+
+**Gap di qualità:** per task di ragionamento complessi, i migliori modelli proprietari superano ancora i migliori open-source. Il gap si sta riducendo, ma esiste.
+
+```
+Modelli open-source da considerare nel 2024:
+
+Llama 3.1 70B  — miglior rapporto qualità/costo per uso generale
+Mistral 7B     — estremamente efficiente, ottimo per classificazione ed estrazione
+Qwen 2.5 72B   — forte in codice e ragionamento
+Phi-3 Mini     — compatto, gira su hardware modesto
+CodeLlama      — specializzato nella generazione di codice
+```
+
+Per l'uso in produzione senza infrastruttura propria, servizi come Together AI, Groq e Replicate offrono inferenza di modelli open-source via API, a costo inferiore rispetto ai proprietari.
+
+## Costo Totale: Token + Latenza + Manutenzione
+
+Il confronto dei costi tra modelli deve andare oltre il prezzo per token. Il costo totale di proprietà include:
+
+**Token di input vs output:** tutti i modelli addebitano di più per i token generati (output) rispetto ai token di input. Per le applicazioni che generano risposte lunghe, il costo di output domina.
+
+**Costo di latenza:** una latenza più alta significa throughput inferiore per server nelle applicazioni ad alta concorrenza. Per le applicazioni in tempo reale, un modello più economico ma lento può richiedere più istanze e costare di più in totale.
+
+**Costo degli errori:** se il modello più economico commette errori che richiedono ri-elaborazione o supervisione umana, il costo effettivo per transazione riuscita può essere maggiore del modello più costoso con maggiore accuratezza.
+
+**Costo di manutenzione dei prompt:** i modelli cambiano con gli aggiornamenti. Un prompt che funziona perfettamente oggi può produrre risultati diversi dopo un aggiornamento del modello. Questo costo di manutenzione è reale e raramente contabilizzato.
+
+| Componente di costo | Modelli proprietari | Modelli open-source (proprio) |
+|--------------------|----------------------|------------------------------|
+| Per token (API) | Sì | No (costo GPU/ora) |
+| Infrastruttura | Basso | Alto |
+| Manutenzione | Basso | Alto |
+| Fine-tuning | Medio | Basso |
+| Conformità dati | Rischio (dati escono) | Basso (dati restano interni) |
+
+## Conclusione
+
+Scegliere un LLM non è una decisione permanente. I modelli migliorano e cambiano costantemente, e quella che è la scelta migliore oggi potrebbe non esserlo tra sei mesi. Ciò che conta è avere un processo di valutazione riproducibile con la tua base di test, in modo da poter rivalutare periodicamente.
+
+In **SystemForge**, il nostro approccio è agnostico rispetto al modello: definiamo quale modello usare in base alle caratteristiche di ogni caso d'uso all'interno del progetto, non per preferenza o familiarità. Se stai valutando quale LLM usare per un'applicazione specifica, possiamo condurre una valutazione strutturata e raccomandare in base alle evidenze, non all'hype.

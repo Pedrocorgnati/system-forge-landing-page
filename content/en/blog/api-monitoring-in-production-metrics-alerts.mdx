@@ -1,0 +1,217 @@
+---
+title: "API Monitoring in Production: Metrics and Alerts"
+slug: "api-monitoring-in-production-metrics-alerts"
+date: "2024-11-22"
+description: "How to monitor APIs in production — p50/p95/p99 latency, error rate, PagerDuty alerts, distributed tracing with OpenTelemetry, and Grafana dashboards."
+tags: ["api monitoring", "opentelemetry", "grafana", "alerts", "observability"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to monitor APIs in production — p50/p95/p99 latency, error rate, PagerDuty alerts, distributed tracing with OpenTelemetry, and Grafana dashboards.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'monitoramento-apis-producao-metricas-alertas'
+  - locale: 'it-IT'
+    slug: 'monitoraggio-api-produzione-metriche-alert'
+  - locale: 'en'
+    slug: 'api-monitoring-in-production-metrics-alerts'
+---
+
+There are two ways to find out your API has problems in production: your alerts tell you, or your customers tell you. The first is just an incident. The second is an incident and a trust crisis.
+
+API monitoring in production isn't optional — it's the quality infrastructure that separates a professional service from a prototype in production. And with the right tools, setting up basic observability takes less than a day of work.
+
+## Essential Metrics: Latency, Error Rate, and Throughput
+
+The three fundamental metrics of any API are known as the SRE (Site Reliability Engineering) "Golden Signals":
+
+**Latency** — how long your API takes to respond. The classic mistake is only monitoring the average. The average hides outliers: if 95% of requests take 50ms and 5% take 10 seconds, the average might be 550ms — which seems reasonable but represents a terrible experience for 1 in 20 users.
+
+The right percentiles to monitor:
+- **p50 (median):** The "median" user. Good performance baseline.
+- **p95:** 95% of requests are below this value. What most users experience.
+- **p99:** The "long tail." Where real performance problems live.
+- **p99.9:** For critical SLAs. An API with a p99.9 of 2 seconds has 0.1% of requests slower than that.
+
+**Error Rate** — percentage of requests returning 5xx. A sudden spike from 0% to 5% error rate is more significant than a constant 2% error rate. Alert on relative variations, not just absolute thresholds.
+
+**Throughput** — how many requests per second. Useful for detecting both abnormal traffic drops (something broke upstream) and spikes that may indicate abuse.
+
+```typescript
+// Manual instrumentation with custom metrics in Next.js
+import { metrics } from "@opentelemetry/api";
+
+const meter = metrics.getMeter("api-metrics");
+
+const httpRequestDuration = meter.createHistogram("http_request_duration_ms", {
+  description: "HTTP request duration in milliseconds",
+  unit: "ms",
+});
+
+const httpRequestsTotal = meter.createCounter("http_requests_total", {
+  description: "Total HTTP requests",
+});
+
+// Instrumentation middleware
+export function instrumentRequest(handler: NextApiHandler): NextApiHandler {
+  return async (req, res) => {
+    const startTime = Date.now();
+    const labels = {
+      method: req.method ?? "unknown",
+      route: req.url?.split("?")[0] ?? "unknown",
+    };
+
+    try {
+      await handler(req, res);
+      const duration = Date.now() - startTime;
+      httpRequestDuration.record(duration, { ...labels, status: String(res.statusCode) });
+      httpRequestsTotal.add(1, { ...labels, status: String(res.statusCode) });
+    } catch (error) {
+      httpRequestDuration.record(Date.now() - startTime, { ...labels, status: "500" });
+      httpRequestsTotal.add(1, { ...labels, status: "500" });
+      throw error;
+    }
+  };
+}
+```
+
+## OpenTelemetry: Distributed Tracing in Practice
+
+Metrics say "something is wrong." Traces say "exactly where it's wrong and why." OpenTelemetry (OTel) is the open standard for observability instrumentation — works with any backend (Jaeger, Tempo, Datadog, New Relic, Honeycomb).
+
+```typescript
+// OpenTelemetry setup in Next.js (instrumentation.ts)
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
+import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+
+export function register() {
+  const sdk = new NodeSDK({
+    traceExporter: new OTLPTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces",
+    }),
+    metricReader: new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/metrics",
+      }),
+    }),
+    instrumentations: [
+      getNodeAutoInstrumentations({
+        "@opentelemetry/instrumentation-fs": { enabled: false }, // too verbose
+      }),
+    ],
+    serviceName: "orders-api",
+  });
+
+  sdk.start();
+}
+```
+
+With auto-instrumentations, you get traces for free: HTTP requests, Prisma/TypeORM queries, Redis commands, fetch/axios calls, and queue messages.
+
+## Grafana + Prometheus: API Dashboard in 30 Minutes
+
+```yaml
+# docker-compose.yml — local observability stack
+version: "3.8"
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "3200:3200"   # Tempo API
+
+volumes:
+  grafana-data:
+```
+
+Essential Prometheus queries for API dashboards:
+
+```promql
+# p99 latency by route (last 5 minutes)
+histogram_quantile(0.99,
+  rate(http_request_duration_ms_bucket[5m])
+) by (route)
+
+# Error rate by route
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (route)
+/
+sum(rate(http_requests_total[5m])) by (route)
+
+# Throughput (req/s)
+sum(rate(http_requests_total[1m])) by (route)
+```
+
+## Smart Alerts: Avoiding Alert Fatigue
+
+Alert fatigue is the phenomenon where a team stops responding to alerts because they receive so many non-urgent alerts that the relevant ones get lost in the noise. It's one of the most serious problems in software operations.
+
+**Smart alerting principles:**
+
+**Alert on symptoms, not causes.** "Error rate > 5%" is a symptom: something is wrong for users. "CPU > 80%" is a cause: may or may not be affecting users. Prefer symptom alerts, use cause as context in the runbook.
+
+**Burn rate, not absolute thresholds.** Instead of alerting when error rate > 1%, alert when you're "burning" your SLO faster than sustainable.
+
+```yaml
+# Alerts in Prometheus (alertmanager)
+groups:
+  - name: api-alerts
+    rules:
+      - alert: HighErrorBurnRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            / sum(rate(http_requests_total[1h]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Error rate above 5% for 5 minutes"
+          runbook: "https://wiki.company.com/runbooks/high-error-rate"
+
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            rate(http_request_duration_ms_bucket[5m])
+          ) > 2000
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P99 latency above 2 seconds"
+```
+
+**Three severity levels:**
+- **Critical:** wake someone up now. SLO at immediate risk, users impacted.
+- **Warning:** investigate during business hours. Worrying trend.
+- **Info:** log for audit. Doesn't interrupt anyone.
+
+## Conclusion
+
+API observability isn't a future project — it's a production requirement. The good news is that the entry cost has dropped dramatically: OpenTelemetry is free and open source, Grafana + Prometheus can be self-hosted at zero cost, and basic setup takes less than a day of work.
+
+At SystemForge, monitoring and SLOs are part of the deploy phase — not added later as an afterthought. This means every delivered system comes with functional dashboards, configured alerts, and basic runbooks.

@@ -1,0 +1,216 @@
+---
+title: "Sicurezza software: 10 vulnerabilità comuni"
+slug: "sicurezza-software-10-vulnerabilita-comuni"
+date: "2024-10-30"
+description: "Le 10 vulnerabilità di sicurezza più comuni nelle applicazioni web e mobile — basate sull'OWASP Top 10 — con esempi di codice e come correggerle."
+tags: ["sicurezza", "owasp", "vulnerabilità", "sviluppo sicuro", "sql injection"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Le 10 vulnerabilità di sicurezza più comuni nelle applicazioni web e mobile — basate sull'OWASP Top 10 — con esempi pratici e come correggerle.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-software-10-vulnerabilidades-comuns'
+  - locale: 'it-IT'
+    slug: 'sicurezza-software-10-vulnerabilita-comuni'
+  - locale: 'en'
+    slug: 'software-security-10-common-vulnerabilities'
+---
+
+## Il 95% delle Vulnerabilità Sfruttate Sono Conosciute ed Evitabili
+
+La maggior parte degli attacchi riusciti non sfrutta vulnerabilità zero-day sofisticate. Sfruttano falle note e documentate che avrebbero potuto essere evitate con pratiche di base di sviluppo sicuro. L'OWASP (Open Web Application Security Project) documenta le vulnerabilità più critiche nelle applicazioni web dal 2003, e le stesse categorie riemergono continuamente.
+
+Questo articolo copre le 10 vulnerabilità più comuni, con esempi pratici e come correggerle.
+
+## 1. Injection (SQL, NoSQL, Command)
+
+L'injection si verifica quando dati non attendibili vengono inviati a un interprete come parte di un comando o di una query.
+
+**SQL Injection — esempio vulnerabile:**
+
+```javascript
+// NON farlo mai
+const query = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`;
+```
+
+Se l'utente inserisce `' OR '1'='1` come email, la query restituisce tutti gli utenti.
+
+**Correzione — query parametrizzate:**
+
+```javascript
+// Corretto: parametri separati dalla query
+const result = await db.query(
+  'SELECT * FROM users WHERE email = $1 AND password = $2',
+  [email, hashedPassword]
+);
+```
+
+Gli ORM moderni come Prisma e Drizzle usano query parametrizzate per impostazione predefinita. Il rischio emerge quando gli sviluppatori usano `$queryRaw` o costruiscono SQL manualmente.
+
+## 2. Autenticazione Rotta e Gestione delle Sessioni
+
+Le falle di autenticazione includono: password deboli senza policy di forza, assenza di rate limiting sul login, token di sessione prevedibili, sessioni che non scadono.
+
+**Problemi comuni:**
+
+- Password archiviate in chiaro o con hash MD5/SHA1
+- Assenza di autenticazione a due fattori per operazioni critiche
+- Token JWT senza scadenza o con segreto debole
+- Session fixation — riutilizzo del session ID dopo il login
+
+**Correzione:**
+
+```typescript
+// Hash corretto con bcrypt (costo minimo 10)
+import bcrypt from 'bcryptjs';
+
+const SALT_ROUNDS = 12;
+const hashedPassword = await bcrypt.hash(plainPassword, SALT_ROUNDS);
+
+// JWT con scadenza breve e refresh token
+const token = jwt.sign(
+  { userId: user.id },
+  process.env.JWT_SECRET!,
+  { expiresIn: '15m' }
+);
+```
+
+## 3. Esposizione di Dati Sensibili
+
+I dati sensibili esposti includono password, token API, dati personali (codice fiscale, carta di credito), dati sanitari e finanziari archiviati o trasmessi senza adeguata protezione.
+
+**Errori comuni:**
+- Dati sensibili nei log dell'applicazione
+- Chiavi API nel repository Git
+- Dati in cache senza TTL o senza crittografia
+- Comunicazione HTTP invece di HTTPS
+
+**Correzione:**
+- Non loggare mai dati sensibili (`console.log(user)` può esporre la password)
+- Usare `.gitignore` per `.env` e non committare mai i segreti
+- Crittografare i dati sensibili a riposo con AES-256
+- Forzare HTTPS in tutti gli ambienti
+
+## 4. XML External Entities (XXE)
+
+Riguarda applicazioni che elaborano XML. Un attaccante può leggere file dal server, fare richieste interne (SSRF) o causare denial of service.
+
+**Correzione:** Disabilitare l'elaborazione di entità esterne nel parser XML. Nelle applicazioni moderne che usano JSON, il rischio è minimo — ma le API legacy elaborano ancora XML.
+
+## 5. Broken Access Control
+
+Si verifica quando gli utenti riescono a eseguire azioni oltre i loro permessi. Include IDOR (Insecure Direct Object Reference) — accesso a risorse di altri utenti modificando un ID nell'URL.
+
+**Esempio vulnerabile:**
+
+```typescript
+// Vulnerabile: non verifica se l'ordine appartiene all'utente loggato
+app.get('/orders/:orderId', async (req, res) => {
+  const order = await db.order.findUnique({ where: { id: req.params.orderId } });
+  res.json(order);
+});
+```
+
+**Correzione:**
+
+```typescript
+// Corretto: verifica la proprietà della risorsa
+app.get('/orders/:orderId', authenticate, async (req, res) => {
+  const order = await db.order.findUnique({
+    where: { id: req.params.orderId, userId: req.user.id } // userId filtra per l'utente loggato
+  });
+  if (!order) return res.status(404).json({ error: 'Not found' });
+  res.json(order);
+});
+```
+
+## 6. Misconfiguration di Sicurezza
+
+Configurazioni predefinite insicure, permessi eccessivi, header HTTP assenti, porte non necessarie aperte.
+
+**Header di sicurezza essenziali:**
+
+```typescript
+// Next.js — next.config.js
+const securityHeaders = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  {
+    key: 'Content-Security-Policy',
+    value: "default-src 'self'; script-src 'self' 'unsafe-inline'"
+  }
+];
+```
+
+## 7. Cross-Site Scripting (XSS)
+
+XSS consente agli attaccanti di iniettare script malevoli nelle pagine visualizzate da altri utenti. Può essere usato per rubare cookie di sessione, reindirizzare utenti o modificare il contenuto della pagina.
+
+**Tipi di XSS:**
+- **Stored XSS:** Script salvato nel database e mostrato ad altri utenti
+- **Reflected XSS:** Script nell'URL riflesso nella risposta
+- **DOM-based XSS:** Manipolazione del DOM via JavaScript sul client
+
+**Correzione:** I framework moderni come React eseguono l'escape del contenuto automaticamente. Il rischio emerge con `dangerouslySetInnerHTML` o la manipolazione diretta del DOM con `innerHTML`.
+
+```typescript
+// Pericoloso
+element.innerHTML = userInput;
+
+// Sicuro
+element.textContent = userInput;
+// O, se si ha bisogno di HTML, usa una libreria di sanitizzazione come DOMPurify
+element.innerHTML = DOMPurify.sanitize(userInput);
+```
+
+## 8. Deserializzazione Insicura
+
+Deserializzare dati non attendibili può portare all'esecuzione remota di codice. Riguarda principalmente linguaggi come Java e PHP, ma anche JavaScript con `JSON.parse` in combinazione con prototipi.
+
+**Correzione:** Validare e sanitizzare i dati deserializzati con schema (Zod, Joi) prima di elaborarli.
+
+## 9. Utilizzo di Componenti con Vulnerabilità Note
+
+Le dipendenze obsolete con CVE noti sono un vettore di attacco diretto. La maggior parte dei progetti ha decine di dipendenze indirette che vengono raramente verificate.
+
+**Pratica obbligatoria:**
+
+```bash
+# Verifica regolare delle dipendenze
+npm audit
+
+# Correzione automatica delle vulnerabilità (quando possibile)
+npm audit fix
+
+# Verifica licenze e vulnerabilità con strumento dedicato
+npx snyk test
+```
+
+Configura alert automatici su GitHub (Dependabot) per ricevere PR automatici quando vengono identificate dipendenze con CVE.
+
+## 10. Logging e Monitoraggio Insufficienti
+
+Senza log adeguati, gli attacchi in corso passano inosservati per giorni o settimane. Senza alert, scopri il problema quando il cliente si lamenta.
+
+**Cosa loggare:**
+- Tentativi di autenticazione (successo e fallimento)
+- Modifiche di permessi e accessi a dati sensibili
+- Errori di autorizzazione (403) — possono indicare tentativi di IDOR
+- Picchi anomali di richieste
+
+**Cosa NON loggare:**
+- Password (nemmeno come hash)
+- Token di sessione completi
+- Dati personali sensibili (codice fiscale, carta)
+
+## Conclusione
+
+La sicurezza non è una funzionalità aggiuntiva — è parte dello sviluppo professionale. Le 10 categorie dell'OWASP Top 10 rappresentano vulnerabilità evitabili con pratiche di base: query parametrizzate, validazione dell'input, controllo degli accessi verificato lato server, dipendenze aggiornate e header corretti.
+
+SystemForge include una revisione della sicurezza in tutti i progetti — Code Review con focus OWASP, dependency audit e validazione degli header.

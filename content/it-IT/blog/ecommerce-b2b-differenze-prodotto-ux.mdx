@@ -1,0 +1,176 @@
+---
+title: "E-commerce B2B: differenze di prodotto e UX"
+slug: "ecommerce-b2b-differenze-prodotto-ux"
+date: "2024-11-25"
+description: "Come l'e-commerce B2B differisce dal B2C: listini prezzi per cliente, approvazione ordini, fatture, credito e catalogo ristretto per profilo."
+tags: ["e-commerce b2b", "b2b", "commercio elettronico", "ux b2b", "marketplace b2b"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come l'e-commerce B2B differisce dal B2C: listini prezzi per cliente, approvazione ordini, fatture, credito e catalogo ristretto per profilo."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ecommerce-b2b-diferencas-produto-ux'
+  - locale: 'it-IT'
+    slug: 'ecommerce-b2b-differenze-prodotto-ux'
+  - locale: 'en'
+    slug: 'b2b-ecommerce-product-and-ux-differences'
+---
+
+L'e-commerce B2B ha una complessità quasi invisibile per chi acquista, ma enormemente maggiore per chi lo costruisce. L'acquirente aziendale vede un catalogo, aggiunge prodotti e fa l'ordine — apparentemente semplice. Dietro ci sono listini prezzi negoziati individualmente, flussi di approvazione con più livelli, emissione automatica di fatture, condizioni di pagamento a termine, cataloghi ristretti per profilo cliente e integrazioni con i sistemi di procurement dell'acquirente.
+
+Applicare la stessa logica di un e-commerce B2C a un'operazione B2B è un errore comune che produce piattaforme che i venditori odiano usare e che non soddisfano le reali esigenze degli acquirenti aziendali.
+
+## Prezzi per Cliente: Listini, Sconti e Contratti
+
+Nel B2C, un prodotto ha un prezzo (con possibile sconto tramite coupon o promozione). Nel B2B, lo stesso prodotto può avere prezzi completamente diversi per ogni cliente — risultato di contratti negoziati, volume storico degli acquisti, segmento di mercato o regione.
+
+L'architettura dei prezzi B2B deve supportare:
+
+**Listini per cliente o segmento:** Il "Listino Oro" ha prezzi X, il "Listino Platinum" ha prezzi Y, e il cliente Z ha prezzi negoziati specificamente. Il catalogo mostrato a ogni cliente deve visualizzare il prezzo contrattuale, non il prezzo di listino.
+
+**Sconti per volume:** Acquisti superiori a 100 unità hanno uno sconto del 5%, superiori a 500 unità hanno il 12%. Lo sconto può essere applicato per articolo, per categoria o per valore totale dell'ordine.
+
+**Validità del contratto:** I prezzi negoziati hanno una scadenza. Quando il contratto scade, il sistema deve applicare il prezzo di listino standard o bloccare i nuovi ordini fino al rinnovo.
+
+```typescript
+async function calcolaPrezzoDB2B(
+  skuId: string,
+  clienteId: string,
+  quantita: number
+): Promise<PrezzoB2B> {
+  // 1. Verificare contratto attivo per il cliente
+  const contratto = await db.contratti.findAttivo(clienteId);
+
+  if (contratto) {
+    // 2. Cercare il prezzo contrattuale per lo SKU
+    const prezzoContratto = await db.listiniPrezzi.findItem({
+      listinoId: contratto.listinoPrezzoid,
+      skuId,
+    });
+
+    if (prezzoContratto) {
+      // 3. Applicare sconto per volume se presente
+      const scontoVolume = calcolaScontoVolume(
+        quantita,
+        contratto.regoleVolume
+      );
+
+      return {
+        prezzoUnitario: prezzoContratto.valore * (1 - scontoVolume),
+        prezzoTotale: prezzoContratto.valore * quantita * (1 - scontoVolume),
+        scontoApplicato: scontoVolume,
+        origine: "contratto",
+        contrattoId: contratto.id,
+        validitaFino: contratto.validitaFine,
+      };
+    }
+  }
+
+  // 4. Fallback: prezzo di listino pubblico
+  const prezzoStandard = await db.prodotti.getPrezzo(skuId);
+  return {
+    prezzoUnitario: prezzoStandard,
+    prezzoTotale: prezzoStandard * quantita,
+    scontoApplicato: 0,
+    origine: "listino_pubblico",
+  };
+}
+```
+
+La visualizzazione dei prezzi nel catalogo B2B richiede attenzione: l'acquirente deve vedere chiaramente se il prezzo visualizzato è il prezzo contrattuale o il prezzo di listino. Mostrare il prezzo di listino barrato con il prezzo contrattuale accanto rinforza il valore del contratto e incentiva la fedeltà.
+
+## Flusso di Approvazione: Acquirente, Responsabile e Finanza
+
+Negli acquisti B2C, la decisione è individuale e immediata. Nel B2B, specialmente per ordini sopra un certo valore, l'acquisto passa attraverso un flusso di approvazione interno all'azienda acquirente. Il sistema di e-commerce deve supportare questo flusso nativamente o tramite integrazione.
+
+Il tipico flusso di approvazione B2B ha tre livelli:
+
+1. **Acquirente/Richiedente:** Crea l'ordine (o "preventivo") nel sistema. Non può approvare — solo richiedere.
+2. **Responsabile/Approvatore:** Riceve notifica, analizza l'ordine, può approvare, rifiutare o richiedere modifiche (quantità, sostituzione articolo, spedizione).
+3. **Ufficio Finanziario:** Per ordini superiori al limite o fuori budget approvato, la finanza ha l'ultima parola. Può verificare il limite di credito disponibile prima di approvare.
+
+La UX di questo flusso deve essere chiara per ogni ruolo. L'acquirente vede i suoi ordini con stato "In attesa di approvazione". Il responsabile vede una coda di ordini in attesa della sua approvazione, con contesto sufficiente per decidere senza contattare il richiedente. Il finanziario vede l'impatto sul credito disponibile prima di approvare.
+
+| Stato ordine | Chi può vedere | Azione disponibile |
+|---|---|---|
+| Bozza | Acquirente | Modifica, invia, cancella |
+| In attesa di approvazione gerarchica | Responsabile, Acquirente (sola lettura) | Approva, rifiuta, richiedi modifica |
+| In attesa di approvazione finanziaria | Finanza, Responsabile, Acquirente | Approva finanza, blocca per credito |
+| Approvato — in attesa di elaborazione | Venditore, Acquirente | Conferma, avvia picking |
+| In preparazione | Acquirente (tracciamento) | — |
+| Fatturato | Acquirente, Finanza | Scarica fattura, conferma ricezione |
+
+Le notifiche via email e/o WhatsApp a ogni cambio di stato sono essenziali — gli acquirenti B2B non monitorano continuamente il portale, ma devono sapere quando qualcosa richiede la loro azione.
+
+## Fatture e Integrazione con Sistemi Fiscali
+
+Nel B2B italiano, la fattura elettronica non è opzionale — è un obbligo di legge per tutte le vendite tra soggetti IVA. L'e-commerce B2B deve emettere fatture elettroniche automaticamente alla conferma dell'ordine, o integrarsi con un sistema esterno che lo faccia.
+
+L'emissione della fattura elettronica comporta:
+- Validazione dei dati fiscali dell'acquirente (P.IVA, codice fiscale, regime tributario)
+- Calcolo delle imposte in base al tipo di prodotto/servizio
+- Trasmissione al Sistema di Interscambio (SDI) dell'Agenzia delle Entrate
+- Archiviazione del file XML e PDF della fattura per consultazione
+
+Integrare con un software di fatturazione specializzato (TeamSystem, Zucchetti, Fatture in Cloud, SAP) è più pratico che costruire l'integrazione SDI da zero. Questi servizi astraggono le particolarità normative e mantengono la conformità quando la legislazione cambia.
+
+Un punto di attenzione: l'emissione della fattura può fallire (P.IVA non valida, SDI non disponibile, dati fiscali inconsistenti). Il flusso dell'e-commerce deve gestire questi errori in modo da non bloccare indefinitamente l'ordine — coda di retry, avviso al team fiscale e meccanismo di rielaborazione manuale sono essenziali.
+
+## Credito e Fatturazione: Pagamento a Termine nell'E-commerce
+
+Il pagamento immediato è la regola nel B2C; il pagamento a termine è la regola nel B2B. "30/60/90 giorni" è il linguaggio della relazione commerciale B2B, e l'e-commerce che accetta solo carta o bonifico immediato perderà clienti aziendali a favore del fornitore che accetta la fattura a 30 giorni.
+
+Il modello di credito B2B nell'e-commerce prevede:
+
+**Limite di credito per cliente:** Ogni azienda acquirente ha un limite approvato dall'ufficio finanziario del venditore. Gli ordini che supererebbero il limite vengono bloccati automaticamente o inoltrati per analisi speciale.
+
+**Condizioni di pagamento:** Il cliente A ha la condizione "30 giorni", il cliente B ha "30/60 giorni" (50% a 30 giorni, 50% a 60 giorni), e così via. Il sistema deve memorizzare e applicare queste condizioni per cliente.
+
+**Fattura con pagamento differito:** La fattura viene generata dopo l'emissione e inviata via email con scadenza secondo le condizioni di pagamento. Il pagamento ricevuto deve aggiornare la posizione finanziaria del cliente (saldo di credito, storico pagamenti).
+
+**Gestione della morosità:** I clienti con fatture scadute devono avere i nuovi ordini bloccati automaticamente. L'integrazione con l'ERP finanziario (SAP, TeamSystem, Zucchetti) è ciò che rende questa gestione praticabile senza intervento manuale costante.
+
+```typescript
+async function validaCreditoPerOrdine(
+  clienteId: string,
+  valoreOrdine: number
+): Promise<ValidazioneCredito> {
+  const cliente = await db.clientiB2B.findById(clienteId);
+
+  // Verificare morosità
+  const fattureScadute = await db.finanziario.countFattureScadute(clienteId);
+  if (fattureScadute > 0) {
+    return {
+      approvato: false,
+      motivo: "morosita",
+      messaggio: `Esistono ${fattureScadute} fattura/e scaduta/e. Regolarizza per continuare ad acquistare.`,
+    };
+  }
+
+  // Verificare limite di credito
+  const saldoUtilizzato = await db.finanziario.getSaldoUtilizzato(clienteId);
+  const saldoDisponibile = cliente.limiteCredito - saldoUtilizzato;
+
+  if (valoreOrdine > saldoDisponibile) {
+    return {
+      approvato: false,
+      motivo: "limite_insufficiente",
+      saldoDisponibile,
+      valoreRichiesto: valoreOrdine,
+      messaggio: `Limite di credito disponibile: €${saldoDisponibile.toFixed(2)}`,
+    };
+  }
+
+  return { approvato: true, saldoDisponibile, limiteTotale: cliente.limiteCredito };
+}
+```
+
+## Conclusione
+
+L'e-commerce B2B ben costruito è un canale di vendita che opera 24h, riduce il costo di assistenza (meno telefonate per prendere ordini), accelera il ciclo di vendita (approvazioni più rapide con flusso digitale) e genera dati sul comportamento d'acquisto che il team commerciale non avrebbe altrimenti.
+
+La complessità tecnica è reale — prezzi per cliente, flussi di approvazione multi-livello, emissione fiscale, gestione del credito — e richiede un'architettura pensata per il B2B dall'inizio, non adattamenti di un sistema B2C. In SystemForge, sviluppiamo piattaforme di e-commerce B2B da zero e personalizzazioni su piattaforme esistenti, con la complessità commerciale che le operazioni B2B richiedono. [Parla con il nostro team](/contato) per discutere il tuo progetto.

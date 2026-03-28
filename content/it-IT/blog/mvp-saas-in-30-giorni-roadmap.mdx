@@ -1,0 +1,148 @@
+---
+title: "MVP SaaS in 30 giorni: roadmap pratica"
+slug: "mvp-saas-in-30-giorni-roadmap"
+date: "2024-10-16"
+description: "Come costruire un MVP SaaS in 30 giorni senza tagliare ciò che conta — scelta dello stack, feature del perimetro minimo, auth, billing di base e primi utenti."
+tags: ["mvp saas", "startup", "sviluppo rapido", "saas", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come costruire un MVP SaaS in 30 giorni senza tagliare ciò che conta — scelta dello stack, feature del perimetro minimo, auth, billing di base e primi utenti.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'mvp-saas-em-30-dias-roteiro'
+  - locale: 'it-IT'
+    slug: 'mvp-saas-in-30-giorni-roadmap'
+  - locale: 'en'
+    slug: 'saas-mvp-in-30-days-practical-roadmap'
+---
+
+30 giorni sono sufficienti per validare un'ipotesi. Non per costruire un prodotto. Questa distinzione definisce tutto nel processo di sviluppo di un MVP SaaS.
+
+L'obiettivo dell'MVP non è consegnare un prodotto completo — è scoprire se le persone pagheranno per risolvere il problema che stai affrontando. Tutto ciò che non contribuisce a questa risposta è uno spreco. Ma questo non significa costruire qualcosa di rotto: un MVP mal costruito tecnicamente genera debito che blocca la crescita per mesi dopo la validazione.
+
+Questa roadmap divide i 30 giorni in quattro settimane con obiettivi chiari, e definisce cosa è essenziale, cosa può aspettare e perché ogni decisione conta.
+
+## Settimana 1: Stack, Auth e Struttura Multi-tenancy
+
+La prima settimana riguarda le fondamenta — le decisioni tecniche che saranno più costose da cambiare in seguito.
+
+**Scelta dello stack per MVP SaaS nel 2024:**
+
+Per la maggior parte dei casi, Next.js con App Router è la scelta migliore per frontend e API di un MVP SaaS:
+- Full-stack in un'unica base di codice
+- Server Components riducono il JavaScript inviato al client
+- API Routes per endpoint semplici, Server Actions per i form
+- Deploy su Vercel in pochi minuti
+
+Per il database, PostgreSQL tramite Supabase o Neon elimina tutta la gestione dell'infrastruttura nelle fasi iniziali.
+
+```
+Stack consigliato per MVP SaaS:
+
+Frontend / API:  Next.js 14+ (App Router)
+Database:        PostgreSQL (Supabase o Neon)
+ORM:             Prisma o Drizzle
+Auth:            NextAuth.js v5 o Clerk
+Billing:         Stripe Billing
+Deploy:          Vercel
+Email:           Resend
+```
+
+**Auth nella settimana 1 — non rimandare:**
+
+L'auth sembra semplice e non lo è mai. Magic link, OAuth con Google, gestione della sessione, middleware di rotte protette — tutto questo deve funzionare prima di qualsiasi feature di prodotto.
+
+**Multi-tenancy minimo:**
+
+Nella settimana 1, implementa il modello più semplice: database condiviso con `organization_id` in tutte le tabelle e Row Level Security in PostgreSQL.
+
+```sql
+-- Schema minimo per multi-tenancy nell'MVP
+CREATE TABLE organizations (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       TEXT NOT NULL,
+  slug       TEXT UNIQUE NOT NULL,
+  plan       TEXT DEFAULT 'trial',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE organization_members (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id UUID NOT NULL REFERENCES organizations(id),
+  user_id         UUID NOT NULL,
+  role            TEXT NOT NULL DEFAULT 'member', -- 'owner', 'admin', 'member'
+  created_at      TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(organization_id, user_id)
+);
+```
+
+## Settimana 2: Core Feature e Dashboard Minimo
+
+La core feature è la ragione di esistere del prodotto. Tutto in questa settimana deve riguardare l'implementazione del flusso principale dell'utente — dall'inizio alla fine — senza rifinitura, ma funzionante.
+
+La regola della settimana 2: **nessuna feature di configurazione**. Non implementare configurazioni dell'account, personalizzazione del profilo, temi, notifiche o esportazione dati. Solo il flusso principale.
+
+Dashboard minimo vitale:
+
+Un dashboard MVP deve mostrare tre cose: lo stato attuale dei dati principali, cosa l'utente deve fare dopo (guida all'onboarding), e un accesso rapido alle azioni più comuni.
+
+| Settimana | Focus | Cosa NON fare |
+|-----------|-------|---------------|
+| 1 | Auth + multi-tenancy + infra | Feature di prodotto |
+| 2 | Core feature end-to-end | Configurazioni, rifinitura |
+| 3 | Billing + onboarding | Feature secondarie |
+| 4 | Rifinitura + feedback | Riscritture, refactoring |
+
+## Settimana 3: Billing e Onboarding
+
+Billing nella settimana 3 — non nella settimana 4, non "dopo il lancio". Se lanci senza billing, non stai validando se le persone pagano. Stai validando se le persone usano gratuitamente, il che risponde a una domanda completamente diversa.
+
+**Billing minimo con Stripe:**
+
+Per l'MVP, hai bisogno solo di tre cose da Stripe:
+1. Un piano con trial di 14 giorni (senza o con carta)
+2. Webhook `customer.subscription.updated` per aggiornare lo stato dell'organizzazione nel database
+3. Link di gestione abbonamento (Stripe Customer Portal) — elimina la necessità di costruire un'UI di billing
+
+```javascript
+// Creazione sessione Stripe Customer Portal
+// Sostituisce tutta l'UI di billing nell'MVP
+app.get('/billing/portal', requireAuth, async (req, res) => {
+  const session = await stripe.billingPortal.sessions.create({
+    customer: req.user.organization.stripeCustomerId,
+    return_url: `${process.env.APP_URL}/dashboard`,
+  });
+  res.redirect(session.url);
+});
+```
+
+**Onboarding nella settimana 3:**
+
+Con il prodotto funzionante, la settimana 3 è il momento giusto per costruire l'onboarding: la checklist dei primi passi, gli empty state e l'email di benvenuto con sequenza di attivazione.
+
+## Settimana 4: Rifinitura, Test e Primi Utenti
+
+La settimana 4 non riguarda le nuove feature. Riguarda la rimozione della frizione da ciò che esiste già e il portare i primi utenti reali a usare il prodotto.
+
+**Cosa rifinire nella settimana 4:**
+- Stati di loading in tutte le azioni che fanno chiamate di rete
+- Messaggi di errore chiari (non "Something went wrong")
+- Responsività di base per mobile
+- Metadati SEO nelle pagine principali
+- Favicon e og:image
+
+**Primi utenti:**
+
+I primi 10-20 utenti non devono venire da un annuncio — devono venire da conversazioni dirette. Entra in gruppi della tua nicchia, pubblica sui tuoi canali, invia messaggi a persone che sai abbiano il problema che il prodotto risolve. Offri il periodo di trial e chiedi esplicitamente feedback.
+
+Installa uno strumento di registrazione delle sessioni (Hotjar, Microsoft Clarity — piano gratuito) prima di condividere il link. Le registrazioni delle prime sessioni degli utenti reali sono più preziose di qualsiasi supposizione su cosa migliorare.
+
+## Conclusione
+
+30 giorni sono un termine ragionevole per avere un MVP SaaS online, con auth, multi-tenancy di base, core feature funzionante, billing integrato e onboarding minimo. Non è tempo per un prodotto perfetto — ma è sufficiente per avere qualcosa di reale nelle mani dei primi utenti e iniziare a raccogliere i dati che informano cosa costruire successivamente.
+
+In **SystemForge**, costruiamo MVP SaaS con questa roadmap come base — stack moderno, multi-tenancy corretto fin dall'inizio, billing integrato e onboarding progettato per l'attivazione. Se vuoi lanciare in 30 giorni con le corrette fondamenta tecniche, [contattaci](/contato).

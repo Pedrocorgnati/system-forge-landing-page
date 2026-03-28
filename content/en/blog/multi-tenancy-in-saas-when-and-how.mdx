@@ -1,0 +1,114 @@
+---
+title: "Multi-Tenancy in SaaS: When and How to Implement It"
+slug: "multi-tenancy-in-saas-when-and-how"
+date: "2024-07-24"
+description: "The three multi-tenancy models (shared database, schema per tenant, database per tenant) — when to use each and how to migrate between them without downtime."
+tags: ["multi-tenancy", "saas", "architecture", "postgresql", "data isolation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: The three multi-tenancy models (shared database, schema per tenant, database per tenant) — when to use each and how to migrate between them without downtime.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'multi-tenancy-quando-e-como-implementar'
+  - locale: 'it-IT'
+    slug: 'multi-tenancy-saas-quando-e-come-implementare'
+  - locale: 'en'
+    slug: 'multi-tenancy-in-saas-when-and-how'
+---
+
+Every SaaS starts with a technical question that seems simple but defines years of architecture: how do you separate one customer's data from another's? This is the essence of multi-tenancy — a system's ability to serve multiple "tenants" with complete isolation between them, using the same infrastructure.
+
+Getting this wrong has serious consequences: a logic bug can leak one company's data to another, a heavy query from one customer can bring down the service for everyone, and a botched migration can require hours of downtime. Getting it right from the start is one of the most profitable architectural decisions a technical founder can make.
+
+There are three main models, each with clear trade-offs in isolation, cost, and operational complexity.
+
+## Shared Database with tenant_id: Simple and Dangerous
+
+The most common model in MVPs is the riskiest in production: all database tables live in a single schema, and each row has a `tenant_id` column identifying which organization it belongs to.
+
+```sql
+CREATE TABLE projects (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id   UUID NOT NULL REFERENCES tenants(id),
+  name        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_projects_tenant ON projects(tenant_id);
+```
+
+Isolation logic lives entirely in the application: every SELECT, INSERT, and UPDATE must include the authenticated user's `tenant_id`. The problem is obvious — a single oversight in code exposes another tenant's data. This isn't hypothetical: it's one of the most common data leakage vectors in SaaS.
+
+**When it makes sense:** MVPs with fewer than 50 tenants, low data volume, no strict compliance requirements (GDPR with physical isolation), and when the engineering team is still defining the data model.
+
+## Schema Per Tenant: Balance Between Isolation and Cost
+
+In this model, each tenant has their own schema within the same PostgreSQL database. Tables have identical structure but are physically separated by namespace.
+
+```sql
+-- Automatically created when registering a new tenant
+CREATE SCHEMA tenant_acme;
+CREATE TABLE tenant_acme.projects (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- In the application, schema is set per session
+SET search_path TO tenant_acme;
+```
+
+Logical isolation is real: a query without the correct `SET search_path` simply can't see that tenant's data. The risk of leakage from an application-layer oversight is dramatically lower.
+
+| Characteristic | Shared database | Schema per tenant |
+|----------------|----------------|-------------------|
+| Isolation | Logical (code) | Logical (database) |
+| Leakage risk | High | Low |
+| Operational cost | Low | Medium |
+| Scalability (tenants) | High | Medium (up to ~5,000) |
+| Per-tenant backup | Complex | Simple |
+| Schema migration | Once | Per tenant |
+
+## Database Per Tenant: Maximum Isolation for Enterprise
+
+Enterprise clients — especially in regulated sectors like healthcare, finance, and government — often require physical data isolation: a dedicated database, sometimes on a dedicated instance.
+
+Operational complexity increases considerably: dynamic database provisioning, connection pooling (PgBouncer or RDS Proxy become mandatory), monitoring multiplied by tenant count, and infrastructure costs that grow linearly.
+
+In return, you get:
+- Compliance with data residency requirements
+- Ability to offer differentiated SLAs per client
+- Total performance isolation
+- Granular backup and restore per account
+
+**When it makes sense:** Enterprise customers with tickets above $2,000/month, explicit isolation requirements in the contract, healthcare or financial sectors, or when a single client represents more than 20% of total revenue.
+
+## Row Level Security as an Alternative in PostgreSQL
+
+An increasingly adopted approach combines the shared database model with PostgreSQL's Row Level Security (RLS) — making isolation a database guarantee, not an application one.
+
+```sql
+-- Enable RLS on the table
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+-- Policy: user only sees rows from their own tenant
+CREATE POLICY tenant_isolation ON projects
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- In the connection, before any query:
+SET app.current_tenant_id = '550e8400-e29b-41d4-a716-446655440000';
+```
+
+With RLS active, even a query without a `tenant_id` filter returns only the data for the tenant configured in the session. The database becomes the guardian of segregation — not the application code.
+
+## Conclusion
+
+The choice of multi-tenancy model isn't permanent, but migrating between them in production without downtime is labor-intensive. The most common strategy is to start with shared database + RLS, migrate to schema per tenant when the customer base reaches a few hundred, and offer dedicated database as a premium option for enterprise.
+
+What should never be deferred is defining `tenant_id` as a mandatory column from the very first commit — and adopting RLS from the MVP. Refactoring this later, with production data, is one of the most costly operations in SaaS engineering.
+
+At **SystemForge**, every SaaS we build comes with the correct multi-tenancy architecture for the product's current stage: RLS with shared database in the MVP, schema per tenant in the growth phase, dedicated database in the enterprise tier. [Talk to us](/contact) to discuss your product's architecture.
