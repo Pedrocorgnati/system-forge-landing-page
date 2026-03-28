@@ -1,0 +1,127 @@
+---
+title: "KPIs That Matter: How to Define Them With Stakeholders"
+slug: "kpis-that-matter-how-to-define-with-stakeholders"
+date: "2024-09-11"
+description: "How to run a KPI definition workshop with non-technical stakeholders — OKRs, vanity metrics vs actionable metrics, and technical instrumentation."
+tags: ["kpis", "metrics", "dashboard", "okr", "product analytics"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to run a KPI definition workshop with non-technical stakeholders — OKRs, vanity metrics vs actionable metrics, and technical instrumentation.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'kpis-que-importam-definir-metricas-stakeholders'
+  - locale: 'it-IT'
+    slug: 'kpi-che-contano-definire-metriche-stakeholder'
+---
+
+There's a recurring pattern in B2B dashboard development: the system gets built, delivered, and three months later the data team discovers nobody opens those screens. The dashboard is technically flawless — queries run, charts render, filters work. But adoption is zero.
+
+The diagnosis almost always points to the same root cause: metrics were defined without the stakeholders who need to use the dashboard. Someone on the technical side decided what to measure based on "what's available in the database" instead of "what people need to make decisions."
+
+## Vanity Metrics vs Actionable Metrics
+
+The fundamental distinction before any workshop is understanding the difference between vanity metrics and actionable metrics.
+
+**Vanity metrics** make numbers grow and look good in presentations, but they don't guide any specific decision. Classic examples: total registered users (includes inactive, canceled, and duplicate users), total pageviews (with no context about which page or which behavior), number of posts published.
+
+**Actionable metrics** are those where a change implies a specific action that someone in the company can take. The diagnostic question is simple: "If this number drops 20% tomorrow, what will you do differently?" If the answer is "nothing" or "I don't know," it's a vanity metric.
+
+Examples of actionable metrics in B2B contexts:
+
+| Context | Vanity Metric | Actionable Metric |
+|---------|--------------|-------------------|
+| B2B e-commerce | Total orders | Conversion rate by category |
+| SaaS | Registered users | DAU/MAU ratio (stickiness) |
+| Logistics | Deliveries completed | % on-time deliveries by route |
+| Support | Tickets opened | Mean time to first response |
+| Finance | Gross revenue | MRR + net churn by cohort |
+
+The practical difference: if conversion rate by category drops, you know to investigate that specific category — assortment, pricing, checkout UX. If total orders drop, you know something is wrong, but you have no idea where to start.
+
+## KPI Workshop: How to Facilitate the Conversation
+
+A well-run KPI workshop takes two to four hours and produces a prioritized list of no more than 15–20 metrics. Workshops that try to cover more typically end with long indicator lists that are never revisited.
+
+**Recommended structure:**
+
+**1. Context and alignment (20 min):** Start with the question "what decisions do you make weekly that would be better with data?" — not "what metrics do you want to see?" Framing by decision instead of by data changes the conversation entirely. Stakeholders tend to request metrics based on what they already know; the decision-framed question opens space for metrics they wouldn't know to ask for.
+
+**2. Decision mapping (30 min):** List the 5–10 most important decisions each stakeholder makes. For each decision, ask: "what would you need to know to make this decision with more confidence?" Document the answers as information requirements, not as metrics yet.
+
+**3. Translation to metrics (45 min):** For each information requirement, define: the metric name, the calculation formula, the data source, the required update frequency, and what a good vs alarming value looks like.
+
+**4. Prioritization (30 min):** Use a simple 2x2 matrix: decision impact (high/low) vs instrumentation ease (high/low). Start with high-impact, high-ease metrics. High-impact, low-ease metrics go into the backlog with a defined deadline.
+
+**5. Technical validation (offline):** Before confirming scope, the technical team verifies whether the required data exists, whether the queries are feasible, and what additional instrumentation is needed.
+
+## OKRs and Their Relationship to Operational Dashboards
+
+OKRs (Objectives and Key Results) and operational dashboards measure different things on different time scales — understanding this relationship prevents the mistake of trying to use a single dashboard for both.
+
+**OKRs** are strategic alignment tools with quarterly or annual cycles. Key Results are targets with a date and a number: "increase NPS from 42 to 55 by December." They answer "are we moving in the right direction?"
+
+**Operational dashboards** are monitoring tools with daily or intraday updates. They answer "what's happening right now?" and "where specifically is the problem?"
+
+The connection between the two: OKR Key Results should appear as highlighted metrics in the dashboard, with progress-toward-target visualization. The operational dashboard's indicators are the leading indicators — the signals that anticipate whether the Key Result will be achieved.
+
+```
+OKR: increase NPS from 42 to 55 by December
+  └─ KR: Monthly NPS [dashboard: progress toward target]
+       └─ Leading indicators:
+            - Mean ticket resolution time [dashboard: daily]
+            - Critical bug rate in production [dashboard: real-time]
+            - % onboarding completed in 7 days [dashboard: weekly]
+```
+
+Explicitly visualizing this hierarchy — strategic goal → operational indicators — gives the dashboard a purpose users understand. Instead of "a collection of numbers," it becomes "the system that shows whether we're hitting our goals."
+
+## Instrumentation: From KPI to Database Query
+
+Defining KPIs is the strategic part. Instrumenting to calculate them correctly is the technical part that frequently gets neglected and causes inconsistencies.
+
+Every KPI needs a technical specification document covering:
+
+- **Precise definition:** does "confirmed orders" include or exclude orders later canceled? Does it include all channels or just the digital channel?
+- **Canonical query:** the SQL query (or equivalent) that produces the correct number, reviewed by the stakeholder
+- **Table grain:** the granularity of the source data (one row per order? per order line item?)
+- **Null and edge case handling:** what happens to orders without a confirmed delivery date?
+
+```sql
+-- Technical specification: on-time delivery rate
+-- Definition: % of orders with status 'delivered' where
+--   delivery_date <= promised_date
+--   excluding orders with cancellation_reason = 'customer_absent'
+-- Grain: one record per order
+
+SELECT
+  DATE_TRUNC('week', o.delivery_date) AS week,
+  COUNT(*) AS total_delivered,
+  COUNT(*) FILTER (
+    WHERE o.delivery_date <= o.promised_date
+  ) AS on_time,
+  ROUND(
+    COUNT(*) FILTER (WHERE o.delivery_date <= o.promised_date)::numeric
+    / NULLIF(COUNT(*), 0) * 100, 2
+  ) AS on_time_rate_pct
+FROM orders o
+WHERE
+  o.status = 'delivered'
+  AND o.cancellation_reason IS DISTINCT FROM 'customer_absent'
+  AND o.delivery_date >= CURRENT_DATE - INTERVAL '90 days'
+GROUP BY 1
+ORDER BY 1;
+```
+
+The canonical query becomes the contract between the data team and the stakeholders. When someone asks "why does the dashboard show 87% but the manager's spreadsheet shows 91%?", you go to the canonical query and find the definition difference — most likely the "customer absent" exclusion criterion.
+
+## Conclusion
+
+The dashboard nobody uses gets built by a technical team that didn't talk enough to the people who need it. The KPI definition process — workshop, technical validation, query specification — seems bureaucratic before you start and obvious after you finish.
+
+The investment is real: a well-run KPI workshop can delay development kick-off by a week. But it prevents two or three months of rework when the delivered system misses the mark because it measured the wrong things.
+
+At **SystemForge**, metric definition is part of the brief phase — before any technical decision is made. KPIs defined in the workshops become documented requirements in the PRD, which drive the queries in the LLD and the dashboard architecture in the design. We don't treat metrics as an implementation detail.

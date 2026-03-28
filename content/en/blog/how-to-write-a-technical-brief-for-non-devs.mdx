@@ -1,0 +1,133 @@
+---
+title: "How to Write a Technical Brief for Non-Developers"
+slug: "how-to-write-a-technical-brief-for-non-devs"
+date: "2024-09-08"
+description: "Guide for founders and managers without technical backgrounds to write a clear brief for software houses — what to include, what to avoid, and a ready-to-use template."
+tags: ["technical brief", "software requirements", "product management", "software hiring", "documentation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Guide for founders and managers without technical backgrounds to write a clear brief for software houses — what to include, what to avoid, and a ready-to-use template.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-escrever-briefing-tecnico-nao-desenvolvedores'
+  - locale: 'it-IT'
+    slug: 'come-scrivere-brief-tecnico-non-sviluppatori'
+---
+
+## A Poor Brief Causes Weeks of Rework
+
+Most delays in software projects don't start in development — they start in the brief. When a client delivers a vague document, the software house makes assumptions. When the delivered software doesn't match what the client imagined, the rework cycle begins.
+
+This guide is for founders, managers, and entrepreneurs without technical backgrounds who need to communicate their idea to a development team clearly and objectively.
+
+## What a Software House Needs to Know
+
+Before writing any line, understand what the technical team will use to estimate, plan, and execute your project:
+
+**The problem to solve:** What pain or need will the software address? Who suffers from this problem today? How do they currently solve it (even if manually or inefficiently)?
+
+**Who will use the system:** Describe the types of users (personas) with their specific needs. A clinic management system has doctors, receptionists, and patients — each with different needs and permissions.
+
+**The main flows:** What does the user do inside the system, in what order? It doesn't need to be technical — a plain language description of "the customer does this, the system shows that, the staff member clicks this button" is sufficient.
+
+**What exists today:** If there are spreadsheets, manual processes, or legacy systems being replaced, describe what they do. This helps understand the business rules embedded in the current process.
+
+**Constraints and obligations:** Is there specific regulation (HIPAA, GDPR, financial regulations)? Is there a mandatory integration with third-party systems? Is there a deadline defined by contract or market opportunity?
+
+## Brief Structure: Problem, Audience, and Flows
+
+A good technical brief has six sections:
+
+### 1. Business Context (1 page)
+Explain what the business is, what the revenue model is, and why the software is needed now. Include:
+- Summary description of the business
+- Why the current system (or lack of system) is creating problems
+- What defines "success" for this project in 12 months
+
+### 2. Personas and Users
+List the types of users with name, role, and main needs. Example:
+
+> **Maria — Receptionist:** Schedules appointments, confirms attendance, views the day's schedule, and registers new patients. Uses the front desk computer 8 hours a day.
+
+> **Dr. John — Doctor:** Accesses patient records during the consultation via tablet, records examination notes and prescriptions, views patient history.
+
+### 3. Main Flows (user journeys)
+Describe the 3 to 5 most important system flows in simple language:
+
+> **Scheduling:** Patient calls, receptionist checks doctor availability, selects time slot, confirms patient details, saves appointment. System automatically sends SMS confirmation.
+
+### 4. Functional Requirements
+List what the system must do, grouped by functional area. Don't use technical jargon — describe in terms of capability:
+
+- The system must allow patients to book appointments online
+- The system must send automatic reminders 24h before the appointment
+- The system must generate appointment reports by period
+
+### 5. Integrations and External Systems
+List external systems that need to connect: payment processors, ERPs, communication systems, third-party APIs. For each, indicate if it's mandatory or desirable.
+
+### 6. Constraints
+- Maximum budget (or range)
+- Desired deadline for MVP or first delivery
+- Required platforms (web, iOS, Android, desktop)
+- Applicable regulations
+
+## What NOT to Include: Technical Decisions That Belong to the Team
+
+A common mistake is the client trying to specify the technical solution instead of the problem. Avoid including in the brief:
+
+**Programming language:** "I want it in Python with Django" — the language choice should be based on performance, scalability, and team expertise requirements, not personal preference.
+
+**Specific database:** "It needs to use PostgreSQL" — unless you have a specific technical reason, leave this decision to the team.
+
+**Frameworks and libraries:** Specifying "must use React" or "I want MongoDB" without technical justification unnecessarily limits the team's options.
+
+**Microservices architecture:** Most new products don't need microservices. Specifying this prematurely adds complexity without benefit.
+
+These decisions are the technical team's responsibility and should be based on product requirements, not client preferences.
+
+## Brief Template
+
+Use this template as a starting point:
+
+```
+# Technical Brief — [Project Name]
+
+## 1. Context
+[What the business is and why the software is needed]
+
+## 2. Problem to Solve
+[Description of the current problem and how it impacts the business]
+
+## 3. Users
+### [Persona 1]
+- Role: [function in the system]
+- Needs: [what they need to do]
+- Usage frequency: [daily/weekly/monthly]
+
+## 4. Main Flows
+### Flow 1: [Name]
+[Step-by-step description in plain language]
+
+## 5. Required Features
+- [feature 1]
+- [feature 2]
+
+## 6. Integrations
+- [system/API]: [mandatory/desirable]
+
+## 7. Constraints
+- Budget: [range or maximum]
+- Deadline: [date or horizon]
+- Platforms: [web/mobile/desktop]
+- Regulations: [if applicable]
+```
+
+## Conclusion
+
+A well-written brief saves weeks of rework and significantly reduces the risk of delivering a product that doesn't meet expectations. You don't need a technical background to write a good brief — you need to be able to clearly explain the problem, the users, and the flows.
+
+SystemForge conducts a structured requirements gathering process that complements the client's brief. If you need help organizing your ideas before talking to a technical team, get in touch.

@@ -1,0 +1,69 @@
+---
+title: "How to Prevent Marketplace Fraud"
+slug: "how-to-prevent-marketplace-fraud"
+date: "2024-09-26"
+description: "Strategies and tools to prevent marketplace fraud: chargebacks, fake accounts, triangulation, and KYC bypass -- with detection techniques."
+tags: ["fraud prevention", "marketplace", "chargeback", "security", "anti-fraud"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Strategies and tools to prevent marketplace fraud: chargebacks, fake accounts, triangulation, and KYC bypass -- with detection techniques."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'prevenir-fraudes-marketplace'
+  - locale: 'it-IT'
+    slug: 'come-prevenire-frodi-marketplace'
+---
+
+Marketplace fraud erodes margins and reputation in ways that often don't appear in dashboards until the damage is done. A chargeback isn't just the loss of the sale amount -- it's the loss of the product (already shipped), the chargeback fee charged by the gateway, the operational cost of disputing or accepting, and the impact on your merchant account score with the acquirer. When that rate exceeds 1%, gateways start charging additional fees. Above 2%, the risk is account termination.
+
+Marketplaces are particularly vulnerable because the attack surface is larger: there's the buyer side, the seller side, and the platform itself. Sophisticated fraudsters attack all three simultaneously.
+
+## Most Common Types of Marketplace Fraud
+
+**Buyer fraud (fraudulent chargeback):** the buyer makes a purchase with a legitimate or stolen card and later files a claim with the bank alleging they don't recognize the charge. In many cases, the product has already been delivered.
+
+**Seller fraud (scam):** a seller lists products they don't have inventory to ship, receives payments, and disappears. Variation: the seller ships counterfeit products or much lower quality than advertised.
+
+**Triangulation:** a fraudster uses the marketplace as an intermediary between a legitimate buyer and a legitimate supplier, paying the supplier with a stolen card. The chargeback arrives weeks later.
+
+**Review manipulation:** using fake accounts to inflate product or seller ratings, or to attack competitors with negative reviews.
+
+**Promotion abuse:** creating multiple accounts to exploit "first-time" coupons or per-SSN promotions. On platforms with cashback or credits, this vector can be very profitable for organized fraudsters.
+
+## Device Fingerprinting and Bot Detection
+
+The first line of defense is understanding who is accessing your platform before any transaction happens. Device fingerprinting creates a unique identifier for each device based on dozens of browser or app attributes.
+
+## Risk Rules: Velocity, Location, and Behavior
+
+| Rule | Signal | Risk score |
+|---|---|---|
+| Multiple cards on same device | > 3 cards in 24h | +30 |
+| Purchase velocity | < 30 seconds at checkout | +20 |
+| IP geolocation vs delivery address | Distance > 300mi | +15 |
+| VPN or proxy detected | Yes | +25 |
+| First order high value | > $200 on new account | +20 |
+| Same delivery address, different accounts | > 3 accounts | +35 |
+| Unusual hour | 2am to 5am (local time) | +10 |
+| Browser in incognito mode | Yes | +10 |
+| Disposable email | Temporary domain | +20 |
+
+Scores above 70 should be automatically blocked. Between 40 and 70, send to manual review or apply additional friction (3D Secure, email confirmation, SMS OTP). Below 40, approve normally.
+
+## Tools: Stripe Radar, Sift, and Open Source Solutions
+
+**Stripe Radar:** automatically integrated in Stripe transactions. Uses ML trained on billions of global transactions. Configurable via custom rules in the dashboard. Cost: no additional fee on the standard plan.
+
+**Sift:** enterprise-grade fraud prevention with ML-based risk scoring, device fingerprinting, and account takeover protection. Strong in marketplace use cases.
+
+For growing marketplaces, the practical recommendation is to start with Stripe Radar (zero cost at the beginning) and add specialized tools when chargeback volume indicates basic ML isn't sufficient.
+
+## Conclusion
+
+Fraud isn't a problem that appears "after the platform grows." It starts on day one, with the first sellers and buyers. Teams that leave anti-fraud for Phase 2 frequently discover they've already accumulated enough chargebacks to compromise the acquirer account before implementing any defense.
+
+SystemForge incorporates security from the documentation phase -- with threat modeling, risk analysis per flow, and User Stories that cover fraud scenarios before implementation. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to learn more.

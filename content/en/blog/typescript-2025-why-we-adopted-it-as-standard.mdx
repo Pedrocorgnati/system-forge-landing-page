@@ -1,0 +1,124 @@
+---
+title: "TypeScript in 2025: Why We Adopted It as Our Standard"
+slug: "typescript-2025-why-we-adopted-it-as-standard"
+date: "2024-10-02"
+description: "Why SystemForge uses TypeScript in 100% of projects — real production benefits, learning curve, tooling, and impact on maintainability."
+tags: ["typescript", "javascript", "development standards", "code quality", "software house"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Why SystemForge uses TypeScript in 100% of projects — real production benefits, learning curve, tooling, and impact on long-term maintainability.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'typescript-2025-por-que-adotamos-como-padrao'
+  - locale: 'it-IT'
+    slug: 'typescript-2025-perche-lo-abbiamo-adottato'
+---
+
+## TypeScript Isn't an Option for Us — It's a Non-Negotiable Standard
+
+In 2019, we were still debating TypeScript vs JavaScript for new projects. In 2024, that debate no longer exists at SystemForge. Every new project starts in TypeScript, with strict configuration, no exceptions.
+
+This isn't a decision based on hype or trends. It's a technical decision grounded in years of experience with what happens to untyped JavaScript projects over time — and what TypeScript changes in concrete, measurable ways.
+
+## The Errors TypeScript Would Have Prevented in Real Projects
+
+Before discussing abstract benefits, it's worth being specific about the type of error TypeScript prevents day-to-day.
+
+### Undefined is not a function
+
+The most classic JavaScript error. You access a property of an object that might be undefined, call a function that might not exist, pass a wrong-type argument to a function.
+
+```typescript
+// JavaScript — error only shows up at runtime
+function processOrder(order) {
+  return order.items.reduce((total, item) => total + item.price, 0);
+}
+
+processOrder(null); // TypeError: Cannot read properties of null
+
+// TypeScript — error caught at compile time
+interface Order {
+  items: { price: number }[];
+}
+
+function processOrder(order: Order): number {
+  return order.items.reduce((total, item) => total + item.price, 0);
+}
+
+processOrder(null); // Error: Argument of type 'null' is not assignable to parameter of type 'Order'
+```
+
+### Fearless refactoring
+
+Renaming a function, changing a method signature, reorganizing modules — in JavaScript, you make the change and hope you didn't forget to update something somewhere. In TypeScript, the compiler lists every usage that needs updating.
+
+This benefit multiplies with codebase size. In projects with 50,000+ lines of code, refactoring in JavaScript is a high-risk operation. In TypeScript, it's routine.
+
+### Contracts between modules
+
+TypeScript enforces explicit interface definitions between modules. When you expose a function from a module, you must type its parameters and return value. The consumer sees exactly what to expect — without reading the code or documentation.
+
+## Impact on Maintainability as the Team Grows
+
+TypeScript solves the most serious problem in growing JavaScript systems: implicit knowledge.
+
+In a mature JavaScript codebase, a critical portion of knowledge about how the system works lives in the heads of the original developers. What can this object contain? What are the required fields for this API? What does this function return when it doesn't find the result?
+
+TypeScript transforms implicit knowledge into explicit code. Types are documentation that the compiler verifies — they never go stale.
+
+### Onboarding new developers
+
+A developer new to a TypeScript project can understand system contracts by exploring the types. In JavaScript, the same process involves reading code, wrestling with unexpected behavior, and asking the original author.
+
+In projects we've measured, new developer onboarding time drops 30-40% with TypeScript compared to JavaScript.
+
+## Learning Curve: Where Teams Get Stuck
+
+TypeScript has a real learning curve. The points where less experienced teams get stuck most often:
+
+**Generics:** The concept of parameterized types (`Array<T>`, `Promise<T>`, generic functions) isn't intuitive for developers coming from JavaScript. The most common escape hatch is using `any` — which eliminates TypeScript's value entirely.
+
+**Conditional types and mapped types:** Advanced type manipulation features. Unnecessary for most projects, but present in widely-used libraries. Not being able to read them makes it hard to understand compiler errors.
+
+**tsconfig.json configuration:** Options like `strict`, `noUncheckedIndexedAccess`, and `exactOptionalPropertyTypes` significantly change compiler behavior. Less experienced teams tend to loosen the configuration when they hit hard errors — which is the wrong approach.
+
+## Strict Configuration: Why Not Use Defaults
+
+TypeScript's default configuration is too permissive for projects that value type safety. The `strict: true` flag enables a set of checks that are off by default:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  }
+}
+```
+
+**`strict: true`** enables: `strictNullChecks`, `strictFunctionTypes`, `strictBindCallApply`, `strictPropertyInitialization`, `noImplicitAny`, `noImplicitThis`.
+
+**`noUncheckedIndexedAccess`:** Makes accessing an array by index (`arr[0]`) return `T | undefined` instead of `T`. Seems like more work, but prevents classic bugs with empty arrays.
+
+**`exactOptionalPropertyTypes`:** Distinguishes absent property from property with `undefined` value. `{ foo?: string }` and `{ foo: string | undefined }` are treated differently — which is semantically correct.
+
+Starting with strict configuration on a new project has minimal cost. Migrating to strict on an existing project is painful. We always recommend starting strict.
+
+## TypeScript in 2025: Adoption and Ecosystem
+
+In 2025, TypeScript is the norm, not the exception. Stack Overflow Developer Survey data shows TypeScript consistently in the top 5 most loved languages. Frameworks like Next.js, Nuxt, SvelteKit, and Angular are TypeScript-first by default.
+
+npm libraries without native types have community-maintained `@types/*` packages. npm ecosystem type coverage has never been broader.
+
+Tools like Zod, Drizzle ORM, Prisma, and tRPC were built specifically to extract maximum value from TypeScript's type system — creating automatic contracts between frontend, backend, and database.
+
+## Conclusion
+
+TypeScript in 2025 is no longer a niche option. It's the standard way to write JavaScript for professional projects. The learning curve exists, but the benefits — fewer bugs, safe refactoring, faster onboarding, explicit contracts between modules — outweigh the cost in virtually any project with more than one developer.
+
+At SystemForge, we use TypeScript with strict on every project, regardless of size. If you want to understand how this impacts the quality of code we deliver, talk to our team.

@@ -1,0 +1,149 @@
+---
+title: "Mobile UX in 2025: Patterns That Increase Retention"
+slug: "mobile-ux-2025-patterns-that-increase-retention"
+date: "2024-10-07"
+description: "Mobile UX patterns that increase retention in 2025 — gestures, bottom sheets, haptic feedback, skeleton screens, and tab vs drawer navigation."
+tags: ["mobile ux", "mobile design", "app retention", "haptic feedback", "bottom sheet"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Mobile UX patterns that increase retention in 2025 — gestures, bottom sheets, haptic feedback, skeleton screens, and tab vs drawer navigation.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ux-mobile-2025-padroes-retencao'
+  - locale: 'it-IT'
+    slug: 'ux-mobile-2025-pattern-di-retention'
+---
+
+Mobile UX is about feeling, not just appearance. An app can look visually stunning and still feel frustrating to use. A visually simple app can create a sense of fluidity and control that keeps users coming back. The difference lies in the details most designers and developers treat as decoration — gestures, tactile feedback, loading behavior, navigation patterns — but which together define whether the user feels the app is working with them or against them.
+
+In 2025, the apps that retain users aren't necessarily the most beautiful. They're the ones that create the best feeling of use.
+
+## Gestures: Swipe, Pull-to-Refresh, and Long Press with Purpose
+
+Gestures are power shortcuts. Experienced mobile users have learned gesture conventions over years — and when your app follows those conventions, it feels immediately familiar. When it violates them, it feels broken.
+
+**Swipe to delete or archive**
+The horizontal swipe pattern on list items to reveal actions (delete, archive, mark as read) is widely recognized. But there's a good version and a bad one. The good: the action is destructive and a full swipe requires confirmation, or the action is reversible (like in Gmail). The bad: a full swipe immediately executes a destructive action, with no undo.
+
+**Pull-to-refresh**
+This is a gesture users make instinctively when they want fresh data. But pull-to-refresh only makes sense with frequently changing content — activity feeds, order lists, conversations. On static screens, it's confusing. The refresh indicator must be visible throughout the entire request duration, not just for a fixed one second.
+
+**Long press for context**
+Long press is the mobile equivalent of right-click — it reveals a contextual menu with relevant actions for the pressed item. Used sparingly (not on every interactive element), it's an elegant way to offer secondary actions without cluttering the interface with buttons.
+
+**System navigation gestures**
+On iOS, the left-edge swipe to go back is a native gesture users expect to work in any app. Disabling it, or creating gestures that conflict with it, is a consistent source of frustration. The same applies to the swipe-down to dismiss modals on iOS 13+.
+
+```tsx
+// Example: swipe-to-dismiss on React Native modal
+import { Animated, PanResponder } from 'react-native';
+
+function DismissableModal({ onDismiss, children }) {
+  const translateY = new Animated.Value(0);
+
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 5,
+    onPanResponderMove: (_, gesture) => {
+      if (gesture.dy > 0) translateY.setValue(gesture.dy);
+    },
+    onPanResponderRelease: (_, gesture) => {
+      if (gesture.dy > 150) {
+        onDismiss();
+      } else {
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: true }).start();
+      }
+    },
+  });
+
+  return (
+    <Animated.View
+      style={{ transform: [{ translateY }] }}
+      {...panResponder.panHandlers}
+    >
+      {children}
+    </Animated.View>
+  );
+}
+```
+
+## Bottom Sheets: When to Use and When to Avoid
+
+Bottom sheets are one of the most used — and most overused — patterns in mobile design. They work well for contextual content that doesn't justify a full screen: a share menu, item details, search filters, action confirmation.
+
+**When to use:**
+- Action that requires additional information before confirming
+- Menu with 3-7 options related to a specific item
+- Content preview with option to expand to full screen
+- Short form (2-4 fields) in a list context
+
+**When to avoid:**
+- Multi-step flows (use stack navigation)
+- Content requiring extensive scrolling (use a dedicated screen)
+- Replacing simple confirmation dialogs (use a native Alert)
+- As a response to tapping any list item (overuse creates fatigue)
+
+A well-implemented bottom sheet has several mandatory characteristics: it can be dismissed with a downward swipe, it closes when tapping outside (backdrop), it animates smoothly with spring physics (not linear ease), and it blocks the scroll of underlying content while open.
+
+| Pattern | Content depth | Primary interaction |
+|---------|---------------|---------------------|
+| Bottom Sheet | Shallow (1 level) | Select, confirm |
+| Modal | Medium (form) | Fill out, submit |
+| Full screen | Deep (flow) | Complete a flow |
+| Tooltip | Minimal (information) | Read, dismiss |
+
+## Haptic Feedback: The Tactile Dimension of UX
+
+Haptic feedback is the least discussed and one of the most impactful mobile UX patterns. It's the physical touch of the app — the vibration that confirms a button was pressed, a like was registered, an action was completed. When well-calibrated, it disappears from user perception — they simply feel the app responds. When poorly calibrated (wrong intensity, wrong timing, overused), it's irritating.
+
+iOS has the best haptic feedback hardware implementation — the Taptic Engine provides distinct sensations for different feedback types. Android varies significantly by manufacturer and device generation.
+
+In React Native with Expo:
+
+```typescript
+import * as Haptics from 'expo-haptics';
+
+// Selection (soft) — when navigating through options
+await Haptics.selectionAsync();
+
+// Light impact — when confirming a reversible action
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+
+// Medium impact — when completing a primary action
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+// Heavy impact — when completing an irreversible or important action
+await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+
+// Success notification — payment confirmed, upload completed
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+// Error notification — validation failed, action denied
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+```
+
+Where haptic feedback clearly adds value: payment confirmation, liking social content, completing a task item, message sent, form error. Where to avoid it: simple scrolling, navigation between screens, loading states, any action the user didn't intentionally initiate.
+
+## Skeleton Screens: Perceived Performance
+
+Skeleton screens don't make the app faster. They make waiting more tolerable — which, in practice, has the same effect on user perception. A classic UX study shows that users tolerate longer waits when content is "visibly loading" compared to seeing a generic spinner.
+
+The logic is simple: the skeleton screen shows the structure of the content about to appear. The user processes this structure, orients themselves, and perceives the wait less because their brain is already "preparing" the context. A spinner, on the other hand, provides no information about what's coming or when.
+
+Best practices for skeleton screens:
+- Use the same visual structure as the real content (same sizes, same hierarchy)
+- Animate with shimmer (gradient that sweeps across the skeleton left to right)
+- Show multiple items, not just one — simulate a list that's populating
+- Don't use skeletons for content that loads in under 300ms — it's more confusing than helpful
+- Transition smoothly from skeleton to real content (fade in, not an abrupt swap)
+
+For error states and empty states, the same principle applies: never leave users wondering if the app broke or if there's no data. A well-designed empty state, with an illustration and a clear action ("Add your first product"), retains the user. A blank screen makes them uninstall.
+
+## Conclusion
+
+The patterns that increase retention in mobile apps aren't closely guarded secrets — they're documented, tested, and validated practices built by millions of users over years of mobile ecosystem evolution. Gestures that follow conventions, bottom sheets used in the right context, calibrated haptic feedback, well-implemented skeleton screens. Each of these patterns contributes to a single perception: this app was built by someone who understands how I use my phone.
+
+At SystemForge, design and development are part of the same process. Every UX decision is implemented with fidelity to the expected behavior — not just visually, but also tactilely, temporally, and contextually. If you're building an app and want to ensure the user experience is as good as the product itself, let's talk.

@@ -1,0 +1,202 @@
+---
+title: "Documentazione software: cio che distingue i team professionisti"
+slug: "documentazione-software-pratica-professionisti"
+date: "2024-11-28"
+description: "Come documentare il software in modo utile — cosa documentare (e cosa no), ADR, README che funzionano, commenti al codice e documentazione delle API."
+tags: ["documentazione", "buone pratiche", "ingegneria del software", "adr", "readme"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come documentare il software in modo utile — cosa documentare (e cosa no), ADR, README che funzionano, commenti al codice e documentazione delle API.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'documentacao-de-software-pratica-que-separa-amadores'
+  - locale: 'en'
+    slug: 'software-documentation-what-separates-professionals'
+---
+
+## Il codice senza documentazione e un asset che si svaluta da solo
+
+Un sistema ben documentato trasferisce conoscenza agli sviluppatori futuri. Un sistema senza documentazione la trasferisce solo a chi lo ha scritto — e persino quegli sviluppatori dimenticano i dettagli nel giro di settimane.
+
+La mancanza di documentazione e un problema che cresce in modo non lineare. Nei primi mesi, non da fastidio. Quando il team cresce, quando lo sviluppatore originale se ne va, quando una feature deve essere modificata un anno dopo — il costo si presenta moltiplicato.
+
+Questo articolo copre cosa documentare, come documentare in modo utile (non burocratico) e le pratiche che distinguono i team professionisti dai dilettanti.
+
+## Cosa documentare: decisioni (ADR) e non implementazioni
+
+L'errore piu comune e documentare cio che il codice dice gia invece di cio che il codice non riesce a esprimere. Un commento che dice "incrementa il contatore di 1" accanto a `counter++` e rumore, non documentazione.
+
+Cio che il codice non riesce a esprimere:
+
+- **Perche** una decisione e stata presa invece di un'alternativa
+- **Cosa** e stato considerato e scartato
+- **Quali sono** i trade-off che il team ha accettato consapevolmente
+- **Quali erano** i vincoli esterni (regolamentazione, compatibilita, scadenze) che hanno influenzato la soluzione
+
+### Architecture Decision Records (ADR)
+
+Gli ADR sono documenti brevi che registrano decisioni architetturali significative. Il formato standard ha quattro sezioni:
+
+```markdown
+# ADR-001: Usare PostgreSQL come database principale
+
+## Status
+Accettato
+
+## Contesto
+Il sistema necessita di transazioni ACID per le operazioni finanziarie.
+Il team ha esperienza consolidata con PostgreSQL.
+Il volume previsto e fino a 1M di record nel primo anno.
+
+## Decisione
+Usare PostgreSQL 15 con Prisma ORM.
+
+## Conseguenze
++ Supporto completo alle transazioni ACID
++ Query complesse con JOIN efficienti
++ Necessita di istanza gestita (AWS RDS o Supabase)
+- Costo operativo maggiore rispetto a SQLite nelle fasi iniziali
+```
+
+Gli ADR non devono essere lunghi. Cio che conta e catturare il ragionamento, non il risultato. Il risultato e nel codice.
+
+**Quando creare un ADR:** Quando si sceglie una tecnologia, quando si modifica l'architettura, quando si decide tra approcci con trade-off significativi, quando si accetta debito tecnico consapevolmente.
+
+**Dove conservarlo:** Nel repository, in `docs/decisions/` o `docs/adrs/`. Vicino al codice, versionato insieme ad esso.
+
+## README che aiuta davvero i nuovi sviluppatori
+
+Un README scadente ha: descrizione vaga del progetto, lista di tecnologie senza contesto e istruzioni di installazione non aggiornate.
+
+Un README utile permette a un nuovo sviluppatore di configurare l'ambiente e contribuire al progetto nello stesso giorno.
+
+### Struttura di un README efficace
+
+```markdown
+# Nome del Progetto
+
+Una frase che descrive cosa fa il sistema e per chi.
+
+## Prerequisiti
+
+- Node.js 20+
+- PostgreSQL 15+
+- Account Vercel (per il deploy)
+
+## Setup locale
+
+1. Clonare il repository
+2. Copiare `.env.example` in `.env` e compilare le variabili
+3. Eseguire `npm install`
+4. Eseguire `npx prisma migrate dev` per creare le tabelle
+5. Eseguire `npm run dev` — accedere a http://localhost:3000
+
+## Struttura del progetto
+
+src/
+  app/          # Route Next.js (App Router)
+  components/   # Componenti React riutilizzabili
+  actions/      # Server Actions
+  lib/          # Utility e configurazioni
+
+## Comandi principali
+
+npm run dev       # Sviluppo
+npm run build     # Build di produzione
+npm run test      # Test unitari
+npx prisma studio # Interfaccia visuale del database
+
+## Deploy
+
+[Link alla documentazione di deploy]
+```
+
+Il README deve rispondere a tre domande senza che lo sviluppatore debba chiedere a nessuno: Come configuro l'ambiente? Come e organizzato il progetto? Come faccio il deploy?
+
+## Commenti al codice: quando e cosa commentare
+
+La regola generale: i commenti spiegano il "perche", non il "cosa". Se il codice necessita di un commento per spiegare cosa sta facendo, probabilmente deve essere refactorato per essere piu chiaro.
+
+**Commentare quando:**
+
+```typescript
+// Workaround: la libreria X ha un bug noto quando l'array e vuoto
+// Vedi: https://github.com/x/lib/issues/1234
+const result = items.length > 0 ? processItems(items) : [];
+
+// PERFORMANCE: questa query viene eseguita 10.000x/giorno
+// Modificare l'indice prima di cambiare il WHERE
+const activeUsers = await db.query(`
+  SELECT id, email FROM users
+  WHERE status = 'active' AND last_seen > NOW() - INTERVAL '30 days'
+`);
+
+// Regola di business: ordini sopra i 500 EUR hanno la spedizione gratuita
+// Come definito nel contratto con il corriere (vedi contratto-logistica.pdf)
+const freeShippingThreshold = 500;
+```
+
+**Non commentare quando il codice e gia chiaro:**
+
+```typescript
+// Male: il commento ripete il codice
+// Verifica se l'utente e attivo
+if (user.status === 'active') { ... }
+
+// Bene: senza commento, il codice si spiega da solo
+if (user.status === 'active') { ... }
+```
+
+## Documentazione API: OpenAPI come contratto vivente
+
+La documentazione API non aggiornata e peggio dell'assenza di documentazione — induce in errore. La soluzione e generare la documentazione direttamente dal codice.
+
+### OpenAPI con zod-to-openapi in Next.js
+
+```typescript
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@anatine/zod-openapi';
+
+extendZodWithOpenApi(z);
+
+const CreateUserSchema = z.object({
+  name: z.string().min(2).openapi({ example: 'Marco Rossi' }),
+  email: z.string().email().openapi({ example: 'marco@azienda.com' }),
+}).openapi('CreateUser');
+
+// Lo schema genera automaticamente la documentazione OpenAPI
+// Qualsiasi modifica allo schema aggiorna la documentazione
+```
+
+Con questo approccio, documentazione e validazione sono la stessa cosa — un'unica source of truth. Quando modificate l'API, la documentazione cambia insieme.
+
+### Swagger UI integrato
+
+```typescript
+// app/api-docs/route.ts
+import SwaggerUI from 'swagger-ui-react';
+import { openApiDocument } from '@/lib/openapi';
+
+export default function ApiDocs() {
+  return <SwaggerUI spec={openApiDocument} />;
+}
+```
+
+Questo crea un'interfaccia visuale interattiva dove qualsiasi sviluppatore puo esplorare e testare l'API senza bisogno di strumenti esterni.
+
+## La documentazione del codice non e burocrazia
+
+L'argomento piu comune contro la documentazione e che "non c'e tempo". In pratica, il costo di scrivere documentazione nel momento in cui si prende una decisione e minimo. Il costo di ricostruire il ragionamento sei mesi dopo — o pagare un nuovo sviluppatore per scoprire cosa funziona per tentativi ed errori — e di ordini di grandezza superiore.
+
+La documentazione non deve essere esaustiva per essere utile. Un ADR di mezza pagina, un README che risponde alle tre domande principali e commenti nei punti non ovvi del codice fanno gia una differenza reale nella quotidianita del team.
+
+## Conclusione
+
+I team professionisti documentano le decisioni, non le implementazioni. Mantengono README che aiutano realmente i nuovi sviluppatori a configurarsi. Commentano il codice quando il ragionamento non e ovvio. Usano OpenAPI come contratto vivente delle API.
+
+Documentazione scadente o assente e debito tecnico che non appare nel codice — appare nel tempo perso, nella frustrazione del team e nella difficolta di scalare.
+
+In SystemForge, la documentazione fa parte del processo di consegna — non e un'attivita successiva. Consegniamo progetti con ADR, README strutturati e documentazione API integrata. Se volete capire come funziona nella pratica, [parlate con il nostro team](https://systemforge.it/contatto).

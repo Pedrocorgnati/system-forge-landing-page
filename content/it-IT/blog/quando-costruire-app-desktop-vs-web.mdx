@@ -1,0 +1,90 @@
+---
+title: "Quando costruire un'app desktop invece di una web app"
+slug: "quando-costruire-app-desktop-vs-web"
+date: "2024-09-04"
+description: "Criteri per decidere tra app desktop e web app: accesso all'hardware, performance offline, sicurezza locale e integrazione con il sistema operativo."
+tags: ["app desktop", "web app", "decisione tecnica", "electron", "tauri"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Criteri per decidere tra app desktop e web app — accesso all'hardware, performance offline, sicurezza locale e integrazione con il sistema operativo.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'quando-construir-app-desktop-vs-web'
+  - locale: 'en'
+    slug: 'when-to-build-desktop-app-vs-web-app'
+---
+
+Il web è un ambiente incredibilmente potente. Con Next.js, React, le moderne API del browser e una buona CDN, è possibile costruire applicazioni sofisticate che girano su qualsiasi dispositivo con un browser. Per la stragrande maggioranza dei casi d'uso — dashboard, e-commerce, piattaforme SaaS, sistemi gestionali — una web app ben costruita è più economica, più facile da aggiornare e più accessibile rispetto a un'app desktop.
+
+Ma esiste un insieme specifico di requisiti dove il web semplicemente non riesce a consegnare ciò di cui il business ha bisogno. Quando ci si scontra con questi requisiti, cercare di forzare una soluzione web porta solitamente a hack, workaround fragili, esperienza utente degradata — e infine alla necessità di riscrivere tutto come app desktop in ogni caso.
+
+Capire quando il desktop è la scelta giusta risparmia mesi di sviluppo e rilavorazione. Questi sono i criteri tecnici che determinano questa decisione.
+
+## Accesso all'Hardware: Fotocamera, Stampante e Periferiche Industriali
+
+Il browser dispone di API hardware. La MediaDevices API consente l'accesso a fotocamera e microfono. La Web USB API permette la comunicazione con alcuni dispositivi USB. La Web Serial API è stata aggiunta a Chrome e consente la comunicazione seriale in alcuni casi.
+
+Il problema è che queste API sono limitate by design — e per buone ragioni di sicurezza. Il browser gira in un ambiente sandboxed che deliberatamente impedisce l'accesso illimitato all'hardware. Per l'uso generale, questo è ottimo. Per applicazioni che richiedono il controllo preciso dell'hardware, è un ostacolo serio.
+
+Si consideri un sistema di controllo del magazzino che deve comunicare con una bilancia industriale tramite RS232. La Web Serial API può funzionare in teoria, ma dipende dai permessi dell'utente a ogni sessione, può avere comportamenti inconsistenti tra gli aggiornamenti di Chrome, e non offre il controllo sui parametri di comunicazione come baud rate, bit di stop e parità con la stessa affidabilità di una libreria nativa.
+
+Con un'app desktop che usa Electron e la libreria `serialport`, la comunicazione è diretta, stabile e completamente controllabile. Lo stesso vale per stampanti fiscali, lettori di codici a barre industriali, controllori PLC, bilance di precisione e qualsiasi dispositivo che comunica tramite protocolli seriali o USB con driver specifici.
+
+Se il sistema deve comunicare in modo affidabile con hardware specializzato, il web creerà più problemi che soluzioni.
+
+## Performance Offline: Dati Locali senza Latenza di Rete
+
+Le Progressive Web App possono funzionare offline tramite Service Workers. Per app di lettura, moduli semplici o contenuto in cache, questo è sufficiente. Ma c'è una differenza fondamentale tra "funzionare in modo degradato senza internet" e "essere progettata per operare principalmente in locale".
+
+Gli ambienti industriali hanno spesso connettività intermittente o assente: fabbriche con infrastruttura di rete carente, magazzini con zone morte Wi-Fi, cantieri in campo, imbarcazioni, miniere in luoghi remoti. Per questi scenari, il modello mentale corretto non è "si sincronizza con il cloud e ha fallback offline" — è "funziona localmente e si sincronizza quando la rete è disponibile".
+
+Un'app desktop con SQLite locale ha latenza di query nell'ordine dei microsecondi. Operazioni che richiederebbero una richiesta HTTP con latenza di 50-300ms avvengono istantaneamente. Per sistemi in cui gli operatori eseguono centinaia di operazioni all'ora — registrazione produzione, controllo qualità, gestione movimenti — questa differenza di performance è percettibile e impatta direttamente la produttività.
+
+Inoltre, con i dati in locale non c'è dipendenza dalla disponibilità del server. Un'interruzione della connettività non blocca le operazioni. Un guasto al server non interessa gli operatori in produzione. L'app continua semplicemente a funzionare.
+
+## Sicurezza Locale: Dati che Non Possono Andare nel Cloud
+
+Non tutti i dati possono o devono transitare via internet. Esistono scenari in cui la normativa, i contratti o semplicemente la policy interna richiedono che i dati rimangano nell'infrastruttura locale dell'azienda — o sulla macchina dell'utente stesso.
+
+Studi medici con dati dei pazienti soggetti a normative sulla privacy (GDPR). Studi legali con documenti riservati dei clienti. Aziende della difesa e della pubblica amministrazione con restrizioni di riservatezza. Industrie con proprietà intellettuale sensibile che non può uscire dalla rete interna. Tutti questi casi hanno in comune la necessità di controllo su dove vengono archiviati i dati.
+
+Un'app desktop con database locale cifrato — come SQLite con SQLCipher — mantiene i dati sulla macchina o nella rete locale. Non c'è traffico verso server esterni. Non c'è rischio di data breach per vulnerabilità di un server remoto. Il controllo sui dati è completo e verificabile.
+
+Questo è fondamentalmente diverso da una web app, anche se ospitata su server aziendali, perché il modello di accesso e i vettori di attacco sono diversi.
+
+## Integrazione con l'OS: Notifiche, Tray Icon e File System
+
+Le applicazioni che richiedono un'integrazione profonda con il sistema operativo — al di là di ciò che il browser offre — sono candidate naturali al desktop.
+
+Esempi concreti di integrazioni che le web app non riescono a replicare in modo nativo:
+
+```javascript
+// Electron: icona nella barra di sistema con menu contestuale
+const { Tray, Menu, nativeImage } = require('electron')
+
+const tray = new Tray(nativeImage.createFromPath('./icon.png'))
+const contextMenu = Menu.buildFromTemplate([
+  { label: 'Apri Dashboard', click: () => mainWindow.show() },
+  { label: 'Sincronizza Ora', click: () => syncData() },
+  { type: 'separator' },
+  { label: 'Esci', role: 'quit' }
+])
+tray.setContextMenu(contextMenu)
+tray.setToolTip('Sistema di Monitoraggio — Online')
+```
+
+Notifiche native del sistema operativo (non quelle del browser), scorciatoie da tastiera globali che funzionano anche quando l'app è minimizzata, accesso illimitato al file system per leggere e scrivere in directory arbitrarie, integrazione con protocolli URL personalizzati (`myapp://`), drag-and-drop di file con accesso al percorso completo, esecuzione di processi esterni — tutte queste integrazioni sono native in Electron o Tauri e difficili o impossibili in una web app.
+
+Se l'applicazione deve "vivere" nel sistema operativo — essere disponibile in background, reagire agli eventi di sistema, manipolare file in modo estensivo — il desktop è l'ambiente corretto.
+
+## Conclusione
+
+La decisione tra desktop e web non è una questione di tecnologia preferita o familiarità del team. È una questione di requisiti. Le web app sono più veloci da sviluppare, più facili da distribuire e aggiornare, e coprono la maggior parte dei casi d'uso del software aziendale moderno.
+
+Ma quando il sistema richiede accesso affidabile a hardware specializzato, performance garantita senza dipendenza dalla rete, controllo totale su dove vengono archiviati i dati, o integrazione profonda con il sistema operativo — l'app desktop non è una scelta nostalgica. È la scelta tecnicamente corretta.
+
+In SystemForge, costruiamo applicazioni desktop per esattamente questi casi: sistemi industriali, strumenti di gestione per ambienti con connettività limitata, applicazioni con requisiti stringenti di sicurezza dei dati. Se stai analizzando i requisiti di un sistema e non sei sicuro se desktop o web sia la scelta giusta, possiamo aiutarti in questa analisi prima di qualsiasi riga di codice.

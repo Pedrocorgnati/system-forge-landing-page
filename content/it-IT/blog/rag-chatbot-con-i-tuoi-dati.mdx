@@ -1,0 +1,194 @@
+---
+title: "RAG nella pratica: ricerca semantica con i tuoi dati"
+slug: "rag-chatbot-con-i-tuoi-dati"
+date: "2024-08-01"
+description: "Come implementare RAG (Retrieval-Augmented Generation) per creare chatbot che rispondono con i tuoi dati — embedding, vector store e chunking di documenti."
+tags: ["rag", "embedding", "vector store", "langchain", "ia generativa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come implementare RAG (Retrieval-Augmented Generation) per creare chatbot che rispondono con i tuoi dati — embedding, vector store e chunking di documenti.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rag-chatbot-com-seus-dados'
+  - locale: 'en'
+    slug: 'rag-chatbot-with-your-own-data'
+---
+
+Gli LLM come GPT-4o e Claude hanno un problema fondamentale quando vengono utilizzati isolatamente: non conoscono i tuoi dati. Sono stati addestrati su informazioni fino a una certa data, non hanno accesso ai tuoi documenti interni, alle policy aziendali, alla cronologia dei clienti o a qualsiasi dato privato. Quando un utente fa una domanda specifica sulla tua azienda, il modello o inventa una risposta plausibile o ammette di non sapere.
+
+RAG — Retrieval-Augmented Generation — è la soluzione standard a questo problema. Invece di affidarsi solo alla conoscenza parametrica del modello, si recuperano i documenti rilevanti dalla propria base di dati e li si inietta nel contesto prima di generare la risposta. Il modello inizia a rispondere con i tuoi dati, in modo aggiornato e tracciabile.
+
+Questo articolo mostra come implementare RAG da zero, dai concetti fino al pipeline funzionante.
+
+## Embedding: Trasformare il Testo in Vettori
+
+Il cuore del RAG è la ricerca semantica, e la ricerca semantica dipende dagli embedding. Un embedding è una rappresentazione numerica del testo in uno spazio vettoriale ad alta dimensione. I testi semanticamente simili sono vicini in questo spazio — "cane" e "cucciolo" avranno vettori vicini, pur essendo parole diverse.
+
+I modelli di embedding trasformano qualsiasi testo in un vettore di centinaia o migliaia di dimensioni. OpenAI offre `text-embedding-3-small` e `text-embedding-3-large`. Sentence Transformers offre modelli open-source eccellenti per l'italiano, come `paraphrase-multilingual-mpnet-base-v2`.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+def get_embedding(text: str, model: str = "text-embedding-3-small") -> list[float]:
+    text = text.replace("\n", " ")
+    response = client.embeddings.create(input=[text], model=model)
+    return response.data[0].embedding
+
+# Esempio
+vettore = get_embedding("Qual è la politica di reso?")
+print(f"Dimensioni: {len(vettore)}")  # 1536 per text-embedding-3-small
+```
+
+La scelta del modello di embedding impatta direttamente la qualità della ricerca. I modelli più grandi catturano sfumature semantiche più complesse, ma sono più costosi e lenti. Per la maggior parte delle applicazioni in italiano, `text-embedding-3-small` o un modello BERT multilingue offrono un buon rapporto qualità-prezzo.
+
+## Vector Store: Pinecone, Chroma e pgvector
+
+Con gli embedding generati, hai bisogno di un posto dove archiviarli ed eseguire ricerche per similarità in modo efficiente. I database relazionali tradizionali non sono ottimizzati per questo — confrontare un vettore da 1536 dimensioni contro milioni di altri vettori richiede algoritmi specializzati come HNSW (Hierarchical Navigable Small World).
+
+Le principali opzioni sono:
+
+| Opzione | Tipo | Adatto a |
+|---------|------|----------|
+| Pinecone | Gestito (cloud) | Produzione senza ops, grande scala |
+| Weaviate | Self-hosted / cloud | Filtraggio ibrido, GraphQL |
+| Chroma | Locale / self-hosted | Prototipazione, progetti più piccoli |
+| pgvector | Estensione PostgreSQL | Già usa Postgres, vuole semplicità |
+| Qdrant | Self-hosted / cloud | Performance, filtraggio avanzato |
+
+Per iniziare con Chroma (ideale per lo sviluppo):
+
+```python
+import chromadb
+from chromadb.utils import embedding_functions
+
+client = chromadb.PersistentClient(path="./chroma_db")
+
+openai_ef = embedding_functions.OpenAIEmbeddingFunction(
+    api_key="la-tua-chiave",
+    model_name="text-embedding-3-small"
+)
+
+collection = client.get_or_create_collection(
+    name="documenti_azienda",
+    embedding_function=openai_ef
+)
+
+# Aggiungere documenti
+collection.add(
+    documents=["La nostra politica di reso consente il cambio entro 30 giorni..."],
+    metadatas=[{"fonte": "politica-reso.pdf", "pagina": 1}],
+    ids=["doc_001"]
+)
+
+# Ricerca
+risultati = collection.query(
+    query_texts=["posso cambiare un prodotto?"],
+    n_results=3
+)
+```
+
+In produzione con dati sensibili o grandi volumi, migrare a pgvector (se già si usa PostgreSQL) o Pinecone è la decisione più pragmatica.
+
+## Chunking: Come Dividere i Documenti per un RAG Efficiente
+
+Il chunking — divisione dei documenti in pezzi più piccoli — è dove molti progetti RAG falliscono in silenzio. Se i chunk sono troppo grandi, si include contesto inutile nel prompt e si pagano più token. Se sono troppo piccoli, il contesto risulta frammentato e privo di senso.
+
+Non esiste una risposta universale, ma alcune linee guida aiutano:
+
+**Chunk size:** 256-512 token è un buon punto di partenza per i documenti tecnici. Per i documenti legali con clausole lunghe, possono essere necessari 512-1024 token.
+
+**Overlap:** la sovrapposizione tra chunk consecutivi (50-100 token) garantisce che le informazioni al confine tra due chunk non vadano perse.
+
+**Chunking semantico:** invece di dividere per dimensione fissa, dividere per paragrafi o sezioni semantiche produce chunk con senso compiuto.
+
+```python
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,
+    chunk_overlap=64,
+    separators=["\n\n", "\n", ".", "!", "?", " ", ""],
+    length_function=len,
+)
+
+with open("manuale_prodotto.txt") as f:
+    testo = f.read()
+
+chunks = splitter.split_text(testo)
+print(f"Totale chunk: {len(chunks)}")
+print(f"Primo chunk: {chunks[0][:200]}...")
+```
+
+Il `RecursiveCharacterTextSplitter` di LangChain tenta di dividere prima per paragrafi (`\n\n`), poi per righe, poi per frasi — preservando al massimo la coerenza semantica.
+
+## Costruire il Pipeline Completo con LangChain
+
+Con embedding, vector store e chunking configurati, il pipeline RAG completo funziona così:
+
+1. **Ingestione:** caricare i documenti, dividerli in chunk, generare gli embedding e salvarli nel vector store
+2. **Recupero:** ricevere la domanda dell'utente, generare l'embedding della domanda, cercare gli N chunk più simili
+3. **Generazione:** costruire un prompt con i chunk recuperati e la domanda originale, inviarlo all'LLM
+
+```python
+from langchain_openai import ChatOpenAI, OpenAIEmbeddings
+from langchain_community.vectorstores import Chroma
+from langchain.chains import RetrievalQA
+from langchain.prompts import PromptTemplate
+
+# Configurare il retriever
+embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+vectorstore = Chroma(
+    persist_directory="./chroma_db",
+    embedding_function=embeddings
+)
+retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
+
+# Prompt personalizzato
+template = """Usa solo il contesto seguente per rispondere alla domanda.
+Se l'informazione non è nel contesto, di' "Non ho trovato questa informazione nel nostro database."
+
+Contesto:
+{context}
+
+Domanda: {question}
+
+Risposta:"""
+
+prompt = PromptTemplate(
+    template=template,
+    input_variables=["context", "question"]
+)
+
+# Pipeline RAG
+llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+qa_chain = RetrievalQA.from_chain_type(
+    llm=llm,
+    chain_type="stuff",
+    retriever=retriever,
+    chain_type_kwargs={"prompt": prompt},
+    return_source_documents=True,
+)
+
+# Utilizzo
+risultato = qa_chain.invoke({"query": "Qual è la garanzia dei prodotti?"})
+print(risultato["result"])
+print("Fonti:", [doc.metadata["fonte"] for doc in risultato["source_documents"]])
+```
+
+Includere le fonti nella risposta è essenziale: permette all'utente di verificare le informazioni e aumenta la fiducia nel sistema.
+
+Un dettaglio critico nel template: l'istruzione "Se l'informazione non è nel contesto, di' X" riduce drasticamente le allucinazioni. Il modello ha il permesso esplicito di ammettere che non sa, invece di inventare.
+
+## Conclusione
+
+Il RAG ha trasformato ciò che è possibile fare con gli LLM nei sistemi aziendali. Invece di un modello generico che non conosce il tuo business, puoi avere un assistente che risponde con i tuoi documenti, le tue policy e i tuoi dati — in modo tracciabile e aggiornato.
+
+Ma implementare il RAG correttamente va oltre il semplice collegamento di un'API. La scelta dell'embedding, la strategia di chunking, la configurazione del retriever e la valutazione della qualità sono decisioni che impattano direttamente l'utilità del sistema.
+
+In **SystemForge**, costruiamo pipeline RAG per aziende che hanno bisogno di un'IA che parli davvero con i loro dati — non con dati inventati. Se hai documenti interni, manuali, contratti o cronologie che devono essere accessibili tramite linguaggio naturale, contattaci.

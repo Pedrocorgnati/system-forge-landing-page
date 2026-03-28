@@ -2,7 +2,7 @@
 title: "Marketplace B2B vs B2C: le differenze che contano"
 slug: "marketplace-b2b-vs-b2c-differenze"
 date: "2024-09-12"
-description: "Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — prezzi, approvazione acquisti, credito e integrazione con ERP."
+description: "Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — pricing, approvazione acquisti, credito e integrazione con ERP."
 tags: ["marketplace b2b", "marketplace b2c", "e-commerce b2b", "ux b2b", "marketplace"]
 coverImage: "/images/blog/default-cover.png"
 author: "Pedro Corgnati"
@@ -10,42 +10,40 @@ relatedService: "marketplace"
 locale: 'it-IT'
 published: true
 exclusive: false
-excerpt: Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — prezzi, approvazione acquisti, credito e integrazione con ERP.
+excerpt: "Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — pricing, approvazione acquisti, credito e integrazione con ERP."
 hreflang_pair:
   - locale: 'pt-BR'
     slug: 'marketplace-b2b-vs-b2c-diferencas'
-  - locale: 'it-IT'
-    slug: 'marketplace-b2b-vs-b2c-differenze'
   - locale: 'en'
     slug: 'marketplace-b2b-vs-b2c-differences'
 ---
 
-A prima vista, un marketplace B2B e uno B2C sembrano fare la stessa cosa: mettere in contatto chi vende con chi compra. In pratica, sono prodotti così diversi che condividere la stessa base di codice tra i due di solito crea più problemi che risparmi di tempo. Il pubblico, il flusso di acquisto, la determinazione dei prezzi, i metodi di pagamento e i requisiti di integrazione sono strutturalmente diversi — e capire queste differenze prima di progettare il sistema è ciò che separa i progetti che scalano da quelli che rimangono bloccati in cicli di rielaborazione.
+A prima vista, un marketplace B2B e un B2C sembrano fare la stessa cosa: connettere chi vende con chi compra. In pratica, sono prodotti cosi diversi che condividere la stessa base di codice tra i due genera spesso piu problemi che risparmi. Il pubblico, il flusso di acquisto, la tariffazione, i metodi di pagamento e i requisiti di integrazione sono strutturalmente diversi — e comprendere queste differenze prima di progettare il sistema e cio che separa i progetti che scalano da quelli bloccati nel refactoring.
 
-Un marketplace B2C serve consumatori finali. La decisione di acquisto è individuale, spesso impulsiva, e il criterio principale è solitamente il prezzo e l'esperienza. Un marketplace B2B serve aziende. La decisione di acquisto coinvolge più persone, processi di approvazione, budget precedentemente allocato e criteri tecnici che vanno ben oltre il prezzo.
+Un marketplace B2C serve consumatori finali. La decisione d'acquisto e individuale, spesso impulsiva, e il criterio principale e solitamente prezzo ed esperienza. Un marketplace B2B serve aziende. La decisione d'acquisto coinvolge piu persone, processi di approvazione, budget preallocati e criteri tecnici che vanno ben oltre il prezzo.
 
-## Flusso di Acquisto B2B: Approvazioni e Più Acquirenti
+## Flusso di Acquisto B2B: Approvazioni e Acquirenti Multipli
 
-Nel B2C, il flusso di acquisto è lineare: ricerca → prodotto → carrello → checkout → pagamento. In pochi minuti. Nel B2B, questo flusso può estendersi per giorni e coinvolgere più persone con ruoli distinti.
+Nel B2C, il flusso di acquisto e lineare: ricerca → prodotto → carrello → checkout → pagamento. In pochi minuti. Nel B2B, questo flusso puo estendersi per giorni e coinvolgere piu persone con ruoli distinti.
 
-Un flusso B2B realistico funziona così:
+Un flusso B2B realistico funziona cosi:
 
-**Acquirente operativo** trova il prodotto e crea una "richiesta di acquisto" (non ancora un ordine). Questa richiesta va a una coda di approvazione.
+**Acquirente operativo** trova il prodotto e crea una "richiesta d'acquisto" (non ancora un ordine). Questa richiesta va in una coda di approvazione.
 
-**Approvatore** (manager, responsabile finanziario o direttore, a seconda del valore) riceve la notifica, esamina la richiesta e approva, rifiuta o richiede modifiche.
+**Approvatore** (manager, amministratore o direttore, a seconda dell'importo) riceve notifica, verifica la richiesta e approva, rifiuta o richiede modifiche.
 
-**Dopo l'approvazione**, la richiesta si converte in ordine di acquisto. L'acquirente operativo lo finalizza con i dati di consegna e la modalità di pagamento (fattura, bonifico, rimessa diretta).
+**Dopo l'approvazione**, la richiesta si converte in ordine d'acquisto. L'acquirente operativo completa con i dati di consegna e la modalita di pagamento (fatturazione, bonifico SEPA, carta).
 
-**La ricevuta** viene generata automaticamente (fattura elettronica in molti casi) e inviata all'indirizzo e-mail del dipartimento fiscale.
+**La fattura** viene generata automaticamente (fattura elettronica SDI nella maggior parte dei casi) e inviata all'email del reparto amministrativo.
 
-Questo flusso richiede che il modello dati supporti più utenti per account acquirente, con ruoli e permessi distinti:
+Questo flusso richiede che il modello dati supporti piu utenti per account acquirente, con ruoli e permessi distinti:
 
 ```typescript
-// Modello di account B2B con più utenti
+// Modello di account B2B con utenti multipli
 interface BuyerAccount {
   id: string;
   companyName: string;
-  vatNumber: string;
+  partitaIva: string;
   creditLimit?: number;  // Limite di credito negoziato
   users: BuyerUser[];
   approvalRules: ApprovalRule[];
@@ -55,7 +53,7 @@ interface BuyerUser {
   id: string;
   accountId: string;
   role: 'operator' | 'approver' | 'admin' | 'finance';
-  purchaseLimit?: number;  // Importo massimo che può approvare da solo
+  purchaseLimit?: number;  // Importo massimo che puo approvare da solo
 }
 
 interface ApprovalRule {
@@ -66,74 +64,51 @@ interface ApprovalRule {
 }
 ```
 
-Questa struttura consente di definire regole come "gli acquisti superiori a €2.000 richiedono 2 approvatori, di cui almeno uno del dipartimento finanziario". Implementare questo nell'MVP B2B non è opzionale — è il cuore del prodotto.
+Questa struttura permette di definire regole come "acquisti superiori a 5.000 EUR richiedono 2 approvatori, di cui almeno uno dell'amministrazione". Implementare questo nel MVP B2B non e opzionale — e il cuore del prodotto.
 
-## Prezzi Differenziati per Cliente nel B2B
+## Pricing Differenziato per Cliente nel B2B
 
-Nei marketplace B2C, tutti vedono lo stesso prezzo. Nel B2B, questo non accade quasi mai. I clienti con volumi elevati negoziano prezzi speciali, i distributori hanno proprie tabelle e i clienti strategici possono avere condizioni esclusive.
+Nei marketplace B2C, tutti vedono lo stesso prezzo. Nel B2B, questo quasi mai accade. Clienti con volumi elevati negoziano prezzi speciali, i distributori hanno listini propri e clienti strategici possono avere condizioni esclusive.
 
-Il sistema di determinazione dei prezzi B2B deve supportare più livelli:
+Il sistema di pricing B2B deve supportare piu livelli:
 
 | Livello | Descrizione | Esempio |
-|---------|-------------|---------|
-| Prezzo base | Prezzo standard, pubblicamente visibile | €100,00 |
-| Tabella di gruppo | Prezzo per segmento di cliente | Distributori: €85,00 |
-| Prezzo per account | Prezzo negoziato individualmente | Cliente X: €78,00 |
-| Sconto per volume | Sconto per quantità nell'ordine | 10+ unità: -8% |
+|---|---|---|
+| Prezzo base | Prezzo standard, visibile pubblicamente | 100,00 EUR |
+| Listino di gruppo | Prezzo per segmento cliente | Distributori: 85,00 EUR |
+| Prezzo per account | Prezzo negoziato individualmente | Cliente X: 78,00 EUR |
+| Sconto per volume | Sconto per quantita nell'ordine | 10+ unita: -8% |
 | Sconto per periodo | Campagna o promozione temporanea | -5% in ottobre |
 
-La logica di risoluzione deve seguire una gerarchia chiara: prezzo per account → sconto per volume → tabella di gruppo → prezzo base. Il prezzo più specifico ha la precedenza.
+La logica di risoluzione deve seguire una gerarchia chiara: prezzo per account → sconto per volume → listino di gruppo → prezzo base. Il prezzo piu specifico ha la precedenza.
 
 ## Integrazione con ERP e Fatturazione Elettronica
 
-Questa è la parte che distingue maggiormente lo sviluppo B2B dal B2C dal punto di vista tecnico. Le aziende acquirenti solitamente necessitano che gli ordini del marketplace si riflettano automaticamente nel loro ERP — sia per il controllo dell'inventario, sia per la contabilità fornitori o l'audit fiscale.
+Questa e la parte che piu differenzia lo sviluppo B2B dal B2C in termini tecnici. Le aziende acquirenti necessitano generalmente che gli ordini del marketplace si riflettano automaticamente nel loro ERP — sia per il controllo del magazzino, che per la contabilita o la revisione fiscale.
 
-Le integrazioni più comuni sono con:
+Le integrazioni piu comuni in Italia sono con:
 
-- **SAP Business One / S/4HANA:** multinazionali e grandi imprese
-- **Microsoft Dynamics 365:** aziende di medie e grandi dimensioni
-- **Odoo / Sage:** PMI con budget contenuto
-- **Xero / QuickBooks:** piccole imprese che necessitano di fatturazione elettronica
+- **SAP Business One / S/4HANA:** multinazionali e grandi aziende
+- **TeamSystem / Zucchetti:** dominanti nelle PMI italiane
+- **Fattura24 / Aruba:** per la fatturazione elettronica SDI
+- **Danea Easyfatt / Fatture in Cloud:** piccole imprese
 
-Dal lato della fatturazione, l'emissione della fattura elettronica è obbligatoria in molti mercati europei (sistema SDI in Italia). Le opzioni più utilizzate sono:
+Per la fatturazione elettronica, l'emissione tramite SDI (Sistema di Interscambio) e obbligatoria in Italia. Il sistema deve generare il formato XML FatturaPA conforme.
 
-```typescript
-// Emissione fattura elettronica dopo conferma ordine
-async function emittiInvoice(order: Order): Promise<string> {
-  const response = await invoiceService.post('/invoices', {
-    invoiceType: 'TD01',  // Fattura ordinaria
-    description: `Acquisto marketplace - Ordine #${order.id}`,
-    amount: order.totalAmount,
-    buyer: {
-      vatNumber: order.buyer.vatNumber,
-      name: order.buyer.companyName,
-      email: order.buyer.fiscalEmail,
-      address: order.buyer.address,
-    }
-  });
+## UX B2B vs B2C: Funzionalita Prima dell'Estetica
 
-  return response.data.id; // ID fattura per tracciamento
-}
-```
+La tentazione nei progetti B2B e replicare l'esperienza visiva raffinata dei grandi B2C come Amazon. Questo e un errore di priorita. Gli utenti B2B preferiscono l'efficienza alla bellezza — usano la piattaforma come strumento di lavoro, spesso quotidianamente, e apprezzano:
 
-L'integrazione con l'ERP è spesso un requisito "deal breaker" nelle vendite B2B: se il marketplace non si integra con l'ERP dell'acquirente, il dipartimento IT dell'azienda blocca l'acquisto. Mappare le integrazioni necessarie prima dello sviluppo evita mesi di negoziazione.
+**Ricerca avanzata con filtri tecnici:** numero di riferimento prodotto, codice fornitore, specifiche tecniche. Un operatore acquisti non vuole navigare per categorie — vuole digitare "vite M8x40 inox 304" e trovare immediatamente.
 
-## UX B2B vs B2C: Funzionalità prima dell'Estetica
+**Storico e riordino rapido:** la maggior parte degli ordini B2B sono ripetizioni. "Ripeti ultimo ordine" e "salva lista acquisti frequenti" valgono piu di qualsiasi animazione UI.
 
-La tentazione nei progetti B2B è replicare l'esperienza visiva curata dei grandi B2C come Amazon. Questo è un errore di priorità. Gli utenti B2B preferiscono l'efficienza all'estetica — usano la piattaforma come strumento di lavoro, spesso quotidianamente, e valorizzano:
+**Esportazione dati:** ordini in CSV/XML, fatture in PDF, report di spesa per periodo e categoria.
 
-**Ricerca avanzata con filtri tecnici:** numero di riferimento del prodotto, codice interno del fornitore, specifiche tecniche (dimensioni, materiali, normative). Un responsabile acquisti non vuole navigare tra le categorie — vuole digitare "vite M8x40 acciaio inox 304" e trovarla immediatamente.
-
-**Cronologia e riordino rapido:** la maggior parte degli ordini B2B sono ripetizioni. "Ripeti ultimo ordine" e "salva lista acquisti frequenti" valgono più di qualsiasi animazione UI.
-
-**Esportazione dati:** ordini in CSV/XML, fatture in PDF, report di spesa per periodo e categoria. Questi dati devono finire nell'ERP dell'acquirente.
-
-**Dashboard account:** credito disponibile, ordini in corso, approvazioni in sospeso, cronologia finanziaria. L'acquirente B2B ha bisogno di pieno controllo sullo stato dell'account.
-
-La regola pratica è: investi nel flusso di acquisto ricorrente prima di qualsiasi miglioramento estetico. L'utente che compra ogni mese deve riuscire a farlo in meno di 5 minuti.
+**Dashboard account:** credito disponibile, ordini in corso, approvazioni in sospeso, storico finanziario.
 
 ## Conclusione
 
-La decisione tra costruire un marketplace B2B o B2C definisce non solo il prodotto, ma l'architettura tecnica, il modello dati, le integrazioni necessarie e il profilo del team che manterrà la piattaforma. Costruire per il pubblico sbagliato è un errore costoso.
+La decisione tra costruire un marketplace B2B o B2C definisce non solo il prodotto, ma l'architettura tecnica, il modello dati, le integrazioni necessarie e il profilo del team che manterra la piattaforma.
 
-SystemForge supporta queste decisioni con documentazione strutturata prima del codice — identificando i flussi critici, mappando le integrazioni necessarie e generando le User Story che coprono gli scenari B2B spesso dimenticati fino a quando un cliente importante non li richiede.
+SystemForge aiuta a prendere queste decisioni con documentazione strutturata prima del codice — identificando i flussi critici, mappando le integrazioni necessarie e generando le User Story che coprono gli scenari B2B spesso dimenticati. Con la documentazione giusta, lo sviluppo inizia senza ambiguita. [Contattaci su systemforge.it](/contatto).

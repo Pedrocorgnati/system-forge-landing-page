@@ -13,8 +13,10 @@ export default defineConfig({
       { find: '@config/sites/it', replacement: path.resolve(__dirname, './config/sites/it') },
       { find: '@config/sites/en', replacement: path.resolve(__dirname, './config/sites/en') },
       { find: '@config/types', replacement: path.resolve(__dirname, './config/types') },
+      { find: '@config/content', replacement: path.resolve(__dirname, './config/content') },
       { find: '@config', replacement: path.resolve(__dirname, './config/index') },
-      { find: '@/', replacement: path.resolve(__dirname, './src/') },
+      { find: '@content', replacement: path.resolve(__dirname, './content') },
+      { find: '@/', replacement: path.resolve(__dirname, './src') + '/' },
     ],
   },
 })

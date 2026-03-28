@@ -1,0 +1,103 @@
+---
+title: "CRO: How to Improve Landing Page Conversion Rate"
+slug: "cro-how-to-improve-landing-page-conversion"
+date: "2024-08-14"
+description: "CRO (Conversion Rate Optimization) process for landing pages: how to identify problems with heatmaps, formulate hypotheses, and run A/B tests."
+tags: ["cro", "landing page", "conversion rate", "a/b test", "hotjar"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: CRO process for landing pages — heatmaps, session recordings, data-driven hypothesis formulation, and A/B tests with statistical significance.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'cro-landing-pages-melhorar-taxa-conversao'
+  - locale: 'it-IT'
+    slug: 'cro-landing-page-migliorare-tasso-conversione'
+---
+
+Doubling a landing page's conversion rate costs less than doubling traffic. That statement seems obvious when you look at the numbers: if your page converts at 2% and you're spending $5,000/month on Google Ads to bring 10,000 visitors, you're generating 200 conversions. To reach 400 conversions while maintaining cost, you can double the investment — or optimize the page to convert at 4%. The financial result is identical. The second option costs hours of analysis and testing, not another $5,000/month recurring.
+
+CRO (Conversion Rate Optimization) is the systematic process of increasing the percentage of visitors who take the desired action on a page. The key word is "systematic": CRO isn't guessing what works, it's measuring what's broken and testing data-based hypotheses.
+
+## Diagnosis: Heatmaps, Session Recordings, and Funnels
+
+Before formulating any hypothesis, you need to understand current user behavior. Three tools build this diagnosis:
+
+**Heatmaps** show where users click, move the mouse, and how much time they spend on each section. Tools like Hotjar, Microsoft Clarity (free), and FullStory generate heat maps by scroll depth and click. The most relevant patterns to observe:
+
+- How far are users scrolling? If fewer than 40% reach the page's end, either the page is too long or it lost the user earlier.
+- What are users trying to click that isn't clickable? Rage clicks on non-interactive elements indicate frustration and unmet expectations.
+- Is the CTA receiving clicks or being ignored? A button nobody clicks may be poorly positioned, have weak copy, or have low visual contrast.
+
+**Session recordings** are individual recordings of user sessions. Watching 20-30 recordings of users who entered the page but didn't convert reveals patterns that no aggregate number shows: the user stops mid-page, scrolls up, and leaves — what was up there that they went back looking for? The user starts filling out the form and abandons on the second field — is that field necessary?
+
+**Conversion funnels** in Google Analytics 4 show where users drop off in multi-step flows. For single-page landing pages, the most relevant funnel is exit rate by segment: mobile vs desktop users, paid vs organic traffic, new vs returning users. Very discrepant rates between segments indicate a specific problem with that group.
+
+## Formulating Data-Based Hypotheses
+
+A poorly formulated CRO hypothesis wastes time and traffic. A good hypothesis has three components:
+
+1. **Observation:** what the data shows
+2. **Hypothetical cause:** why this might be happening
+3. **Proposed change:** what you'll change to test
+
+Bad example: "I'll change the button color to see if it improves."
+
+Good example: "The heatmap shows only 18% of mobile users reach the CTA (observation). On mobile, the form pushes the button below the fold (hypothetical cause). I'll move the CTA above the form on mobile (proposed change)."
+
+The difference is relevant: in the second case, you know what you're testing and why. If the test confirms the hypothesis, you learned something about your users' behavior. If it doesn't, you eliminate a hypothesis and move to the next.
+
+## A/B Test: Statistical Significance and Minimum Duration
+
+The biggest mistake in A/B tests is declaring a winner too early. Seeing variant B converting 15% more after 200 visitors and stopping the test is a classic statistical error — with small samples, variations of that size are noise, not signal.
+
+To calculate the necessary sample size before starting a test, use the formula:
+
+```
+n = (Z_α/2 + Z_β)² × (p₁(1-p₁) + p₂(1-p₂)) / (p₁ - p₂)²
+
+Where:
+- Z_α/2 = 1.96 for 95% confidence
+- Z_β = 0.84 for 80% statistical power
+- p₁ = current conversion rate (baseline)
+- p₂ = expected conversion rate (minimum detectable effect)
+```
+
+In practice, use online calculators like Optimizely's or Evan Miller's. For a page converting at 3% and a minimum detectable effect of 20% (meaning you want to detect if the variant reached 3.6% or more), you need approximately 15,000 visitors per variant.
+
+This has direct implications: if your site receives 500 visitors per month, you need 5 years to get a statistically valid result at that traffic level. In these cases, prioritize more aggressive changes (larger expected effect) or use qualitative approaches instead of A/B testing.
+
+The recommended minimum duration is two complete business cycles — generally two weeks — regardless of traffic volume. This eliminates weekday bias (Monday users behave differently than Saturday users).
+
+## Prioritization: Which Elements to Test First
+
+With limited resources, the order of tests matters. The ICE framework (Impact, Confidence, Ease) helps prioritize:
+
+| Hypothesis | Impact (1-10) | Confidence (1-10) | Ease (1-10) | ICE Score |
+|---|---|---|---|---|
+| Change headline to focus on outcome | 8 | 7 | 9 | 8.0 |
+| Add demo video | 7 | 5 | 4 | 5.3 |
+| Remove form fields | 9 | 8 | 7 | 8.0 |
+| Change CTA color | 4 | 4 | 10 | 6.0 |
+| Add video testimonial | 6 | 6 | 5 | 5.7 |
+
+The ICE score is the average of the three values. This table suggests starting with headline and form field reduction — high expected impact, high data-based confidence, and reasonably simple execution.
+
+Elements with highest potential impact, in general order:
+
+1. Headline and subheadline (affects 100% of visitors)
+2. CTA copy and positioning (affects everyone who reaches it)
+3. Number of form fields (affects the decision to submit)
+4. Social proof (affects trust at the moment of decision)
+5. Hero image or video (affects initial product perception)
+
+Button color, typeface, and small layout variations tend to have low impact and shouldn't be initial priorities — unless your data specifically shows a problem there.
+
+## Conclusion
+
+CRO isn't a one-time activity — it's a continuous process of observation, hypothesis, and testing. High-performing pages got there after dozens of iterations, not after a perfect redesign executed once.
+
+The prerequisite for doing CRO is having a solid technical foundation: a page that loads fast, is instrumented with analytics and heatmap tools, and whose structure allows changes without regression risk. At SystemForge, we deliver Next.js landing pages with this foundation already configured — Google Analytics 4, Microsoft Clarity integrated, and component structure that facilitates rapid data-driven iteration.

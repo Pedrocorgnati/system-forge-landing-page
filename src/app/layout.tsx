@@ -4,10 +4,12 @@ import './globals.css'
 import { ThemeProvider } from '@/components/layout/ThemeProvider'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
-import { JsonLd } from '@/components/ui/JsonLd'
+import { JsonLdOrganization } from '@/components/seo/JsonLdOrganization'
+import { JsonLdLocalBusiness } from '@/components/seo/JsonLdLocalBusiness'
 import { LanguageSuggestionBanner } from '@/components/ui/LanguageSuggestionBanner'
 import { DevOverlayLoader } from '@/components/dev/DevOverlayLoader'
-import { organizationSchema } from '@/lib/schema'
+import { CookieBanner } from '@/components/ui/CookieBanner'
+import { Analytics } from '@/components/analytics/Analytics'
 import { getSiteConfig, LOCALE_URLS, SUPPORTED_LOCALES } from '@config'
 import { loadMessages } from '@config/content'
 
@@ -76,9 +78,13 @@ export const metadata: Metadata = {
       SUPPORTED_LOCALES.map(locale => [locale, LOCALE_URLS[locale]])
     ),
   },
+  manifest: '/manifest.json',
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-icon.png',
+  },
+  verification: {
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
   },
 }
 
@@ -121,7 +127,10 @@ export default function RootLayout({
           </main>
           <Footer />
           <DevOverlayLoader />
-          <JsonLd schema={organizationSchema} />
+          <CookieBanner />
+          <Analytics />
+          <JsonLdOrganization siteConfig={config} />
+          <JsonLdLocalBusiness siteConfig={config} />
         </ThemeProvider>
       </body>
     </html>

@@ -1,0 +1,181 @@
+---
+title: "Distribuzione di app desktop: firma del codice e installer"
+slug: "distribuzione-app-desktop-firma-codice"
+date: "2024-11-03"
+description: "Come firmare il codice e generare installer professionali per app Electron su Windows, macOS e Linux — code signing, notarization e distribuzione."
+tags: ["code signing", "desktop app", "electron", "windows installer", "macos notarization"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come firmare il codice e generare installer professionali per app Electron su Windows, macOS e Linux — code signing, notarization e distribuzione.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'distribuicao-app-desktop-assinatura-codigo'
+  - locale: 'en'
+    slug: 'distributing-desktop-apps-code-signing'
+---
+
+Avete passato mesi a costruire un'app desktop. Il codice e solido, i test passano, la UX e riuscita bene. Poi generate l'installer e lo inviate al cliente per il test. Lui prova ad aprire il file e riceve: "Windows Defender SmartScreen ha impedito l'avvio di un'applicazione non riconosciuta." Oppure, su macOS: "Impossibile aprire 'VostraApp.app' perche lo sviluppatore non puo essere verificato."
+
+Questo momento e evitabile. Il code signing — la firma digitale del codice — e cio che distingue un'app che si installa senza allarmi da un'app che sembra malware per i sistemi operativi moderni. Non e un dettaglio di distribuzione da rimandare. E un requisito per qualsiasi app che verra installata da utenti reali al di fuori del vostro ambiente di sviluppo.
+
+Il processo e diverso su ogni piattaforma e comporta costi e tempistiche. Comprendere come funziona prima di arrivare alla fase di distribuzione risparmia settimane di ritardi e sorprese spiacevoli con i clienti.
+
+## Windows: certificato EV e Authenticode
+
+Windows utilizza lo standard Authenticode per la verifica del codice firmato. SmartScreen, il sistema di reputazione di Microsoft, analizza due fattori: se il codice e firmato e quale reputazione ha accumulato il certificato utilizzato.
+
+Esistono due tipi di certificati per Windows:
+
+**Certificato OV (Organization Validation):** Verifica che l'organizzazione esiste, ma SmartScreen mostrera comunque l'avviso di "editore sconosciuto" nelle prime installazioni finche il certificato non avra accumulato una reputazione sufficiente. Per app con pochi utenti, questo processo puo richiedere mesi.
+
+**Certificato EV (Extended Validation):** Richiede una verifica presenziale o notarile dell'identita del titolare, costa di piu (tipicamente 300-500 EUR/anno), ma bypassa immediatamente il processo di accumulazione della reputazione di SmartScreen. Per app aziendali, l'EV e la strada corretta.
+
+Fornitori come DigiCert, Sectigo e GlobalSign emettono certificati EV. Il processo di validazione richiede da alcuni giorni a due settimane, a seconda del fornitore e della rapidita di risposta alla documentazione richiesta.
+
+Con `electron-builder`, la configurazione del signing su Windows e:
+
+```json
+{
+  "build": {
+    "win": {
+      "target": ["nsis", "portable"],
+      "certificateFile": "cert.pfx",
+      "certificatePassword": "${CERTIFICATE_PASSWORD}",
+      "signingHashAlgorithms": ["sha256"],
+      "signDlls": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "VostraApp"
+    }
+  }
+}
+```
+
+Il `signDlls: true` e importante: senza di esso, solo l'eseguibile principale viene firmato, e le DLL non firmate all'interno dell'installer possono far scattare gli allarmi dell'antivirus.
+
+La password del certificato non deve mai essere nel codice o nel repository. Deve essere una variabile d'ambiente iniettata dal CI/CD — GitHub Actions Secrets, GitLab CI Variables o equivalente.
+
+## macOS: Developer ID e notarization Apple
+
+macOS ha un processo in due fasi: signing con un certificato Developer ID, e notarization — invio dell'app firmata per l'analisi automatizzata di Apple prima della distribuzione.
+
+Il Gatekeeper, sistema di sicurezza di macOS, dal Catalina (2019) richiede la notarization per qualsiasi app distribuita al di fuori del Mac App Store. Senza notarization, macOS blocca l'apertura dell'app con il messaggio di "sviluppatore non verificato".
+
+Il Developer ID richiede un account nell'Apple Developer Program (99 USD/anno). Il certificato viene generato tramite Xcode o Accesso Portachiavi ed esportato come file `.p12` per l'utilizzo in ambienti di CI.
+
+La configurazione in `electron-builder` per macOS:
+
+```json
+{
+  "build": {
+    "mac": {
+      "target": ["dmg", "zip"],
+      "category": "public.app-category.productivity",
+      "identity": "Developer ID Application: Vostra Azienda (TEAM_ID)",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "entitlements.mac.plist",
+      "entitlementsInherit": "entitlements.mac.plist",
+      "notarize": {
+        "teamId": "TEAM_ID"
+      }
+    }
+  }
+}
+```
+
+Il `hardenedRuntime: true` e obbligatorio per la notarization. Il file `entitlements.mac.plist` dichiara i permessi richiesti dall'app — accesso alla rete, fotocamera, microfono, ecc. Apple analizza se i permessi dichiarati hanno senso per il tipo di app.
+
+Il processo di notarization richiede da alcuni minuti ad alcune ore. In una pipeline di CI, questo significa che la build di release puo richiedere piu tempo delle build di sviluppo. Pianificate questo nel vostro SLA di deploy.
+
+## Linux: AppImage, .deb e Snap
+
+Linux e piu permissivo di Windows e macOS in termini di verifica del codice — non esiste un sistema centralizzato equivalente a SmartScreen o Gatekeeper. Ma la scelta del formato di distribuzione impatta direttamente sull'esperienza di installazione.
+
+| Formato | Pro | Contro | Indicato per |
+|---|---|---|---|
+| AppImage | Portabile, senza installazione | Senza auto-update nativo | Distribuzione standalone |
+| .deb | Integrazione con apt, familiare | Solo Debian/Ubuntu | Ambienti controllati |
+| .rpm | Integrazione con dnf/yum | Solo Red Hat/Fedora | Ambienti RHEL aziendali |
+| Snap | Distribuzione universale, sandboxed | Avvio piu lento | Distribuzione pubblica |
+| Flatpak | Sandbox robusto, universale | Setup iniziale complesso | App per utente finale |
+
+Per la distribuzione aziendale — dove l'azienda controlla le macchine dei dipendenti — il `.deb` o `.rpm` e la scelta piu pratica perche consente di automatizzare l'installazione tramite strumenti di gestione della configurazione come Ansible o script di provisioning.
+
+Per la distribuzione pubblica ampia, l'AppImage ha il vantaggio di funzionare su praticamente qualsiasi distribuzione Linux senza installazione. Snap e Flatpak sono alternative con distribuzione via store (Snap Store, Flathub) ma aggiungono complessita al processo di pubblicazione.
+
+## CI/CD per build multipiattaforma
+
+Build per Windows, macOS e Linux in parallelo sono fattibili con GitHub Actions utilizzando runner specifici per piattaforma:
+
+```yaml
+# .github/workflows/release.yml
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - run: npm ci
+
+      - name: Build and Sign (Windows)
+        if: matrix.os == 'windows-latest'
+        env:
+          CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERT_PASSWORD }}
+          CSC_LINK: ${{ secrets.WINDOWS_CERT_BASE64 }}
+        run: npm run build:win
+
+      - name: Build and Notarize (macOS)
+        if: matrix.os == 'macos-latest'
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_LINK: ${{ secrets.MACOS_CERT_BASE64 }}
+          CSC_KEY_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: npm run build:mac
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: npm run build:linux
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.os }}
+          path: dist/
+```
+
+Il certificato `.p12` viene archiviato come base64 in un GitHub Secret (`CSC_LINK`), non come file nel repository. `electron-builder` lo decodifica automaticamente quando trova il valore in base64.
+
+## Conclusione
+
+Il code signing e la notarization sono investimenti che la maggior parte dei progetti scopre di dover aver fatto fin dall'inizio quando arriva alla prima demo per il cliente e Windows blocca l'installer. Il processo ha dei costi — tra 100 e 500 EUR/anno a seconda delle piattaforme — e tempi di validazione che devono rientrare nel cronoprogramma del progetto.
+
+La parte positiva e che, con la configurazione CI/CD corretta, il processo diventa completamente automatizzato dopo il setup iniziale. Ogni release genera installer firmati e notarizzati per tutte le piattaforme in modo trasparente.
+
+In SystemForge, la pipeline di build e distribuzione — incluso il code signing per tutte le piattaforme rilevanti — fa parte del deliverable di qualsiasi progetto di app desktop. Se state pianificando di distribuire un'app desktop ai clienti e volete strutturare il processo di distribuzione in modo professionale fin dall'inizio, [possiamo aiutarvi](https://systemforge.it/contatto).

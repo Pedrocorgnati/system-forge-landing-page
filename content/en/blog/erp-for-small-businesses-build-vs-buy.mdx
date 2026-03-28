@@ -1,0 +1,137 @@
+---
+title: "ERP for Small Businesses: Build vs Buy"
+slug: "erp-for-small-businesses-build-vs-buy"
+date: "2024-08-24"
+description: "When an SMB should buy an off-the-shelf ERP (QuickBooks, NetSuite, Odoo) and when a custom system makes more sense — cost, fit, and scalability analysis."
+tags: ["erp", "business management", "quickbooks", "netsuite", "smb software"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: When an SMB should buy an off-the-shelf ERP (QuickBooks, NetSuite, Odoo) and when a custom system makes more sense — cost, fit, and scalability analysis.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'erp-pequenas-empresas-construir-vs-comprar'
+  - locale: 'it-IT'
+    slug: 'erp-piccole-imprese-costruire-vs-comprare'
+---
+
+The decision to use an off-the-shelf ERP or build a custom system is one of the most recurring dilemmas for small and mid-size business owners who are growing. The generic ERP saves money today and costs dearly in the future -- not in subscription fees, but in lost productivity, parallel spreadsheets, and processes that never quite fit the company's workflow.
+
+That doesn't mean off-the-shelf systems are bad. For most SMBs below a certain level of operational maturity, buying a market solution is the correct decision. The problem is when the company keeps using the tool out of inertia even after the system has started working against business growth.
+
+This article provides an objective analysis of when each path makes sense, how to evaluate the transition point, and what to include in the minimum scope of a custom ERP.
+
+## Off-the-Shelf ERPs for SMBs: QuickBooks, NetSuite, Odoo, and Zoho
+
+The US market has mature solutions for different SMB profiles. Understanding each platform's positioning helps choose the right tool for the company's current stage.
+
+| Platform | Primary Focus | Strength | Limitation |
+|------------|---------------|-------------|-----------|
+| **QuickBooks** | Accounting + invoicing | Simplicity, massive accountant network | Limited for operations |
+| **NetSuite** | Full ERP (mid-market) | Comprehensive modules, scalability | High cost, complex setup |
+| **Odoo** | Modular open-source ERP | Flexibility, low per-user cost | Requires technical setup |
+| **Zoho One** | All-in-one business suite | 45+ integrated apps, affordable | Individual modules lack depth |
+| **Xero** | Cloud accounting | Clean UX, strong integrations | Weak for inventory/operations |
+
+QuickBooks is currently the most popular choice for small US businesses, with strong accounting, invoicing, and payroll modules. NetSuite serves companies that have outgrown QuickBooks and need a full-suite ERP with CRM, inventory, and financials integrated. Odoo is the natural choice for companies that want flexibility and customization without enterprise-level pricing.
+
+The monthly cost of these platforms ranges from $30 to $2,000+ depending on the plan and volume of operations. For a company with $500K/month in revenue, even the higher-end pricing represents less than 0.4% of revenue -- financially justifiable as long as the system delivers value.
+
+## When the Off-the-Shelf ERP No Longer Fits
+
+The clearest sign that a company has outgrown its generic ERP is the proliferation of parallel spreadsheets. When employees need an Excel sheet to supplement what the ERP doesn't do, or when the sales department has its own "real" database that only gets synchronized with the official system later, the ERP is failing.
+
+Other warning signs:
+
+**Core processes not supported**: if the business's main process doesn't exist in the ERP -- project management for construction firms, compounding formulas for specialty pharmacies, work orders for field service companies -- the company is working around the system, not with it.
+
+**Impossible or expensive integrations**: when operations require integration with industry-specific systems (manufacturing ERPs, commodity trading platforms, specialized logistics providers) and the generic platform doesn't have an available connector or charges prohibitive API fees.
+
+**Multiple third-party modules**: when the company subscribes to 4 or 5 different systems that should talk to each other -- ERP for accounting, separate CRM, helpdesk system, project management tool -- and spends hours every week doing manual synchronization between them.
+
+**Team growth with efficiency loss**: if doubling the number of employees also doubled the manual operational effort, the system isn't scaling with the business.
+
+## Custom ERP: What to Include in the Minimum Scope
+
+A custom ERP doesn't need to do everything on day one. The most common mistake is trying to migrate 100% of the legacy system's functionality at once, resulting in 18-month projects that become obsolete before going live.
+
+The minimum viable scope of a custom ERP for an SMB includes:
+
+**Core financial module**:
+- Accounts payable and receivable with due dates and alerts
+- Cash flow (actual and projected)
+- Bank reconciliation via OFX/Open Banking
+- Configurable cost centers and categories
+
+**Operational module** (varies by industry):
+- Main business entity (order, work order, project, contract)
+- Lifecycle with statuses and assignees
+- Attachments and interaction history
+
+**Basic invoicing module**:
+- Invoice generation integrated with accounting
+- Tax calculation by product/service type and jurisdiction
+- Export to accounting system
+
+**Authentication and profiles**:
+- Login with MFA
+- Role-based access (admin, finance, operations, read-only)
+- Audit log of all actions
+
+What to leave for future versions: advanced BI, marketplace integrations, full HR module, mobile app. Features that seem essential before launch frequently see low usage in the first few months.
+
+## ERP Migration: How Not to Lose Historical Data
+
+Historical data migration is where ERP projects tend to fail silently. The company goes live with the new system, the historical data "will be migrated later" -- and never is. Two years later, nobody can answer simple questions like "what was that client's revenue in 2022?"
+
+The migration strategy must be treated as a mandatory deliverable, not a post-launch task:
+
+**1. Source data audit**: before migrating, understand the real state of data in the legacy system. Null values that shouldn't be null, duplicate entities, broken relationships. Cleanup happens at the source before migration.
+
+**2. Schema mapping**: a formal document mapping each field from the old system to the corresponding field in the new one. Fields without exact correspondence need explicit decisions.
+
+**3. Layered migration**: migrate master data first (customers, vendors, products), then historical transactions (closed orders, financial entries), and finally open data (active orders, outstanding receivables).
+
+**4. Parallel operation period**: keep both systems running simultaneously for 30 to 60 days, with daily reconciliation of financial balances. Expensive, but indispensable for companies with critical operations.
+
+**5. Legacy archival**: the old system should not be shut down at go-live. Keep it in read-only mode for at least 12 months for historical queries.
+
+```python
+# Simplified customer migration script example
+import pandas as pd
+from datetime import datetime
+
+def migrate_customers(legacy_df, new_erp_session):
+    errors = []
+    migrated = 0
+
+    for _, row in legacy_df.iterrows():
+        try:
+            customer = {
+                "name": row["COMPANY_NAME"] or row["DBA_NAME"],
+                "ein": clean_ein(row["EIN"]),
+                "email": row["EMAIL"].lower().strip() if pd.notna(row["EMAIL"]) else None,
+                "active": True,
+                "migrated_at": datetime.utcnow(),
+                "legacy_id": str(row["CUST_ID"])  # keeps reference to old system
+            }
+            new_erp_session.insert("customers", customer)
+            migrated += 1
+        except Exception as e:
+            errors.append({"legacy_id": row["CUST_ID"], "error": str(e)})
+
+    return {"migrated": migrated, "errors": errors}
+```
+
+The `legacy_id` field is frequently overlooked during migration, but it's crucial for reconciliation during the parallel operation period and for historical traceability.
+
+## Conclusion
+
+The build vs buy decision for an ERP is not a question of company size -- it's a question of operational fit. A company with $20M in revenue can function perfectly well with QuickBooks if its processes are standard. A company with $2M may need a custom system if its business model is unique enough.
+
+The reliable signal that it's time to customize is when the sum of the cost of adapting processes to the generic ERP (time wasted, rework, parallel spreadsheets) exceeds the investment in a custom system.
+
+SystemForge specializes in building industry-specific ERPs with well-defined minimum viable scope, documented data migration, and architecture that scales with the business. If you're evaluating this decision, we can do an analysis of your current scenario before any proposal. [Get in touch](https://systemforgesoftware.com/contact).

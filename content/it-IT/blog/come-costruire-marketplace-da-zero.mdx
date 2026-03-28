@@ -1,0 +1,133 @@
+---
+title: "Come costruire un marketplace da zero"
+slug: "come-costruire-marketplace-da-zero"
+date: "2024-07-22"
+description: "Architettura e decisioni tecniche per costruire un marketplace: stack, modello dati multi-vendor, pagamenti e pannello del venditore."
+tags: ["marketplace", "architettura", "multi-vendor", "e-commerce", "sviluppo"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Architettura e decisioni tecniche per costruire un marketplace — modello dati multi-vendor, split dei pagamenti, pannello venditore e roadmap realistica.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-construir-marketplace-do-zero'
+  - locale: 'en'
+    slug: 'how-to-build-a-marketplace-from-scratch'
+---
+
+Un marketplace non è un e-commerce con più prodotti. È una piattaforma che connette due lati di un mercato — acquirenti e venditori — e guadagna dall'intermediazione. Questa differenza concettuale si traduce in vera complessità tecnica: servono account segregati, trasferimento finanziario automatico, pannello per venditore, sistema di valutazioni doppie, regole di qualità e, come minimo, il doppio della superficie di interfaccia.
+
+Se stai considerando di costruire un marketplace, è corretto affermare che la complessità tecnica è tre volte maggiore rispetto a un e-commerce semplice. Questo non è un'esagerazione — è quanto mostra la pratica nei progetti reali. Prima di iniziare, è fondamentale capire dove vive questa complessità e come architettare il sistema affinché non diventi debito tecnico irrecuperabile.
+
+## Modello Dati: Sellers, Products e Orders
+
+La principale differenza architetturale di un marketplace sta nel modello dati. In un e-commerce tradizionale c'è un unico "proprietario" dei prodotti. In un marketplace, ogni prodotto appartiene a un venditore, ogni ordine può contenere articoli di venditori diversi e ogni pagamento deve essere ripartito con precisione.
+
+Il modello centrale ruota attorno a quattro entità principali:
+
+```sql
+-- Venditori con proprio account finanziario
+CREATE TABLE sellers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  slug TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  commission_rate NUMERIC(5, 2) NOT NULL DEFAULT 10.00,
+  payment_account_id TEXT, -- ID nel gateway di pagamento
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, active, suspended
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Prodotti collegati a un venditore
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id UUID REFERENCES sellers(id) NOT NULL,
+  title TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  stock INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'draft', -- draft, active, paused
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Ordini con più articoli di venditori diversi
+CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  buyer_id UUID REFERENCES users(id),
+  total_cents INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Articoli segregati per venditore per facilitare il trasferimento
+CREATE TABLE order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id),
+  seller_id UUID REFERENCES sellers(id),
+  product_id UUID REFERENCES products(id),
+  quantity INTEGER NOT NULL,
+  unit_price_cents INTEGER NOT NULL,
+  commission_cents INTEGER NOT NULL,
+  seller_net_cents INTEGER NOT NULL
+);
+```
+
+Questa separazione tra `order_items` e `orders` è fondamentale. Permette di calcolare esattamente quanto deve ricevere ogni venditore per ordine, anche quando il cliente acquista da più seller in una sola transazione.
+
+Le colonne `commission_cents` e `seller_net_cents` devono essere calcolate al momento della creazione dell'articolo — non al momento del trasferimento. Questo evita problemi nel caso in cui le commissioni cambino nel tempo.
+
+## Pannello del Venditore: Cosa Costruire il Giorno 1
+
+Il pannello del venditore è dove la maggior parte dei team sottostima lo scope. Nel giorno 1 di un MVP funzionante, il venditore ha bisogno come minimo di:
+
+**Gestione catalogo:** creare, modificare e sospendere prodotti. Questo include upload di immagini, descrizione ricca, varianti (taglia, colore) e controllo stock per SKU.
+
+**Gestione ordini:** visualizzare gli ordini che contengono i propri prodotti, aggiornare lo stato (confermato, in preparazione, spedito, consegnato) e comunicare il codice di tracking.
+
+**Finanze di base:** vedere il saldo disponibile, il saldo da liberare (periodo di holdback) e la cronologia dei trasferimenti già effettuati. La trasparenza finanziaria è essenziale per conquistare venditori seri.
+
+**Impostazioni account:** coordinate bancarie per la ricezione, dati fiscali (P.IVA) e configurazione delle politiche di spedizione.
+
+Tutto questo prima del lancio. I venditori che non riescono a gestire autonomamente i propri prodotti abbandonano la piattaforma nelle prime settimane.
+
+## Stack Raccomandata per Marketplace nel 2025
+
+La scelta dello stack influisce direttamente sulla velocità di sviluppo e sulla capacità di scalare le funzionalità critiche.
+
+| Layer | Opzione Primaria | Alternativa |
+|---|---|---|
+| Frontend acquirente | Next.js 14 + App Router | Remix |
+| Frontend venditore | Next.js 14 (pannello separato) | React SPA |
+| Backend/API | Node.js + Fastify | NestJS |
+| Database | PostgreSQL (Supabase) | PlanetScale |
+| Pagamenti | Stripe Connect | PayPal Marketplace |
+| Job queue | BullMQ (Redis) | Inngest |
+| Storage | Cloudflare R2 | AWS S3 |
+| Search | Typesense | Algolia |
+| Deploy | Vercel + Railway | AWS |
+
+La separazione tra il frontend dell'acquirente e il pannello del venditore non è obbligatoria nell'MVP, ma è altamente raccomandata. Le due interfacce hanno esigenze di UX completamente diverse e tendono a crescere in direzioni opposte.
+
+L'uso di BullMQ o Inngest per i job asincroni è essenziale fin dal giorno 1. Trasferimenti finanziari, email di notifica, aggiornamenti stock ed elaborazione delle immagini non devono avvenire in modo sincrono nella richiesta HTTP.
+
+## Roadmap: dall'MVP al Marketplace Scalabile
+
+Una roadmap realistica per un marketplace segue tre fasi distinte:
+
+**Fase 1 — MVP Funzionante (2-4 mesi):** registrazione e onboarding dei venditori, catalogo base, carrello e checkout con split del pagamento, pannello venditore con gestione ordini e finanze semplice, sistema di valutazioni base (solo l'acquirente valuta il venditore).
+
+**Fase 2 — Crescita (3-6 mesi):** ricerca avanzata con filtri per seller/categoria/prezzo, programma coupon e promozioni, integrazione con corrieri per calcolo automatico della spedizione, app mobile (se il pubblico target usa prevalentemente il mobile), sistema di controversie e risoluzione dei conflitti.
+
+**Fase 3 — Scala (continuo):** raccomandazioni personalizzate con ML, programma seller premium con commissioni differenziate, API pubblica per integrazioni esterne (ERP dei venditori), analytics avanzato per categoria, espansione dei metodi di pagamento.
+
+La trappola più comune è cercare di consegnare la Fase 3 insieme alla Fase 1. Il risultato è ritardo nel lancio, tecnologia complessa con pochi utenti a giustificarla e debito tecnico che blocca la crescita futura.
+
+## Conclusione
+
+Costruire un marketplace da zero richiede decisioni tecniche corrette fin dall'inizio. Un modello dati mal pianificato, una scelta sbagliata di gateway di pagamento o un pannello venditore inutilizzabile possono compromettere mesi di sviluppo.
+
+SystemForge accelera questo processo generando tutta la documentazione tecnica — PRD, architettura, LLD, User Stories, task dettagliate — prima di scrivere la prima riga di codice. Con questo approccio, il team di sviluppo inizia con chiarezza su cosa costruire, in quale ordine e perché.
+
+Se stai avviando un marketplace o hai bisogno di riorganizzare un progetto già in corso, SystemForge può ridurre significativamente il rischio tecnico e l'incertezza nel tuo prossimo progetto.

@@ -13,11 +13,11 @@ import { CookieConsentModal } from './CookieConsentModal'
 /* ------------------------------------------------------------------ */
 
 const btnBase =
-  'h-10 px-4 rounded-md text-sm font-medium min-h-[44px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+  'h-10 px-4 rounded-md text-sm font-medium min-h-[44px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [touch-action:manipulation]'
 
 const btnPrimary = cn(btnBase, 'bg-primary text-primary-foreground hover:bg-primary/90')
 const btnOutline = cn(btnBase, 'border border-input bg-background hover:bg-accent')
-const btnGhost = 'text-sm font-medium text-primary underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2'
+const btnGhost = 'text-sm font-medium text-primary underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [touch-action:manipulation]'
 
 /* ------------------------------------------------------------------ */
 /*  Component                                                          */

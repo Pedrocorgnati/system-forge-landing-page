@@ -11,6 +11,11 @@ locale: 'pt-BR'
 published: true
 exclusive: false
 excerpt: "Como implementar webhooks seguros: validação de assinatura HMAC, retry com backoff exponencial, idempotência e fila de processamento assíncrono."
+hreflang_pair:
+  - locale: 'it-IT'
+    slug: 'webhook-sicuri-validazione-firma-idempotenza'
+  - locale: 'en'
+    slug: 'secure-webhooks-signature-validation-idempotency'
 ---
 
 Webhooks são um dos padrões mais poderosos e mais mal implementados de integrações entre sistemas. A ideia é simples: em vez de você ficar consultando uma API periodicamente ("tem novidade?"), o serviço externo te avisa quando algo acontece. Pagamento aprovado? POST no seu endpoint. Entrega confirmada? POST no seu endpoint.

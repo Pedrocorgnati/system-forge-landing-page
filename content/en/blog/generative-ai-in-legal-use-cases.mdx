@@ -1,0 +1,150 @@
+---
+title: "Generative AI in Legal: Real-World Use Cases"
+slug: "generative-ai-in-legal-use-cases"
+date: "2024-09-15"
+description: "How law firms and corporate legal departments use generative AI for contract analysis, legal research, and document automation."
+tags: ["legal ai", "legaltech", "contract ai", "legal automation", "llm"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How law firms and corporate legal departments use generative AI for contract analysis, legal research, and document automation.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ia-generativa-no-juridico-casos-de-uso'
+  - locale: 'it-IT'
+    slug: 'ia-generativa-nel-settore-legale'
+---
+
+## AI in Legal: Beyond the Hype
+
+The legal sector has an ambivalent relationship with technology. On one hand, it's conservative by nature — contracts, precedents, and regulations exist to create stability. On the other, it's one of the sectors where generative AI has already demonstrated measurable productivity gains: research that took hours now takes minutes, contracts are reviewed in seconds, and drafts are generated from briefings.
+
+This article presents real use cases where AI already adds value in legal — and where it's still not reliable without human oversight.
+
+## Use Case 1: Contract Review and Analysis
+
+Contract analysis is the most mature AI use case in legal. The process involves sending the contract to an LLM with a structured prompt requesting the extraction of specific information.
+
+```python
+from anthropic import Anthropic
+
+client = Anthropic()
+
+def analyze_contract(contract_text: str) -> dict:
+    prompt = f"""Analyze the contract below and extract:
+
+1. Parties involved (name, EIN/tax ID, role in the contract)
+2. Contract subject matter (description of what is being contracted)
+3. Term (start date, end date, auto-renewal)
+4. Main obligations of each party
+5. Termination clauses and penalties
+6. Governing law and jurisdiction
+7. Identified risks (abusive clauses, ambiguities, excessive obligations)
+
+Contract:
+{contract_text}
+
+Reply in structured JSON."""
+
+    response = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=4096,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.content[0].text
+```
+
+**What works well:** Extraction of specific clauses, identification of dates, parties, and obligations. Standardized contracts (leases, services, NDAs) achieve high accuracy.
+
+**Where attention is required:** Interpretation of legal ambiguities, validity analysis against specific regulations, and calculating consequences of interconnected clauses still require attorney review.
+
+## Use Case 2: Accelerated Legal Research
+
+Legal research involves finding relevant precedents, case law, and doctrine for a specific issue. With RAG over a legal document database, it's possible to significantly accelerate this process.
+
+```python
+from llama_index.core import VectorStoreIndex
+from llama_index.core.node_parser import SentenceSplitter
+
+# Database: Supreme Court opinions, circuit court decisions, regulatory guidance
+# Previously loaded as indexed documents
+query_engine = index.as_query_engine(
+    similarity_top_k=10,
+    response_mode="tree_summarize"
+)
+
+response = query_engine.query(
+    "What is the current circuit court consensus on platform liability for third-party content under Section 230?"
+)
+
+# Returns response + sources of consulted opinions
+for source in response.source_nodes:
+    print(f"Case: {source.metadata['citation']}")
+    print(f"Date: {source.metadata['date']}")
+    print(f"Relevant excerpt: {source.text[:200]}")
+```
+
+Law firms that implemented RAG systems over their case law databases report 60–80% reduction in initial research time.
+
+## Use Case 3: Draft and Document Generation
+
+Draft generation is one of the most productive use cases for legal teams with high volumes of standardized documents.
+
+```python
+def generate_nda_draft(briefing_data: dict) -> str:
+    prompt = f"""Generate an NDA (Non-Disclosure Agreement) draft based on the following information:
+
+- Disclosing party: {briefing_data['discloser']}
+- Receiving party: {briefing_data['recipient']}
+- Subject of confidentiality: {briefing_data['subject']}
+- Term: {briefing_data['term']}
+- Governing law/jurisdiction: {briefing_data['jurisdiction']}
+- Applicable regulations: {briefing_data['applicable_regs']}
+
+Use formal legal language. Include standard clauses for:
+definition of confidential information, parties' obligations,
+exceptions to confidentiality, consequences of breach, and general provisions."""
+
+    response = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=8192,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.content[0].text
+```
+
+**Important:** AI-generated drafts are starting points, not final documents. Attorneys must review especially liability clauses, regulatory compliance, and adaptations to the specific business context.
+
+## Use Case 4: Due Diligence Screening
+
+In M&A processes, legal due diligence involves reviewing hundreds of contracts under tight deadlines. AI can handle initial screening, classifying documents by relevance and risk.
+
+The approach works in three stages:
+1. **Automatic classification:** Identify document type (employment contract, software license, intellectual property, etc.)
+2. **Metadata extraction:** Date, parties, value, term, change of control clauses
+3. **Risk flagging:** Clauses requiring special attention (termination on change of control, preemptive rights, assignment restrictions)
+
+M&A teams report that AI screening allows attorneys to focus on the 20% of documents that genuinely require deep analysis.
+
+## Where AI Is Still Not Reliable
+
+Clarity about limitations is essential for responsible use:
+
+**Don't rely without review:**
+- Calculation of procedural deadlines (statute of limitations and repose periods are critical)
+- Interpretation of specific regulatory frameworks (SEC, CFPB, HIPAA, state-specific laws)
+- Litigation strategy and risk assessment
+- Signed legal opinions — responsibility always rests with the attorney
+
+**Hallucination risk:** LLMs can cite precedents that don't exist or confuse case citation numbers. Every legal citation generated by AI must be verified against primary sources.
+
+## Conclusion
+
+Generative AI is already a reality in legal — firms that don't adopt it lose competitive ground in productivity and response time. The most mature use cases (contract review, research, draft generation, due diligence screening) have proven ROI when implemented with adequate oversight.
+
+SystemForge implements legal automation solutions with AI for law firms and corporate legal departments. If you want to understand how this works in practice, reach out to our team.

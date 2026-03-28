@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
 import { blog as articles } from '@/.velite'
-import { JsonLd } from '@/components/ui/JsonLd'
+import { JsonLdBlogPosting } from '@/components/seo/JsonLdBlogPosting'
 import { ArticlePage } from '@/components/blog/ArticlePage'
 import { generatePageMetadata } from '@/lib/seo'
 import { getRelatedArticles } from '@/lib/cross-links'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
 import { SITE } from '@/lib/constants'
+import { getSiteConfig } from '@config'
 
 /**
  * /blog/[slug] — Artigo individual do blog.
@@ -99,39 +100,20 @@ export default async function BlogPostPage({ params }: PageProps) {
       .filter(a => a.slug !== article.slug)
     : []
 
-  // Schema.org Article (FEAT-BL-007)
-  const articleSchema = {
-    '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: article.title,
-    description: article.description,
-    image: ogImageUrl,
-    datePublished: article.date,
-    dateModified: article.date,
-    author: {
-      '@type': 'Organization',
-      name: article.author,
-      url: siteUrl,
-    },
-    publisher: {
-      '@type': 'Organization',
-      name: 'SystemForge',
-      url: siteUrl,
-      logo: {
-        '@type': 'ImageObject',
-        url: `${siteUrl}/images/logo.png`,
-      },
-    },
-    mainEntityOfPage: {
-      '@type': 'WebPage',
-      '@id': `${siteUrl}/blog/${article.slug}`,
-    },
-    keywords: article.tags.join(', '),
-  }
+  const siteConfig = getSiteConfig()
 
   return (
     <>
-      <JsonLd schema={articleSchema} />
+      <JsonLdBlogPosting
+        post={{
+          title: article.title,
+          slug: article.slug,
+          date: article.date,
+          description: article.description,
+          coverImage: ogImageUrl,
+        }}
+        siteConfig={siteConfig}
+      />
       <ArticlePage article={article} relatedArticles={relatedArticles} />
     </>
   )

@@ -20,7 +20,7 @@ export const itConfig: SiteConfig = {
   email: 'contatto@systemforge.it',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+393401234567',
   calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge-it',
-  budgetEngine: process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://systemforge.it',
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.corgnati.com/quote'}?locale=it-IT`,
   address: 'Milano, Italia',
   compliance: 'GDPR',
   currency: 'EUR',
@@ -42,7 +42,7 @@ export const itConfig: SiteConfig = {
     description:
       'Sviluppiamo software su misura: SaaS, app mobile, landing page, e-commerce, dashboard e automazioni con IA.',
     titleTemplate: '%s | SystemForge',
-    ogImage: '/images/og-image.png',
+    ogImage: '/og/og-it.png',
   },
   routes: {
     home: '/',
@@ -61,10 +61,14 @@ export const itConfig: SiteConfig = {
     contact: '/#contatto',
   },
   newsletter: {
-    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL  // fallback legado
+      ?? '',
     doubleOptIn: true, // GDPR obrigatório
   },
   newsletterApiUrl:
-    process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL
+      ?? '',
   ga4MeasurementId: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
 }

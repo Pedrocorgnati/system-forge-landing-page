@@ -1,0 +1,104 @@
+---
+title: "Pubblicare un'app su App Store e Google Play: guida"
+slug: "pubblicare-app-store-google-play-guida"
+date: "2024-07-15"
+description: "Guida passo passo per pubblicare un'app su App Store e Google Play — account sviluppatore, review guidelines, ASO di base ed errori che causano il rifiuto."
+tags: ["app store", "google play", "pubblicare app", "aso", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Guida passo passo per pubblicare un'app su App Store e Google Play — account sviluppatore, review guidelines, ASO di base ed errori che causano il rifiuto.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'publicar-app-app-store-google-play-guia'
+  - locale: 'en'
+    slug: 'publish-app-on-app-store-and-google-play'
+---
+
+Hai trascorso mesi a sviluppare la tua app. Il codice funziona, i test sono passati, il team ha approvato. Ora basta pubblicare e guardare i download arrivare, giusto? Non esattamente. La fase di pubblicazione ha più livelli di quanti la maggior parte dei founder si aspetti, e saltarne uno costa tempo — a volte settimane di ritardo nel lancio.
+
+Questa guida copre il processo completo: dalla creazione degli account sviluppatore fino alle pratiche di ASO che aumentano la visibilità organica della tua app.
+
+## Account Sviluppatore: Apple e Google — Costi e Requisiti
+
+Prima di tutto, hai bisogno di account attivi su entrambe le piattaforme. I modelli sono diversi e vale la pena capire cosa richiede ciascuna.
+
+**Apple Developer Program**
+- Costo: USD 99/anno (persona fisica o giuridica)
+- Le persone giuridiche hanno bisogno di un DUNS Number — un identificativo globale per le aziende. Il processo di ottenimento può richiedere da 5 a 30 giorni lavorativi se l'azienda non è registrata.
+- Richiede un dispositivo Apple per la sottomissione tramite Xcode o Transporter
+- L'account personale pubblica l'app a nome proprio; l'account aziendale pubblica a nome dell'azienda
+
+**Google Play Console**
+- Costo: USD 25 (quota una tantum, non annuale)
+- Dal 2023, i nuovi account devono completare un periodo di test chiuso con almeno 20 tester per 14 giorni prima di poter pubblicare per il pubblico generale
+- Accetta la sottomissione tramite interfaccia web, senza necessità di hardware specifico
+
+| Piattaforma | Costo | Tempo di attivazione account | Requisito speciale |
+|-------------|-------|------------------------------|-------------------|
+| App Store (Apple) | USD 99/anno | 24–48h (personale) / fino a 30 giorni (aziendale con DUNS) | Xcode o Transporter |
+| Google Play | USD 25 (una tantum) | 24–48h | 20 tester per 14 giorni (nuovi account) |
+
+Una decisione importante: pubblicare come persona fisica o giuridica? Per i prodotti commerciali, preferisci sempre l'account aziendale. Il nome dell'azienda appare nello store, non il nome personale dello sviluppatore, trasmettendo maggiore credibilità.
+
+## App Store Review: Cosa Apple Rifiuta più Frequentemente
+
+Apple ha il processo di review più rigoroso delle due piattaforme. Il tempo medio di approvazione è di 24-48 ore, ma un rifiuto riavvia il ciclo. I motivi più comuni di rifiuto sono:
+
+**1. Crash durante il review**
+Il revisore testerà l'app manualmente. Qualsiasi crash, specialmente all'avvio o nei flussi principali, porta al rifiuto immediato. Testa sempre su un dispositivo fisico prima di sottomettere, non solo sul simulatore.
+
+**2. Metadati fuorvianti**
+Screenshot che mostrano funzionalità non presenti nella versione sottomessa, descrizioni che promettono funzionalità inesistenti o categorie errate. Apple verifica manualmente.
+
+**3. Funzionalità incomplete**
+Le app che sottomettono contenuto placeholder, link non funzionanti, schermate vuote o flussi che terminano senza azione vengono rifiutate. La linea guida 2.1 ("App Completeness") viene spesso citata.
+
+**4. Pagamenti al di fuori del sistema Apple**
+Qualsiasi link per acquisti al di fuori dell'IAP (In-App Purchase) di Apple nelle app iOS — inclusi i link al sito web — viola le linee guida. Apple prende questo molto sul serio.
+
+**5. Raccolta dati senza dichiarazione**
+L'App Privacy Report (Privacy Nutrition Label) deve riflettere esattamente quali dati raccoglie l'app. Le incongruenze causano il rifiuto.
+
+L'App Store Review Guidelines è disponibile pubblicamente e deve essere letta integralmente prima della prima sottomissione. Non è un documento breve, ma è più diretto di quanto sembri.
+
+## Google Play: Politiche e Processo di Review
+
+Google Play ha un processo più automatizzato, ma non meno rigoroso. La revisione combina analisi automatica con revisione umana nei casi sospetti.
+
+I motivi più comuni di rifiuto o sospensione includono:
+
+- **Violazione della politica sulla privacy:** le app che raccolgono dati senza un'informativa sulla privacy chiara e accessibile vengono rifiutate. L'informativa deve essere un URL valido, non un testo inline.
+- **Permessi eccessivi:** richiedere permessi che l'app non usa (ad esempio, accesso alla fotocamera in un'app calcolatrice) attiva la revisione manuale.
+- **Contenuto protetto da proprietà intellettuale:** utilizzo di marchi, loghi o personaggi di terzi senza autorizzazione.
+- **Comportamento ingannevole:** app che si spacciano per un'altra app, imitano l'interfaccia del sistema operativo o mostrano annunci fuori dal contesto dell'app.
+
+Un vantaggio pratico di Google Play: la pubblicazione può essere eseguita a fasi (staged rollout), rilasciando l'app progressivamente al 5%, 10%, 20% degli utenti. Questo consente di rilevare i problemi di produzione prima del rollout completo.
+
+## ASO di Base: Nome, Icona, Screenshot e Descrizione
+
+L'ASO (App Store Optimization) è l'equivalente della SEO per gli store di app. Un'app ben ottimizzata appare più in alto nel ranking di ricerca e converte più visitatori in download.
+
+**Nome dell'app**
+È il campo con maggiore peso per la ricerca organica. Includi la parola chiave principale in modo naturale. Limite: 30 caratteri su App Store, 50 su Google Play. Esempio: "Fintag — Gestione Spese" invece di solo "Fintag".
+
+**Icona**
+L'icona è la prima impressione. Regole pratiche: sfondo a colore solido o sfumatura semplice, un elemento centrale riconoscibile, nessun testo (illeggibile nelle dimensioni piccole). Testa sia su sfondo chiaro che scuro.
+
+**Screenshot**
+Gli screenshot sono il fattore di conversione più impattante. Ognuno deve contenere un titolo che descriva il beneficio, non la funzionalità. "Controlla le tue spese in tempo reale" converte più di "Schermata transazioni".
+
+**Descrizione**
+Le prime tre righe appaiono prima del "mostra altro" — usa questo spazio per comunicare il beneficio principale e il differenziale. Il resto della descrizione può essere più dettagliato, con bullet point delle funzionalità.
+
+**Parole chiave (App Store)**
+L'App Store ha un campo keywords specifico (100 caratteri) che non è visibile all'utente ma influenza il ranking. Usa parole che non sono nel titolo o nel sottotitolo. Non ripetere i termini.
+
+## Conclusione
+
+Pubblicare un'app con successo non riguarda solo il codice — significa capire le regole di ciascuna piattaforma, preparare correttamente i metadati e lanciare con una strategia di visibilità fin dal primo giorno. Un singolo errore nel processo di sottomissione può ritardare il lancio di settimane.
+
+In SystemForge, trattiamo la pubblicazione come parte dello sviluppo, non come una fase successiva. Dalla configurazione degli account all'ASO iniziale e al piano di rollout, ogni dettaglio è documentato ed eseguito con lo stesso rigore del codice. Se stai sviluppando un'app e vuoi garantire che il lancio avvenga nei tempi e senza sorprese, contattaci.

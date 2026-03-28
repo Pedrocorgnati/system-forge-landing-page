@@ -153,12 +153,13 @@ export const AdvisorSchema = z.object({
 
 // ─── 8. PrivacySchema ────────────────────────────────────────────────────────
 // Para content/{locale}/pages/privacy.json
-// Estrutura LGPD/GDPR: título + seções com heading e parágrafos
+// Estrutura LGPD/GDPR: título + seções com id (ancoragem), heading e parágrafos
 export const PrivacySchema = z.object({
   title: z.string().min(1),
   lastUpdated: z.string().min(1),
   sections: z.array(
     z.object({
+      id: z.string().optional(),
       heading: z.string().min(1),
       paragraphs: z.array(z.string().min(1)),
     })

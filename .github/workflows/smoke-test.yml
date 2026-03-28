@@ -1,0 +1,65 @@
+# .github/workflows/smoke-test.yml
+# Smoke Tests — valida cada domínio após deploy
+# Checks: HTTP 200 + keyword de conteúdo + atributo lang correto
+#
+# Trigger: workflow_run após "Triple Market Deploy" completar em main
+# 3 jobs independentes — diagnóstico granular por domínio
+name: Smoke Tests
+
+on:
+  workflow_run:
+    workflows: ["Triple Market Deploy"]
+    types: [completed]
+    branches: [main]
+
+  workflow_dispatch:
+    inputs:
+      url:
+        description: 'URL para teste manual (opcional — se vazio, testa todos)'
+        required: false
+
+jobs:
+  smoke-br:
+    name: Smoke BR (forjadesistemas.com.br)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test forjadesistemas.com.br
+        run: |
+          chmod +x scripts/smoke-test.sh
+          ./scripts/smoke-test.sh \
+            https://forjadesistemas.com.br \
+            "Forja de Sistemas" \
+            "pt-BR"
+
+  smoke-it:
+    name: Smoke IT (systemforge.it)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test systemforge.it
+        run: |
+          chmod +x scripts/smoke-test.sh
+          ./scripts/smoke-test.sh \
+            https://systemforge.it \
+            "SystemForge" \
+            "it"
+
+  smoke-en:
+    name: Smoke EN (systemforgesoftware.com)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Smoke test systemforgesoftware.com
+        run: |
+          chmod +x scripts/smoke-test.sh
+          ./scripts/smoke-test.sh \
+            https://systemforgesoftware.com \
+            "SystemForge Software" \
+            "en"

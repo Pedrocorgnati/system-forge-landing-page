@@ -1,0 +1,119 @@
+---
+title: "Gestione venditori marketplace: onboarding e compliance"
+slug: "gestione-venditori-marketplace-onboarding"
+date: "2024-08-28"
+description: "Come strutturare onboarding, verifica identità, politiche di qualità e disattivazione dei venditori nei marketplace."
+tags: ["marketplace", "gestione venditori", "kyc", "onboarding", "compliance"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come strutturare onboarding, verifica identità, politiche di qualità e disattivazione dei venditori nei marketplace.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-vendedores-marketplace-onboarding'
+  - locale: 'en'
+    slug: 'marketplace-vendor-management-onboarding'
+---
+
+La qualità di un marketplace è, in ultima analisi, la qualità dei suoi venditori. I compratori non tornano per la tua tecnologia — tornano perché hanno trovato prodotti reali, con descrizioni oneste, consegnati in tempo da venditori che rispondono alle domande. Ciò significa che la gestione del lato dell'offerta è critica quanto qualsiasi altra funzionalità tecnica della piattaforma.
+
+Il processo inizia molto prima che il venditore pubblichi il primo prodotto. Un onboarding mal strutturato attira profili inadeguati, complica il KYC e crea problemi di compliance che si trascinano per mesi. Un onboarding ben progettato, al contrario, filtra i venditori seri fin dall'inizio e crea una base di qualità che si sostiene con la crescita della piattaforma.
+
+## Flusso di Onboarding: Registrazione, Verifica e Approvazione
+
+L'onboarding dei venditori deve essere trattato come un prodotto separato, con il proprio flusso UX e i propri criteri di successo. L'obiettivo non è solo raccogliere dati — è guidare il venditore fino allo stato "attivo e in pubblicazione" il più rapidamente possibile, senza rinunciare alle verifiche necessarie.
+
+Un flusso di onboarding ben strutturato ha cinque fasi:
+
+**Fase 1 — Registrazione base:** email, password e tipo di account (persona fisica o giuridica). Non chiedere niente di più in questo momento. L'obiettivo è ridurre l'attrito iniziale e creare l'account il più velocemente possibile. La verifica email deve avvenire qui.
+
+**Fase 2 — Dati del profilo:** nome visualizzato del negozio, categoria principale, breve descrizione, foto profilo/logo. Questo è ciò che il compratore vede — aiuta il venditore a creare una buona prima impressione.
+
+**Fase 3 — Documentazione e KYC:** codice fiscale/P.IVA, documenti d'identità, prova di indirizzo, dati bancari. Questa è la fase più delicata e deve essere trattata con cura nella UX — spiega perché ogni informazione è necessaria e quanto tempo richiede l'analisi.
+
+**Fase 4 — Configurazione finanziaria:** dati per la ricezione pagamenti (IBAN, coordinate bancarie), consenso ai termini finanziari incluse commissioni e calendario dei bonifici.
+
+**Fase 5 — Pubblicazione del primo prodotto:** guidata, con checklist. I venditori che pubblicano il primo prodotto entro le prime 48 ore hanno un tasso di attivazione molto più alto rispetto a quelli che rimandano questa fase.
+
+Lo stato del venditore deve transitare tra stati chiaramente definiti:
+
+```typescript
+type VendorStatus =
+  | 'draft'           // registrazione iniziata, senza verifica
+  | 'pending_kyc'     // in attesa di analisi documenti
+  | 'kyc_review'      // documenti in analisi manuale
+  | 'active'          // approvato, può vendere
+  | 'suspended'       // sospeso temporaneamente (preavviso)
+  | 'deactivated';    // disattivato definitivamente
+```
+
+Ogni transizione di stato deve inviare un'email automatica informando il venditore su cosa è successo e cosa ci si aspetta da lui in seguito.
+
+## KYC Automatizzato: Verifica dei Documenti
+
+Il KYC (Know Your Customer) è il processo di verifica che il venditore sia chi dice di essere. Nel contesto dei marketplace, serve due scopi: conformità normativa (richiesta dalla Banca d'Italia per le piattaforme di pagamento) e riduzione delle frodi.
+
+L'approccio raccomandato combina verifica automatica per i casi semplici e revisione umana per i casi limite.
+
+**Verifiche automatiche praticabili:**
+
+- Codice fiscale: verifica tramite servizi di data enrichment italiani (Infocamere, CRIF, Cerved)
+- Partita IVA: situazione fiscale, composizione societaria, data di costituzione
+- Dati bancari: validazione dell'intestazione tramite servizi di verifica IBAN
+- Indirizzo: incrocio con database CAP/comuni e validazione della coerenza
+
+**Verifiche che richiedono analisi umana o OCR avanzato:**
+
+- Riconoscimento facciale (liveness check) per confermare che la persona sia reale
+- Lettura e validazione di documenti d'identità (carta d'identità, patente, passaporto)
+- Verifica di prove di indirizzo (utenze, estratti conto)
+
+Strumenti come Netheos, IDnow, Jumio e Onfido coprono la maggior parte di queste esigenze tramite API. Il costo per verifica completa varia tra €3 e €15 a seconda dei servizi utilizzati — un costo che si ripaga rapidamente bloccando venditori fraudolenti.
+
+Lo SLA dell'analisi manuale deve essere comunicato esplicitamente. "La tua registrazione è in analisi e sarà elaborata entro 2 giorni lavorativi" è molto meglio che lasciare il venditore in attesa senza feedback.
+
+## Politiche di Qualità e Sistema di Score
+
+Dopo l'onboarding, la gestione della qualità dei venditori diventa continua. Un sistema di score ben implementato crea gli incentivi corretti e consente di identificare i venditori problematici prima che causino danni alla reputazione della piattaforma.
+
+Le metriche più rilevanti per lo score dei venditori nei marketplace sono:
+
+| Metrica | Peso suggerito | Obiettivo |
+|---|---|---|
+| Tasso di recensioni positive | 30% | > 90% |
+| Tasso di cancellazioni | 20% | < 5% |
+| Tempo medio di risposta | 15% | < 4 ore |
+| Tasso di spedizione puntuale | 20% | > 95% |
+| Tasso di resi | 15% | < 3% |
+
+Lo score finale (0 a 100) definisce il tier del venditore:
+
+- **Platinum (90-100):** evidenza nei risultati di ricerca, tasso di commissione ridotto, badge di qualità
+- **Gold (75-89):** posizionamento standard, condizioni normali
+- **Silver (60-74):** avviso su metriche in calo, accesso al programma di miglioramento
+- **A rischio (sotto 60):** notifica formale, termine per il recupero, restrizione su nuovi prodotti
+
+La trasparenza è fondamentale: il venditore deve poter vedere il proprio score attuale, quali metriche stanno tirando verso il basso e cosa deve migliorare. Un pannello di metriche dettagliato non è un lusso — è una parte essenziale del pannello del venditore.
+
+## Disattivazione dei Venditori: Processo e Comunicazione
+
+Disattivare un venditore è inevitabile in qualsiasi marketplace in crescita. Il processo deve essere equo, documentato e rispettoso — anche quando la causa è una frode, perché il modo in cui gestisci la chiusura viene osservato dagli altri venditori e può diventare oggetto di discussione nelle community.
+
+Il processo raccomandato ha tre livelli:
+
+**Sospensione temporanea automatica:** attivata quando le metriche scendono sotto soglie critiche (es: 3 chargeback in 30 giorni, score sotto 50 per 2 settimane consecutive). Il venditore riceve un'email che spiega la sospensione, le metriche che l'hanno causata e un termine chiaro (es: 15 giorni) per risolvere i problemi.
+
+**Sospensione manuale:** attivata dal team operativo dopo analisi di segnalazioni, comportamento sospetto o violazioni di policy. Richiede registrazione interna del motivo e delle prove, che potrebbero essere necessarie in controversie legali.
+
+**Disattivazione definitiva:** dopo sospensione temporanea senza miglioramento, o immediatamente in caso di frode comprovata. Il venditore deve ricevere comunicazione formale con i motivi specifici e informazioni sul saldo in sospeso e i termini di pagamento.
+
+Il saldo finanziario di un venditore disattivato non può essere semplicemente trattenuto a tempo indeterminato. Definisci nella policy (e comunica nell'onboarding) che i venditori disattivati ricevono i valori già elaborati entro X giorni, con trattenuta solo degli importi in periodo di holdback per la copertura di chargeback aperti.
+
+## Conclusione
+
+La gestione dei venditori è una delle parti più sottovalutate nella costruzione di un marketplace. I team che pianificano solo il lato tecnico e lasciano i processi di onboarding, KYC e qualità come "fase 2" si trovano invariabilmente ad affrontare crisi di credibilità quando la piattaforma inizia a crescere.
+
+SystemForge supporta questa fase generando documentazione strutturata per tutti questi flussi — dal modello dati alle User Stories con scenari di errore — prima di qualsiasi implementazione. Con la documentazione completa in mano, il team tecnico può costruire con fiducia e il team operativo sa esattamente quali processi deve eseguire.

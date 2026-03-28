@@ -1,0 +1,188 @@
+---
+title: "Offline-first su desktop: SQLite locale vs sincronizzazione"
+slug: "offline-first-desktop-sqlite-vs-sincronizzazione"
+date: "2024-10-19"
+description: "Architettura offline-first per app desktop: SQLite locale con better-sqlite3, sincronizzazione con il server e risoluzione dei conflitti in ambienti senza internet."
+tags: ["offline first", "sqlite", "electron", "sincronizzazione", "app desktop"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Architettura offline-first per app desktop: SQLite locale con better-sqlite3, sincronizzazione con il server e risoluzione dei conflitti in ambienti senza internet."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-desktop-sqlite-vs-sync'
+  - locale: 'en'
+    slug: 'offline-first-desktop-sqlite-vs-sync'
+---
+
+Le applicazioni industriali vivono in un mondo dove la connettività non può essere data per scontata. Una fabbrica in zona rurale può avere internet di qualità variabile. Un magazzino può avere punti ciechi del Wi-Fi. Un cantiere in campo può restare senza segnale per ore. Una nave può operare in acque senza copertura per giorni interi.
+
+Per questi scenari, costruire un'applicazione che dipende da una connessione costante con un server remoto è una scelta che genererà incidenti in produzione in modo prevedibile. Il modello corretto è l'offline-first: l'applicazione funziona completamente con i dati locali, e si sincronizza con il server ogni volta che la connettività è disponibile.
+
+Implementare l'offline-first in modo robusto comporta tre problemi interconnessi: archiviazione locale efficiente, strategia di sincronizzazione e risoluzione dei conflitti quando due utenti modificano lo stesso dato senza essere connessi contemporaneamente. Ciascuno di questi problemi ha soluzioni ben definite — ma i dettagli di implementazione determinano se il sistema sarà affidabile in produzione o una fonte costante di problemi.
+
+## SQLite con better-sqlite3: Performance Sincrona nel Main Process
+
+SQLite è il database più usato al mondo per un motivo semplice: è affidabile, leggero e funziona ovunque. Per le app desktop offline-first, è la scelta naturale per l'archiviazione locale.
+
+Nel contesto di Electron, c'è una decisione importante su quale libreria usare per accedere a SQLite. La libreria `sqlite3` usa un'API asincrona basata su callback. `better-sqlite3` usa un'API completamente sincrona. Nel main process di Electron, l'API sincrona è la scelta corretta.
+
+Il main process di Electron è un processo Node.js che non è il renderer (la UI). Le operazioni sincrone nel main process non bloccano la UI perché girano in processi separati. E l'API sincrona di `better-sqlite3` è considerevolmente più veloce per query rapide, oltre a semplificare enormemente il codice:
+
+```javascript
+// main/database.js
+const Database = require('better-sqlite3')
+const path = require('path')
+const { app } = require('electron')
+
+const DB_PATH = path.join(app.getPath('userData'), 'app.db')
+
+const db = new Database(DB_PATH)
+
+// Attivare la modalità WAL per migliori performance in letture concorrenti
+db.pragma('journal_mode = WAL')
+db.pragma('foreign_keys = ON')
+
+// Migrazione iniziale
+db.exec(`
+  CREATE TABLE IF NOT EXISTS registro_produzione (
+    id TEXT PRIMARY KEY,
+    linea_id TEXT NOT NULL,
+    prodotto_id TEXT NOT NULL,
+    quantita INTEGER NOT NULL,
+    operatore_id TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER,
+    deleted_at INTEGER,
+    server_updated_at INTEGER
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_produzione_non_sincronizzati
+    ON registro_produzione(synced_at)
+    WHERE synced_at IS NULL;
+`)
+
+// Funzioni di accesso — sincrone, veloci, semplici
+const insertRegistro = db.prepare(`
+  INSERT INTO registro_produzione
+    (id, linea_id, prodotto_id, quantita, operatore_id, created_at, updated_at)
+  VALUES
+    (@id, @linea_id, @prodotto_id, @quantita, @operatore_id, @created_at, @updated_at)
+`)
+
+const getUnsynced = db.prepare(`
+  SELECT * FROM registro_produzione
+  WHERE synced_at IS NULL AND deleted_at IS NULL
+  ORDER BY created_at ASC
+  LIMIT 100
+`)
+
+const markSynced = db.prepare(`
+  UPDATE registro_produzione
+  SET synced_at = @synced_at, server_updated_at = @server_updated_at
+  WHERE id = @id
+`)
+
+module.exports = { db, insertRegistro, getUnsynced, markSynced }
+```
+
+La colonna `synced_at` è centrale nella strategia offline-first: i record che non sono ancora stati sincronizzati con il server hanno `synced_at = NULL`. Un indice parziale su questa colonna rende la query degli elementi in sospeso estremamente veloce, anche con migliaia di record.
+
+## Sincronizzazione: Strategia di Merge con Timestamp
+
+La sincronizzazione avviene in due direzioni: inviare i dati locali al server (push) e recuperare i dati nuovi dal server verso il locale (pull). L'ordine e la frequenza dipendono dai requisiti, ma il pattern più comune è: al ripristino della connettività, prima fare il push dei dati locali in sospeso, poi il pull degli aggiornamenti dal server.
+
+La strategia di merge con timestamp usa `updated_at` come criterio di confronto: il record modificato più di recente vince. Perché questo funzioni, tutti i record devono avere un timestamp di modifica affidabile, e gli orologi dei dispositivi devono essere ragionevolmente sincronizzati (NTP risolve questo nella maggior parte degli ambienti).
+
+```javascript
+// main/sync.js
+const { getUnsynced, markSynced, db } = require('./database')
+
+async function syncToServer(serverUrl, authToken) {
+  const pendingRecords = getUnsynced.all()
+
+  if (pendingRecords.length === 0) return { pushed: 0, pulled: 0 }
+
+  // Inviare i record in sospeso in batch
+  const BATCH_SIZE = 50
+  let pushed = 0
+
+  for (let i = 0; i < pendingRecords.length; i += BATCH_SIZE) {
+    const batch = pendingRecords.slice(i, i + BATCH_SIZE)
+
+    const response = await fetch(`${serverUrl}/api/sync/push`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}`
+      },
+      body: JSON.stringify({ records: batch })
+    })
+
+    const { synced, serverTimestamps } = await response.json()
+
+    // Contrassegnare come sincronizzati in un'unica transazione
+    const markBatch = db.transaction((items) => {
+      for (const item of items) {
+        markSynced.run({
+          id: item.id,
+          synced_at: Date.now(),
+          server_updated_at: serverTimestamps[item.id]
+        })
+      }
+    })
+    markBatch(synced)
+    pushed += synced.length
+  }
+
+  return { pushed }
+}
+```
+
+L'uso delle transazioni di SQLite per contrassegnare i batch come sincronizzati è importante per la performance: ogni singolo `db.run()` implica un commit su disco. Raggruppare 50 operazioni in una transazione riduce il tempo di un ordine di grandezza.
+
+## Conflitti: Last-write-wins vs Risoluzione Manuale
+
+La risoluzione dei conflitti è dove il sistema diventa complesso. Un conflitto si verifica quando due client (o un client e il server) modificano lo stesso record senza sincronizzazione intermedia. La domanda è: quale versione prevale?
+
+**Last-write-wins (LWW):** La versione con l'`updated_at` più recente sostituisce semplicemente quella più vecchia. È la strategia più semplice da implementare e funziona bene quando i conflitti sono rari e la perdita di una modifica è accettabile. Per i registri di produzione dove ogni macchina opera indipendentemente, LWW è frequentemente sufficiente.
+
+**Risoluzione manuale:** Per dati dove la perdita di una modifica non è accettabile — come configurazioni critiche o dati finanziari — il sistema deve rilevare il conflitto e presentare le due versioni all'utente perché decida. Questo richiede di archiviare la versione base del record (lo stato al momento dell'ultima sincronizzazione) oltre alla versione locale modificata.
+
+**Merge per campo:** Un approccio intermedio è tentare un merge a livello di campo: se due utenti hanno modificato campi diversi dello stesso record, entrambe le modifiche possono essere applicate senza conflitto. C'è conflitto reale solo quando lo stesso campo è stato modificato nelle due versioni.
+
+La scelta tra queste strategie dipende dal dominio. Per la maggior parte dei sistemi industriali, LWW con logging dei conflitti rilevati (per audit) è sufficiente e mantiene gestibile la complessità di implementazione.
+
+## Crittografia Locale con SQLCipher
+
+In ambienti dove i dati sono sensibili — informazioni di produzione che non devono essere accessibili a chi ha accesso fisico al computer, o dati dei clienti che necessitano di protezione a riposo — SQLite standard non è sufficiente. Il file del database è leggibile da chiunque abbia accesso al file system.
+
+SQLCipher è un'estensione di SQLite che aggiunge crittografia AES-256 trasparente. Dal punto di vista del codice, l'uso è quasi identico a SQLite normale — la differenza è che un pragma iniziale definisce la chiave di crittografia:
+
+```javascript
+// Con better-sqlite3 ed estensione SQLCipher
+const db = new Database(DB_PATH)
+
+// La chiave deve provenire da un luogo sicuro — keychain del SO, non hardcoded
+const encryptionKey = await getKeyFromSystemKeychain()
+
+db.pragma(`key = '${encryptionKey}'`)
+db.pragma('cipher_page_size = 4096')
+db.pragma('kdf_iter = 256000')
+```
+
+La chiave di crittografia non deve essere hardcoded nel codice o archiviata in testo in chiaro in un file di configurazione. Il posto corretto è il keychain nativo del sistema operativo: `keytar` in Node.js consente l'accesso al Keychain di macOS, al Windows Credential Manager e a libsecret su Linux in modo trasparente.
+
+La crittografia ha un costo in performance — tipicamente dal 10% al 20% più lento rispetto a SQLite puro — ma per la maggior parte delle applicazioni industriali, questo costo è del tutto trascurabile rispetto al beneficio in termini di sicurezza.
+
+## Conclusione
+
+L'architettura offline-first per app desktop non è più complessa di quanto sembri — è complessa nei dettagli giusti. SQLite con `better-sqlite3` per l'archiviazione locale, timestamp per la sincronizzazione, e una policy chiara di risoluzione dei conflitti coprono la grande maggioranza degli scenari industriali. La crittografia con SQLCipher aggiunge sicurezza con impatto minimo sulla complessità del codice.
+
+Ciò che distingue un sistema offline-first affidabile da uno che genera incidenti costanti è la robustezza del processo di sincronizzazione: gestione corretta dei fallimenti parziali, logging adeguato per la diagnostica, e test automatizzati che simulano scenari di connettività intermittente.
+
+In SystemForge, costruiamo sistemi offline-first per ambienti industriali dove la connettività non può essere data per scontata. Se stai progettando un sistema con questi requisiti, possiamo aiutarti a definire l'architettura corretta fin dall'inizio — prima che decisioni di design affrettate diventino debiti tecnici difficili da risolvere.

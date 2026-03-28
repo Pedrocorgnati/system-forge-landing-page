@@ -1,0 +1,270 @@
+---
+title: "Monitoraggio delle API in produzione: metriche e alert"
+slug: "monitoraggio-api-produzione-metriche-alert"
+date: "2024-11-22"
+description: "Come monitorare le API in produzione — latenza p50/p95/p99, error rate, alert con PagerDuty, distributed tracing con OpenTelemetry e dashboard Grafana."
+tags: ["monitoraggio api", "opentelemetry", "grafana", "alert", "osservabilità"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come monitorare le API in produzione — latenza p50/p95/p99, error rate, alert con PagerDuty, distributed tracing con OpenTelemetry e dashboard Grafana."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'monitoramento-apis-producao-metricas-alertas'
+  - locale: 'en'
+    slug: 'api-monitoring-in-production-metrics-alerts'
+---
+
+Esistono due modi per scoprire che la tua API ha problemi in produzione: te lo comunicano i tuoi alert, oppure te lo comunicano i tuoi clienti. Il primo è semplicemente un incidente. Il secondo è un incidente più una crisi di fiducia.
+
+Il monitoraggio delle API in produzione non è opzionale — è l'infrastruttura di qualità che distingue un servizio professionale da un prototipo in produzione. E con gli strumenti giusti, configurare un'osservabilità di base richiede meno di una giornata di lavoro.
+
+## Metriche Essenziali: Latenza, Error Rate e Throughput
+
+Le tre metriche fondamentali di qualsiasi API sono note come i "Golden Signals" del SRE (Site Reliability Engineering):
+
+**Latenza** — quanto tempo impiega la tua API a rispondere. L'errore classico è monitorare solo la media. La media nasconde gli outlier: se il 95% delle richieste impiega 50ms e il 5% impiega 10 secondi, la media può essere 550ms — che sembra ragionevole ma rappresenta una pessima esperienza per 1 utente su 20.
+
+I percentili corretti da monitorare:
+- **p50 (mediana):** L'utente "mediano". Buona baseline di performance.
+- **p95:** Il 95% delle richieste è sotto questo valore. Ciò che la maggior parte degli utenti sperimenta.
+- **p99:** La "coda lunga". Dove risiedono i problemi di performance reali.
+- **p99.9:** Per SLA critici. Un'API con p99.9 di 2 secondi ha lo 0,1% delle richieste più lente di così — sono comunque centinaia di richieste ad alto volume.
+
+**Error Rate** — percentuale di richieste che restituiscono 5xx. Un picco improvviso dallo 0% al 5% di error rate è più significativo di un error rate costante del 2%. Genera alert su variazioni relative, non solo su soglie assolute.
+
+**Throughput** — quante richieste al secondo. Utile per rilevare sia cali di traffico anomali (qualcosa si è rotto a monte) sia picchi che possono indicare abuso o traffico insolito.
+
+```typescript
+// Strumentazione manuale con metriche custom in Next.js
+import { metrics } from "@opentelemetry/api";
+
+const meter = metrics.getMeter("api-metrics");
+
+const httpRequestDuration = meter.createHistogram("http_request_duration_ms", {
+  description: "Durata delle richieste HTTP in millisecondi",
+  unit: "ms",
+});
+
+const httpRequestsTotal = meter.createCounter("http_requests_total", {
+  description: "Totale delle richieste HTTP",
+});
+
+// Middleware di strumentazione
+export function instrumentRequest(handler: NextApiHandler): NextApiHandler {
+  return async (req, res) => {
+    const startTime = Date.now();
+    const labels = {
+      method: req.method ?? "unknown",
+      route: req.url?.split("?")[0] ?? "unknown",
+    };
+
+    try {
+      await handler(req, res);
+      const duration = Date.now() - startTime;
+      httpRequestDuration.record(duration, { ...labels, status: String(res.statusCode) });
+      httpRequestsTotal.add(1, { ...labels, status: String(res.statusCode) });
+    } catch (error) {
+      httpRequestDuration.record(Date.now() - startTime, { ...labels, status: "500" });
+      httpRequestsTotal.add(1, { ...labels, status: "500" });
+      throw error;
+    }
+  };
+}
+```
+
+## OpenTelemetry: Distributed Tracing nella Pratica
+
+Le metriche dicono "qualcosa non va". I trace dicono "esattamente dove non va e perché". OpenTelemetry (OTel) è lo standard aperto per la strumentazione di osservabilità — funziona con qualsiasi backend (Jaeger, Tempo, Datadog, New Relic, Honeycomb).
+
+Un trace è composto da span: unità di lavoro con timestamp di inizio, durata e attributi. Una richiesta HTTP crea uno span root; le chiamate al database, ai servizi esterni e alle code creano span figli. Il risultato è un grafico a cascata che mostra esattamente dove è stato speso il tempo.
+
+```typescript
+// Configurazione di OpenTelemetry in Next.js (instrumentation.ts)
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
+import { OTLPMetricExporter } from "@opentelemetry/exporter-metrics-otlp-http";
+import { PeriodicExportingMetricReader } from "@opentelemetry/sdk-metrics";
+import { getNodeAutoInstrumentations } from "@opentelemetry/auto-instrumentations-node";
+
+export function register() {
+  const sdk = new NodeSDK({
+    traceExporter: new OTLPTraceExporter({
+      url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/traces",
+    }),
+    metricReader: new PeriodicExportingMetricReader({
+      exporter: new OTLPMetricExporter({
+        url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT ?? "http://localhost:4318/v1/metrics",
+      }),
+    }),
+    instrumentations: [
+      getNodeAutoInstrumentations({
+        "@opentelemetry/instrumentation-fs": { enabled: false }, // troppo verboso
+      }),
+    ],
+    serviceName: "api-ordini",
+  });
+
+  sdk.start();
+}
+
+// Creazione di span custom per operazioni critiche
+import { trace } from "@opentelemetry/api";
+
+const tracer = trace.getTracer("order-service");
+
+async function processPayment(orderId: string, amount: number) {
+  const span = tracer.startSpan("process_payment", {
+    attributes: {
+      "order.id": orderId,
+      "payment.amount": amount,
+    },
+  });
+
+  try {
+    const result = await paymentGateway.charge({ orderId, amount });
+    span.setAttribute("payment.transaction_id", result.transactionId);
+    span.setStatus({ code: SpanStatusCode.OK });
+    return result;
+  } catch (error) {
+    span.recordException(error as Error);
+    span.setStatus({ code: SpanStatusCode.ERROR, message: String(error) });
+    throw error;
+  } finally {
+    span.end();
+  }
+}
+```
+
+Con le auto-instrumentazioni, ottieni gratuitamente i trace di: richieste HTTP, query Prisma/TypeORM, comandi Redis, chiamate fetch/axios e messaggi in coda. Lo span tree rivela immediatamente se la lentezza è nel database, in un servizio esterno o nel codice dell'applicazione.
+
+## Grafana + Prometheus: Dashboard API in 30 Minuti
+
+Prometheus effettua lo scrape delle metriche esponendo un endpoint HTTP in formato testuale. Grafana visualizza queste metriche in dashboard. La combinazione è lo standard di osservabilità più diffuso nei sistemi self-hosted.
+
+```yaml
+# docker-compose.yml — stack di osservabilità locale
+version: "3.8"
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+
+  tempo:
+    image: grafana/tempo:latest
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "3200:3200"   # Tempo API
+
+volumes:
+  grafana-data:
+```
+
+Query Prometheus essenziali per le dashboard API:
+
+```promql
+# Latenza p99 per rotta (ultimi 5 minuti)
+histogram_quantile(0.99,
+  rate(http_request_duration_ms_bucket[5m])
+) by (route)
+
+# Error rate per rotta
+sum(rate(http_requests_total{status=~"5.."}[5m])) by (route)
+/
+sum(rate(http_requests_total[5m])) by (route)
+
+# Throughput (req/s)
+sum(rate(http_requests_total[1m])) by (route)
+
+# Apdex score: % di richieste entro lo SLA (es.: 500ms)
+(
+  sum(rate(http_request_duration_ms_bucket{le="500"}[5m]))
+  +
+  sum(rate(http_request_duration_ms_bucket{le="2000"}[5m]))
+) / 2
+/
+sum(rate(http_request_duration_ms_count[5m]))
+```
+
+Grafana dispone di dashboard pronte su grafana.com/grafana/dashboards per Node.js, Next.js e API generiche. Importa, adatta le query ai tuoi label name e hai un'osservabilità professionale in pochi minuti.
+
+## Alert Intelligenti: Evitare l'Alert Fatigue
+
+L'alert fatigue è il fenomeno in cui un team smette di rispondere agli alert perché ne riceve talmente tanti senza reale urgenza che quelli rilevanti si perdono nel rumore. È uno dei problemi più seri nelle operazioni software.
+
+I principi degli alert intelligenti:
+
+**Genera alert sui sintomi, non sulle cause.** "Error rate > 5%" è un sintomo: qualcosa non va per gli utenti. "CPU > 80%" è una causa: potrebbe o meno star impattando gli utenti. Preferisci alert sui sintomi, usa le cause come contesto nel runbook.
+
+**Burn rate, non soglie assolute.** Invece di generare un alert quando l'error rate > 1%, genera un alert quando stai "bruciando" il tuo SLO più velocemente del sostenibile. Se il tuo SLO è il 99,9% di disponibilità/mese e hai un error rate del 10%, esaurirai il budget di errori dell'intero mese in 4 ore.
+
+```yaml
+# Alert in Prometheus (alertmanager)
+groups:
+  - name: api-alerts
+    rules:
+      # Alta urgenza: SLO in rapido consumo
+      - alert: HighErrorBurnRate
+        expr: |
+          (
+            sum(rate(http_requests_total{status=~"5.."}[1h]))
+            / sum(rate(http_requests_total[1h]))
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          team: backend
+        annotations:
+          summary: "Error rate superiore al 5% da 5 minuti"
+          runbook: "https://wiki.azienda.com/runbooks/high-error-rate"
+
+      # Latenza in degradazione
+      - alert: HighP99Latency
+        expr: |
+          histogram_quantile(0.99,
+            rate(http_request_duration_ms_bucket[5m])
+          ) > 2000
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P99 di latenza superiore a 2 secondi"
+
+      # Assenza di traffico (possibile guasto a monte)
+      - alert: NoTraffic
+        expr: sum(rate(http_requests_total[5m])) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "API senza traffico da 10 minuti — verificare che sia raggiungibile"
+```
+
+**Tre livelli di severità:**
+- **Critical:** sveglia qualcuno subito. SLO a rischio immediato, utenti impattati.
+- **Warning:** indaga durante l'orario di lavoro. Tendenza preoccupante.
+- **Info:** log per audit. Non interrompe nessuno.
+
+## Conclusione
+
+L'osservabilità delle API non è un progetto futuro — è un requisito di produzione. La buona notizia è che il costo di ingresso è diminuito drasticamente: OpenTelemetry è gratuito e open source, Grafana + Prometheus può essere self-hosted a costo zero, e la configurazione di base richiede meno di una giornata di lavoro.
+
+Il ritorno è immediato: la prossima volta che un cliente segnala lentezza, avrai dati precisi su quale endpoint, a quale percentile di latenza, a partire da quale momento — non supposizioni. La prossima volta che si verifica un incidente, lo saprai prima del cliente.
+
+In SystemForge, monitoraggio e SLO fanno parte della fase di deploy — non vengono aggiunti dopo come ripensamento. Questo significa che ogni sistema consegnato viene fornito con dashboard funzionali, alert configurati e runbook di base. Se stai costruendo un'API che andrà in produzione e hai bisogno di osservabilità fin dall'inizio, possiamo aiutarti a strutturare tutto come parte del progetto.

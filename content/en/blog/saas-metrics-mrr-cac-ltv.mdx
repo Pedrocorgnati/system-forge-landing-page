@@ -1,0 +1,169 @@
+---
+title: "SaaS Metrics: MRR, CAC, and LTV in Practice"
+slug: "saas-metrics-mrr-cac-ltv"
+date: "2024-10-02"
+description: "How to calculate and interpret MRR, ARR, CAC, LTV, and Payback Period in SaaS -- with formulas, real-world examples, and how to use them for growth decisions."
+tags: ["saas metrics", "mrr", "cac", "ltv", "saas kpis"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to calculate and interpret MRR, ARR, CAC, LTV, and Payback Period in SaaS -- with formulas, real-world examples, and how to use them for growth decisions."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'metricas-saas-mrr-cac-ltv'
+  - locale: 'it-IT'
+    slug: 'metriche-saas-mrr-cac-ltv'
+---
+
+Running a SaaS without tracking the right metrics is like flying a plane without an instrument panel: you can stay airborne for a while, but you won't notice you're descending until it's too late. SaaS metrics aren't investor bureaucracy -- they're the language your business uses to understand itself.
+
+The problem is that many founders calculate these metrics incorrectly, or interpret them in isolation, missing the signal they carry together. This guide covers the five most important SaaS metrics, with precise formulas, real numerical examples, and -- more importantly -- how to use them to make growth decisions.
+
+## MRR and ARR: The Foundation of Everything
+
+**MRR (Monthly Recurring Revenue)** is the normalized monthly recurring revenue -- the amount that comes in every month predictably, excluding one-time and occasional payments.
+
+```
+MRR = Sum of monthly recurring revenues from all active customers
+
+Example:
+- 80 customers on Starter plan ($29/mo)   = $2,320
+- 35 customers on Pro plan ($99/mo)        = $3,465
+- 8 customers on Business plan ($249/mo)   = $1,992
+---
+Total MRR:                                  $7,777
+```
+
+MRR breaks down into components that reveal the health of your growth:
+
+| Component | What it is | Example |
+|-----------|---------|---------|
+| New MRR | Revenue from new customers | $2,100 |
+| Expansion MRR | Upgrades from existing customers | $890 |
+| Churned MRR | Revenue lost from cancellations | -$740 |
+| Contraction MRR | Revenue lost from downgrades | -$210 |
+| **Net New MRR** | **Net MRR change** | **$2,040** |
+
+A healthy SaaS has **Expansion MRR > Churned MRR** -- meaning customers who stay spend more over time than those who leave. When this happens, Net Revenue Retention (NRR) goes above 100%, and the business grows even without acquiring new customers.
+
+**ARR (Annual Recurring Revenue)** is simply `MRR x 12`. Use ARR for investor conversations and valuation benchmarks -- most SaaS multiples are calculated on ARR.
+
+## CAC: How Much It Costs to Acquire a Customer
+
+**CAC (Customer Acquisition Cost)** is the total cost to acquire a new paying customer, including marketing, sales, and related operational costs.
+
+```
+CAC = (Total marketing spend + Total sales spend) / New customers acquired in the period
+
+Example (September):
+Marketing spend (ads, content, tools):  $4,000
+Sales team salary and commission:       $6,000
+Total:                                  $10,000
+
+New customers in September:             25
+
+CAC = $10,000 / 25 = $400 per customer
+```
+
+The most common CAC calculation mistake is not including all costs: BDR and SDR salaries, CRM tools, marketing agency, event participation, content creation costs. Underestimated CAC leads to misguided budget allocation decisions.
+
+A useful distinction is to separate **CAC by channel**:
+
+```
+Channel        | Investment | Customers | CAC
+-------------- | ---------- | --------- | ------
+Google Ads     | $2,500     | 12        | $208
+LinkedIn Ads   | $1,200     | 3         | $400
+SDR outbound   | $4,000     | 7         | $571
+Referrals      | $600       | 8         | $75
+```
+
+This view shows that referrals have 6x lower CAC than outbound -- information that should redirect investment toward referral programs.
+
+## LTV: How Much a Customer Is Worth Over Time
+
+**LTV (Lifetime Value)** is the total value a customer generates for the business over their entire active period. It's the metric that answers: "if I spend $400 to acquire this customer, how much will I get back?"
+
+The simplest formula:
+
+```
+LTV = ARPU / Monthly Churn Rate
+
+Where:
+ARPU = Average Revenue Per User = MRR / Total active customers
+
+Example:
+MRR:               $7,777
+Active customers:  123
+ARPU:              $63.23
+
+Monthly churn rate: 2.8%
+
+LTV = $63.23 / 0.028 = $2,258 per customer
+```
+
+A more precise version considers gross margin:
+
+```
+LTV = (ARPU x Gross Margin %) / Churn Rate
+
+If gross margin is 70%:
+LTV = ($63.23 x 0.70) / 0.028 = $1,581
+```
+
+LTV calculated on gross margin is the relevant number to compare with CAC -- what matters is the profit generated, not gross revenue.
+
+## LTV/CAC and Payback Period: The Viability Indicators
+
+Individual metrics gain real meaning when related to each other. The two most important derived indicators are:
+
+**LTV/CAC Ratio:** measures acquisition efficiency. How much LTV you generate for each dollar invested in acquisition.
+
+```
+LTV/CAC = $1,581 / $400 = 4.0x
+```
+
+Reference benchmarks:
+- Below 1x: the business loses money on each acquired customer
+- Between 1x and 3x: marginal -- can be sustainable depending on growth
+- **3x to 5x: healthy -- standard for growing B2B SaaS**
+- Above 5x: excellent, but may indicate underinvestment in acquisition (growth left on the table)
+
+**Payback Period:** how many months of revenue are needed to recover the CAC.
+
+```
+Payback Period = CAC / (ARPU x Gross Margin %)
+
+Payback = $400 / ($63.23 x 0.70) = 9.0 months
+```
+
+Payback Period determines the working capital requirement. A SaaS with 24-month Payback needs much more cash to scale than one with 8-month Payback, because each customer's cost takes 2 years to recover.
+
+Payback Period benchmarks:
+- Below 6 months: excellent, scales with little capital
+- 6 to 18 months: healthy for B2B
+- Above 18 months: requires external capital or cautious growth
+
+**Summary table with the example numbers:**
+
+```
+MRR:              $7,777
+ARR:              $93,324
+ARPU:             $63.23
+CAC:              $400
+LTV (w/ margin):  $1,581
+LTV/CAC:          4.0x       OK Healthy
+Payback Period:   9.0 months OK Healthy
+Monthly churn:    2.8%       Warning (above 2%)
+```
+
+## Conclusion
+
+These five metrics -- MRR, ARR, CAC, LTV, and Payback Period -- are the SaaS instrument panel. Analyzed together, they reveal whether the growth engine is calibrated, whether acquisition is efficient, whether retention sustains the business, and whether there's enough capital to scale at the right pace.
+
+The operational challenge is having these numbers updated automatically, without manual spreadsheets. A metrics dashboard integrated with Stripe, your customer database, and marketing tools transforms this instrument panel into something consulted daily -- not monthly.
+
+At **SystemForge**, the SaaS products we build include an integrated metrics dashboard from the MVP: MRR breakdown by plan, CAC by channel when integrable, automatic churn tracking, and health score alerts. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to see how we structure this for your product.

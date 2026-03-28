@@ -1,0 +1,122 @@
+name: Quality Gate
+
+# Gate de qualidade obrigatório antes de merge para main.
+# Bloqueia PRs com TypeScript errors, ESLint warnings, frontmatter inválido
+# ou content parity quebrada.
+#
+# module-14-integration / TASK-7/ST005
+# Referência: QUAL-002, QUAL-003
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Cancela runs anteriores para o mesmo PR/branch
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  quality:
+    name: Quality Gate — TS + ESLint + Frontmatter + Parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      # ── Velite: gerar tipos (necessário para tsc importar .velite/index.d.ts)
+      - name: Generate Velite types
+        run: NEXT_PUBLIC_LOCALE=pt-BR npx velite build --no-watch || true
+        # || true: provisório — investigar se velite falha em CI por falta de conteúdo
+
+      # ── TypeScript: 3 ambientes
+      - name: TypeScript check (pt-BR)
+        id: tsc_br
+        run: NEXT_PUBLIC_LOCALE=pt-BR NEXT_PUBLIC_SITE_URL=https://forjadesistemas.com.br npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: G-PLACEHOLDER
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+5541999999999'
+          NEXT_PUBLIC_CONTACT_EMAIL: contato@forjadesistemas.com.br
+          NEXT_PUBLIC_CALENDLY_URL: 'https://calendly.com/placeholder'
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: 'https://placeholder.example.com'
+
+      - name: TypeScript check (it-IT)
+        id: tsc_it
+        run: NEXT_PUBLIC_LOCALE=it-IT NEXT_PUBLIC_SITE_URL=https://systemforge.it npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: G-PLACEHOLDER
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+39000000000'
+          NEXT_PUBLIC_CONTACT_EMAIL: contatto@systemforge.it
+          NEXT_PUBLIC_CALENDLY_URL: 'https://calendly.com/placeholder'
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: 'https://placeholder.example.com'
+
+      - name: TypeScript check (en)
+        id: tsc_en
+        run: NEXT_PUBLIC_LOCALE=en NEXT_PUBLIC_SITE_URL=https://systemforgesoftware.com npx tsc --noEmit
+        env:
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: G-PLACEHOLDER
+          NEXT_PUBLIC_WHATSAPP_NUMBER: '+10000000000'
+          NEXT_PUBLIC_CONTACT_EMAIL: contact@systemforgesoftware.com
+          NEXT_PUBLIC_CALENDLY_URL: 'https://calendly.com/placeholder'
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: 'https://placeholder.example.com'
+
+      # ── ESLint: zero warnings (--max-warnings 0)
+      - name: ESLint (zero warnings)
+        id: eslint
+        run: npx eslint src/ --ext .ts,.tsx --max-warnings 0
+
+      # ── Content parity: 30 arquivos × 3 locales
+      - name: Content parity check
+        id: parity
+        run: npx tsx scripts/check-content-parity.ts
+
+      # ── Frontmatter: 3 locales
+      - name: Frontmatter validation (pt-BR)
+        id: fm_br
+        run: NEXT_PUBLIC_LOCALE=pt-BR npx tsx scripts/validate-frontmatter.ts
+
+      - name: Frontmatter validation (it-IT)
+        id: fm_it
+        run: NEXT_PUBLIC_LOCALE=it-IT npx tsx scripts/validate-frontmatter.ts
+
+      - name: Frontmatter validation (en)
+        id: fm_en
+        run: NEXT_PUBLIC_LOCALE=en npx tsx scripts/validate-frontmatter.ts
+
+      # ── Hardcodes: warning only em CI (não bloqueia — corrigir proativamente)
+      - name: Hardcodes audit (warning only)
+        run: bash scripts/check-hardcodes.sh --warn
+        continue-on-error: true
+
+      - name: Quality Gate Summary
+        if: always()
+        run: |
+          status_icon() { [ "$1" == "success" ] && echo "✅" || echo "❌"; }
+          echo "## Quality Gate" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript (pt-BR) | $(status_icon ${{ steps.tsc_br.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript (it-IT) | $(status_icon ${{ steps.tsc_it.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript (en) | $(status_icon ${{ steps.tsc_en.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| ESLint (zero warnings) | $(status_icon ${{ steps.eslint.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Content parity (30 files) | $(status_icon ${{ steps.parity.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontmatter (pt-BR) | $(status_icon ${{ steps.fm_br.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontmatter (it-IT) | $(status_icon ${{ steps.fm_it.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "| Frontmatter (en) | $(status_icon ${{ steps.fm_en.outcome }}) |" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
 import { getSiteConfig } from '@config'
 import { loadMessages, interpolate } from '@config/content'
@@ -19,7 +18,7 @@ interface NewsletterApiResponse {
   error?: string
 }
 
-type FormStatus = 'idle' | 'submitting' | 'success' | 'pending-confirmation'
+type FormStatus = 'idle' | 'submitting' | 'success' | 'pending-confirmation' | 'error'
 
 const config = getSiteConfig()
 const msg = loadMessages().newsletter
@@ -63,6 +62,7 @@ export function NewsletterOptIn() {
   const [submittedEmail, setSubmittedEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [consentError, setConsentError] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
   const [formData, setFormData] = useState<NewsletterFormData>({
     email: '',
     consent: false,
@@ -104,13 +104,17 @@ export function NewsletterOptIn() {
 
     setStatus('submitting')
 
-    const apiUrl = process.env.NEXT_PUBLIC_NEWSLETTER_API_URL
+    const workerUrl = config.newsletter?.workerUrl
 
-    if (!apiUrl) {
-      setStatus('idle')
-      toast.error(msg.error)
+    if (!workerUrl) {
+      setErrorMessage(msg.error)
+      setStatus('error')
       return
     }
+
+    const subscribeUrl = workerUrl.endsWith('/subscribe')
+      ? workerUrl
+      : `${workerUrl.replace(/\/$/, '')}/subscribe`
 
     // AbortController com timeout de 10 segundos
     const controller = new AbortController()
@@ -118,7 +122,7 @@ export function NewsletterOptIn() {
     const timeoutId = setTimeout(() => controller.abort(), 10000)
 
     try {
-      const response = await fetch(apiUrl, {
+      const response = await fetch(subscribeUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -131,23 +135,25 @@ export function NewsletterOptIn() {
 
       if (!response.ok) {
         const json = (await response.json().catch(() => ({}))) as NewsletterApiResponse
-        throw new Error(json.error ?? `HTTP ${response.status}`)
+        setErrorMessage(json.error ?? msg.error)
+        setStatus('error')
+        return
       }
 
-      // GDPR: show pending-confirmation state (double opt-in)
-      if (isGDPR) {
+      // GDPR: show pending-confirmation state (double opt-in — Worker retorna 202)
+      if (isGDPR || response.status === 202) {
         setSubmittedEmail(formData.email)
         setStatus('pending-confirmation')
       } else {
         setStatus('success')
       }
     } catch (err) {
-      setStatus('idle')
       if (err instanceof Error && err.name === 'AbortError') {
-        toast.error(msg.timeoutError)
+        setErrorMessage(msg.timeoutError ?? msg.error)
       } else {
-        toast.error(msg.error)
+        setErrorMessage(msg.error)
       }
+      setStatus('error')
     } finally {
       clearTimeout(timeoutId)
     }
@@ -178,6 +184,45 @@ export function NewsletterOptIn() {
           <p role="status" className="text-sm font-medium text-foreground">
             {interpolate(msg.pendingConfirmation, { email: submittedEmail })}
           </p>
+        </div>
+      </section>
+    )
+  }
+
+  // Error state — mensagem inline + botão retry
+  if (status === 'error') {
+    return (
+      <section data-testid="newsletter-error" aria-live="assertive" className="my-6">
+        <div className="flex items-start gap-2">
+          <span
+            className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-destructive/20"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="w-3.5 h-3.5 text-destructive"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </span>
+          <div className="flex flex-col gap-2">
+            <p role="alert" className="text-sm font-medium text-destructive">
+              {errorMessage || msg.error}
+            </p>
+            <button
+              type="button"
+              onClick={() => { setStatus('idle'); setErrorMessage('') }}
+              className="text-xs text-primary hover:underline text-left w-fit"
+            >
+              {msg.retryButton ?? 'Tentar novamente'}
+            </button>
+          </div>
         </div>
       </section>
     )

@@ -1,0 +1,181 @@
+---
+title: "Multi-Tenant Dashboards: Separating Client Data"
+slug: "multi-tenant-dashboards-separating-client-data"
+date: "2024-10-09"
+description: "How to implement data isolation in multi-tenant dashboards -- Row Level Security in PostgreSQL, tenant middleware, and data leakage prevention."
+tags: ["multi-tenancy", "dashboard", "row level security", "postgresql", "saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to implement data isolation in multi-tenant dashboards -- Row Level Security in PostgreSQL, tenant middleware, and data leakage prevention."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'multi-tenant-dashboard-separar-dados'
+  - locale: 'it-IT'
+    slug: 'dashboard-multi-tenant-separare-dati-clienti'
+---
+
+A multi-tenancy bug is different from every other bug. It's not a crash, not a broken screen, not a wrong number. It's silent: a user from Company A can see Company B's data. And usually nobody notices until a client calls to complain they saw a competitor's confidential information.
+
+The consequences are serious: lost contract, lawsuit, regulatory notification (CCPA/GDPR), irreparable reputational damage. In B2B SaaS with sensitive corporate data, data leakage between tenants is one of the few bugs that can shut down a company.
+
+## Row Level Security in PostgreSQL: Complete Setup
+
+Row Level Security (RLS) is PostgreSQL's mechanism that applies access policies directly in the database, regardless of how the query got there. Even if the application sends a query without a tenant filter, PostgreSQL will apply the policy and return only the rows the user has permission to see.
+
+RLS is the last line of defense -- and therefore the most important.
+
+```sql
+-- 1. Enable RLS on the table
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- 2. Force RLS even for the table owner (crucial!)
+ALTER TABLE orders FORCE ROW LEVEL SECURITY;
+
+-- 3. Create read policy per tenant
+CREATE POLICY tenant_isolation_policy ON orders
+  AS PERMISSIVE
+  FOR ALL
+  TO authenticated_role
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- 4. Replicate for all schema tables
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation_policy ON customers
+  AS PERMISSIVE FOR ALL TO authenticated_role
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- 5. Global reference tables (without tenant_id)
+-- Do NOT enable RLS on global tables like 'countries', 'currencies'
+
+-- Check which tables have RLS enabled:
+SELECT schemaname, tablename, rowsecurity, forcerowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
+ORDER BY tablename;
+```
+
+**Critical attention:** `FORCE ROW LEVEL SECURITY` is mandatory. Without it, the superuser and table owner bypass RLS -- and your application's database user frequently has those privileges.
+
+## Tenant Middleware: Injecting tenant_id in All Queries
+
+The tenant middleware is responsible for:
+1. Identifying which tenant is making the request
+2. Validating that the authenticated user belongs to that tenant
+3. Injecting the `tenant_id` into the database connection before any query
+
+```typescript
+// lib/db/tenant-middleware.ts
+import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+
+// Safer approach: use explicit transaction
+export async function withTenant<T>(
+  tenantId: string,
+  fn: (db: PrismaClient) => Promise<T>
+): Promise<T> {
+  const db = new PrismaClient();
+
+  return db.$transaction(async (tx) => {
+    // SET LOCAL applies only within the transaction
+    await tx.$executeRawUnsafe(
+      `SET LOCAL app.current_tenant_id = $1`,
+      tenantId
+    );
+    // Pass the transactional client to the function
+    return fn(tx as unknown as PrismaClient);
+  });
+}
+
+// Usage in Server Actions or API Routes:
+export async function getOrders() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error('Not authenticated');
+
+  return withTenant(session.user.tenantId, async (db) => {
+    // RLS ensures only the correct tenant's orders are returned
+    // EVEN if the query has no explicit tenant_id filter
+    return db.order.findMany({ orderBy: { createdAt: 'desc' } });
+  });
+}
+```
+
+The `SET LOCAL` approach inside a transaction is safer than a global `SET` because the configuration is automatically reverted at the end of the transaction, preventing leakage between requests in a connection pool.
+
+## Isolation Tests: Verifying No Data Leakage
+
+Tenant isolation tests should be part of the integration test suite and should run on every PR that touches database queries.
+
+```typescript
+// tests/integration/tenant-isolation.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { createTestTenant, createTestUser } from './helpers';
+import { getOrders, getCustomers } from '@/lib/data';
+
+describe('Tenant Isolation', () => {
+  let tenantA: { id: string; apiKey: string };
+  let tenantB: { id: string; apiKey: string };
+
+  beforeAll(async () => {
+    tenantA = await createTestTenant('company-a', { orders: 5, customers: 3 });
+    tenantB = await createTestTenant('company-b', { orders: 8, customers: 6 });
+  });
+
+  it('Tenant A user should not see Tenant B orders', async () => {
+    const userA = await createTestUser({ tenantId: tenantA.id });
+    const orders = await getOrders({ userId: userA.id });
+
+    expect(orders.every(o => o.tenantId === tenantA.id)).toBe(true);
+    expect(orders.length).toBe(5);
+
+    const tenantBOrderIds = orders.filter(o => o.tenantId === tenantB.id);
+    expect(tenantBOrderIds.length).toBe(0);
+  });
+
+  it('query without explicit filter should not return cross-tenant data', async () => {
+    const userB = await createTestUser({ tenantId: tenantB.id });
+    const customers = await getCustomers({ userId: userB.id });
+
+    expect(customers.every(c => c.tenantId === tenantB.id)).toBe(true);
+    expect(customers.length).toBe(6);
+  });
+
+  afterAll(async () => {
+    await cleanupTestTenants([tenantA.id, tenantB.id]);
+  });
+});
+```
+
+## Performance: Indexes by tenant_id
+
+RLS adds an implicit `tenant_id = ?` predicate to all queries. Without an index on the `tenant_id` field, this results in full table scans as the table grows.
+
+```sql
+-- Composite indexes: tenant_id always as the first column
+CREATE INDEX CONCURRENTLY idx_orders_tenant_date
+  ON orders (tenant_id, created_at DESC);
+
+CREATE INDEX CONCURRENTLY idx_orders_tenant_status
+  ON orders (tenant_id, status);
+
+-- For dashboard queries that aggregate by period:
+CREATE INDEX CONCURRENTLY idx_orders_tenant_date_status
+  ON orders (tenant_id, DATE_TRUNC('month', created_at), status)
+  WHERE status != 'cancelled'; -- partial index reduces size
+```
+
+The `tenant_id` as the first field in the composite index is critical. PostgreSQL can use a composite index when the predicate includes the first field -- but not when it includes only subsequent fields.
+
+## Conclusion
+
+Correct multi-tenancy isn't a feature you add later -- it's an architectural decision that permeates the database schema, the application middleware, integration tests, and the deployment model.
+
+The combination of RLS in PostgreSQL with tenant middleware in the application creates two independent layers of protection. If the application sends a query without the correct tenant (whether by bug or malicious attempt), the database refuses. If RLS is misconfigured, the middleware prevents queries without tenant context from even reaching the database.
+
+The cost of implementing multi-tenancy correctly from the start is one focused week of work. The cost of remediating a data leakage incident between tenants -- technically, legally, and reputationally -- is incomparably higher.
+
+At SystemForge, multi-tenancy is treated as a first-class security requirement, documented in the LLD with the RLS strategy, index specification, and isolation test plan. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to learn more.

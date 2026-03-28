@@ -1,0 +1,234 @@
+---
+title: "Integrare sistemi legacy senza riscrivere tutto"
+slug: "integrare-sistemi-legacy-senza-riscrivere"
+date: "2024-11-14"
+description: "Strategie per integrare sistemi legacy (COBOL, Oracle, SAP) con applicazioni moderne — API gateway, database sync e event bridging senza big bang migration."
+tags: ["sistemi legacy", "integrazione", "api gateway", "migrazione", "modernizzazione"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Strategie per integrare sistemi legacy (COBOL, Oracle, SAP) con applicazioni moderne — API gateway, database sync e event bridging senza big bang migration.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integrar-sistemas-legados-sem-reescrever'
+  - locale: 'en'
+    slug: 'integrating-legacy-systems-without-rewriting'
+---
+
+Ogni azienda con più di dieci anni di operatività ha un sistema legacy. Può essere un gestionale degli anni '90 in COBOL, un Oracle E-Business Suite che nessuno vuole toccare, un SAP così personalizzato da non essere riconoscibile da nessun consultor, o un insieme di fogli Excel interconnessi che in qualche modo è diventato il cuore del business. Questi sistemi sono problematici — lenti, costosi da mantenere, impossibili da integrare con l'ecosistema moderno. Ma funzionano. E i dati in essi contenuti sono critici.
+
+La risposta istintiva è "riscriviamo tutto da zero". È anche la risposta che più frequentemente sfocia in progetti pluriennali, budget sforati e sistemi moderni che non funzionano bene quanto il legacy che hanno sostituito. C'è un motivo per cui il sistema legacy esiste ancora dopo decenni: ha risolto problemi reali con molta logica di business incorporata che nessuno ha mai documentato completamente.
+
+L'alternativa è integrare senza sostituire — almeno non tutto in una volta.
+
+## Strangler Fig Pattern: Modernizzazione Incrementale
+
+Il pattern Strangler Fig (fico strangolatore) trae origine dalla biologia: una pianta che cresce attorno a un albero ospite, sostituendolo gradualmente mentre l'albero continua a sostenere il peso. Per i sistemi software, il principio è lo stesso.
+
+Invece di sostituire il sistema legacy tutto in una volta, si aggiunge uno strato moderno attorno ad esso. Le nuove funzionalità vengono sviluppate nel sistema nuovo. Le funzionalità esistenti migrano gradualmente, una alla volta, quando ci sono capacità e necessità. Il legacy rimane in produzione per tutta la durata della transizione e viene spento solo quando l'ultima funzionalità è stata migrata.
+
+Il processo pratico si articola in tre fasi:
+
+**Fase 1 — Intercettazione:** si aggiunge un proxy o API gateway davanti al sistema legacy. Tutto il traffico passa attraverso di esso. Il proxy non fa altro che inoltrare le richieste al legacy — per ora.
+
+**Fase 2 — Migrazione incrementale:** funzionalità per funzionalità, si implementa la logica nel sistema moderno. Il proxy inizia a instradare alcune richieste al sistema nuovo e altre al legacy, a seconda di ciò che è già stato migrato.
+
+**Fase 3 — Decommissioning:** quando l'ultima funzionalità è migrata, il proxy punta tutto al sistema moderno e il legacy viene spento.
+
+```
+                    ┌─────────────┐
+Utenti ────────────▶│ API Gateway │
+                    └──────┬──────┘
+                           │
+              ┌────────────┴────────────┐
+              │                         │
+              ▼                         ▼
+   ┌──────────────────┐      ┌──────────────────────┐
+   │  Sistema Moderno │      │   Sistema Legacy      │
+   │  (funzionalità   │      │   (funzionalità       │
+   │   già migrate)   │      │    non ancora migrate)│
+   └──────────────────┘      └──────────────────────┘
+```
+
+Il vantaggio è la reversibilità: se qualcosa va storto nella migrazione di una funzionalità, il proxy torna a instradare sul legacy senza impatto per l'utente. Rischio controllato, iterazione costante.
+
+## API Gateway come Livello di Astrazione
+
+Per i sistemi legacy privi di API — che rappresenta la maggioranza — il primo passo è creare uno strato API che esponga le funzionalità del legacy in formato moderno (REST o GraphQL) senza toccare il codice legacy.
+
+Esistono tre approcci a seconda di come il legacy è accessibile:
+
+**Wrapping via database:** se il legacy utilizza un database relazionale (Oracle, SQL Server, PostgreSQL), è possibile creare un'API che legge e scrive direttamente nel database, bypassando lo strato applicativo. È l'approccio più rapido, ma rischioso se il database contiene regole di business in stored procedure o trigger.
+
+**Screen scraping tramite automazione:** se il legacy è accessibile solo tramite interfaccia grafica (GUI) e il database non è accessibile, si usa RPA (Playwright, PyAutoGUI) per automatizzare l'interazione con l'interfaccia e la si espone via API. Fragile, ma a volte è l'unica opzione.
+
+**Messaging middleware:** per sistemi come SAP e mainframe IBM, esistono middleware specifici (MuleSoft, IBM App Connect, WSO2) con connettori pronti per i protocolli nativi di questi sistemi (RFC, BAPI, IDoc per SAP; MQ per IBM). Si configura il middleware e questo espone il legacy via REST.
+
+Un esempio di wrapper REST semplice per un database Oracle legacy con Python:
+
+```python
+from fastapi import FastAPI, HTTPException
+from sqlalchemy import create_engine, text
+from pydantic import BaseModel
+from typing import Optional
+import os
+
+app = FastAPI(title="API Legacy Wrapper")
+engine = create_engine(os.getenv("ORACLE_DSN"))
+
+class Ordine(BaseModel):
+    numero: str
+    cliente_id: str
+    stato: Optional[str] = None
+
+@app.get("/ordini/{numero}")
+async def recupera_ordine(numero: str):
+    """Espone una query del database legacy via REST moderno"""
+    with engine.connect() as conn:
+        result = conn.execute(
+            text("""
+                SELECT p.NUM_PED, p.COD_CLI, c.NOM_CLI, p.SIT_PED,
+                       p.VLR_TOT, p.DAT_EMI
+                FROM TB_PEDIDOS p
+                JOIN TB_CLIENTES c ON p.COD_CLI = c.COD_CLI
+                WHERE p.NUM_PED = :numero
+            """),
+            {"numero": numero}
+        ).fetchone()
+
+    if not result:
+        raise HTTPException(status_code=404, detail="Ordine non trovato")
+
+    # Traduce le colonne criptiche del legacy in nomi moderni
+    return {
+        "numero": result.NUM_PED,
+        "cliente": {
+            "id": result.COD_CLI,
+            "nome": result.NOM_CLI
+        },
+        "stato": traduci_stato(result.SIT_PED),
+        "valore_totale": float(result.VLR_TOT),
+        "emesso_il": result.DAT_EMI.isoformat()
+    }
+
+def traduci_stato(codice: str) -> str:
+    """Traduce i codici interni del legacy in stati leggibili"""
+    mappa = {
+        "A": "aperto",
+        "E": "in_lavorazione",
+        "F": "completato",
+        "C": "annullato"
+    }
+    return mappa.get(codice, "sconosciuto")
+```
+
+Questo wrapper non tocca il codice legacy, non modifica il database, non comporta rischi di regressione. Si limita a creare una vista moderna dei dati esistenti.
+
+## Database Sync: Replicare i Dati verso Sistemi Moderni
+
+In molti casi, il sistema moderno non ha bisogno di scrivere sul legacy — ha solo bisogno di leggere i dati più recenti. In questo scenario, la soluzione più semplice è sincronizzare il database del legacy verso un database moderno (PostgreSQL, ad esempio) e lasciare che il sistema moderno legga da lì.
+
+Due strategie principali per la sincronizzazione:
+
+**Polling con timestamp:** ogni N minuti, una routine confronta il timestamp di aggiornamento dei record nel legacy con quelli già sincronizzati. I record nuovi o modificati vengono copiati nel database moderno. Semplice da implementare, ma con una latenza di N minuti.
+
+**Change Data Capture (CDC) con Debezium:** cattura le modifiche direttamente dal transaction log del database (binlog di MySQL, WAL di PostgreSQL, redo log di Oracle). Latenza di secondi, senza carico aggiuntivo sulle tabelle di origine. È l'approccio corretto per la sincronizzazione in tempo reale.
+
+Per il polling semplice, la struttura di base:
+
+```python
+from datetime import datetime
+import sqlalchemy as sa
+
+# Engine per i due database
+engine_legacy = sa.create_engine("oracle+cx_oracle://...")
+engine_moderno = sa.create_engine("postgresql://...")
+
+def sincronizza_ordini(ultima_sync: datetime) -> int:
+    """
+    Sincronizza gli ordini modificati dall'ultima esecuzione.
+    Restituisce il numero di record sincronizzati.
+    """
+    with engine_legacy.connect() as conn_orig:
+        nuovi = conn_orig.execute(
+            sa.text("""
+                SELECT NUM_PED, COD_CLI, SIT_PED, VLR_TOT, DAT_ALT
+                FROM TB_PEDIDOS
+                WHERE DAT_ALT > :ultima_sync
+                ORDER BY DAT_ALT ASC
+            """),
+            {"ultima_sync": ultima_sync}
+        ).fetchall()
+
+    if not nuovi:
+        return 0
+
+    with engine_moderno.connect() as conn_dest:
+        conn_dest.execute(
+            sa.text("""
+                INSERT INTO ordini (numero, cliente_id, stato, valore_totale, aggiornato_il)
+                VALUES (:num, :cli, :sit, :vlr, :dat)
+                ON CONFLICT (numero) DO UPDATE SET
+                    stato = EXCLUDED.stato,
+                    valore_totale = EXCLUDED.valore_totale,
+                    aggiornato_il = EXCLUDED.aggiornato_il
+            """),
+            [{"num": r.NUM_PED, "cli": r.COD_CLI,
+              "sit": r.SIT_PED, "vlr": r.VLR_TOT,
+              "dat": r.DAT_ALT} for r in nuovi]
+        )
+        conn_dest.commit()
+
+    return len(nuovi)
+```
+
+L'`ON CONFLICT DO UPDATE` (UPSERT) garantisce l'idempotenza: se il record esiste già, viene aggiornato. Se non esiste, viene inserito. Questo consente di rielaborare finestre temporali senza creare duplicati.
+
+## Event Bridging: CDC con Debezium
+
+Per una latenza prossima allo zero, Debezium è la soluzione di riferimento. Legge il transaction log del database e pubblica ogni modifica come evento in un topic Kafka. Il sistema moderno consuma questi eventi in tempo reale.
+
+L'architettura:
+
+```
+Oracle Legacy
+     │
+     │ redo log (lettura non invasiva)
+     ▼
+┌─────────┐
+│ Debezium│ (connector)
+└────┬────┘
+     │ eventi JSON
+     ▼
+┌─────────┐
+│  Kafka  │ (topic: legacy.TB_PEDIDOS)
+└────┬────┘
+     │
+     ├──▶ Sistema Moderno (consumer)
+     ├──▶ Data Warehouse (consumer)
+     └──▶ Servizio Notifiche (consumer)
+```
+
+Debezium emette eventi nel formato:
+
+```json
+{
+  "op": "u",
+  "before": { "NUM_PED": "12345", "SIT_PED": "A" },
+  "after": { "NUM_PED": "12345", "SIT_PED": "F" },
+  "source": { "table": "TB_PEDIDOS", "ts_ms": 1700000000000 }
+}
+```
+
+`op` può essere `c` (create), `u` (update) o `d` (delete). Il campo `before` riporta lo stato precedente e `after` quello nuovo — si sa esattamente cosa è cambiato, non solo che qualcosa è cambiato.
+
+## Conclusione
+
+I sistemi legacy non devono essere un ostacolo permanente. Con le giuste strategie — Strangler Fig per la modernizzazione incrementale, API Gateway per esporre il legacy in formato moderno, Database Sync per replicare i dati senza impatto, Debezium per CDC in tempo reale — si connette il passato al presente senza il rischio di una big bang migration.
+
+La chiave è iniziare dallo strato di astrazione: un API Gateway o wrapper REST che isola il legacy dal sistema moderno. Da lì, la migrazione avviene in modo controllato, funzionalità per funzionalità, con rollback sempre disponibile.
+
+In SystemForge abbiamo esperienza nell'integrazione con sistemi legacy di più generazioni — dalle API Oracle a SAP via RFC. Se hai bisogno di connettere un sistema datato al tuo ecosistema moderno senza fermare tutto per una migrazione pluriennale, [contatta il nostro team](/contatto).

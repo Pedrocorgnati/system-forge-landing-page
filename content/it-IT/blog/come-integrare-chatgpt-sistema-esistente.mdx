@@ -1,0 +1,243 @@
+---
+title: "Come integrare ChatGPT in un sistema esistente"
+slug: "come-integrare-chatgpt-sistema-esistente"
+date: "2024-10-10"
+description: "Guida tecnica per integrare l'API di OpenAI in sistemi esistenti — autenticazione, streaming, gestione del contesto, costi e fallback."
+tags: ["chatgpt", "openai api", "integrazione ia", "llm", "automazione con ia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Guida tecnica per integrare l'API di OpenAI in sistemi esistenti — autenticazione, streaming, gestione del contesto, costi e fallback.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integrar-chatgpt-sistema-existente-api'
+  - locale: 'en'
+    slug: 'how-to-integrate-chatgpt-into-an-existing-system'
+---
+
+## Integrare ChatGPT Non È Solo Chiamare un'API
+
+L'integrazione dell'API di OpenAI con un sistema esistente sembra semplice nella documentazione. In pratica, la produzione richiede di pensare a: gestione del contesto (token limits), streaming per una UX reattiva, gestione degli errori e timeout, controllo dei costi, fallback quando l'API non è disponibile e sicurezza dell'API key.
+
+Questa guida copre l'implementazione completa di un'integrazione con ChatGPT (GPT-4o) in un sistema esistente — dal setup alla produzione.
+
+## Setup Iniziale e Autenticazione
+
+```typescript
+// lib/openai.ts
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30000, // timeout 30s
+  maxRetries: 2,   // 2 tentativi automatici per errori transitori
+});
+
+export default openai;
+```
+
+**Sicurezza dell'API Key:**
+- Non esporre mai nel frontend — ogni chiamata deve passare per il backend
+- Usare variabili d'ambiente (mai hardcoded)
+- Ruotare la key se viene compromessa
+- Usare usage limits nella dashboard di OpenAI per evitare sorprese di costo
+
+## Streaming per UX Reattiva
+
+Senza streaming, l'utente attende 5-15 secondi senza feedback prima di vedere la risposta. Con lo streaming, il testo appare parola per parola — come nel ChatGPT stesso.
+
+```typescript
+// app/api/chat/route.ts (Next.js)
+import openai from '@/lib/openai';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages,
+    stream: true,
+    temperature: 0.7,
+    max_tokens: 1000,
+  });
+
+  const stream = OpenAIStream(response);
+  return new StreamingTextResponse(stream);
+}
+```
+
+```typescript
+// components/ChatInterface.tsx (frontend)
+import { useChat } from 'ai/react';
+
+export function ChatInterface() {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/chat',
+  });
+
+  return (
+    <div>
+      {messages.map(m => (
+        <div key={m.id}>
+          <strong>{m.role === 'user' ? 'Tu' : 'Assistente'}:</strong>
+          <p>{m.content}</p>
+        </div>
+      ))}
+
+      <form onSubmit={handleSubmit}>
+        <input value={input} onChange={handleInputChange} placeholder="Scrivi la tua domanda..." />
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Elaborazione...' : 'Invia'}
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+## Gestione del Contesto e Token Limits
+
+GPT-4o accetta fino a 128.000 token di contesto (input + output). In conversazioni lunghe, la cronologia deve essere gestita per non superare il limite — e per controllare i costi (si paga per token elaborato, inclusa la cronologia).
+
+```typescript
+// lib/context-manager.ts
+const MAX_CONTEXT_TOKENS = 8000; // Mantenere ben al di sotto del limite
+
+function countTokens(text: string): number {
+  // Stima: ~4 caratteri per token (approssimazione valida per l'italiano)
+  return Math.ceil(text.length / 4);
+}
+
+export function trimMessages(
+  messages: { role: string; content: string }[],
+  maxTokens = MAX_CONTEXT_TOKENS
+): { role: string; content: string }[] {
+  let totalTokens = 0;
+  const trimmed = [];
+
+  // Includi sempre il system message e l'ultimo messaggio dell'utente
+  const systemMessage = messages.find(m => m.role === 'system');
+  if (systemMessage) {
+    totalTokens += countTokens(systemMessage.content);
+    trimmed.push(systemMessage);
+  }
+
+  // Aggiungi i messaggi recenti dal fondo in avanti
+  const conversationMessages = messages.filter(m => m.role !== 'system').reverse();
+
+  for (const message of conversationMessages) {
+    const tokens = countTokens(message.content);
+    if (totalTokens + tokens > maxTokens) break;
+    totalTokens += tokens;
+    trimmed.unshift(message);
+  }
+
+  return trimmed;
+}
+```
+
+## Gestione degli Errori e Fallback
+
+L'API di OpenAI può andare in errore per rate limit, timeout o instabilità. I sistemi di produzione hanno bisogno di una strategia di fallback.
+
+```typescript
+// lib/chat-service.ts
+import openai from './openai';
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+export async function generateResponse(
+  messages: { role: string; content: string }[],
+  preferredModel: 'gpt-4o' | 'claude-opus-4-6' = 'gpt-4o'
+): Promise<string> {
+  try {
+    // Tentativo con modello preferito (OpenAI)
+    if (preferredModel === 'gpt-4o') {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: messages as any,
+        max_tokens: 1000,
+      });
+      return response.choices[0].message.content || '';
+    }
+  } catch (error: any) {
+    // Rate limit o timeout — usa fallback
+    if (error.status === 429 || error.code === 'ECONNABORTED') {
+      console.warn('OpenAI non disponibile, uso fallback Anthropic');
+
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-6',
+        max_tokens: 1000,
+        messages: messages.filter(m => m.role !== 'system') as any,
+        system: messages.find(m => m.role === 'system')?.content,
+      });
+
+      return response.content[0].type === 'text' ? response.content[0].text : '';
+    }
+    throw error;
+  }
+
+  return '';
+}
+```
+
+## Controllo dei Costi
+
+In produzione, il costo dell'API scala con il volume. Strategie per il controllo:
+
+**Cache delle risposte:** Per domande frequenti e simili, la cache delle risposte genera risparmi significativi.
+
+```typescript
+import { Redis } from 'ioredis';
+import crypto from 'crypto';
+
+const redis = new Redis(process.env.REDIS_URL!);
+
+export async function getCachedOrGenerate(
+  messages: { role: string; content: string }[],
+  ttl = 3600 // 1 ora
+): Promise<string> {
+  const cacheKey = crypto
+    .createHash('md5')
+    .update(JSON.stringify(messages))
+    .digest('hex');
+
+  const cached = await redis.get(`chat:${cacheKey}`);
+  if (cached) return cached;
+
+  const response = await generateResponse(messages);
+  await redis.setex(`chat:${cacheKey}`, ttl, response);
+
+  return response;
+}
+```
+
+**Monitoraggio dell'utilizzo:**
+
+```typescript
+// Registra ogni chiamata con costo stimato
+async function logUsage(model: string, inputTokens: number, outputTokens: number) {
+  const costs = {
+    'gpt-4o': { input: 0.005, output: 0.015 }, // per 1K token
+    'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
+  };
+
+  const cost = (costs[model]?.input * inputTokens / 1000) +
+               (costs[model]?.output * outputTokens / 1000);
+
+  await db.aiUsageLog.create({
+    data: { model, inputTokens, outputTokens, costUsd: cost, createdAt: new Date() }
+  });
+}
+```
+
+## Conclusione
+
+Integrare ChatGPT in un sistema esistente va molto oltre il semplice chiamare l'API. Streaming, gestione del contesto, gestione degli errori con fallback e controllo dei costi sono componenti essenziali di un'integrazione di produzione.
+
+SystemForge integra i LLM in sistemi aziendali esistenti — dai chatbot interni all'automazione dei processi con IA. Se vuoi discutere di un caso specifico, contatta il nostro team.

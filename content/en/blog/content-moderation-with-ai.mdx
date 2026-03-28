@@ -1,0 +1,150 @@
+---
+title: "Content Moderation with AI: Beyond Blocklists"
+slug: "content-moderation-with-ai"
+date: "2024-10-10"
+description: "How to implement automated content moderation with LLMs -- text, image, and video classification, false positives, and the cost of human review."
+tags: ["content moderation", "ai", "trust and safety", "classification", "llm"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to implement automated content moderation with LLMs -- text, image, and video classification, false positives, and the cost of human review."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'moderacao-de-conteudo-com-ia'
+  - locale: 'it-IT'
+    slug: 'moderazione-contenuti-con-ia'
+---
+
+Platforms that allow user-generated content face a growing dilemma: as they scale, manual moderation becomes impossible. A platform with 100,000 posts per day would need hundreds of moderators working 24 hours to review everything. But fully automating has costs too -- false positives block legitimate content, driving users away and creating perceptions of censorship.
+
+The solution isn't choosing between manual and automated moderation. It's building a layered system that uses automation where confidence is high and humans where context is necessary.
+
+## Blocklist vs Classifier: Limitations of Each Approach
+
+The simplest approach to automated moderation is the blocklist: block any content containing forbidden words or expressions. Quick to implement, virtually zero cost. And completely inadequate for any real-world use.
+
+The problem with blocklists is twofold. On one hand, they generate absurd false positives: blocking the word "gun" prevents discussions about culture, history, gaming, public safety. On the other, they're easily circumvented with spelling variations, character substitutions, or ambiguous context.
+
+Traditional machine learning classifiers go beyond blocklists: models trained on labeled examples learn more complex patterns. But they still fail on context and nuance. "I'm going to kill you" in a threat message vs in a conversation between joking friends has the same text, completely different meanings.
+
+LLMs understand context. That's the qualitative leap that justifies the higher cost per classification.
+
+## LLM for Moderation: Context That Rules Can't Capture
+
+An LLM can consider the complete conversation context, the user's history, the platform where the content appears, and the implicit intent -- all at the same time. This enables decisions that would be impossible for a simple classifier.
+
+```python
+from openai import OpenAI
+from pydantic import BaseModel
+from enum import Enum
+
+class ModerationDecision(str, Enum):
+    APPROVED = "approved"
+    HUMAN_REVIEW = "human_review"
+    REMOVED = "removed"
+
+class ModerationResult(BaseModel):
+    decision: ModerationDecision
+    violated_categories: list[str]
+    confidence: float  # 0.0 to 1.0
+    justification: str
+    suggested_action: str
+
+client = OpenAI()
+
+def moderate_content(
+    content: str,
+    conversation_context: str = "",
+    platform: str = "general"
+) -> ModerationResult:
+    system_prompt = f"""You are a content moderator for a {platform} platform.
+
+    Violation categories:
+    - hate_speech: attacks on groups by race, gender, religion, sexual orientation
+    - violence: direct threats, incitement to physical violence
+    - spam: repetitive content, unsolicited promotional links
+    - misinformation: false factual claims about health, elections, safety
+    - adult_content: explicit sexual content outside appropriate platforms
+    - harassment: repeated personal attacks on a specific individual
+
+    Consider the conversation context. Irony, humor, and critical discussion are different from actual violations.
+    Be precise: false positives harm legitimate users."""
+
+    context_text = f"\nConversation context:\n{conversation_context}" if conversation_context else ""
+
+    response = client.beta.chat.completions.parse(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"Content for moderation:{context_text}\n\nContent: {content}"}
+        ],
+        response_format=ModerationResult,
+    )
+    return response.choices[0].message.parsed
+```
+
+Note the use of `gpt-4o-mini` -- for high-volume moderation, using the cheapest model that maintains necessary quality is fundamental. For borderline cases that need deeper analysis, the system can automatically escalate to a more capable model.
+
+## Layered Moderation Pipeline
+
+An efficient pipeline doesn't use LLMs for everything. The cost per decision matters when you're moderating millions of items per day. The layered architecture applies the cheapest method first and scales only when necessary.
+
+| Layer | Method | Time | Cost | Cases handled |
+|-------|--------|------|------|---------------|
+| 1 | Hardcoded filters | < 1ms | Zero | Obvious spam, known links, structural patterns |
+| 2 | Local ML classifier | 5-20ms | Very low | High-confidence categories, clearly OK content |
+| 3 | LLM (small model) | 500ms-1s | Low | Medium cases, context needed |
+| 4 | LLM (large model) | 1-3s | Medium | Complex cases, critical nuance |
+| 5 | Human review | Minutes-hours | High | Borderline cases, appeals, high-impact content |
+
+With this architecture, 70-80% of volume passes through layer 1 (spam, malicious links, obvious patterns). Another 15-20% is resolved in layers 2-3. Only 1-5% reaches human review -- reducing human workload by a factor of 20-100x.
+
+Layer 5 is not optional: there will always be cases that require human judgment. The goal isn't to eliminate humans from moderation, but to concentrate human time on cases where it truly makes a difference.
+
+## False Positives: The Cost of Aggressive Moderation
+
+A false positive in content moderation means blocking or removing legitimate content. The cost is real: frustrated user, valuable content lost, potential censorship allegations, and in extreme cases, loss of active users.
+
+Platforms that tuned their systems for maximum sensitivity (minimizing false negatives) frequently create serious problems with false positives. Sex education posts are blocked as adult content. Mental health discussions are flagged as suicide encouragement. History articles about violence are removed as "promoting violence."
+
+The technical solution is calibrating the threshold by category and context:
+
+```python
+AUTO_REMOVAL_THRESHOLDS = {
+    "csam": 0.50,           # Any suspicion goes to immediate review
+    "direct_violence": 0.90,
+    "hate_speech": 0.92,
+    "spam": 0.85,
+    "health_misinformation": 0.95,  # High threshold: legitimate discussion is common
+}
+
+HUMAN_REVIEW_THRESHOLDS = {
+    "csam": 0.30,
+    "direct_violence": 0.70,
+    "hate_speech": 0.75,
+    "spam": 0.65,
+    "health_misinformation": 0.80,
+}
+
+def decide_action(category: str, confidence: float) -> str:
+    removal_threshold = AUTO_REMOVAL_THRESHOLDS.get(category, 0.95)
+    review_threshold = HUMAN_REVIEW_THRESHOLDS.get(category, 0.75)
+
+    if confidence >= removal_threshold:
+        return "auto_remove"
+    elif confidence >= review_threshold:
+        return "human_review_queue"
+    else:
+        return "approve"
+```
+
+Actively measure and monitor false positive rates. Random samples of approved content (to check false negatives) and review of appeals for removed content (to identify false positives) are processes that need to happen continuously.
+
+## Conclusion
+
+Effective content moderation with AI isn't about finding the right model -- it's about building the right pipeline. Filtering layers, calibrated thresholds by category, human review in the right cases, and continuous quality monitoring are the elements that make the difference between a system that scales and one that creates new problems.
+
+At **SystemForge**, we build trust & safety systems for platforms with user-generated content that need scalable moderation. If your platform is growing beyond manual moderation capacity, we can help design a system that protects your community without blocking legitimate content. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to learn more.

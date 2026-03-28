@@ -1,0 +1,133 @@
+---
+title: "Come scrivere un brief tecnico per non-sviluppatori"
+slug: "come-scrivere-brief-tecnico-non-sviluppatori"
+date: "2024-09-08"
+description: "Guida per founder e manager senza background tecnico che vogliono scrivere un brief chiaro per software house — cosa includere, cosa evitare e template pronto."
+tags: ["brief tecnico", "requisiti software", "gestione prodotto", "assunzione software", "documentazione"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Guida per founder e manager senza background tecnico che vogliono scrivere un brief chiaro per software house — cosa includere, cosa evitare e template pronto.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-escrever-briefing-tecnico-nao-desenvolvedores'
+  - locale: 'en'
+    slug: 'how-to-write-a-technical-brief-for-non-devs'
+---
+
+## Un Brief Scadente Causa Settimane di Rework
+
+La maggior parte dei ritardi nei progetti software non inizia nello sviluppo — inizia nel brief. Quando un cliente consegna un documento vago, la software house fa supposizioni. Quando il software consegnato non corrisponde a ciò che il cliente immaginava, inizia il ciclo del rework.
+
+Questa guida è per founder, manager e imprenditori senza background tecnico che hanno bisogno di comunicare la propria idea a un team di sviluppo in modo chiaro e obiettivo.
+
+## Cosa Deve Sapere una Software House
+
+Prima di scrivere qualsiasi riga, capisci cosa il team tecnico userà per stimare, pianificare ed eseguire il tuo progetto:
+
+**Il problema da risolvere:** Quale dolore o necessità risolverà il software? Chi soffre di questo problema oggi? Come lo risolve attualmente (anche in modo manuale o inefficiente)?
+
+**Chi userà il sistema:** Descrivi i tipi di utenti (persona) con le loro esigenze specifiche. Un sistema di gestione di uno studio medico ha medici, receptionist e pazienti — ciascuno con esigenze e permessi diversi.
+
+**I flussi principali:** Cosa fa l'utente nel sistema, in quale ordine? Non deve essere tecnico — una descrizione in linguaggio naturale di "il cliente fa questo, il sistema mostra quello, l'operatore clicca su quel bottone" è sufficiente.
+
+**Cosa esiste oggi:** Se ci sono fogli di calcolo, processi manuali o sistemi legacy che verranno sostituiti, descrivi cosa fanno. Questo aiuta a capire le regole di business incorporate nel processo attuale.
+
+**Vincoli e obblighi:** Esiste una regolamentazione specifica (GDPR, normative di settore)? Esiste un'integrazione obbligatoria con sistemi di terze parti? C'è una scadenza definita da contratto o opportunità di mercato?
+
+## Struttura del Brief: Problema, Pubblico e Flussi
+
+Un buon brief tecnico ha sei sezioni:
+
+### 1. Contesto del Business (1 pagina)
+Spiega cos'è il business, qual è il modello di ricavi e perché il software è necessario adesso. Includi:
+- Descrizione riassuntiva del business
+- Perché il sistema attuale (o l'assenza di sistema) sta creando problemi
+- Cosa definisce il "successo" di questo progetto in 12 mesi
+
+### 2. Persona e Utenti
+Elenca i tipi di utenti con nome, ruolo e necessità principali. Esempio:
+
+> **Maria — Receptionist:** Prenota appuntamenti, conferma la presenza via WhatsApp, visualizza l'agenda del giorno e registra nuovi pazienti. Usa il computer della reception 8 ore al giorno.
+
+> **Dott. Giovanni — Medico:** Accede alle cartelle durante la visita tramite tablet, registra anamnesi e prescrizioni, visualizza la storia del paziente.
+
+### 3. Flussi Principali (percorsi utente)
+Descrivi i 3-5 flussi più importanti del sistema in linguaggio semplice:
+
+> **Prenotazione:** Il cliente chiama, la receptionist verifica la disponibilità del medico, sceglie l'orario, conferma i dati del paziente, salva la prenotazione. Il sistema invia automaticamente un SMS di conferma.
+
+### 4. Requisiti Funzionali
+Elenca cosa deve fare il sistema, raggruppato per area funzionale. Non usare gergo tecnico — descrivi in termini di capacità:
+
+- Il sistema deve permettere ai pazienti di prenotare visite online
+- Il sistema deve inviare promemoria automatici 24h prima della visita
+- Il sistema deve generare report di visite effettuate per periodo
+
+### 5. Integrazioni e Sistemi Esterni
+Elenca i sistemi esterni che devono connettersi: processori di pagamento, ERP, sistemi di comunicazione, API di terze parti. Per ognuno, indica se è obbligatorio o desiderabile.
+
+### 6. Vincoli
+- Budget massimo (o fascia)
+- Scadenza desiderata per il MVP o prima consegna
+- Piattaforme necessarie (web, iOS, Android, desktop)
+- Normative applicabili
+
+## Cosa NON Includere: Dettagli Tecnici che Spettano al Team
+
+Un errore comune è che il cliente cerchi di specificare la soluzione tecnica invece del problema. Evita di includere nel brief:
+
+**Linguaggio di programmazione:** "Lo voglio in Python con Django" — la scelta del linguaggio deve basarsi su requisiti di performance, scalabilità ed expertise del team, non su preferenze personali.
+
+**Database specifico:** "Deve usare PostgreSQL" — a meno che tu non abbia una ragione tecnica specifica, lascia questa decisione al team.
+
+**Framework e librerie:** Specificare "deve usare React" o "voglio MongoDB" senza giustificazione tecnica limita inutilmente le opzioni del team.
+
+**Architettura a microservizi:** La maggior parte dei nuovi prodotti non ha bisogno di microservizi. Specificarlo prematuramente aggiunge complessità senza beneficio.
+
+Queste decisioni sono di responsabilità del team tecnico e devono basarsi sui requisiti del prodotto, non sulle preferenze del cliente.
+
+## Template del Brief
+
+Usa questo template come punto di partenza:
+
+```
+# Brief Tecnico — [Nome del Progetto]
+
+## 1. Contesto
+[Cos'è il business e perché il software è necessario]
+
+## 2. Problema da Risolvere
+[Descrizione del problema attuale e del suo impatto sul business]
+
+## 3. Utenti
+### [Persona 1]
+- Ruolo: [funzione nel sistema]
+- Esigenze: [cosa deve fare]
+- Frequenza di utilizzo: [quotidiana/settimanale/mensile]
+
+## 4. Flussi Principali
+### Flusso 1: [Nome]
+[Descrizione passo per passo in linguaggio semplice]
+
+## 5. Funzionalità Necessarie
+- [funzionalità 1]
+- [funzionalità 2]
+
+## 6. Integrazioni
+- [sistema/API]: [obbligatorio/desiderabile]
+
+## 7. Vincoli
+- Budget: [fascia o massimo]
+- Scadenza: [data o orizzonte]
+- Piattaforme: [web/mobile/desktop]
+- Normative: [se applicabile]
+```
+
+## Conclusione
+
+Un brief ben scritto risparmia settimane di rework e riduce significativamente il rischio di consegnare un prodotto che non soddisfa le aspettative. Non hai bisogno di un background tecnico per scrivere un buon brief — hai bisogno di riuscire a spiegare chiaramente il problema, gli utenti e i flussi.
+
+SystemForge conduce un processo strutturato di raccolta dei requisiti che completa il brief del cliente. Se hai bisogno di aiuto per organizzare le tue idee prima di parlare con un team tecnico, contattaci.

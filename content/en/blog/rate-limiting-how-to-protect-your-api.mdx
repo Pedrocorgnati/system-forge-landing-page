@@ -1,0 +1,157 @@
+---
+title: "Rate Limiting: How to Protect Your API in Production"
+slug: "rate-limiting-how-to-protect-your-api"
+date: "2024-08-09"
+description: "How to implement rate limiting in Node.js APIs — algorithms (token bucket, leaky bucket), Redis for distributed counting, and 429 responses with Retry-After."
+tags: ["rate limiting", "throttling", "api", "redis", "security"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to implement rate limiting in Node.js APIs — token bucket and leaky bucket algorithms, Redis for distributed counting, and 429 responses with Retry-After.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rate-limiting-throttling-proteger-api'
+  - locale: 'it-IT'
+    slug: 'rate-limiting-proteggere-api-produzione'
+---
+
+Imagine you just launched your API and, in the first week, a single client with a bug in their integration code starts making 10,000 requests per minute. Without rate limiting, your API goes down for all other clients. With rate limiting, that client gets `429 Too Many Requests` responses, their bug becomes visible in logs, and your other users never notice a problem.
+
+Rate limiting isn't just protection against DDoS attacks — it's a guarantee of availability and fairness among your API consumers. It's one of the first features that should be implemented in any API heading to production.
+
+## Algorithms: Token Bucket vs Leaky Bucket vs Fixed Window
+
+The algorithm choice defines your API's behavior under pressure. Each one has different trade-offs.
+
+### Fixed Window
+
+The simplest: count requests in fixed time windows (per minute, per hour). "Maximum 100 requests per minute."
+
+**Problem:** vulnerable to the "window edge" attack. A client can make 100 requests at second 59 and 100 more at the next second — 200 requests in 2 seconds, without formally violating the rule.
+
+### Sliding Window
+
+Solves the fixed window problem: instead of resetting the counter at fixed intervals, the window "slides" over time. The count includes all requests in the last 60 seconds, regardless of when the window started.
+
+More precise, but requires more Redis memory to store individual timestamps.
+
+### Token Bucket
+
+Each client has a "bucket" of tokens. Each request consumes one token. The bucket is replenished at a constant rate (e.g., 10 tokens per second, maximum 100 tokens). If the bucket is empty, the request is rejected.
+
+**Advantage:** allows controlled bursts. A client that was idle accumulates tokens and can make a legitimate burst. Ideal for APIs where usage spikes are expected (e.g., a user opening the app and loading multiple data points at once).
+
+### Leaky Bucket
+
+The inverse of token bucket: requests enter the bucket and exit at a constant rate, like water leaking through a hole. If the bucket fills up, requests are dropped.
+
+**Advantage:** absolutely constant outflow rate, ideal for protecting downstream services that don't tolerate load variation. **Disadvantage:** penalizes legitimate bursts.
+
+| Algorithm | Burst allowed | Complexity | Ideal use |
+|-----------|--------------|------------|-----------|
+| Fixed Window | Yes (edge) | Low | Prototyping, internal systems |
+| Sliding Window | No | Medium | Public APIs with strict fairness |
+| Token Bucket | Yes (controlled) | Medium | Product APIs, mobile backends |
+| Leaky Bucket | No | Medium | Downstream service protection |
+
+## Implementation with Redis and express-rate-limit
+
+For Node.js APIs, the `express-rate-limit` + `rate-limit-redis` combination is the industry standard. Redis ensures the counter is shared across all API instances (essential in production with multiple pods).
+
+```typescript
+import rateLimit from "express-rate-limit";
+import RedisStore from "rate-limit-redis";
+import { createClient } from "redis";
+
+const redisClient = createClient({
+  url: process.env.REDIS_URL,
+});
+
+await redisClient.connect();
+
+// Global rate limiter: 100 req/min per IP
+export const globalLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100,
+  standardHeaders: true, // Returns RateLimit-* headers
+  legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+  }),
+  handler: (req, res) => {
+    res.status(429).json({
+      error: "Too Many Requests",
+      message: "You have exceeded the request limit. Please try again shortly.",
+      retryAfter: res.getHeader("Retry-After"),
+    });
+  },
+});
+
+// Stricter rate limiter for sensitive endpoints
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10, // Maximum 10 login attempts in 15 minutes
+  skipSuccessfulRequests: true, // Don't count successful attempts
+  store: new RedisStore({
+    sendCommand: (...args) => redisClient.sendCommand(args),
+  }),
+});
+
+// Applying the limiters
+app.use("/api/", globalLimiter);
+app.use("/api/auth/login", authLimiter);
+app.use("/api/auth/forgot-password", authLimiter);
+```
+
+For Next.js App Router, the pattern is slightly different but the concept is identical — the rate limiting logic goes in the middleware or at the start of each route handler.
+
+## Strategies: By IP, By API Key, and By User
+
+The granularity of rate limiting defines the effectiveness of the protection. The three strategies have distinct use cases.
+
+**By IP:** The simplest strategy and the first line of defense. Works well for public APIs without authentication. Problem: shared IPs (companies behind NAT, college networks) penalize legitimate users. Proxies and VPNs bypass it easily.
+
+**By API Key:** The right strategy for key-based authentication APIs. Each client has its own quota, independent of IP. You can offer different tiers (free: 1,000 req/day, pro: 100,000 req/day) and identify exactly which client is abusing.
+
+**By Authenticated User:** For APIs with login (JWT, session), use `userId` as the key. This ensures a user can't abuse the API regardless of which IP or device they use.
+
+**Recommended strategy:** combine all three in layers. Rate limit by IP as the first defense (without querying the database), then by API Key/user for per-tier customized limits.
+
+```typescript
+// Dynamic key: prioritizes user ID > API Key > IP
+const keyGenerator = (req: Request): string => {
+  if (req.user?.id) return `user:${req.user.id}`;
+  if (req.headers["x-api-key"]) return `key:${req.headers["x-api-key"]}`;
+  return `ip:${req.ip}`;
+};
+```
+
+## 429 Responses: Retry-After Headers and Useful Messages
+
+The quality of your `429` response determines whether your rate limiting is developer-friendly or frustrating. A good 429 response includes:
+
+**Standard headers (RFC 6585 + RateLimit Headers):**
+
+```
+HTTP/1.1 429 Too Many Requests
+RateLimit-Limit: 100
+RateLimit-Remaining: 0
+RateLimit-Reset: 1720000060
+Retry-After: 47
+```
+
+- `Retry-After`: seconds until the client can retry. Allows SDKs to implement automatic retry.
+- `RateLimit-Remaining`: how many requests the client has left in the current window. Allows well-behaved clients to self-regulate before hitting the limit.
+
+**Response body:** include actionable information. "Rate limit exceeded" doesn't help. "You've reached the limit of 100 requests per minute. Next window available in 47 seconds." helps a lot.
+
+For APIs with plan tiers, include an upgrade link: `"upgradeUrl": "https://api.mysite.com/pricing"`.
+
+## Conclusion
+
+Rate limiting is one of the easiest features to implement with the highest return in resilience and security. The recipe is simple: Redis as a shared store, Token Bucket algorithm for most cases, granularity by user/API Key rather than just by IP, and 429 responses with `Retry-After` that allow smart clients to behave well automatically.
+
+What distinguishes production APIs from prototypes isn't just functionality — it's the protective infrastructure around it. At SystemForge, rate limiting, authentication, and versioning are specified in documentation before development begins, ensuring the API arrives in production ready for the real world. If you're building an API that needs to handle pressure, we can help structure it the right way.

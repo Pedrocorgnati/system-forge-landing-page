@@ -1,0 +1,137 @@
+---
+title: "Gestione scorte nell'e-commerce: evitare l'overselling"
+slug: "gestione-scorte-ecommerce-evitare-overselling"
+date: "2024-10-28"
+description: "Come progettare la gestione dell'inventario nell'e-commerce per evitare l'overselling — riserva ottimistica vs pessimistica, sincronizzazione multicanale e alert automatici."
+tags: ["gestione scorte", "e-commerce", "overselling", "inventario", "ecommerce operazioni"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come progettare la gestione dell'inventario nell'e-commerce per evitare l'overselling — riserva ottimistica vs pessimistica, sincronizzazione multicanale e alert automatici.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-estoque-ecommerce-evitar-overselling'
+  - locale: 'en'
+    slug: 'inventory-management-ecommerce-avoid-overselling'
+---
+
+L'overselling si verifica quando un e-commerce vende piu unita di un prodotto di quante ne abbia in magazzino. Cio che accade dopo e sempre negativo: l'ordine deve essere annullato, il cliente si frustra, arrivano recensioni negative e, su piattaforme come Amazon ed eBay, il punteggio del venditore scende — impattando direttamente sulla visibilita degli annunci. Nei casi piu gravi, il consumatore puo avvalersi della tutela prevista dal Codice del Consumo.
+
+Il problema e piu comune di quanto sembri, specialmente nelle operazioni multicanale (negozio proprio + marketplace) dove lo stesso inventario fisico alimenta piu canali di vendita. La soluzione tecnica esiste, ma richiede un'architettura attenta e la comprensione dei trade-off.
+
+## Riserva pessimistica vs ottimistica: trade-off di conversione
+
+Esistono due approcci fondamentali alla riserva dell'inventario: pessimistico e ottimistico.
+
+**Riserva pessimistica**: decrementa la disponibilita nel momento in cui il prodotto viene aggiunto al carrello. Se 10 clienti mettono l'ultimo articolo nel carrello, solo il primo lo vede disponibile — gli altri 9 vedono "esaurito" ancora prima di iniziare il checkout.
+
+Vantaggio: l'overselling e praticamente impossibile. Svantaggio: il tasso di conversione cala, perche i carrelli abbandonati "bloccano" l'inventario. Un cliente che aggiunge al carrello e non acquista mantiene il prodotto "riservato" per il tempo configurato (generalmente 15-60 minuti), impedendo ad altri di comprare.
+
+**Riserva ottimistica**: mantiene l'inventario disponibile durante tutta la navigazione e lo decrementa solo al momento della conferma del pagamento. Piu clienti possono "vedere" lo stesso prodotto disponibile contemporaneamente.
+
+Vantaggio: conversione piu alta, perche non ci sono falsi allarmi di "esaurito". Svantaggio: due clienti possono completare il checkout dello stesso prodotto contemporaneamente, generando overselling se non c'e un adeguato controllo transazionale.
+
+La maggior parte degli e-commerce con operazioni sane utilizza un **approccio ibrido**: riserva temporanea all'inizio del checkout (non all'aggiunta al carrello) con scadenza automatica in 15-20 minuti se il pagamento non viene confermato.
+
+```sql
+-- Tabella delle riserve di inventario
+CREATE TABLE riserve_inventario (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  prodotto_id UUID NOT NULL REFERENCES prodotti(id),
+  variante_id UUID REFERENCES varianti(id),
+  quantita INT NOT NULL,
+  ordine_id UUID REFERENCES ordini(id),
+  sessione_id VARCHAR(64),           -- Per riserve anonime (prima del login)
+  scade_il TIMESTAMPTZ NOT NULL,     -- Scadenza automatica
+  stato VARCHAR(20) DEFAULT 'attiva', -- attiva | confermata | scaduta | annullata
+  creata_il TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Vista dell'inventario disponibile (tiene conto delle riserve attive)
+CREATE VIEW inventario_disponibile AS
+SELECT
+  i.prodotto_id,
+  i.variante_id,
+  i.quantita_fisica
+    - COALESCE(SUM(r.quantita) FILTER (WHERE r.stato = 'attiva' AND r.scade_il > NOW()), 0)
+    AS disponibile
+FROM inventario i
+LEFT JOIN riserve_inventario r USING (prodotto_id, variante_id)
+GROUP BY i.prodotto_id, i.variante_id, i.quantita_fisica;
+```
+
+## Inventario multicanale: il problema della sincronizzazione
+
+La sfida maggiore dell'overselling nel 2025 non e il negozio proprio — e l'operazione multicanale. Quando lo stesso inventario fisico alimenta negozio proprio, Amazon, eBay e altri marketplace, ogni vendita su qualsiasi canale deve essere riflessa su tutti gli altri in tempo reale (o il piu vicino possibile).
+
+Il problema di sincronizzazione multicanale e fondamentalmente un problema di consistenza distribuita. Avete N sistemi esterni (ogni marketplace e un sistema indipendente) e dovete garantire che l'inventario visualizzato su ciascuno rifletta la realta dell'inventario centrale.
+
+Gli approcci variano in complessita e affidabilita:
+
+| Approccio | Latenza sync | Affidabilita | Complessita |
+|---|---|---|---|
+| Polling periodico (ogni 5 min) | Alta (fino a 5 min di delay) | Bassa | Bassa |
+| Webhook + coda messaggi | Bassa (secondi) | Alta | Media |
+| Buffer inventario per canale | Bassa (virtuale) | Alta | Bassa-media |
+| Inventario unificato con lock | Molto bassa | Molto alta | Alta |
+
+L'approccio piu pratico per operazioni di medie dimensioni e il **buffer di inventario per canale**: non sincronizzate l'inventario reale, ma assegnate una quota di inventario per ogni canale. Se avete 100 unita, configurate 40 per il negozio proprio, 35 per Amazon, 25 per eBay. Quando un canale esaurisce la propria quota, redistribuite manualmente o con una regola automatica.
+
+Questo approccio sacrifica l'utilizzo ottimale dell'inventario (in scenari estremi, eBay puo avere 0 di quota mentre il negozio proprio ha 40 unita ferme), ma elimina il rischio di overselling in scenari di alta concorrenza per le unita.
+
+## Lock del database vs code di messaggi
+
+Per il negozio proprio, il controllo dell'overselling al momento della conferma del pagamento e un problema di concorrenza classico. Due utenti che completano il checkout dello stesso prodotto contemporaneamente possono generare overselling se non c'e controllo.
+
+La soluzione con **lock del database** (SELECT FOR UPDATE) garantisce l'esclusivita a livello di transazione:
+
+```typescript
+async function confermaOrdine(ordineId: string): Promise<void> {
+  await db.transaction(async (trx) => {
+    // Lock sulla riga dell'inventario — blocca altre transazioni simultanee
+    const [inventario] = await trx
+      .select()
+      .from("inventario")
+      .where({ prodotto_id: ordine.prodottoId })
+      .forUpdate() // SELECT ... FOR UPDATE
+      .noWait();   // Fallisce immediatamente se gia in lock
+
+    if (inventario.disponibile < ordine.quantita) {
+      throw new InventarioInsufficienteError(ordine.prodottoId);
+    }
+
+    await trx("inventario")
+      .where({ prodotto_id: ordine.prodottoId })
+      .decrement("disponibile", ordine.quantita);
+
+    await trx("ordini")
+      .where({ id: ordineId })
+      .update({ stato: "confermato", confermato_il: new Date() });
+  });
+}
+```
+
+I lock funzionano bene per volumi moderati, ma hanno limitazioni in alta concorrenza: le transazioni in attesa si accumulano, aumentando la latenza. Per Black Friday o lanci con alta domanda simultanea, le **code di messaggi** (RabbitMQ, SQS, Redis Streams) sono piu scalabili — gli ordini entrano in coda, un worker li elabora uno alla volta, senza concorrenza sul database.
+
+## Alert di riordino e integrazione con il gestionale
+
+Controllare l'overselling e meta del problema; l'altra meta e garantire che l'inventario venga rifornito prima di esaurirsi. Alert di riordino automatizzati sono essenziali per operazioni che dipendono da fornitori con lead time.
+
+Il punto di riordino (ROP — Reorder Point) e calcolato sulla base del consumo medio e del lead time del fornitore:
+
+```
+ROP = (Vendite medie giornaliere × Lead time in giorni) + Scorta di sicurezza
+```
+
+Un prodotto che vende 10 unita/giorno e ha un lead time di 7 giorni dal fornitore necessita di un alert quando l'inventario arriva a 70 unita (+ scorta di sicurezza del 20% = 84 unita). Se aspettate che l'inventario arrivi a zero per fare l'ordine, resterete 7 giorni senza vendere.
+
+L'integrazione con il gestionale (TeamSystem, Zucchetti, SAP Business One, Odoo) chiude il ciclo: alert automatici generano ordini di acquisto nel gestionale, che aggiorna l'inventario previsto, che viene riflesso nell'e-commerce con disponibilita futura ("Disponibile tra 7 giorni"). Comunicare proattivamente la disponibilita futura converte clienti che altrimenti se ne sarebbero andati per mancanza di scorte.
+
+## Conclusione
+
+L'overselling non e solo un problema tecnico — e un problema di reputazione, di relazione con i marketplace e, nei casi estremi, un problema legale. L'architettura dell'inventario giusta dipende dal profilo dell'operazione: riserva ibrida (all'inizio del checkout, con scadenza), buffer di quote per il multicanale e lock transazionali per la conferma del pagamento sono i blocchi essenziali.
+
+La complessita aumenta con la crescita: piu canali, piu SKU, piu picchi di domanda richiedono soluzioni progressivamente piu robuste. In SystemForge progettiamo moduli di gestione inventario dal negozio proprio alle integrazioni con marketplace multipli e gestionali, con l'architettura adeguata al momento del business. [Contattate il nostro team](https://systemforge.it/contatto).

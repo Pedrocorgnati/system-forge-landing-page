@@ -1,21 +1,25 @@
-import type { MetadataRoute } from 'next'
-import { SITE } from '@/lib/constants'
-
 /**
- * app/robots.ts — robots.txt via Next.js App Router.
+ * src/app/robots.ts
+ * robots.txt dinâmico via Next.js App Router.
  *
- * INT-051: robots.txt com referência ao sitemap.
- * Disallow /newsletter/confirmado (reservado para module-8).
+ * INT-020 — robots.txt aponta para sitemap do domínio ativo no build.
+ * INT-051 — Sitemap URL dinâmica por locale.
+ *
+ * Cada build (build:br / build:it / build:en) gera robots.txt com
+ * a URL de sitemap correta para o domínio ativo.
  */
-
-function getSiteUrl(): string {
-  return SITE.url
-}
+import type { MetadataRoute } from 'next'
+import { getSiteConfig } from '@config'
 
 export const dynamic = 'force-static'
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = getSiteUrl()
+  const config = getSiteConfig()
+
+  // Normalizar base URL (remover trailing slash)
+  const siteUrl = config.url.endsWith('/')
+    ? config.url.slice(0, -1)
+    : config.url
 
   return {
     rules: [
@@ -23,9 +27,13 @@ export default function robots(): MetadataRoute.Robots {
         userAgent: '*',
         allow: '/',
         disallow: [
-          '/newsletter/confirmado', // página de confirmação (module-8)
-          '/_next/',                 // assets internos do Next.js
-          '/static/',                // assets do Velite
+          '/api/',                     // rotas de API server-side
+          '/_next/',                   // assets internos do Next.js
+          '/admin/',                   // área administrativa (se existir)
+          '/static/',                  // assets do Velite
+          '/newsletter/confirmado',   // página de confirmação pós-opt-in (BR)
+          '/newsletter/confermato',   // página de confirmação pós-opt-in (IT)
+          '/newsletter/confirmed',    // página de confirmação pós-opt-in (EN)
         ],
       },
     ],

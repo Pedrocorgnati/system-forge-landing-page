@@ -1,0 +1,27 @@
+name = "newsletter-it"
+main = "src/index.ts"
+compatibility_date = "2026-03-26"
+
+[[kv_namespaces]]
+binding = "NEWSLETTER_KV"
+id = "5125d8d64e444767bded6c787fb6e19f"
+preview_id = "d1d28700120a446bb62216f45db90ada"
+
+[[d1_databases]]
+binding = "D1_AUDIT"
+database_name = "newsletter-audit"
+database_id = "85f58928-0f2a-4e72-881e-2ae337f1875c"
+
+[vars]
+SITE_LOCALE = "it-IT"
+ALLOWED_ORIGINS = "https://systemforge.it,http://localhost:3000"
+WORKER_DOMAIN = "newsletter-it.corgnati-pedro.workers.dev"
+FROM_EMAIL = "newsletter@systemforge.it"
+AUDIT_PEPPER = "9bf1e79683b44adce95e574df1b8367d8e5c2c8b7b38e30539c376ef0a01bbca"
+TURNSTILE_EXPECTED_HOSTNAME = "systemforge.it"
+
+# Secrets — configurar via:
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put RESEND_AUDIENCE_ID_IT    (audience_id da lista "newsletter-it" no Resend)
+#   wrangler secret put TURNSTILE_SECRET_KEY
+# Nunca committar secrets no wrangler.toml

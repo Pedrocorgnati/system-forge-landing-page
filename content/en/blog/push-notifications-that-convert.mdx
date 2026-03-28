@@ -1,0 +1,202 @@
+---
+title: "Push Notifications That Convert: Strategy and Code"
+slug: "push-notifications-that-convert"
+date: "2024-07-29"
+description: "Push notifications in React Native with Expo — permissions, segmentation, deep links, and open-rate metrics to optimize engagement."
+tags: ["push notifications", "react native", "expo", "app engagement", "mobile marketing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Push notifications in React Native with Expo — permissions, segmentation, deep links, and open-rate metrics to optimize engagement.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'push-notifications-que-convertem'
+  - locale: 'it-IT'
+    slug: 'push-notification-che-convertono'
+---
+
+A poorly sent push notification is worse than no notification. The user receives an irrelevant message at 11pm, goes straight to settings and disables everything — or uninstalls the app. That decision happens in seconds and is rarely reversed. On the other hand, a well-thought-out notification, sent at the right moment with the correct context, can be the trigger that turns a dormant user into an active one.
+
+The difference between those two scenarios lies in how you implement the system, not just how you write the copy.
+
+## Permissions: How to Ask Without Scaring the User
+
+On iOS, permission to send notifications is mandatory and the system shows the native dialog only once. If the user declines, the only way to re-enable it is by manually going into system settings. This means the moment and context in which you ask for permission are critical.
+
+The most common mistake is asking for permission immediately on the app's first open, before the user understands any value. The acceptance rate with this approach hovers around 30–40%. A better approach is the "soft ask" model: display a custom screen explaining why notifications are useful, with an "Enable notifications" button. Only when the user clicks that button do you trigger the native system dialog. This filters out undecided users and raises the acceptance rate to 60–70%.
+
+On Android, starting with version 13 (API 33), the behavior became similar to iOS — explicit permission is required. On earlier versions, notifications are allowed by default.
+
+```typescript
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+
+async function registerForPushNotifications(): Promise<string | null> {
+  if (!Device.isDevice) {
+    console.warn('Push notifications do not work in the simulator');
+    return null;
+  }
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    return null;
+  }
+
+  const token = await Notifications.getExpoPushTokenAsync({
+    projectId: 'your-eas-project-id',
+  });
+
+  return token.data;
+}
+```
+
+After obtaining the token, save it in the backend associated with the user and device. A user can have multiple devices, and you'll need the token to send targeted notifications.
+
+## Expo Notifications: Setup and Sending via API
+
+Expo Notifications abstracts the differences between APNs (Apple Push Notification service) and FCM (Firebase Cloud Messaging), offering a unified API. For managed workflow projects, setup is minimal.
+
+In `app.json` or `app.config.js`, enable notifications:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/notification-sound.wav"]
+        }
+      ]
+    ]
+  }
+}
+```
+
+To send a notification via the Expo Push API (ideal for testing and smaller-scale projects), POST to `https://exp.host/--/api/v2/push/send`:
+
+```typescript
+async function sendPushNotification(
+  expoPushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, unknown>
+) {
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: expoPushToken,
+      sound: 'default',
+      title,
+      body,
+      data: data ?? {},
+    }),
+  });
+}
+```
+
+For high-volume production, use FCM directly or a service like OneSignal, Braze, or Klaviyo, which offer integrated segmentation, scheduling, and analytics.
+
+## Segmentation: Relevant Notifications at the Right Time
+
+Segmentation isn't just sending different notifications to different groups. It's understanding user behavior and using it to determine what, when, and how often to send.
+
+Some high-impact segmentations:
+
+**By user lifecycle:**
+- New users (first 7 days): focus on onboarding and activating the core feature
+- Active users: notifications about new features, updates relevant to their behavior
+- Churn-risk users (no open in 7–14 days): re-engagement message with a clear value proposition
+
+**By time zone:**
+Never send notifications based on server time. Always calculate by the device's time zone. Notifications sent between 10am–12pm or 7pm–9pm in the user's local time have significantly higher open rates.
+
+**By in-app behavior:**
+If the user added items to the cart but didn't complete the purchase, a reminder notification 2 hours later is contextual and expected. If the user has never used a specific feature, a notification explaining that feature can boost engagement.
+
+| Segment | Estimated open rate | Recommended strategy |
+|---------|---------------------|----------------------|
+| New users (D0–D7) | 25–40% | Progressive onboarding |
+| Active users | 10–20% | Relevant updates |
+| Re-engagement (D7+) | 5–12% | Direct value proposition |
+| Cart abandonment | 30–50% | Reminder with light urgency |
+
+## Deep Links: Notifications That Go to the Right Context
+
+A notification that opens only the app's home screen is a missed opportunity. The user tapped because they were interested in the specific content of the notification — take them exactly to that content.
+
+Deep links in notifications work by passing data in the notification's `data` field and handling that data when the user opens the app from the notification:
+
+```typescript
+import * as Notifications from 'expo-notifications';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect } from 'react';
+
+export function useNotificationDeepLink() {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // Notification received with app in foreground
+    const foregroundSub = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log('Notification received:', notification);
+      }
+    );
+
+    // User tapped the notification
+    const responseSub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+
+        if (data.screen === 'OrderDetail' && data.orderId) {
+          navigation.navigate('OrderDetail', { orderId: data.orderId });
+        } else if (data.screen === 'Promotion' && data.promoId) {
+          navigation.navigate('Promotion', { promoId: data.promoId });
+        }
+      }
+    );
+
+    return () => {
+      foregroundSub.remove();
+      responseSub.remove();
+    };
+  }, [navigation]);
+}
+```
+
+When sending the notification from the backend, include the destination in the data:
+
+```json
+{
+  "to": "ExponentPushToken[...]",
+  "title": "Your order has shipped",
+  "body": "Order #4521 is on its way. Tap to track it.",
+  "data": {
+    "screen": "OrderDetail",
+    "orderId": "4521"
+  }
+}
+```
+
+This pattern guarantees a seamless experience: the user sees the notification, taps it, and is immediately in the relevant context — without having to navigate the app to find what was promised.
+
+## Conclusion
+
+Push notifications are one of the few communication channels that reach the user's screen directly, without algorithmic filters. But that privilege comes at a cost: a bad experience destroys the permission permanently. The path to notifications that convert runs through asking for permission with context, segmenting by actual behavior, and always taking the user to the right place in the app.
+
+At SystemForge, every notification implementation is planned alongside the engagement strategy — because working code without strategy is a notification that gets the app uninstalled. If you want to build a mobile communication system that retains users instead of driving them away, we can help.

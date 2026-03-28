@@ -83,7 +83,8 @@ export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
 
 export function buildBudgetCTA(label: string, context?: string): CTAConfig {
   const config = getSiteConfig()
-  const suffix = context ? `?context=${encodeURIComponent(context)}` : ''
+  const sep = config.budgetEngine.includes('?') ? '&' : '?'
+  const suffix = context ? `${sep}context=${encodeURIComponent(context)}` : ''
   return {
     action: ConversionAction.BUDGET_ENGINE,
     label,

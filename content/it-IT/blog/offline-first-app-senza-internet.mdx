@@ -1,0 +1,208 @@
+---
+title: "Offline-first nelle app: funzionare senza internet"
+slug: "offline-first-app-senza-internet"
+date: "2024-10-21"
+description: "Come costruire app React Native offline-first — WatermelonDB, sincronizzazione con il server, risoluzione dei conflitti e UX per stati senza connessione."
+tags: ["offline first", "react native", "watermelondb", "sincronizzazione", "mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come costruire app React Native offline-first — WatermelonDB, sincronizzazione con il server, risoluzione dei conflitti e UX per stati senza connessione."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-apps-sem-internet'
+  - locale: 'en'
+    slug: 'offline-first-apps-working-without-internet'
+---
+
+Le app che necessitano di internet per funzionare perdono utenti in metropolitana, in aereo, in zone con copertura scarsa, e in tutti quei momenti in cui la connessione oscilla ma l'utente vuole comunque usare il prodotto. Questa perdita non si manifesta in modo drammatico — l'utente non disinstalla al momento della caduta del segnale. Semplicemente associa l'app a un'esperienza frustrante e la apre sempre meno.
+
+L'approccio offline-first inverte la premessa: l'app funziona pienamente con i dati locali, e la sincronizzazione con il server avviene come beneficio aggiuntivo, non come requisito per usare il prodotto. Implementarlo correttamente richiede decisioni architetturali che vanno prese fin dall'inizio.
+
+## WatermelonDB: Database Locale Reattivo per React Native
+
+WatermelonDB è un database locale per React Native costruito su SQLite, con un'API reattiva che si integra naturalmente con React. È progettato specificamente per il caso d'uso offline-first: le operazioni locali sono sincrone e immediate, e la sincronizzazione con il backend è un processo separato.
+
+L'installazione richiede un passaggio di native rebuild perché utilizza moduli nativi:
+
+```bash
+npx expo install @nozbe/watermelondb @nozbe/with-observables
+# Per Expo bare workflow:
+cd ios && pod install
+```
+
+Definizione dello schema e dei model:
+
+```typescript
+// database/schema.ts
+import { appSchema, tableSchema } from '@nozbe/watermelondb';
+
+export const schema = appSchema({
+  version: 1,
+  tables: [
+    tableSchema({
+      name: 'tasks',
+      columns: [
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'string', isOptional: true },
+        { name: 'completed', type: 'boolean' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+        { name: 'server_id', type: 'string', isOptional: true },
+        { name: 'is_deleted', type: 'boolean' }, // soft delete per la sync
+      ],
+    }),
+  ],
+});
+
+// models/Task.ts
+import { Model } from '@nozbe/watermelondb';
+import { field, date, readonly } from '@nozbe/watermelondb/decorators';
+
+export class Task extends Model {
+  static table = 'tasks';
+
+  @field('title') title!: string;
+  @field('description') description!: string | null;
+  @field('completed') completed!: boolean;
+  @date('created_at') createdAt!: Date;
+  @date('updated_at') updatedAt!: Date;
+  @field('server_id') serverId!: string | null;
+  @field('is_deleted') isDeleted!: boolean;
+}
+```
+
+WatermelonDB utilizza gli observable — i componenti React si ri-renderizzano automaticamente quando i dati cambiano:
+
+```typescript
+// hooks/useTasks.ts
+import { withObservables } from '@nozbe/with-observables';
+import { database } from '../database';
+import { Task } from '../models/Task';
+import { Q } from '@nozbe/watermelondb';
+
+const enhance = withObservables([], () => ({
+  tasks: database
+    .get<Task>('tasks')
+    .query(Q.where('is_deleted', false), Q.sortBy('created_at', Q.desc))
+    .observe(),
+}));
+
+export const TaskList = enhance(TaskListComponent);
+```
+
+## Strategia di Sincronizzazione: Conflict-free vs Manuale
+
+La parte più complessa dell'offline-first è la sincronizzazione. Quando l'app torna ad avere connessione, i dati locali devono essere inviati al server, e i dati del server devono aggiornare il database locale — ma possono esserci conflitti se lo stesso record è stato modificato in due posti.
+
+WatermelonDB offre un'API di sincronizzazione chiamata `synchronize` che si aspetta due endpoint nel backend: un `pullChanges` che restituisce ciò che è cambiato sul server, e un `pushChanges` che riceve le modifiche locali:
+
+```typescript
+import { synchronize } from '@nozbe/watermelondb/sync';
+import { database } from './database';
+
+async function syncWithServer() {
+  await synchronize({
+    database,
+    pullChanges: async ({ lastPulledAt }) => {
+      const response = await fetch(
+        `/api/sync/pull?last_pulled_at=${lastPulledAt ?? 0}`,
+        { headers: { Authorization: `Bearer ${await getToken()}` } }
+      );
+      const { changes, timestamp } = await response.json();
+      return { changes, timestamp };
+    },
+    pushChanges: async ({ changes, lastPulledAt }) => {
+      await fetch('/api/sync/push', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${await getToken()}`,
+        },
+        body: JSON.stringify({ changes, lastPulledAt }),
+      });
+    },
+  });
+}
+```
+
+**Risoluzione dei conflitti: Last Write Wins**
+La strategia più semplice è "l'ultima scrittura vince" — il record con l'`updated_at` più recente sostituisce quello più vecchio. Funziona bene per la maggior parte dei casi d'uso ed è la strategia predefinita di WatermelonDB.
+
+**Risoluzione dei conflitti: Manuale (field-level merge)**
+Per applicazioni collaborative dove due persone possono modificare lo stesso documento contemporaneamente, la risoluzione deve avvenire per campo: il nome è stato modificato sul dispositivo A e lo stato sul dispositivo B — il merge corretto prende il nome da A e lo stato da B. Questo è operativamente più complesso, richiede timestamp per campo o CRDT (Conflict-free Replicated Data Types).
+
+| Strategia | Complessità | Caso d'uso |
+|---|---|---|
+| Last Write Wins | Bassa | App personale, dati non collaborativi |
+| Server Wins | Bassa | Dati autoritativi del server (es: saldo) |
+| Client Wins | Bassa | Bozze, dati dell'utente |
+| Field-level merge | Alta | App collaborative |
+| CRDT | Molto alta | Documenti in tempo reale (tipo Notion) |
+
+## UX Senza Connessione: Indicatori, Code e Feedback
+
+La UX offline-first richiede di comunicare all'utente lo stato della connessione e cosa succede con le azioni che compie offline.
+
+**Indicatore di stato della connessione**
+Un banner discreto in cima allo schermo quando l'app è offline è sufficiente — non interrompe il flusso ma informa sul contesto. Quando la connessione torna, mostra brevemente una conferma di sincronizzazione.
+
+```typescript
+import NetInfo from '@react-native-community/netinfo';
+import { useEffect, useState } from 'react';
+
+function useConnectionStatus() {
+  const [isConnected, setIsConnected] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(async (state) => {
+      const connected = state.isConnected && state.isInternetReachable;
+      setIsConnected(!!connected);
+
+      if (connected) {
+        setIsSyncing(true);
+        await syncWithServer();
+        setIsSyncing(false);
+      }
+    });
+
+    return unsubscribe;
+  }, []);
+
+  return { isConnected, isSyncing };
+}
+```
+
+**Feedback sulle azioni offline**
+Quando l'utente crea o modifica qualcosa offline, l'app deve confermare l'azione localmente con lo stesso feedback visivo che darebbe online. La differenza: aggiungi un indicatore visivo discreto (un'icona "in attesa di sincronizzazione") sull'elemento modificato. Quando la sync avviene, l'indicatore scompare.
+
+Non bloccare mai le azioni locali per mancanza di connessione. L'utente ha creato un task offline? Crealo localmente e sincronizza dopo. Non mostrare mai "Nessuna connessione — azione bloccata" per operazioni che possono essere accodate.
+
+## Modalità Offline Parziale: Cosa Funziona e Cosa No
+
+Non tutte le funzionalità di un'app devono funzionare offline. La decisione su cosa deve funzionare senza internet è strategica.
+
+**Funziona bene offline:**
+- Lettura di contenuti già caricati (articoli, prodotti visualizzati, storico)
+- Creazione e modifica di dati dell'utente (note, task, moduli)
+- Azioni che possono essere accodate (like, commenti, aggiungi al carrello)
+- Navigazione e ricerca nei dati locali
+
+**Richiede connessione per natura:**
+- Elaborazione pagamenti
+- Autenticazione (prima volta — il refresh del token può essere locale)
+- Upload di file grandi
+- Ricerca in database enormi senza indice locale
+- Streaming di contenuti multimediali
+
+Documentare e comunicare quali funzionalità richiedono connessione fa parte della UX offline-first. Uno stato di errore chiaro ("Questa funzione richiede una connessione a internet") è infinitamente migliore di uno spinner che gira all'infinito o di una schermata di errore tecnico.
+
+## Conclusione
+
+L'offline-first non è una feature — è una decisione architetturale che va presa prima di scrivere la prima riga di codice. Implementarlo dopo è possibile, ma molto più costoso. La scelta del database locale, la strategia di sincronizzazione e il modello di risoluzione dei conflitti definiscono quanto robusto e affidabile sarà l'app in condizioni reali di utilizzo.
+
+In SystemForge, le app che richiedono resilienza offline vengono progettate con questa architettura fin dalla fase di pianificazione. Se stai costruendo un'app per utenti frequentemente in movimento — campo, logistica, vendite, sanità — e vuoi garantire che l'esperienza sia consistente con o senza internet, il nostro team può aiutarti a strutturare la soluzione giusta per il tuo caso.

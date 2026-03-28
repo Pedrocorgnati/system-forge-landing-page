@@ -1,0 +1,148 @@
+---
+title: "Petshop Management Software: Scheduling and Health Records"
+slug: "petshop-management-software-scheduling"
+date: "2024-10-29"
+description: "Requirements for pet shop software: grooming scheduling, veterinary health records, vaccine tracking, automated reminders, and loyalty programs."
+tags: ["pet shop software", "veterinary software", "grooming scheduling", "pet management", "loyalty program"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Requirements for pet shop software: grooming scheduling, veterinary health records, vaccine tracking, automated reminders, and loyalty programs."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'software-petshops-agendamento-prontuario'
+  - locale: 'it-IT'
+    slug: 'software-per-negozi-animali-gestione'
+---
+
+A pet shop is a business with an operational workflow that generic scheduling and management systems simply ignore. A hair salon books people. A pet shop books pets — and pets have breeds, sizes, temperaments, and specific needs that directly affect service duration, schedule capacity, and groomer approach. A 65-pound Golden Retriever takes three times longer for a bath and groom than a 7-pound Chihuahua. An anxious or aggressive dog needs an isolated time slot. This isn't operational pickiness — it's the difference between a schedule that works and one that creates chaos.
+
+Beyond specialized scheduling, a full-service pet shop (or veterinary clinic) needs pet health records, vaccine tracking, automated owner reminders, and a loyalty program that drives repeat business. This article maps the technical and functional requirements of each of these dimensions.
+
+## Grooming Schedule: Duration, Conflicts, and Capacity
+
+The most important differentiator of a pet shop scheduling system vs. any generic tool is dynamic service duration calculation. Duration is not fixed by service type — it's a function of multiple pet attributes.
+
+Factors affecting grooming duration:
+
+| Factor | Impact on duration |
+|--------|-------------------|
+| Size (small, medium, large, giant) | Base multiplier (30 min to 3h) |
+| Breed (smooth, medium, long, double coat) | +20% to +100% for long coats |
+| Coat condition (matted, dirty, wet) | +30% to +60% for extreme cases |
+| Temperament (calm, anxious, aggressive) | +0% to +50% for difficult animals |
+| Service type (bath only, bath+groom, sanitary trim) | Additive components |
+
+The system must allow each shop to configure their own duration table, since groomer speed and available equipment vary.
+
+With durations calculated, the schedule must manage:
+
+**Per-groomer capacity**: each groomer/bather has their own schedule. Two simultaneous bookings for the same professional must be detected and blocked.
+
+**Dryer capacity**: bathing areas with dryers have physical capacity. A pet in the dryer for 40 minutes occupies the equipment even if the groomer is free to receive the next one.
+
+**Schedule conflicts**: beyond the professional, the system must verify physical space availability (bathing station) if capacity is the limiting factor.
+
+**Online booking for pet owners**: a portal or WhatsApp bot where the owner can see available slots and book without calling, respecting all capacity constraints.
+
+**Waitlist**: for fully booked slots, the system should offer waitlist registration with automatic notification if a spot opens due to a cancellation.
+
+```javascript
+// Example: dynamic duration calculation
+function calculateDuration(pet, service, config) {
+  const baseDuration = config.baseDuration[pet.size][service.type]; // in minutes
+
+  const breedFactor = config.breedFactor[pet.breed] ?? 1.0;
+  const temperamentFactor = config.temperamentFactor[pet.temperament] ?? 1.0;
+  const coatFactor = pet.mattedCoat ? 1.4 : 1.0;
+
+  const calculatedDuration = Math.ceil(
+    baseDuration * breedFactor * temperamentFactor * coatFactor
+  );
+
+  // Round up to nearest slot (typically 30 min)
+  const slotMinutes = 30;
+  return Math.ceil(calculatedDuration / slotMinutes) * slotMinutes;
+}
+```
+
+## Pet Health Records: Medical History and Vaccines
+
+For pet shops that have a veterinarian on staff (for exams, vaccinations, or boarding), the animal's health record is as important as the service history. And for pet shops without a vet, vaccine records are still essential — owners frequently need proof when booking services.
+
+The pet health record must include:
+
+**Animal profile data**: name, species, breed, date of birth, sex, current weight, color, and markings. Microchip number when available.
+
+**Weight history**: weight evolution chart across visits, useful for identifying significant gain or loss.
+
+**Vaccines and dewormings**: record of each vaccine with administration date, lot number, manufacturer, responsible veterinarian, and booster date. The system must generate automatic owner alerts when a booster is approaching.
+
+**Visit and procedure history**: clinical notes in chronological order with date and responsible party.
+
+**Allergies and special conditions**: a prominently displayed field visible on all pet screens for critical information — allergy to a specific medication, cardiac condition contraindicating a procedure, seizure history.
+
+**Lab results and reports**: upload facility for laboratory test files, x-rays, and external reports with date and lab reference.
+
+For AVMA (American Veterinary Medical Association) and state veterinary board compliance, digital veterinary medical records must follow principles similar to human medical records — immutability, identification of responsible party, and audit trail for changes.
+
+## Automated Reminders: WhatsApp and Email by Trigger
+
+Customer retention in pet shops is strongly correlated with the frequency of relevant reminders. An owner who receives a personalized message reminding them that their pet's rabies vaccine booster expires in 15 days is much more likely to book than one who has to remember on their own.
+
+The most important automatic communication triggers:
+
+**Appointment reminder**: 24h before the scheduled time, with interactive confirmation (reply "1" to confirm or "2" to cancel).
+
+**Vaccine booster**: calculated based on administration date + vaccine type interval, sent 30 days and 7 days in advance.
+
+**Post-service follow-up**: 7 days after grooming, a message asking how it went and suggesting the next booking.
+
+**Pet birthday**: birthday message on the animal's birthday with a special offer (discount on bath, free toy).
+
+**Inactivity**: customers who haven't booked in 60 days receive a personalized message with an incentive to return.
+
+WhatsApp reminder implementation requires the official WhatsApp Business API (Meta), which requires Meta to approve message templates before use. Unapproved templates result in account suspension. For email, platforms like SendGrid, Postmark, or Amazon SES provide reliable deliverability.
+
+The recommended architecture uses a message queue (RabbitMQ, Redis Queue, or SQS) with workers that process sends asynchronously, preventing reminder volume from impacting main system performance.
+
+## Loyalty Program: Points, Cashback, or Packages
+
+Pet shops have a huge advantage for retention: the service is inherently recurring. A pet that needs a bath every 30 days guarantees a monthly visit. The challenge is making sure that recurring visit happens at your shop, not the competitor's.
+
+The three most effective loyalty approaches for pet shops:
+
+**Points per service**: every dollar spent accumulates points that can be redeemed for discounts, free services, or products. Simple for owners to understand, but requires clear rules on expiration and redemption.
+
+**Progressive cashback**: every X grooming services, the next one is free or discounted. "Get 50% off your 10th bath" is a simple, high-visual-impact mechanic — owners can easily track their progress.
+
+**Monthly/quarterly packages**: the owner pays upfront for a service bundle (e.g., 4 baths per month for $80, discounted from the single price). This ensures predictable revenue for the shop and creates loyalty inertia — the owner already paid, so they'll use it.
+
+In the system, the loyalty program needs to:
+
+- Real-time points or credit balance visible to staff on the customer screen
+- Accumulation and redemption history with date and referenced service
+- Admin-configurable rules (multipliers on specific days, extra points for premium services)
+- Points liability report — how much the shop owes in accumulated unredeemed points
+
+```
+Example package rule:
+- Gold Package: 4 baths/month for small breeds → $80/month (vs $25 single)
+- Silver Package: 2 baths/month for medium breeds → $90/month (vs $50 single)
+- Valid for 30 calendar days from activation
+- Unused balance does not roll over to the next month
+- Cancellation with pro-rated refund within 5 days of activation
+```
+
+The system must track package consumption in real time and block bookings when the monthly limit is reached, without depending on manual staff control.
+
+## Conclusion
+
+An efficient pet shop in 2024 no longer operates with a paper appointment book and reminders in the owner's personal WhatsApp. Competition has increased, customer acquisition cost has risen, and retention has become the primary growth driver for the business.
+
+A specialized system isn't a competitive differentiator — it's the basic infrastructure for operating efficiently. The difference between a generic system and one built for pet shops shows up in practice: in the schedule that genuinely respects professional capacity, in reminders that reach the right owner at the right time, in the health record that the veterinarian actually trusts.
+
+SystemForge builds sector-specific management systems focused on the specific processes of each vertical. If you have a pet shop or a chain and you're evaluating modernizing your operations, let's talk about what makes sense for your business model.

@@ -1,0 +1,186 @@
+---
+title: "Core Web Vitals: Optimizing LCP, CLS, and INP"
+slug: "core-web-vitals-optimize-lcp-cls-inp"
+date: "2024-09-27"
+description: "How to optimize LCP, CLS, and INP in Next.js and static sites — lazy loading, font swap, layout shift, and interactivity with code examples."
+tags: ["core web vitals", "lcp", "cls", "web performance", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to optimize LCP, CLS, and INP in Next.js and static sites — lazy loading, font swap, layout shift, and interactivity with code examples.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'core-web-vitals-otimizar-lcp-cls-fid'
+  - locale: 'it-IT'
+    slug: 'core-web-vitals-ottimizzare-lcp-cls-inp'
+---
+
+Core Web Vitals have affected Google rankings since May 2021. This isn't theory — Google has published studies showing a direct correlation between pages with good Core Web Vitals metrics and lower bounce rates. The ranking impact is real and measurable for competitive queries where other factors are balanced.
+
+What makes the topic complex is that the three metrics (LCP, CLS, and INP) measure different phenomena, have different causes, and require different solutions. A site can have excellent LCP and terrible CLS. Each metric must be diagnosed and resolved independently.
+
+## LCP: Why It's Slow and How to Fix It
+
+LCP (Largest Contentful Paint) measures the time until the largest visible element in the upper viewport is fully rendered. Google's target is below 2.5 seconds; above 4 seconds is classified as "poor."
+
+In 90% of landing pages, the element that determines LCP is the hero image or the main headline block. Diagnosis starts by identifying which element the browser is using as LCP — Chrome DevTools' Performance panel shows this on the "LCP" line of the timeline.
+
+**Cause 1: Unprioritized image.** The browser discovers images in HTML in order of appearance and queues them for download at default priority. For the hero image, this is wrong — it should be downloaded at maximum priority.
+
+```html
+<!-- Wrong: browser treats as low priority -->
+<img src="/hero.png" alt="Hero" />
+
+<!-- Correct: tells the browser this is the most important element -->
+<img
+  src="/hero.png"
+  alt="Hero"
+  fetchpriority="high"
+  loading="eager"
+  width="1200"
+  height="630"
+/>
+```
+
+In Next.js, the `next/image` component accepts the `priority` prop that does exactly this:
+
+```tsx
+import Image from 'next/image'
+
+<Image
+  src="/hero.png"
+  alt="Hero"
+  width={1200}
+  height={630}
+  priority // equivalent to fetchpriority="high" + loading="eager"
+/>
+```
+
+**Cause 2: Wrong image format.** PNG and JPEG are significantly larger than WebP and AVIF. An 800KB hero image in JPEG can be 200KB in WebP and 150KB in AVIF. `next/image` automatically converts to WebP/AVIF depending on browser support.
+
+**Cause 3: Render-blocking resources.** CSS and JavaScript that block rendering delay LCP. Chat widget scripts, ad pixels, and heatmaps often block the main thread before the initial render.
+
+```html
+<!-- Third-party script blocking rendering -->
+<script src="https://cdn.example.com/widget.js"></script>
+
+<!-- Correct: deferred loading -->
+<script src="https://cdn.example.com/widget.js" defer></script>
+```
+
+## CLS: Identifying and Eliminating Layout Shift
+
+CLS (Cumulative Layout Shift) measures the sum of all unexpected layout shifts during the page's lifetime. A layout shift occurs when an element changes position after it has already been rendered. The target is below 0.1.
+
+Chrome DevTools identifies each layout shift in the Performance timeline, showing which element moved, how much it moved, and what caused the movement.
+
+**Cause 1: Images without defined dimensions.** Without `width` and `height`, the browser doesn't know how much space to reserve for the image before downloading it. When the image arrives, it pushes the content below.
+
+```tsx
+// Wrong: no dimensions
+<Image src="/photo.png" alt="Photo" />
+
+// Correct: defined dimensions guarantee space reservation
+<Image src="/photo.png" alt="Photo" width={800} height={450} />
+```
+
+**Cause 2: Web fonts with FOUT.** When the web font loads after text has already been rendered with the fallback font, text can change size or position. `font-display: swap` swaps the fallback font for the web font when available — this eliminates FOUT but can cause CLS if the fonts have very different metrics.
+
+The modern solution is adjusting fallback font metrics to match the web font:
+
+```css
+@font-face {
+  font-family: 'MyFont';
+  src: url('/fonts/my-font.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* Fallback with adjusted metrics to match MyFont */
+@font-face {
+  font-family: 'MyFont-Fallback';
+  src: local('Arial');
+  size-adjust: 105%;
+  ascent-override: 90%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+```
+
+`next/font` does this adjustment automatically for Google Fonts.
+
+**Cause 3: Dynamic content without reserved space.** Cookie banners, notifications, and JavaScript-loaded components that appear after the initial layout push content. The solution is to reserve space with a fixed height before the component loads:
+
+```tsx
+// Reserve space before the dynamic component is ready
+<div style={{ minHeight: '60px' }}>
+  {cookieBannerVisible && <CookieBanner />}
+</div>
+```
+
+## INP: The New Metric That Replaced FID
+
+INP (Interaction to Next Paint) replaced FID (First Input Delay) as the official metric in March 2024. The difference is fundamental: FID measured only the delay of the first interaction, INP measures the latency of all interactions throughout the entire session.
+
+The target is below 200ms. Above 500ms is classified as "poor."
+
+High INP is almost always caused by heavy JavaScript on the main thread. When the main thread is busy (processing analytics, running complex React components, or executing third-party scripts), any user click or tap waits in queue for the thread to free up.
+
+Correct diagnosis uses Chrome DevTools' Performance panel with active interaction recording. Long Tasks (>50ms) appear in red on the timeline.
+
+```tsx
+// Component causing unnecessary Long Task
+function LargeList({ items }: { items: Item[] }) {
+  return (
+    <ul>
+      {items.map(item => (
+        <ComplexItem key={item.id} item={item} />
+      ))}
+    </ul>
+  )
+}
+
+// Improved: virtualized rendering for large lists
+import { useVirtualizer } from '@tanstack/react-virtual'
+
+function LargeList({ items }: { items: Item[] }) {
+  const parentRef = useRef<HTMLDivElement>(null)
+  const virtualizer = useVirtualizer({
+    count: items.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60,
+  })
+
+  return (
+    <div ref={parentRef} style={{ height: '400px', overflow: 'auto' }}>
+      <div style={{ height: virtualizer.getTotalSize() }}>
+        {virtualizer.getVirtualItems().map(virtualItem => (
+          <div key={virtualItem.key} style={{ transform: `translateY(${virtualItem.start}px)` }}>
+            <ComplexItem item={items[virtualItem.index]} />
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+```
+
+## Tools: PageSpeed Insights, CrUX, and WebPageTest
+
+| Tool | What it measures | When to use |
+|---|---|---|
+| PageSpeed Insights | Lab data (simulated) + Field data (CrUX) | Quick diagnosis and benchmarks |
+| Chrome DevTools Performance | Lab data with detailed waterfall | Root cause debugging |
+| WebPageTest | Lab data with filmstrip and waterfall | Variant and CDN comparison |
+| CrUX Dashboard | Real field data by URL and origin | Historical real-user trends |
+| Search Console > Core Web Vitals | Aggregated field data | Production monitoring and alerts |
+
+The most important data for SEO is Field Data (CrUX) — these are the real metrics of your actual users, not a simulation. A page can pass all lab tests and still have poor Field Data if your users are on slow devices or congested mobile networks.
+
+## Conclusion
+
+Core Web Vitals aren't a compliance checkbox — they're indicators of your users' real experience. Pages that load fast, don't flicker during load, and respond immediately to interactions convert better and rank higher.
+
+Next.js structurally solves much of the Core Web Vitals problem: static export eliminates high TTFB, `next/image` solves image LCP and CLS, and `next/font` eliminates FOUT without CLS. At SystemForge, we deliver projects with a Core Web Vitals report as part of the process — no landing page ships with LCP above 2.5s or CLS above 0.1.

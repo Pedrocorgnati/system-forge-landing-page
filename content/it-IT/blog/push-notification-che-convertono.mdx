@@ -1,0 +1,202 @@
+---
+title: "Push notification che convertono: strategia e codice"
+slug: "push-notification-che-convertono"
+date: "2024-07-29"
+description: "Push notification in React Native con Expo — permessi, segmentazione, deep link e metriche di apertura per ottimizzare il coinvolgimento."
+tags: ["push notification", "react native", "expo", "coinvolgimento app", "mobile marketing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Push notification in React Native con Expo — permessi, segmentazione, deep link e metriche di apertura per ottimizzare il coinvolgimento.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'push-notifications-que-convertem'
+  - locale: 'en'
+    slug: 'push-notifications-that-convert'
+---
+
+Una push notification mal inviata è peggio di nessuna notifica. L'utente riceve un messaggio irrilevante alle 23:00, va direttamente nelle impostazioni e disattiva tutto — o disinstalla l'app. Questa decisione avviene in pochi secondi e raramente viene annullata. Al contrario, una notifica ben pensata, inviata nel momento giusto, con il contesto corretto, può essere il trigger che trasforma un utente silente in un utente attivo.
+
+La differenza tra i due scenari sta nel modo in cui implementi il sistema, non solo in come scrivi il testo.
+
+## Permessi: Come Chiederli senza Spaventare l'Utente
+
+Su iOS, il permesso per inviare notifiche è obbligatorio e il sistema mostra la finestra di dialogo nativa una sola volta. Se l'utente rifiuta, l'unico modo per riabilitarla è andare manualmente nelle impostazioni di sistema. Ciò significa che il momento e il contesto in cui chiedi il permesso sono critici.
+
+L'errore più comune è chiedere il permesso immediatamente all'apertura dell'app per la prima volta, prima che l'utente abbia compreso alcun valore. Il tasso di accettazione con questo approccio si attesta intorno al 30–40%. Un approccio migliore è il modello del "soft ask": mostrare una schermata personalizzata che spiega perché le notifiche sono utili, con un pulsante "Attiva notifiche". Solo quando l'utente clicca su quel pulsante si attiva la finestra di dialogo nativa del sistema. Questo filtra gli utenti indecisi e innalza il tasso di accettazione al 60–70%.
+
+Su Android, dalla versione 13 (API 33), il comportamento è diventato simile a iOS — è necessario un permesso esplicito. Nelle versioni precedenti, le notifiche sono permesse per impostazione predefinita.
+
+```typescript
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+
+async function registerForPushNotifications(): Promise<string | null> {
+  if (!Device.isDevice) {
+    console.warn('Le push notification non funzionano nel simulatore');
+    return null;
+  }
+
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+  let finalStatus = existingStatus;
+
+  if (existingStatus !== 'granted') {
+    const { status } = await Notifications.requestPermissionsAsync();
+    finalStatus = status;
+  }
+
+  if (finalStatus !== 'granted') {
+    return null;
+  }
+
+  const token = await Notifications.getExpoPushTokenAsync({
+    projectId: 'il-tuo-project-id-eas',
+  });
+
+  return token.data;
+}
+```
+
+Dopo aver ottenuto il token, salvalo nel backend associato all'utente e al dispositivo. Un utente può avere più dispositivi, e avrai bisogno del token per inviare notifiche mirate.
+
+## Expo Notifications: Setup e Invio via API
+
+Expo Notifications astrae le differenze tra APNs (Apple Push Notification service) e FCM (Firebase Cloud Messaging), offrendo un'API unificata. Per i progetti con managed workflow, il setup è minimo.
+
+In `app.json` o `app.config.js`, abilita le notifiche:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#ffffff",
+          "sounds": ["./assets/notification-sound.wav"]
+        }
+      ]
+    ]
+  }
+}
+```
+
+Per inviare una notifica tramite l'API Expo Push (ideale per test e progetti di piccola scala), fai una POST a `https://exp.host/--/api/v2/push/send`:
+
+```typescript
+async function sendPushNotification(
+  expoPushToken: string,
+  title: string,
+  body: string,
+  data?: Record<string, unknown>
+) {
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      to: expoPushToken,
+      sound: 'default',
+      title,
+      body,
+      data: data ?? {},
+    }),
+  });
+}
+```
+
+Per la produzione ad alto volume, usa FCM direttamente o un servizio come OneSignal, Braze o Klaviyo, che offrono segmentazione, pianificazione e analytics integrati.
+
+## Segmentazione: Notifica Rilevante al Momento Giusto
+
+La segmentazione non è solo inviare notifiche diverse a gruppi diversi. È capire il comportamento dell'utente e usarlo per determinare cosa, quando e con quale frequenza inviare.
+
+Alcune segmentazioni ad alto impatto:
+
+**Per ciclo di vita dell'utente:**
+- Nuovi utenti (primi 7 giorni): focus su onboarding e attivazione della funzionalità principale
+- Utenti attivi: notifiche su novità, aggiornamenti rilevanti al loro comportamento
+- Utenti a rischio di churn (nessuna apertura da 7–14 giorni): messaggio di re-engagement con proposta di valore chiara
+
+**Per fuso orario:**
+Non inviare mai notifiche in base all'orario del server. Calcola sempre in base al fuso orario del dispositivo. Le notifiche inviate tra le 10:00 e le 12:00 o tra le 19:00 e le 21:00 nell'orario locale dell'utente hanno tassi di apertura significativamente più elevati.
+
+**Per comportamento in-app:**
+Se l'utente ha aggiunto articoli al carrello ma non ha completato l'acquisto, una notifica di promemoria 2 ore dopo è contestuale e attesa. Se l'utente non ha mai usato una funzionalità specifica, una notifica che la illustra può aumentare il coinvolgimento.
+
+| Segmento | Tasso di apertura stimato | Strategia raccomandata |
+|----------|--------------------------|----------------------|
+| Nuovi utenti (D0–D7) | 25–40% | Onboarding progressivo |
+| Utenti attivi | 10–20% | Aggiornamenti rilevanti |
+| Re-engagement (D7+) | 5–12% | Proposta di valore diretta |
+| Abbandono carrello | 30–50% | Promemoria con urgenza leggera |
+
+## Deep Link: Notifica che Porta al Contesto Giusto
+
+Una notifica che apre solo la schermata iniziale dell'app è un'opportunità persa. L'utente ha cliccato perché era interessato al contenuto specifico della notifica — portalo esattamente a quel contenuto.
+
+I deep link nelle notifiche funzionano passando dati nel campo `data` della notifica e gestendo quei dati quando l'utente apre l'app dalla notifica:
+
+```typescript
+import * as Notifications from 'expo-notifications';
+import { useNavigation } from '@react-navigation/native';
+import { useEffect } from 'react';
+
+export function useNotificationDeepLink() {
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    // Notifica ricevuta con l'app in foreground
+    const foregroundSub = Notifications.addNotificationReceivedListener(
+      (notification) => {
+        console.log('Notifica ricevuta:', notification);
+      }
+    );
+
+    // L'utente ha toccato la notifica
+    const responseSub = Notifications.addNotificationResponseReceivedListener(
+      (response) => {
+        const data = response.notification.request.content.data;
+
+        if (data.screen === 'OrderDetail' && data.orderId) {
+          navigation.navigate('OrderDetail', { orderId: data.orderId });
+        } else if (data.screen === 'Promotion' && data.promoId) {
+          navigation.navigate('Promotion', { promoId: data.promoId });
+        }
+      }
+    );
+
+    return () => {
+      foregroundSub.remove();
+      responseSub.remove();
+    };
+  }, [navigation]);
+}
+```
+
+All'invio della notifica dal backend, includi la destinazione nei dati:
+
+```json
+{
+  "to": "ExponentPushToken[...]",
+  "title": "Il tuo ordine è stato spedito",
+  "body": "Ordine #4521 è in consegna. Tocca per tracciarlo.",
+  "data": {
+    "screen": "OrderDetail",
+    "orderId": "4521"
+  }
+}
+```
+
+Questo pattern garantisce un'esperienza fluida: l'utente vede la notifica, la tocca ed è immediatamente nel contesto rilevante — senza dover navigare nell'app per trovare ciò che era stato promesso.
+
+## Conclusione
+
+Le push notification sono uno dei pochi canali di comunicazione che raggiungono direttamente lo schermo dell'utente, senza filtri algoritmici. Ma questo privilegio ha un prezzo: un'esperienza negativa distrugge il permesso in modo permanente. La strada verso notifiche che convertono passa dal richiedere il permesso con il giusto contesto, segmentare in base al comportamento reale e portare sempre l'utente nel posto giusto nell'app.
+
+In SystemForge, ogni implementazione di notifiche è pianificata insieme alla strategia di coinvolgimento — perché codice funzionante senza strategia è una notifica che fa disinstallare l'app. Se vuoi costruire un sistema di comunicazione mobile che fidelizza gli utenti invece di allontanarli, possiamo aiutarti.

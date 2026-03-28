@@ -1,0 +1,190 @@
+---
+title: "Mobile App Testing: A Complete QA Strategy"
+slug: "mobile-app-testing-complete-qa-strategy"
+date: "2024-09-23"
+description: "How to structure testing for React Native apps — unit tests with Jest, component tests with Testing Library, E2E with Detox, and real device testing."
+tags: ["mobile testing", "react native", "jest", "detox", "mobile qa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to structure testing for React Native apps — unit tests with Jest, component tests with Testing Library, E2E with Detox, and real device testing.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'testes-apps-mobile-estrategia-qa'
+  - locale: 'it-IT'
+    slug: 'test-app-mobile-strategia-qa'
+---
+
+An app without tests is a launch with a time bomb. The question isn't whether it'll blow up, it's when — and whether it'll be during development, where the cost is low, or in production, where the cost is high: complaining users, negative store reviews, churn that could have been prevented. Testing is not optional in professional software. In mobile, where the deploy cycle is slower (any update needs to pass app store review), testing is even more critical.
+
+The good news is that you don't need to test everything to have a reliable app. You need to test the right things at the right level.
+
+## Mobile Testing Pyramid: Where to Invest
+
+The testing pyramid is a mental model for distributing QA effort efficiently. The base of the pyramid has more tests, faster and cheaper. The top has fewer tests, slower and more costly, but validating real app behavior.
+
+```
+        /\
+       /E2E\          <- Detox, Appium (few, slow, expensive)
+      /------\
+     /Integra-\       <- Components with Testing Library
+    /  tion    \
+   /------------\
+  /    Unit      \    <- Jest (many, fast, cheap)
+ /----------------\
+```
+
+**Unit tests (base):** Test isolated functions and business logic. No rendering, no network calls. These are the fastest to write and execute. Every function that calculates, transforms data, or implements business rules must have unit tests.
+
+**Component tests (middle):** Test rendered React Native components, but without a real device. They verify whether the component renders correctly, responds to user interactions, and displays expected states (loading, error, empty, filled).
+
+**E2E tests (top):** Run the real app on a simulator or physical device, simulating user actions. These are the closest to reality but the slowest. They should cover only critical flows: onboarding, login, main app action, checkout.
+
+Recommended distribution for React Native projects: 60-70% unit, 20-30% component, 10% E2E.
+
+## Jest and React Native Testing Library: Unit and Component Tests
+
+Jest is the standard test runner for React Native. The combination with React Native Testing Library (RNTL) covers both unit and component tests.
+
+Unit test for a business function:
+
+```typescript
+// utils/currency.ts
+export function formatUSD(valueInCents: number): string {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  }).format(valueInCents / 100);
+}
+
+// utils/currency.test.ts
+import { formatUSD } from './currency';
+
+describe('formatUSD', () => {
+  it('formats cents to dollars with symbol', () => {
+    expect(formatUSD(1990)).toBe('$19.90');
+  });
+
+  it('formats zero value correctly', () => {
+    expect(formatUSD(0)).toBe('$0.00');
+  });
+
+  it('formats large values without precision loss', () => {
+    expect(formatUSD(100000)).toBe('$1,000.00');
+  });
+});
+```
+
+Component test with RNTL:
+
+```typescript
+// components/ProductCard.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import { ProductCard } from './ProductCard';
+
+const mockProduct = {
+  id: '1',
+  name: 'Specialty Coffee',
+  price: 690,
+  imageUrl: 'https://example.com/coffee.jpg',
+};
+
+describe('ProductCard', () => {
+  it('displays the product name and price', () => {
+    render(<ProductCard product={mockProduct} onPress={jest.fn()} />);
+
+    expect(screen.getByText('Specialty Coffee')).toBeTruthy();
+    expect(screen.getByText('$6.90')).toBeTruthy();
+  });
+
+  it('calls onPress when the card is tapped', () => {
+    const onPressMock = jest.fn();
+    render(<ProductCard product={mockProduct} onPress={onPressMock} />);
+
+    fireEvent.press(screen.getByTestId('product-card'));
+
+    expect(onPressMock).toHaveBeenCalledWith('1');
+  });
+
+  it('shows loading state when imageUrl is null', () => {
+    render(
+      <ProductCard
+        product={{ ...mockProduct, imageUrl: null }}
+        onPress={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('image-placeholder')).toBeTruthy();
+  });
+});
+```
+
+An important practice: always add `testID` to components that will be tested. RNTL prioritizes queries by accessible text (`getByText`, `getByRole`), but `getByTestId` is necessary for elements without visible text.
+
+## Detox: E2E on Simulator and Real Device
+
+Detox is the most adopted E2E framework for React Native. It runs the real app on a simulator (iOS Simulator or Android Emulator) and simulates gestures, taps, and keyboard inputs.
+
+```typescript
+// e2e/login.test.ts
+import { device, element, by, expect as detoxExpect } from 'detox';
+
+describe('Login Flow', () => {
+  beforeAll(async () => {
+    await device.launchApp({ newInstance: true });
+  });
+
+  beforeEach(async () => {
+    await device.reloadReactNative();
+  });
+
+  it('logs in with valid credentials', async () => {
+    await element(by.id('email-input')).typeText('user@example.com');
+    await element(by.id('password-input')).typeText('password123');
+    await element(by.id('login-button')).tap();
+
+    await detoxExpect(element(by.id('home-screen'))).toBeVisible();
+  });
+
+  it('shows error message with invalid credentials', async () => {
+    await element(by.id('email-input')).typeText('wrong@example.com');
+    await element(by.id('password-input')).typeText('wrongpassword');
+    await element(by.id('login-button')).tap();
+
+    await detoxExpect(
+      element(by.text('Invalid email or password'))
+    ).toBeVisible();
+  });
+});
+```
+
+Detox requires additional configuration in `package.json` and separate build files for testing. The setup curve is the main adoption barrier, but once configured, tests are stable and reliable.
+
+| Flow | E2E Priority | Reason |
+|------|-------------|--------|
+| Onboarding and registration | High | Blocks new users if broken |
+| Login and authentication | High | Blocks app access |
+| Core action (e.g., checkout) | High | Revenue generation |
+| Settings and profile | Medium | Important but not critical |
+| Content flows | Low | Can be covered by component tests |
+
+## Firebase Test Lab and BrowserStack: Real Device Testing
+
+Simulators are convenient but don't replace physical devices. Android hardware fragmentation is real: different manufacturers, Android versions, and screen densities create behaviors that the emulator doesn't reproduce. On iOS, fragmentation is smaller, but still exists across iPhone generations.
+
+**Firebase Test Lab**
+Runs instrumented tests (Android) or XCUITest (iOS) on physical devices hosted by Google. For React Native, it's possible to run Detox tests on Test Lab with additional configuration. The free plan includes access to physical devices for limited minutes.
+
+**BrowserStack App Automate**
+Similar to Firebase Test Lab, with support for Detox and Appium. Offers more device variety and flexible pricing. Useful for reproducing bugs reported on specific devices.
+
+A practical strategy: run E2E tests on the simulator in CI (fast, free), and schedule weekly runs on physical devices via Firebase Test Lab or BrowserStack to catch hardware issues the simulator doesn't detect.
+
+## Conclusion
+
+A well-structured test strategy doesn't slow down development — it stabilizes it. The time you spend writing tests is recovered by not having to debug production bugs, not having to go through store review to fix urgent regressions, and not having to deal with unhappy users.
+
+The mobile testing pyramid isn't different from other types of software, but the execution has its particularities — tooling, configuration, and the physical device factor. At SystemForge, tests are part of the development process from the first line of code, not added afterward. If you're building an app and want to ensure quality is embedded in the process, our team can help structure the QA strategy from day one.

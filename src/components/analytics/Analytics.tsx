@@ -1,46 +1,64 @@
 'use client'
 
-import Script from 'next/script'
+import { useEffect } from 'react'
 import { useCookieConsent } from '@/hooks/useCookieConsent'
 import { getSiteConfig } from '@config'
 
 /**
  * Conditionally loads GA4 based on cookie consent.
- * Only injects the gtag script when the user has explicitly
- * accepted analytics cookies AND a GA4 measurement ID exists.
+ *
+ * - Script is injected via document.createElement — never via dangerouslySetInnerHTML.
+ * - Only loads when the user has explicitly accepted analytics cookies.
+ * - Re-triggers without page reload when consent changes (useEffect dependency).
+ * - Ad-blocker / network errors are handled silently via script.onerror.
+ * - Duplicate injection prevented by ID guard.
+ *
+ * INT-027 (COMP-005) — GA4 consent gate
+ * module-11-cookie-compliance TASK-4/ST001
  */
 export function Analytics() {
   const { consent } = useCookieConsent()
   const config = getSiteConfig()
   const measurementId = config.ga4MeasurementId
 
-  if (!consent.categories.analytics || !measurementId) {
-    return null
-  }
+  const shouldLoadGA = consent.categories.analytics && !!measurementId
 
-  return (
-    <>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-        strategy="afterInteractive"
-        id="gtag-script"
-      />
-      <Script
-        id="gtag-init"
-        strategy="afterInteractive"
-        dangerouslySetInnerHTML={{
-          __html: `
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', '${measurementId}', {
-              page_path: window.location.pathname,
-              anonymize_ip: true,
-              cookie_flags: 'SameSite=None;Secure',
-            });
-          `,
-        }}
-      />
-    </>
-  )
+  useEffect(() => {
+    if (!shouldLoadGA || !measurementId) return
+
+    // Guard: prevent duplicate script injection
+    if (document.getElementById('gtag-script')) {
+      // Script already loaded — just re-configure (handles re-trigger after consent change)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const w = window as any
+      if (w.gtag) {
+        w.gtag('config', measurementId, { page_path: window.location.pathname })
+      }
+      return
+    }
+
+    // Bootstrap dataLayer queue BEFORE script loads (gtag.js reads from it)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any
+    w.dataLayer = w.dataLayer || []
+    // eslint-disable-next-line prefer-rest-params
+    if (!w.gtag) w.gtag = function () { w.dataLayer.push(arguments) }
+    w.gtag('js', new Date())
+    w.gtag('config', measurementId, {
+      page_path: window.location.pathname,
+      anonymize_ip: true,
+    })
+
+    // Inject gtag.js dynamically — no dangerouslySetInnerHTML
+    const script = document.createElement('script')
+    script.id = 'gtag-script'
+    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`
+    script.async = true
+    script.onerror = () => {
+      // Silently handle ad-blocker / network errors — site continues normally
+    }
+    document.head.appendChild(script)
+  }, [shouldLoadGA, measurementId])
+
+  return null
 }

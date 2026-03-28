@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import { Container } from '@/components/ui/Container'
+import { CookiePreferencesButton } from '@/components/ui/CookiePreferencesButton'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
 
@@ -91,6 +92,9 @@ export function Footer() {
                 >
                   {FOOTER_TEXT.privacy}
                 </Link>
+              </li>
+              <li>
+                <CookiePreferencesButton />
               </li>
             </ul>
           </nav>

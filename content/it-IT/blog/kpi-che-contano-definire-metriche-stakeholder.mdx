@@ -1,0 +1,127 @@
+---
+title: "KPI che contano: come definirli con gli stakeholder"
+slug: "kpi-che-contano-definire-metriche-stakeholder"
+date: "2024-09-11"
+description: "Come condurre un workshop di definizione KPI con stakeholder non tecnici — OKR, metriche di vanità vs metriche d'azione e strumentazione tecnica."
+tags: ["kpi", "metriche", "dashboard", "okr", "product analytics"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come condurre un workshop di definizione KPI con stakeholder non tecnici — OKR, metriche di vanità vs metriche d'azione e strumentazione tecnica.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'kpis-que-importam-definir-metricas-stakeholders'
+  - locale: 'en'
+    slug: 'kpis-that-matter-how-to-define-with-stakeholders'
+---
+
+Esiste uno schema ricorrente nello sviluppo di dashboard B2B: il sistema viene costruito, consegnato, e tre mesi dopo il team dati scopre che nessuno apre quelle schermate. Il dashboard funziona perfettamente dal punto di vista tecnico — le query girano, i grafici si renderizzano, i filtri funzionano. Ma l'adozione non c'è.
+
+La diagnosi punta quasi sempre allo stesso problema: le metriche sono state definite senza il coinvolgimento degli stakeholder che useranno il dashboard. Qualcuno del team tecnico ha deciso cosa misurare basandosi su "cosa c'è disponibile nel database" invece che su "cosa serve alle persone per prendere decisioni".
+
+## Metriche di Vanità vs Metriche che Generano Azione
+
+La distinzione fondamentale prima di qualsiasi workshop è comprendere la differenza tra metriche di vanità e metriche d'azione.
+
+**Le metriche di vanità** fanno crescere i numeri e sembrano bene nelle presentazioni, ma non orientano nessuna decisione specifica. Esempi classici: numero totale di utenti registrati (include utenti inattivi, cancellati, duplicati), pageview totali (senza contesto su quale pagina o su quale comportamento), numero di post pubblicati.
+
+**Le metriche d'azione** sono quelle che, quando cambiano, implicano un'azione specifica che qualcuno in azienda può eseguire. La domanda diagnostica è semplice: "Se questo numero cala del 20% domani, cosa farai di diverso?" Se la risposta è "niente" o "non lo so", è una metrica di vanità.
+
+Esempi di metriche d'azione in contesti B2B:
+
+| Contesto | Metrica di Vanità | Metrica d'Azione |
+|----------|-------------------|-----------------|
+| E-commerce B2B | Totale ordini | Tasso di conversione per categoria |
+| SaaS | Utenti registrati | Rapporto DAU/MAU (stickiness) |
+| Logistica | Consegne effettuate | % consegne nei tempi per percorso |
+| Supporto | Ticket aperti | Tempo medio di prima risposta |
+| Finance | Fatturato lordo | MRR + net churn per coorte |
+
+La differenza pratica: se il tasso di conversione per categoria cala, sai che devi indagare su quella categoria specifica — assortimento, prezzo, UX del processo d'acquisto. Se il totale degli ordini cala, sai solo che qualcosa è andato storto, ma non da dove iniziare a indagare.
+
+## Workshop KPI: Come Facilitare la Conversazione
+
+Un workshop KPI ben condotto dura tra le 2 e le 4 ore e produce un elenco prioritario di massimo 15-20 metriche. I workshop che cercano di coprire di più finiscono generalmente con lunghe liste di indicatori che non vengono mai più revisionati.
+
+**Struttura raccomandata:**
+
+**1. Contesto e allineamento (20 min):** inizia con la domanda "quali decisioni prendi ogni settimana che potrebbero essere migliori con i dati?" — non "quali metriche vuoi vedere". L'orientamento per decisioni invece che per dati cambia il frame della conversazione. Gli stakeholder tendono a chiedere metriche basate su ciò che già conoscono; la domanda per decisioni apre spazio a metriche che non saprebbero chiedere.
+
+**2. Mappatura delle decisioni (30 min):** elenca le 5-10 decisioni più importanti che ogni stakeholder prende. Per ogni decisione, chiedi: "cosa avresti bisogno di sapere per prendere questa decisione con maggiore sicurezza?" Documenta le risposte come requisiti informativi, non ancora come metriche.
+
+**3. Traduzione in metriche (45 min):** per ogni requisito informativo, definisci: il nome della metrica, la formula di calcolo, la fonte dei dati, la frequenza di aggiornamento necessaria, e cosa costituisce un valore positivo vs allarmante.
+
+**4. Prioritizzazione (30 min):** usa una semplice matrice 2x2: impatto sulla decisione (alto/basso) vs facilità di strumentazione (alta/bassa). Inizia dalle metriche ad alto impatto e alta facilità. Quelle ad alto impatto e bassa facilità entrano nel backlog con una scadenza definita.
+
+**5. Validazione tecnica (offline):** prima di confermare lo scope, il team tecnico verifica che i dati necessari esistano, che le query siano realizzabili e quali ulteriori strumentazioni sono necessarie.
+
+## OKR e Relazione con i Dashboard Operativi
+
+Gli OKR (Objectives and Key Results) e i dashboard operativi misurano cose diverse su scale temporali diverse — capire questa relazione evita l'errore di cercare di usare un unico dashboard per entrambi.
+
+**Gli OKR** sono strumenti di allineamento strategico con cicli trimestrali o annuali. I Key Results sono obiettivi con data e target numerico: "aumentare l'NPS da 42 a 55 entro dicembre". Rispondono alla domanda "stiamo andando nella direzione giusta?".
+
+**I dashboard operativi** sono strumenti di monitoraggio con aggiornamento giornaliero o infragiornaliero. Rispondono a "cosa sta succedendo adesso?" e "dove si trova il problema specifico?".
+
+Il collegamento tra i due: i Key Results degli OKR devono comparire come metriche in evidenza nel dashboard, con visualizzazione del progresso rispetto all'obiettivo. Gli indicatori operativi del dashboard sono i "leading indicators" — i segnali che anticipano se il Key Result verrà raggiunto.
+
+```
+OKR: aumentare l'NPS da 42 a 55 entro dicembre
+  └─ KR: NPS mensile [dashboard: progresso verso l'obiettivo]
+       └─ Leading indicators:
+            - Tempo medio di risoluzione ticket [dashboard: giornaliero]
+            - Tasso di bug critici in produzione [dashboard: in tempo reale]
+            - % onboarding completato in 7 giorni [dashboard: settimanale]
+```
+
+Visualizzare esplicitamente questa gerarchia — obiettivo strategico → indicatori operativi — dà al dashboard uno scopo che gli utenti comprendono. Invece di "una raccolta di numeri", diventa "il sistema che mostra se stiamo raggiungendo i nostri obiettivi".
+
+## Strumentazione: Dal KPI alla Query di Database
+
+Definire i KPI è la parte strategica. Strumentare per calcolarli correttamente è la parte tecnica spesso trascurata, che causa inconsistenze.
+
+Ogni KPI necessita di un documento di specifica tecnica con:
+
+- **Definizione precisa:** "ordini confermati" include o esclude gli ordini annullati in seguito? Include tutti i canali o solo il canale digitale?
+- **Query canonica:** la query SQL (o equivalente) che produce il numero corretto, revisionata dallo stakeholder
+- **Grain della tabella:** la granularità dei dati sorgente (una riga per ordine? per voce di ordine?)
+- **Gestione dei null e dei casi limite:** cosa succede agli ordini senza data di consegna confermata?
+
+```sql
+-- Specifica tecnica: tasso di consegna nei tempi
+-- Definizione: % di ordini con stato 'delivered' dove
+--   delivery_date <= promised_date
+--   escludendo ordini con causa_radice = 'cliente_assente'
+-- Grain: un record per ordine
+
+SELECT
+  DATE_TRUNC('week', o.delivery_date) AS settimana,
+  COUNT(*) AS totale_consegnati,
+  COUNT(*) FILTER (
+    WHERE o.delivery_date <= o.promised_date
+  ) AS nei_tempi,
+  ROUND(
+    COUNT(*) FILTER (WHERE o.delivery_date <= o.promised_date)::numeric
+    / NULLIF(COUNT(*), 0) * 100, 2
+  ) AS percentuale_nei_tempi
+FROM orders o
+WHERE
+  o.status = 'delivered'
+  AND o.cancellation_reason IS DISTINCT FROM 'cliente_assente'
+  AND o.delivery_date >= CURRENT_DATE - INTERVAL '90 days'
+GROUP BY 1
+ORDER BY 1;
+```
+
+La query canonica diventa il contratto tra il team dati e gli stakeholder. Quando qualcuno chiede "perché il dashboard mostra 87% ma il foglio Excel del responsabile mostra 91%?", si va alla query canonica e si trova la differenza di definizione — probabilmente il criterio di esclusione "cliente assente".
+
+## Conclusione
+
+Il dashboard che nessuno usa viene costruito da un team tecnico che non ha parlato abbastanza con chi lo utilizzerà. Il processo di definizione dei KPI — workshop, validazione tecnica, specifica delle query — sembra burocratico prima di iniziare e ovvio dopo averlo concluso.
+
+L'investimento è reale: un workshop KPI ben condotto può ritardare l'avvio dello sviluppo di una settimana. Ma evita due o tre mesi di rilavorazione quando il sistema consegnato non risponde alle esigenze perché ha misurato le cose sbagliate.
+
+In SystemForge, la definizione delle metriche fa parte della fase di brief — prima di qualsiasi decisione tecnica. I KPI definiti nei workshop diventano requisiti documentati nel PRD, che guidano le query nell'LLD e l'architettura del dashboard nel design. Non trattiamo le metriche come un dettaglio implementativo.

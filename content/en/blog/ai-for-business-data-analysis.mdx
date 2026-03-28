@@ -1,0 +1,187 @@
+---
+title: "AI for Business Data Analysis: From CSV to Insight"
+slug: "ai-for-business-data-analysis"
+date: "2024-10-24"
+description: "How to use generative AI for business data analysis — Code Interpreter, natural language queries, report generation, and limitations."
+tags: ["ai data analysis", "code interpreter", "llm data", "business intelligence", "report automation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to use generative AI for business data analysis — Code Interpreter, natural language queries, report generation, and limitations.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ia-para-analise-de-dados-empresariais'
+  - locale: 'it-IT'
+    slug: 'ia-per-analisi-dati-aziendali'
+---
+
+For decades, data analysis was a specialist's activity. You needed SQL to query databases, Python or R for more complex analyses, and BI tools for visualization. Those without technical skills depended on someone who had them — creating bottlenecks and delays in business decisions.
+
+Generative AI is changing this gradually but significantly. Not to the point of making data analysts unnecessary — far from it. But to the point of letting a manager ask questions about their data in plain English and get useful answers without writing a line of code. And to the point of automating report generation that previously consumed hours every start of the week.
+
+This article explores what's possible today, how it works technically, and where the real limitations lie.
+
+## Code Interpreter: LLMs that Execute Analysis Code
+
+Code Interpreter is OpenAI's feature where GPT-4o can write and execute Python code in a sandboxed environment. You upload a CSV file, ask a question, and the model writes the code to answer, executes it, and returns the result — including charts.
+
+The cycle is: question → generated code → execution → result → natural language interpretation. The user sees only the question and the answer; the code happens behind the scenes.
+
+To integrate Code Interpreter via API in your application:
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI()
+
+def analyze_with_code_interpreter(csv_path: str, question: str) -> str:
+    # Upload the file
+    with open(csv_path, "rb") as f:
+        file = client.files.create(file=f, purpose="assistants")
+
+    # Create assistant with Code Interpreter
+    assistant = client.beta.assistants.create(
+        name="Data Analyst",
+        instructions="""You are a data analyst.
+        Answer questions about the provided data using precise analysis.
+        Always present results in English with business context, not just numbers.""",
+        tools=[{"type": "code_interpreter"}],
+        model="gpt-4o",
+        tool_resources={"code_interpreter": {"file_ids": [file.id]}}
+    )
+
+    # Create thread and send message
+    thread = client.beta.threads.create()
+    client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=question,
+    )
+
+    # Run and wait
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id=assistant.id,
+    )
+
+    # Get response
+    messages = client.beta.threads.messages.list(thread_id=thread.id)
+    for msg in messages.data:
+        if msg.role == "assistant":
+            return msg.content[0].text.value
+
+    return "No response"
+
+# Usage
+answer = analyze_with_code_interpreter(
+    "sales_2024.csv",
+    "Which product had the highest percentage growth between Q1 and Q2? And which regions drove that growth?"
+)
+print(answer)
+```
+
+The advantage of Code Interpreter over a simple text query is real execution: the model isn't "guessing" the answer based on training. It reads the data, calculates, and presents verifiable results. If you want to audit, you can ask it to show the code that generated the result.
+
+## Natural Language Queries: Text-to-SQL in Practice
+
+Text-to-SQL is the ability to convert an English question directly into an executable SQL query. It's particularly useful in environments where data lives in relational databases and you want to democratize access without giving non-technical users direct database access.
+
+```python
+from openai import OpenAI
+import sqlite3
+
+client = OpenAI()
+
+# Database schema (provided to the model as context)
+DB_SCHEMA = """
+Available tables:
+
+sales(id, date, product_id, quantity, total_value, customer_id, rep_id, region)
+products(id, name, category, unit_price, unit_cost)
+customers(id, name, city, state, segment, signup_date)
+reps(id, name, team, monthly_quota)
+
+Relationships:
+- sales.product_id -> products.id
+- sales.customer_id -> customers.id
+- sales.rep_id -> reps.id
+"""
+
+def text_to_sql(question: str) -> str:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {
+                "role": "system",
+                "content": f"""Convert the question to a SQL query for SQLite.
+                Return ONLY the SQL query, no explanations.
+
+                Schema:
+                {DB_SCHEMA}
+
+                Rules:
+                - Use only tables and columns from the schema
+                - Dates in YYYY-MM-DD format
+                - Limit results to 1000 rows by default"""
+            },
+            {"role": "user", "content": question}
+        ],
+        temperature=0,
+    )
+    return response.choices[0].message.content.strip()
+
+def run_query(question: str, conn: sqlite3.Connection) -> list[dict]:
+    sql = text_to_sql(question)
+    print(f"Generated SQL: {sql}")  # For auditing
+
+    cursor = conn.execute(sql)
+    columns = [desc[0] for desc in cursor.description]
+    return [dict(zip(columns, row)) for row in cursor.fetchall()]
+```
+
+One critical precaution: Text-to-SQL for external users should never have write access to the database. Use read-only database users and validate that the generated query doesn't contain UPDATE, DELETE, DROP, or INSERT before executing.
+
+## Automated Report Generation with LLMs
+
+Weekly sales reports, operations metrics, executive dashboards — much of an analyst's time is spent not on analysis, but on assembling the same report with different data every week. AI can automate this assembly.
+
+The pattern is:
+
+1. Extract data from the database with predefined queries
+2. Pass the data to the LLM with a report template
+3. The model fills in the template with data analysis, identifies highlights and exceptions
+4. Report is emailed or published on a dashboard
+
+| Report type | Automation viability | Note |
+|-------------|---------------------|------|
+| Weekly KPIs | High | Structured data, little interpretation |
+| Monthly executive report | Medium | Requires human review before distribution |
+| Anomaly analysis | High | LLMs are good at spotting what's outside the norm |
+| Board report | Low | High reputational risk, always human review |
+| Root cause diagnosis | Medium | LLM suggests hypotheses, human validates |
+
+High-risk report automation (board, regulatory) must always have human review before sending. Automating the draft saves 80% of the time; the final review ensures an analysis error doesn't reach important decision-makers.
+
+## Limitations: What AI Data Analysis Still Doesn't Do Well
+
+Clarity about limitations is important for setting correct expectations and avoiding misdirected projects.
+
+**Very large data:** Code Interpreter has file size limits. For analyses over gigabyte datasets or billions of rows, the approach must be different — run queries in the database and send only aggregated results to the LLM.
+
+**Specific business context:** the model doesn't know that "SKU-789" is the company's most important product or that the Southwest region has different seasonality. This context must be explicitly provided in the prompt or via RAG over internal documentation.
+
+**Causality vs correlation:** LLMs are good at identifying correlations in data. Establishing causality (did sales drop because a competitor launched a product or because there was a logistics issue?) requires business knowledge the model doesn't have unless you provide the context.
+
+**Complex statistical analysis:** for analyses requiring specific statistical techniques (regression with variable control, time series with complex seasonality, rigorous A/B testing), a data analyst with the right tools still significantly outperforms LLMs.
+
+**Production reliability:** in demos, Code Interpreter always works. In production with real data and unpredictable questions, you'll encounter cases where the model generates buggy code, uses the wrong column, or misinterprets the question. Human review of results is still necessary for important decisions.
+
+## Conclusion
+
+AI for data analysis doesn't replace analysts — it increases their productivity and democratizes data access for people without technical backgrounds. The most practical applications with fast ROI are recurring report automation, ad-hoc natural language queries over structured data, and automatic anomaly detection.
+
+At **SystemForge**, we integrate AI analysis capabilities into business management systems, enabling teams to ask questions about their data without depending on an available analyst. If you want to transform your data into more accessible insights, we can discuss how this applies to your specific context.

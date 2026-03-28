@@ -73,10 +73,20 @@ export function CookieConsentModal({ onClose, onSave }: CookieConsentModalProps)
 
   const closeRef = useRef<HTMLButtonElement>(null)
   const modalRef = useRef<HTMLDivElement>(null)
+  const previousFocusRef = useRef<Element | null>(null)
 
-  // Focus the close button on mount
+  // Capture previously focused element and focus close button on mount
   useEffect(() => {
+    previousFocusRef.current = document.activeElement
     closeRef.current?.focus()
+
+    return () => {
+      // Restore focus to the element that was focused before modal opened
+      const prev = previousFocusRef.current
+      if (prev && prev instanceof HTMLElement) {
+        prev.focus()
+      }
+    }
   }, [])
 
   // Escape key closes modal

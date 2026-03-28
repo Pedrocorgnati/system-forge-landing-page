@@ -1,0 +1,206 @@
+---
+title: "Whisper: Automatic Transcription for Business"
+slug: "whisper-automatic-transcription-for-business"
+date: "2024-11-05"
+description: "How to use OpenAI's Whisper for automatic transcription of meetings, customer service calls, and video content with high accuracy."
+tags: ["whisper", "automatic transcription", "openai", "ai audio", "automation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to use OpenAI's Whisper for automatic transcription of meetings, customer service calls, and video content with high accuracy.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'whisper-transcricao-automatica-negocios'
+  - locale: 'it-IT'
+    slug: 'whisper-trascrizione-automatica-business'
+---
+
+## Audio Transcription: From Impractical to Trivial
+
+Before 2022, automatic transcription with usable quality was expensive and still required extensive manual correction. Whisper, released by OpenAI in September 2022 as an open-source model, radically changed this landscape.
+
+Whisper is an automatic speech recognition (ASR) model trained on 680,000 hours of multilingual audio. Its performance is remarkably better than previous commercial services — and it can run locally (zero cost per transcription) or via the OpenAI API.
+
+## Business Use Cases
+
+**Meetings and video calls:** Automatic meeting transcription enables generating meeting notes, extracting decisions and action items via post-transcription LLM. The Whisper + GPT-4 combination turns a 1-hour meeting into a structured summary in under 5 minutes.
+
+**Customer service / call centers:** Transcription of support calls for quality analysis, identification of recurring issues, and team training.
+
+**Video content:** Automatic caption generation for corporate videos, training materials, and webinars.
+
+**Qualitative research:** Transcription of interviews and focus groups for analysis.
+
+## Local Setup with faster-whisper
+
+For high volumes, running locally saves significantly compared to the API. `faster-whisper` is the optimized quantized implementation — 4x faster than the original with lower memory usage:
+
+```bash
+pip install faster-whisper
+```
+
+```python
+from faster_whisper import WhisperModel
+
+# Available models: tiny, base, small, medium, large-v3
+# For English: medium or large-v3 offer the best accuracy
+model = WhisperModel("large-v3", device="cpu", compute_type="int8")
+
+def transcribe_audio(file_path: str) -> dict:
+    segments, info = model.transcribe(
+        file_path,
+        language="en",  # Forcing the language improves accuracy
+        beam_size=5,
+        best_of=5,
+        temperature=0.0,  # More deterministic output
+        vad_filter=True,  # Removes silences (faster processing)
+    )
+
+    result = {
+        "language": info.language,
+        "language_probability": info.language_probability,
+        "segments": []
+    }
+
+    for segment in segments:
+        result["segments"].append({
+            "start": segment.start,
+            "end": segment.end,
+            "text": segment.text.strip(),
+        })
+
+    return result
+
+# Usage
+transcription = transcribe_audio("meeting-2024-10-30.mp3")
+full_text = " ".join(s["text"] for s in transcription["segments"])
+print(full_text)
+```
+
+## Transcription via OpenAI API
+
+For lower volumes or when no GPU is available, the OpenAI API is the simplest option:
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+def transcribe_via_api(audio_path: str) -> str:
+    # Limit: 25MB per file
+    with open(audio_path, "rb") as f:
+        transcription = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=f,
+            language="en",
+            response_format="verbose_json",  # Includes timestamps per segment
+            timestamp_granularities=["segment"],
+        )
+
+    return transcription.text
+
+# Cost: $0.006 per minute (June 2024)
+# 100 hours of audio ≈ $36
+```
+
+## Full Pipeline: Meeting → Structured Notes
+
+```python
+import anthropic
+from faster_whisper import WhisperModel
+
+whisper = WhisperModel("large-v3", device="cpu", compute_type="int8")
+claude = anthropic.Anthropic()
+
+def meeting_to_notes(audio_file: str, attendees: list[str]) -> str:
+    # Step 1: Transcribe
+    segments, _ = whisper.transcribe(audio_file, language="en", vad_filter=True)
+    transcription = " ".join(s.text for s in segments)
+
+    # Step 2: Generate structured notes with AI
+    prompt = f"""Based on the meeting transcript below, generate structured meeting notes with:
+
+1. **Executive Summary** (3-5 lines)
+2. **Decisions Made** (list)
+3. **Action Items** (owner, due date, action)
+4. **Next Steps**
+
+Attendees mentioned: {', '.join(attendees)}
+
+Transcript:
+{transcription[:8000]}"""  # Context limit
+
+    response = claude.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=2000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.content[0].text
+
+notes = meeting_to_notes("sprint-planning.mp3", ["John", "Sarah", "Mike"])
+print(notes)
+```
+
+## Supported Audio Formats
+
+Whisper accepts: mp3, mp4, m4a, wav, flac, ogg, webm, mpeg. For unsupported formats or files over 25MB (API limit), convert with ffmpeg:
+
+```bash
+# Convert any format to mp3
+ffmpeg -i input.opus -ac 1 -ar 16000 output.mp3
+
+# Split a long file into 10-minute chunks
+ffmpeg -i long.mp3 -f segment -segment_time 600 -c copy chunk_%03d.mp3
+```
+
+## Speaker Diarization: Identifying Who Said What
+
+Standard Whisper doesn't differentiate speakers. To identify "who said what," combine it with `pyannote.audio`:
+
+```python
+from pyannote.audio import Pipeline
+from faster_whisper import WhisperModel
+
+diarization_pipeline = Pipeline.from_pretrained(
+    "pyannote/speaker-diarization-3.1",
+    use_auth_token="HF_TOKEN"
+)
+
+def transcribe_with_speakers(file: str) -> list:
+    # Diarization (who speaks when)
+    diarization = diarization_pipeline(file)
+
+    # Transcription
+    whisper_model = WhisperModel("large-v3", compute_type="int8")
+    segments, _ = whisper_model.transcribe(file, language="en")
+
+    # Combine: for each transcription segment, identify the speaker
+    result = []
+    for segment in segments:
+        midpoint = (segment.start + segment.end) / 2
+        speaker = "Unknown"
+
+        for turn, _, label in diarization.itertracks(yield_label=True):
+            if turn.start <= midpoint <= turn.end:
+                speaker = label
+                break
+
+        result.append({
+            "speaker": speaker,
+            "start": segment.start,
+            "text": segment.text.strip()
+        })
+
+    return result
+```
+
+## Conclusion
+
+Whisper has made high-quality automatic transcription accessible to any business. Applications range from automatic meeting notes to call center quality analysis and video content transcription. The combination with LLMs like Claude and GPT-4 for analysis and structuring of transcribed content creates high-value automation pipelines.
+
+SystemForge builds audio transcription and analysis pipelines with AI for businesses. If you want to explore a specific use case, reach out to our team.

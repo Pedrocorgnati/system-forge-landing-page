@@ -1,0 +1,105 @@
+---
+title: "Zapier vs Make vs n8n: Which Tool Should You Choose"
+slug: "zapier-vs-make-vs-n8n-which-to-choose"
+date: "2024-09-09"
+description: "Detailed comparison of Zapier, Make (Integromat), and n8n for workflow automation — pricing, flexibility, self-hosting, and use cases."
+tags: ["zapier", "make", "n8n", "automation", "no-code"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Detailed comparison of Zapier, Make (Integromat), and n8n for workflow automation — pricing, flexibility, self-hosting, and use cases.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'zapier-vs-make-vs-n8n-qual-escolher'
+  - locale: 'it-IT'
+    slug: 'zapier-vs-make-vs-n8n-quale-scegliere'
+---
+
+Automating workflows between different applications used to require a developer to write custom integrations. Today, tools like Zapier, Make, and n8n have democratized that process — anyone with basic logical reasoning can connect two systems and automate repetitive tasks without writing code.
+
+But the three tools are very different from each other. Choosing wrong means overpaying, getting locked into a limiting ecosystem, or dealing with maintenance headaches that wouldn't exist with the right tool. This article is an honest comparison of all three, including the weak points the official websites won't tell you about.
+
+## Zapier: The Classic with the Largest Ecosystem
+
+Zapier has been around since 2011 and built the largest integration catalog in the market: over 6,000 connectable apps. If you need to integrate two popular apps, chances are Zapier already has the connector ready, working, and documented.
+
+Zapier's value proposition is being as simple as possible: you create "Zaps" — flows with a trigger and one or more actions. The interface guides you step by step. For a basic flow like "when a Typeform submission comes in, add a row in Google Sheets and send a Gmail," you're set up in under ten minutes with zero technical knowledge.
+
+Zapier's problem is the price. The free plan is extremely limited (100 tasks per month, two-step flows only). For any real professional use, you'll need the Starter plan ($19.99/month) at minimum — and as task volume grows, the price scales up aggressively.
+
+Another weakness: complex flow logic in Zapier is frustrating. Conditional branching exists but is limited compared to Make. Loops, array iteration, and sophisticated data transformations require workarounds that make maintenance painful.
+
+Use Zapier when: the integration you need is among the 6,000+ options, the flow is simple (under 5 steps), volume is low, and speed of setup is your top priority.
+
+## Make: Complex Visual Flows at Lower Cost
+
+Make (formerly Integromat) is where visual power really shines. Instead of Zapier's linear interface, Make uses a canvas where you see the full flow as a diagram — modules connected by lines, visual branching, explicit loops.
+
+For complex flows, this is a massive advantage: you can visualize and debug what's happening at each step. Make has native tools for array manipulation, iterators, aggregators, and routers with multiple conditions — things that require workarounds in Zapier.
+
+The cost is significantly lower than Zapier for equivalent volumes. The Core plan ($10.59/month) already includes 10,000 operations — far more generous. The billing unit is also different: Make charges per operation (each module executed), while Zapier charges per task (each successful action). In complex flows, this can be advantageous or disadvantageous depending on your structure.
+
+Make's integration catalog (~1,800 apps) is smaller than Zapier's, but covers the most popular apps with greater depth — the connectors tend to expose more fields and functionality than their Zapier equivalents.
+
+Use Make when: your flows have complex logic (branching, loops, data transformation), you need better cost-to-value than Zapier, and the app you want to connect is in the catalog.
+
+## n8n: Self-hosted, Free, and Unlimited Executions
+
+n8n is philosophically different from the other two: it's open-source, can be self-hosted, and in the self-hosted version has no execution limits. You run it on your server, your data stays in your infrastructure, and the operational cost is basically the server cost.
+
+n8n's interface is similar to Make — visual canvas with nodes and connections. But n8n goes further in terms of customization: you can write JavaScript or Python code directly inside flow nodes, create custom HTTP triggers, use complex OAuth credentials, and build integrations with any API that has documentation, even without an official connector.
+
+```json
+// Example "Code" node in n8n — transforms data in JavaScript
+// Input: array of e-commerce orders
+// Output: only orders over $500 with a calculated field
+
+const orders = $input.all();
+
+return orders
+  .filter(item => {
+    const amount = parseFloat(item.json.amount.replace('$', '').replace(',', ''));
+    return amount > 500;
+  })
+  .map(item => ({
+    json: {
+      ...item.json,
+      tier: item.json.amount > 2000 ? 'premium' : 'standard',
+      processed_at: new Date().toISOString()
+    }
+  }));
+```
+
+n8n's downside is the learning curve and operational responsibility. In the self-hosted version, you need to manage the server, updates, backups, and availability. If the server goes down, automations stop. For those who don't want that overhead, there's the cloud version (n8n.cloud) with paid plans.
+
+The other limitation is connector maturity: less popular apps may have buggy or incomplete connectors. For those cases, the generic HTTP node handles it manually.
+
+Use n8n when: you have high execution volumes (self-hosting eliminates per-volume costs), your flows need custom code logic, you need data to stay in your infrastructure (GDPR, HIPAA, sensitive data), or you want zero platform cost.
+
+## Pricing Comparison by Operation Volume
+
+Comparing entry-level plans for professional use:
+
+| Tool | Plan | Price/month | Included volume | Additional cost |
+|---|---|---|---|---|
+| Zapier | Starter | USD 19.99 | 750 tasks | USD 0.016/extra task |
+| Zapier | Professional | USD 49.00 | 2,000 tasks | USD 0.018/extra task |
+| Make | Core | USD 10.59 | 10,000 operations | USD 1.00/1,000 ops |
+| Make | Pro | USD 18.82 | 10,000 operations | USD 0.90/1,000 ops |
+| n8n Cloud | Starter | USD 20.00 | 2,500 executions | USD 0.00040/exec |
+| n8n Self-hosted | - | ~USD 5-20/server | Unlimited | - |
+
+For 50,000 operations per month, the cost difference between Zapier (expensive) and n8n self-hosted (nearly free) can reach hundreds of dollars monthly. For 500 operations per month, Zapier probably fits the free plan and the difference doesn't matter.
+
+The practical rule: up to 5,000 operations/month with simple flows, Zapier or Make without overthinking it. Above that, n8n self-hosted starts making financial sense. If data is sensitive or subject to compliance requirements, n8n self-hosted regardless of volume.
+
+## Conclusion
+
+There is no superior tool — there's the right tool for your context. Zapier wins on ecosystem size and simplicity. Make wins on visual power for complex flows. n8n wins on cost at high volumes and full data control.
+
+The good news is that none of the three creates real vendor lock-in: the flows are business logic, and migrating between tools (though tedious) is possible. Start with what meets your current needs and migrate when the scale justifies it.
+
+At SystemForge, we implement automations on all three platforms — and we know when to recommend each one. If you have a manual process you want to automate but don't know where to start, [reach out](/contact). We map the flow, choose the right tool, and get the automation into production.

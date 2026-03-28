@@ -1,0 +1,213 @@
+---
+title: "Webhook vs Polling: Real-Time System Integrations"
+slug: "webhook-vs-polling-real-time-integrations"
+date: "2024-09-23"
+description: "When to use webhooks and when to use polling in system integrations — architecture, resilience, retry, and signature validation with examples."
+tags: ["webhook", "polling", "integration", "real-time", "architecture"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: When to use webhooks and when to use polling in system integrations — architecture, resilience, retry, and signature validation with examples.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'webhook-vs-polling-integracoes-real-time'
+  - locale: 'it-IT'
+    slug: 'webhook-vs-polling-integrazioni-real-time'
+---
+
+Every system integration faces the same fundamental problem: how does system A know when something changed in system B? There are two answers to this question — polling and webhooks — and the choice between them directly impacts latency, infrastructure cost, and error handling complexity.
+
+Polling is the digital equivalent of calling your bank every five minutes asking "did any payments come in?" Webhooks are the opposite: the bank calls you when something happens. The metaphor makes it clear which is more efficient, but like every metaphor, it hides the cases where the less elegant version is the only viable option.
+
+## How Webhooks Work: Registration, Delivery, and Retry
+
+A webhook is essentially an HTTP POST request that the source system sends to the URL you configured whenever an event occurs. You don't ask — you receive.
+
+The basic flow has three steps:
+
+1. **Registration**: you tell the source system which URL should receive notifications (usually via a configuration panel or API).
+2. **Event**: something happens in the source system (payment processed, form submitted, status updated).
+3. **Delivery**: the source system makes a POST to your URL with the event payload in JSON.
+
+From an implementation perspective, receiving a webhook is straightforward — it's just an HTTP endpoint:
+
+```python
+from fastapi import FastAPI, Request, HTTPException
+import hmac
+import hashlib
+
+app = FastAPI()
+
+WEBHOOK_SECRET = "your_shared_secret"
+
+@app.post("/webhooks/payment")
+async def receive_payment(request: Request):
+    # 1. Validate signature (see section below)
+    received_signature = request.headers.get("X-Signature-SHA256", "")
+    body = await request.body()
+    expected_signature = hmac.new(
+        WEBHOOK_SECRET.encode(),
+        body,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(received_signature, f"sha256={expected_signature}"):
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+    # 2. Process the payload
+    payload = await request.json()
+    event = payload.get("event")
+    data = payload.get("data", {})
+
+    if event == "payment.approved":
+        # Queue for async processing
+        await queue.enqueue("process_payment", data)
+
+    # 3. Respond 200 IMMEDIATELY
+    # The source system will retry if it doesn't receive 2xx in time
+    return {"status": "received"}
+```
+
+The most important detail is in that last comment: you must respond 200 as fast as possible, before processing the event. If processing takes too long and the source's timeout expires, it will consider the delivery failed and retry — generating duplicate events.
+
+Most serious platforms have automatic retry policies: if they don't receive 2xx within X seconds, they try again with exponential backoff (1 minute, 5 minutes, 30 minutes, 1 hour, etc.). This is great for resilience, but requires you to handle duplicates.
+
+## Polling: When It's the Only Viable Option
+
+Webhooks are elegant, but not always available. There are three situations where polling is the only way out:
+
+**The system doesn't support webhooks.** Legacy systems, old ERPs, government APIs — many simply don't implement webhooks. You need to periodically ask if anything changed.
+
+**You're behind a firewall.** If your application runs in an internal network without a publicly accessible address, no external system can POST to you. You need to go fetch the data, not receive it.
+
+**The source is a file or shared database.** When the "integration" is checking whether a new file appeared on an FTP or whether a database table has new records, polling is the natural model.
+
+Efficient polling doesn't need to be naive. Instead of fetching everything every time, use strategies that minimize data transfer:
+
+```python
+import httpx
+from datetime import datetime, timedelta
+import asyncio
+
+async def poll_new_orders(last_check: datetime) -> list[dict]:
+    """
+    Smart polling: only fetch orders created since the last check.
+    Uses incremental timestamp to avoid fetching already-processed data.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://api.external-system.com/orders",
+            params={
+                "created_after": last_check.isoformat(),
+                "limit": 100,
+                "status": "pending"
+            },
+            headers={"Authorization": "Bearer TOKEN"}
+        )
+        response.raise_for_status()
+        return response.json()["orders"]
+
+async def polling_loop():
+    last_check = datetime.utcnow() - timedelta(minutes=5)
+
+    while True:
+        try:
+            new_orders = await poll_new_orders(last_check)
+            last_check = datetime.utcnow()
+
+            for order in new_orders:
+                await process_order(order)
+
+        except Exception as e:
+            # Don't update last_check on error
+            # To avoid skipping events during the failure window
+            print(f"Polling error: {e}")
+
+        await asyncio.sleep(60)  # Wait 1 minute before next check
+```
+
+The critical detail: don't update the last check timestamp when an error occurs. If you do, you'll skip the events that should have been processed during the failure window.
+
+## Signature Validation: Preventing Webhook Spoofing
+
+Your webhook endpoint is publicly exposed on the internet. Anyone can discover the URL and send fake POSTs — simulating approved payments, created orders, or any event your system processes.
+
+The standard solution is HMAC (Hash-based Message Authentication Code): the source system and your system share a secret. For each event, the source computes a hash of the payload using the secret and includes it in the header. You recompute the hash on your end and compare.
+
+```python
+import hmac
+import hashlib
+
+def validate_stripe_signature(payload: bytes, received_header: str, secret: str) -> bool:
+    """
+    Stripe uses a specific format: t=timestamp,v1=hash
+    This prevents replay attacks — old signatures aren't valid
+    """
+    parts = dict(p.split("=", 1) for p in received_header.split(","))
+    timestamp = parts.get("t", "")
+    received_signature = parts.get("v1", "")
+
+    # Prevent replay: reject events older than 5 minutes
+    import time
+    if abs(time.time() - int(timestamp)) > 300:
+        return False
+
+    # Recompute signature with timestamp included
+    signed_payload = f"{timestamp}.".encode() + payload
+    expected_signature = hmac.new(
+        secret.encode(),
+        signed_payload,
+        hashlib.sha256
+    ).hexdigest()
+
+    # compare_digest prevents timing attacks
+    return hmac.compare_digest(received_signature, expected_signature)
+```
+
+Never validate signatures by comparing strings with `==` — this is vulnerable to timing attacks. Always use `hmac.compare_digest` (Python) or equivalent in other languages.
+
+## Idempotency: Processing the Same Event More Than Once
+
+Even with everything configured correctly, duplicate events will happen. The source system doesn't know if your 200 arrived before the timeout — so it retries. Your business logic needs to be idempotent: processing the same event two, three, or ten times must have the same effect as processing it once.
+
+The standard implementation uses a log of already-processed events:
+
+```python
+import redis
+
+redis_client = redis.Redis()
+
+def process_event_idempotent(event_id: str, payload: dict) -> bool:
+    """
+    Returns True if processed, False if already processed before.
+    Uses Redis with 24h TTL to avoid accumulating data indefinitely.
+    """
+    key = f"webhook:processed:{event_id}"
+
+    # SET NX (only set if doesn't exist) + EXPIRE
+    was_set = redis_client.set(key, "1", nx=True, ex=86400)
+
+    if not was_set:
+        # We've already processed this event
+        print(f"Event {event_id} already processed — ignoring duplicate")
+        return False
+
+    # Process the event
+    execute_business_logic(payload)
+    return True
+```
+
+The `event_id` must be a unique identifier provided by the source system (Stripe calls it `id`, PayPal `resource_id`, etc.). Never use a timestamp as an idempotency identifier — two events can have the same timestamp at high volume.
+
+## Conclusion
+
+The choice between webhook and polling isn't a matter of preference — it's a matter of what the data source supports and where your system is accessible.
+
+When webhooks are available, always prefer them: near-zero latency, no wasted requests, and no unnecessary load on both sides. When polling is unavoidable, make it efficient with incremental filters and never skip events on error.
+
+And in either case: validate signatures, respond fast, process asynchronously, and implement idempotency. These four principles eliminate 90% of the problems that surface in webhook-based integrations in production.
+
+At SystemForge, we design and implement system integrations with a focus on resilience and maintainability — whether via webhook, polling, or message queues. Contact us if you need to connect systems that weren't built to talk to each other.

@@ -1,0 +1,136 @@
+---
+title: "Multi-tenancy nel SaaS: quando e come implementarlo"
+slug: "multi-tenancy-saas-quando-e-come-implementare"
+date: "2024-07-24"
+description: "I tre modelli di multi-tenancy (database condiviso, schema per tenant, database per tenant) — quando usare ciascuno e come migrare tra essi senza downtime."
+tags: ["multi-tenancy", "saas", "architettura", "postgresql", "isolamento dati"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "I tre modelli di multi-tenancy (database condiviso, schema per tenant, database per tenant) — quando usare ciascuno e come migrare tra essi senza downtime."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'multi-tenancy-quando-e-como-implementar'
+  - locale: 'en'
+    slug: 'multi-tenancy-in-saas-when-and-how'
+---
+
+Ogni SaaS inizia con una domanda tecnica che sembra semplice ma definisce anni di architettura: come separare i dati di un cliente da quelli di un altro? Questa è l'essenza del multi-tenancy — la capacità di un sistema di servire molteplici "inquilini" (tenant) con totale isolamento tra loro, utilizzando la stessa infrastruttura.
+
+Farlo nel modo sbagliato ha conseguenze serie: un bug di logica può far trapelare dati di un'azienda verso un'altra, una query pesante di un cliente può mandare giù il servizio per tutti, e una migrazione mal eseguita può richiedere ore di downtime. Farlo bene, fin dall'inizio, è una delle decisioni architetturali più redditizie che un founder tecnico possa prendere.
+
+Esistono tre modelli principali, ciascuno con trade-off chiari in termini di isolamento, costo e complessità operativa.
+
+## Database Condiviso con tenant_id: Semplice e Rischioso
+
+Il modello più comune negli MVP è il più rischioso in produzione: tutte le tabelle del database risiedono in un unico schema, e ogni riga ha una colonna `tenant_id` che identifica a quale organizzazione appartiene.
+
+```sql
+CREATE TABLE projects (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id   UUID NOT NULL REFERENCES tenants(id),
+  name        TEXT NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_projects_tenant ON projects(tenant_id);
+```
+
+La logica di isolamento è interamente nell'applicazione: ogni SELECT, INSERT e UPDATE deve includere il `tenant_id` dell'utente autenticato. Il problema è evidente — una singola dimenticanza nel codice espone i dati di altri tenant. Non è un'ipotesi: è uno dei vettori di data breach più comuni nei SaaS.
+
+Oltre al rischio di sicurezza, c'è il problema di performance. Poiché tutti i tenant condividono le stesse tabelle, un cliente con un alto volume di dati compete direttamente con gli altri. Gli indici parziali aiutano, ma non eliminano il problema su larga scala.
+
+**Quando ha senso:** MVP con meno di 50 tenant, basso volume di dati, senza requisiti di compliance rigorosi (GDPR con isolamento fisico) e quando il team di ingegneria sta ancora definendo il modello dati.
+
+## Schema per Tenant: Equilibrio tra Isolamento e Costo
+
+In questo modello, ogni tenant ha il proprio schema all'interno dello stesso database PostgreSQL. Le tabelle hanno struttura identica, ma sono fisicamente separate per namespace.
+
+```sql
+-- Creazione automatica alla registrazione di un nuovo tenant
+CREATE SCHEMA tenant_acme;
+CREATE TABLE tenant_acme.projects (
+  id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name       TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Nell'applicazione, lo schema viene impostato per sessione
+SET search_path TO tenant_acme;
+```
+
+L'isolamento logico è reale: una query senza il corretto `SET search_path` semplicemente non vede i dati del tenant. Il rischio di data leak per dimenticanza nel livello applicativo è drasticamente inferiore.
+
+Anche l'operatività diventa più semplice: backup per tenant, migrazioni indipendenti, analisi delle query per un cliente specifico. Strumenti come pg_dump accettano il parametro `--schema` per esportare solo i dati di un singolo tenant.
+
+Il costo: PostgreSQL ha un limite pratico di schema per database (nell'ordine di qualche migliaio prima della degradazione di performance nel catalogo di sistema). Per SaaS con decine di migliaia di piccoli tenant, questo modello inizia a creare pressione.
+
+| Caratteristica | Database condiviso | Schema per tenant |
+|---------------|--------------------|--------------------|
+| Isolamento | Logico (codice) | Logico (database) |
+| Rischio di data leak | Alto | Basso |
+| Costo operativo | Basso | Medio |
+| Scalabilità (tenant) | Alta | Media (fino a ~5.000) |
+| Backup per tenant | Complesso | Semplice |
+| Migrazione di schema | Una volta | Per tenant |
+
+## Database per Tenant: Massimo Isolamento per Enterprise
+
+I clienti enterprise — specialmente in settori regolamentati come sanità, finanza e pubblica amministrazione — richiedono frequentemente l'isolamento fisico dei dati: un database dedicato, a volte su un'istanza propria. Questo è il modello database per tenant.
+
+La complessità operativa aumenta considerevolmente: provisioning dinamico dei database, connection pooling (PgBouncer o RDS Proxy diventano obbligatori), monitoraggio moltiplicato per il numero di tenant, e costi di infrastruttura che crescono linearmente.
+
+In cambio, ottieni:
+- Conformità ai requisiti di residenza dei dati (data residency)
+- Possibilità di offrire SLA differenziati per cliente
+- Isolamento totale delle performance
+- Backup e restore granulari per singolo account
+
+```
+# Esempio di infrastruttura con Terraform per provisioning dinamico
+resource "aws_db_instance" "tenant" {
+  for_each           = var.enterprise_tenants
+  identifier         = "saas-tenant-${each.key}"
+  engine             = "postgres"
+  engine_version     = "15.4"
+  instance_class     = each.value.db_tier
+  allocated_storage  = each.value.storage_gb
+  db_name            = "tenant_db"
+  username           = "app_user"
+  password           = random_password.tenant[each.key].result
+  skip_final_snapshot = false
+}
+```
+
+**Quando ha senso:** Clienti enterprise con ticket superiore a EUR 2.000/mese, requisiti espliciti di isolamento nel contratto, settore sanitario o finanziario, o quando il cliente rappresenta più del 20% del fatturato totale e qualsiasi data breach sarebbe catastrofico.
+
+## Row Level Security come Alternativa in PostgreSQL
+
+Un approccio sempre più adottato combina il modello database condiviso con la Row Level Security (RLS) di PostgreSQL — rendendo l'isolamento una garanzia del database, non dell'applicazione.
+
+```sql
+-- Abilitazione della RLS sulla tabella
+ALTER TABLE projects ENABLE ROW LEVEL SECURITY;
+
+-- Policy: l'utente vede solo le righe del proprio tenant
+CREATE POLICY tenant_isolation ON projects
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- Nella connessione, prima di qualsiasi query:
+SET app.current_tenant_id = '550e8400-e29b-41d4-a716-446655440000';
+```
+
+Con la RLS attiva, anche una query senza filtro sul `tenant_id` restituisce solo i dati del tenant configurato nella sessione. Il database diventa il garante della segregazione — non il codice dell'applicazione.
+
+Il limite della RLS è la performance: policy complesse possono degradare le query su tabelle molto grandi. E la configurazione errata del `SET` può comunque essere un vettore di problema se gestita in modo scorretto nell'ORM. Ma per la maggior parte dei SaaS in crescita, RLS con database condiviso offre il miglior equilibrio tra sicurezza e costo operativo.
+
+## Conclusione
+
+La scelta del modello di multi-tenancy non è permanente, ma migrare tra modelli in produzione senza downtime è laborioso. La strategia più comune è iniziare con database condiviso + RLS, migrare a schema per tenant quando la base clienti raggiunge qualche centinaio, e offrire database dedicato come opzione premium per il segmento enterprise.
+
+Ciò che non va mai rimandato è la definizione del `tenant_id` come colonna obbligatoria fin dal primo commit — e l'adozione della RLS fin dall'MVP. Fare refactoring di questo aspetto dopo, con dati in produzione, è una delle operazioni più costose nell'ingegneria SaaS.
+
+In **SystemForge**, ogni SaaS che costruiamo nasce già con l'architettura di multi-tenancy corretta per lo stadio del prodotto: RLS con database condiviso nell'MVP, schema per tenant nella fase di crescita, database dedicato nel tier enterprise. La fondazione tecnica giusta fa risparmiare mesi di rilavorazione. [Contattaci](/contatto) per discutere l'architettura del tuo prodotto.

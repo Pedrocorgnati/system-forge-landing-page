@@ -1,0 +1,87 @@
+---
+title: "Offline-First Apps: Working Without Internet"
+slug: "offline-first-apps-working-without-internet"
+date: "2024-10-21"
+description: "How to build offline-first React Native apps -- WatermelonDB, server synchronization, conflict resolution, and UX for offline states."
+tags: ["offline first", "react native", "watermelondb", "sync", "mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to build offline-first React Native apps -- WatermelonDB, server synchronization, conflict resolution, and UX for offline states."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-apps-sem-internet'
+  - locale: 'it-IT'
+    slug: 'offline-first-app-senza-internet'
+---
+
+Apps that need internet to function lose users in subways, on planes, in areas with poor coverage, and in every moment when the connection drops but the user still wants to use the product. This loss doesn't appear dramatically -- the user doesn't uninstall at the moment of signal loss. They simply associate the app with a frustrating experience and open it less and less.
+
+The offline-first approach inverts the premise: the app works fully with local data, and server synchronization happens as an additional benefit, not as a requirement to use the product. Implementing this correctly requires architecture decisions that need to be made early.
+
+## WatermelonDB: Reactive Local Database for React Native
+
+WatermelonDB is a local database for React Native built on top of SQLite, with a reactive API that integrates naturally with React. It's designed specifically for the offline-first use case: local operations are synchronous and immediate, and backend synchronization is a separate process.
+
+```typescript
+// database/schema.ts
+import { appSchema, tableSchema } from '@nozbe/watermelondb';
+
+export const schema = appSchema({
+  version: 1,
+  tables: [
+    tableSchema({
+      name: 'tasks',
+      columns: [
+        { name: 'title', type: 'string' },
+        { name: 'description', type: 'string', isOptional: true },
+        { name: 'completed', type: 'boolean' },
+        { name: 'created_at', type: 'number' },
+        { name: 'updated_at', type: 'number' },
+        { name: 'server_id', type: 'string', isOptional: true },
+        { name: 'is_deleted', type: 'boolean' }, // soft delete for sync
+      ],
+    }),
+  ],
+});
+```
+
+## Synchronization Strategy: Conflict-free vs Manual
+
+The most complex part of offline-first is synchronization. When the app reconnects, local data needs to be sent to the server, and server data needs to update the local database -- but there may be conflicts if the same record was modified in two places.
+
+| Strategy | Complexity | Use case |
+|---|---|---|
+| Last Write Wins | Low | Personal app, non-collaborative data |
+| Server Wins | Low | Authoritative server data (e.g., balance) |
+| Client Wins | Low | Drafts, user data |
+| Field-level merge | High | Collaborative apps |
+| CRDT | Very high | Real-time documents (like Notion) |
+
+## UX Without Connection: Indicators, Queues, and Feedback
+
+Offline-first UX requires communicating the connection state to the user and what happens with actions taken offline.
+
+Never block local actions due to lack of connection. The user created a task offline? Create it locally and sync later. Never show "No internet -- action blocked" for operations that can be queued.
+
+**What works well offline:**
+- Reading already-loaded content (articles, viewed products, history)
+- Creating and editing user data (notes, tasks, forms)
+- Queueable actions (like, comment, add to cart)
+- Navigation and search in local data
+
+**Requires connection by nature:**
+- Payment processing
+- Authentication (first time -- token refresh can be local)
+- Large file uploads
+- Search in huge databases without local index
+- Media streaming
+
+## Conclusion
+
+Offline-first isn't a feature -- it's an architectural decision that needs to be made before writing the first line of code. Implementing it later is possible but much more costly. The choice of local database, synchronization strategy, and conflict resolution model define how robust and reliable the app will be in real-world conditions.
+
+At SystemForge, apps that need offline resilience are designed with this architecture from the planning phase. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to discuss your project.

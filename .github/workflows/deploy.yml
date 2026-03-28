@@ -1,82 +1,318 @@
-name: Deploy — forjadesistemas.com.br
+# .github/workflows/deploy.yml
+# Triple Market Deploy — 3 SFTP deploys paralelos (BR, IT, EN)
+# Secrets documentados em: docs/ci-cd-secrets.md
+#
+# Pré-requisito: build.yml deve ter completado com sucesso (artifacts build-{locale} disponíveis)
+# Trigger: workflow_run após "Triple Market Build" completar em main
+# Manual: workflow_dispatch para re-deploy de mercado específico
+name: Triple Market Deploy
 
 on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Triple Market Build"]
+    types: [completed]
+    branches: [main]
 
+  workflow_dispatch:
+    inputs:
+      market:
+        description: 'Mercado para deploy manual (all, br, it, en)'
+        required: false
+        default: 'all'
+
+# Cancela runs anteriores para o mesmo branch
 concurrency:
-  group: deploy-production
+  group: deploy-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    name: Build & Deploy
+  # ===========================================================================
+  # DEPLOY: Brasil (pt-BR) → forjadesistemas.com.br
+  # ===========================================================================
+  deploy-br:
+    name: Deploy BR (forjadesistemas.com.br)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
     steps:
-      - name: Checkout
+      - name: Download build artifact (pt-BR)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-pt-BR
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          sparse-checkout: |
+            scripts/generate-htaccess.ts
+            package.json
+            tsconfig.json
+          sparse-checkout-cone-mode: false
 
-      - name: Setup Node.js 20
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: Cache node_modules
-        uses: actions/cache@v4
-        id: npm-cache
-        with:
-          path: |
-            node_modules
-            .velite
-          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Install tsx
+        run: npm install --no-save tsx
 
-      - name: Install dependencies
-        if: steps.npm-cache.outputs.cache-hit != 'true'
-        run: npm ci
+      - name: Generate .htaccess (BR — LGPD)
+        run: npx tsx scripts/generate-htaccess.ts --locale=br
 
-      - name: Validate frontmatter
-        run: npm run validate:frontmatter
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+      - name: Copy .htaccess into build output
+        run: cp dist/br/.htaccess out/.htaccess
 
-      - name: Optimize images
-        run: npm run optimize:images
-
-      - name: Generate search index
-        run: npm run generate:search-index
-
-      - name: Build
-        run: npm run build
-        env:
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
-          NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
-          NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
-          NEXT_PUBLIC_CONTACT_EMAIL: ${{ secrets.NEXT_PUBLIC_CONTACT_EMAIL }}
-          NEXT_PUBLIC_CALENDLY_URL: ${{ secrets.NEXT_PUBLIC_CALENDLY_URL }}
-          NEXT_PUBLIC_BUDGET_ENGINE_URL: ${{ secrets.NEXT_PUBLIC_BUDGET_ENGINE_URL }}
-
-      - name: Deploy via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          username: ${{ secrets.SFTP_USER }}
-          server: ${{ secrets.SFTP_HOST }}
-          port: ${{ secrets.SFTP_PORT }}
-          password: ${{ secrets.SFTP_PASSWORD }}
-          local_path: './out/*'
-          remote_path: '/domains/forjadesistemas.com.br/public_html'
-          sftpArgs: '-o ConnectTimeout=10'
-
-      - name: Purge Cloudflare cache
+      - name: Verify security headers in .htaccess (BR)
         run: |
-          curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
-            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            --data '{"purge_everything":true}' || true
+          grep -q "Strict-Transport-Security" out/.htaccess && echo "✅ HSTS present" || (echo "❌ HSTS missing" && exit 1)
+          grep -q "X-Frame-Options" out/.htaccess && echo "✅ X-Frame-Options present" || (echo "❌ X-Frame-Options missing" && exit 1)
+          grep -q "Content-Security-Policy" out/.htaccess && echo "✅ CSP present" || (echo "❌ CSP missing" && exit 1)
+          grep -q "googletagmanager" out/.htaccess && echo "✅ GTM in CSP (expected for BR)" || (echo "❌ GTM missing from BR CSP" && exit 1)
+
+      - name: Deploy to forjadesistemas.com.br
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SFTP_BR_HOST }}
+          username: ${{ secrets.SFTP_BR_USER }}
+          password: ${{ secrets.SFTP_BR_PASS }}
+          port: ${{ secrets.SFTP_BR_PORT }}
+          protocol: ftps
+          local-dir: out/
+          server-dir: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+
+      - name: Purge Cloudflare cache (BR)
+        if: success()
+        run: |
+          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID }}"
+          if [ -n "$ZONE_ID" ]; then
+            curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data '{"purge_everything":true}' || true
+          fi
+
+      - name: Deploy summary (BR)
+        if: success()
+        run: |
+          echo "## Deploy BR concluído" >> $GITHUB_STEP_SUMMARY
+          echo "- **Domínio:** forjadesistemas.com.br" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # DEPLOY: Itália (it-IT) → systemforge.it
+  # ===========================================================================
+  deploy-it:
+    name: Deploy IT (systemforge.it)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download build artifact (it-IT)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-it-IT
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Checkout (scripts only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/generate-htaccess.ts
+            package.json
+            tsconfig.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install tsx
+        run: npm install --no-save tsx
+
+      - name: Generate .htaccess (IT — GDPR, sem GTM)
+        run: npx tsx scripts/generate-htaccess.ts --locale=it
+
+      - name: Copy .htaccess into build output
+        run: cp dist/it/.htaccess out/.htaccess
+
+      - name: Verify security headers in .htaccess (IT)
+        run: |
+          grep -q "Strict-Transport-Security" out/.htaccess && echo "✅ HSTS present" || (echo "❌ HSTS missing" && exit 1)
+          grep -q "X-Frame-Options" out/.htaccess && echo "✅ X-Frame-Options present" || (echo "❌ X-Frame-Options missing" && exit 1)
+          grep -q "Content-Security-Policy" out/.htaccess && echo "✅ CSP present" || (echo "❌ CSP missing" && exit 1)
+          ! grep -q "googletagmanager" out/.htaccess && echo "✅ GTM absent from IT CSP (GDPR compliant)" || (echo "❌ GTM must NOT be in IT CSP" && exit 1)
+
+      - name: Deploy to systemforge.it
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SFTP_IT_HOST }}
+          username: ${{ secrets.SFTP_IT_USER }}
+          password: ${{ secrets.SFTP_IT_PASS }}
+          port: ${{ secrets.SFTP_IT_PORT }}
+          protocol: ftps
+          local-dir: out/
+          server-dir: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+
+      - name: Purge Cloudflare cache (IT)
+        if: success()
+        run: |
+          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID_IT }}"
+          if [ -n "$ZONE_ID" ]; then
+            curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data '{"purge_everything":true}' || true
+          fi
+
+      - name: Deploy summary (IT)
+        if: success()
+        run: |
+          echo "## Deploy IT concluído" >> $GITHUB_STEP_SUMMARY
+          echo "- **Domínio:** systemforge.it" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # DEPLOY: Inglês (en) → systemforgesoftware.com
+  # ===========================================================================
+  deploy-en:
+    name: Deploy EN (systemforgesoftware.com)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Download build artifact (en)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-en
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Checkout (scripts only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/generate-htaccess.ts
+            package.json
+            tsconfig.json
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install tsx
+        run: npm install --no-save tsx
+
+      - name: Generate .htaccess (EN — CAN-SPAM/CCPA)
+        run: npx tsx scripts/generate-htaccess.ts --locale=en
+
+      - name: Copy .htaccess into build output
+        run: cp dist/en/.htaccess out/.htaccess
+
+      - name: Verify security headers in .htaccess (EN)
+        run: |
+          grep -q "Strict-Transport-Security" out/.htaccess && echo "✅ HSTS present" || (echo "❌ HSTS missing" && exit 1)
+          grep -q "X-Frame-Options" out/.htaccess && echo "✅ X-Frame-Options present" || (echo "❌ X-Frame-Options missing" && exit 1)
+          grep -q "Content-Security-Policy" out/.htaccess && echo "✅ CSP present" || (echo "❌ CSP missing" && exit 1)
+          grep -q "googletagmanager" out/.htaccess && echo "✅ GTM in CSP (expected for EN)" || (echo "❌ GTM missing from EN CSP" && exit 1)
+
+      - name: Deploy to systemforgesoftware.com
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.SFTP_EN_HOST }}
+          username: ${{ secrets.SFTP_EN_USER }}
+          password: ${{ secrets.SFTP_EN_PASS }}
+          port: ${{ secrets.SFTP_EN_PORT }}
+          protocol: ftps
+          local-dir: out/
+          server-dir: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
+          dangerous-clean-slate: true
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+
+      - name: Purge Cloudflare cache (EN)
+        if: success()
+        run: |
+          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID_EN }}"
+          if [ -n "$ZONE_ID" ]; then
+            curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data '{"purge_everything":true}' || true
+          fi
+
+      - name: Deploy summary (EN)
+        if: success()
+        run: |
+          echo "## Deploy EN concluído" >> $GITHUB_STEP_SUMMARY
+          echo "- **Domínio:** systemforgesoftware.com" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # POST-DEPLOY: Smoke Tests (3 domínios)
+  # ===========================================================================
+  post-deploy-smoke:
+    name: Post-Deploy Smoke Tests
+    needs: [deploy-br, deploy-it, deploy-en]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: ${{ always() && needs.deploy-br.result == 'success' && needs.deploy-it.result == 'success' && needs.deploy-en.result == 'success' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Wait for CDN propagation
+        run: sleep 60
+
+      - name: Run smoke tests (básico — HTTP/lang/keyword/sitemap)
+        run: bash scripts/smoke-test-full.sh
+
+      - name: Run feature smoke tests (blog/contact/services)
+        run: bash scripts/smoke-test-features.sh
+
+      - name: Run worker smoke tests (newsletter Workers)
+        env:
+          WORKER_BR: ${{ secrets.NEWSLETTER_WORKER_URL_BR }}
+          WORKER_IT: ${{ secrets.NEWSLETTER_WORKER_URL_IT }}
+          WORKER_EN: ${{ secrets.NEWSLETTER_WORKER_URL_EN }}
+        run: |
+          [ -n "$WORKER_BR" ] && bash scripts/smoke-test-workers.sh \
+            || echo "⚠️ WORKER_BR/IT/EN não configurados — pulando smoke-test-workers"
+
+      - name: Smoke test summary
+        if: always()
+        run: |
+          echo "## Post-Deploy Smoke Tests concluídos" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY

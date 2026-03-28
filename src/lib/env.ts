@@ -48,14 +48,10 @@ const EnvSchema = z.object({
     .string()
     .optional(),
 
-  // ===== Newsletter (Cloudflare Worker proxy — opcional antes do deploy) =====
-  NEXT_PUBLIC_NEWSLETTER_API_URL: z
-    .string()
-    .url('NEWSLETTER_API_URL deve ser uma URL válida (ex: https://systemforge-newsletter-proxy.xxx.workers.dev)')
-    .optional(),
-
   // NOTA: RESEND_API_KEY é secret do Cloudflare Worker (wrangler secret put),
   // NÃO pertence ao schema do Next.js — configurar apenas no Worker.
+  // Newsletter worker URLs são lidas diretamente via config/sites/{br,it,en}.ts
+  // (NEXT_PUBLIC_NEWSLETTER_WORKER_URL_{BR,IT,EN})
 
   // ===== i18n Triple-Market =====
   // Obrigatório nos scripts build:br / build:it / build:en
@@ -87,7 +83,6 @@ export function getValidatedEnv(): Env {
     NEXT_PUBLIC_GA4_MEASUREMENT_ID: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
     NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     NEXT_PUBLIC_CLOUDFLARE_ZONE_ID: process.env.NEXT_PUBLIC_CLOUDFLARE_ZONE_ID,
-    NEXT_PUBLIC_NEWSLETTER_API_URL: process.env.NEXT_PUBLIC_NEWSLETTER_API_URL,
     NEXT_PUBLIC_LOCALE: process.env.NEXT_PUBLIC_LOCALE,
     OUT_DIR: process.env.OUT_DIR,
   })

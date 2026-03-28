@@ -1,0 +1,133 @@
+---
+title: "How to Build a Marketplace from Scratch"
+slug: "how-to-build-a-marketplace-from-scratch"
+date: "2024-07-22"
+description: "Architecture and technical decisions for building a marketplace: tech stack, multi-vendor data model, payments split, and seller dashboard."
+tags: ["marketplace", "architecture", "multi-vendor", "e-commerce", "development"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Architecture and technical decisions for building a marketplace — multi-vendor data model, payment splits, seller dashboard, and a realistic roadmap.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-construir-marketplace-do-zero'
+  - locale: 'it-IT'
+    slug: 'come-costruire-marketplace-da-zero'
+---
+
+A marketplace is not an e-commerce store with more products. It's a platform that connects two sides of a market — buyers and sellers — and charges for that intermediation. This conceptual difference translates into real technical complexity: you need segregated accounts, automatic financial transfers, per-seller dashboards, dual review systems, quality rules, and at minimum, twice the interface surface area.
+
+If you're considering building a marketplace, it's safe to say the technical complexity is three times greater than a simple e-commerce store. This isn't an exaggeration — it's what practice shows in real projects. Before starting, it's critical to understand where this complexity lives and how to architect the system so it doesn't become irrecoverable technical debt.
+
+## Data Model: Sellers, Products, and Orders
+
+The main architectural difference in a marketplace lies in the data model. In a traditional e-commerce store, there's a single "owner" of products. In a marketplace, every product belongs to a seller, every order can contain items from different sellers, and every payment must be split precisely.
+
+The core model revolves around four main entities:
+
+```sql
+-- Sellers with their own financial account
+CREATE TABLE sellers (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES users(id),
+  slug TEXT UNIQUE NOT NULL,
+  display_name TEXT NOT NULL,
+  commission_rate NUMERIC(5, 2) NOT NULL DEFAULT 10.00,
+  payment_account_id TEXT, -- ID in the payment gateway
+  status TEXT NOT NULL DEFAULT 'pending', -- pending, active, suspended
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Products linked to a seller
+CREATE TABLE products (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  seller_id UUID REFERENCES sellers(id) NOT NULL,
+  title TEXT NOT NULL,
+  price_cents INTEGER NOT NULL,
+  stock INTEGER NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'draft', -- draft, active, paused
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Orders with items from multiple sellers
+CREATE TABLE orders (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  buyer_id UUID REFERENCES users(id),
+  total_cents INTEGER NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Items segregated by seller to facilitate payouts
+CREATE TABLE order_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  order_id UUID REFERENCES orders(id),
+  seller_id UUID REFERENCES sellers(id),
+  product_id UUID REFERENCES products(id),
+  quantity INTEGER NOT NULL,
+  unit_price_cents INTEGER NOT NULL,
+  commission_cents INTEGER NOT NULL,
+  seller_net_cents INTEGER NOT NULL
+);
+```
+
+This separation between `order_items` and `orders` is fundamental. It allows calculating exactly how much each seller should receive per order, even when the customer buys from multiple sellers in a single transaction.
+
+The `commission_cents` and `seller_net_cents` columns should be calculated at item creation time — not at payout time. This prevents problems if commission rates change over time.
+
+## Seller Dashboard: What to Build on Day 1
+
+The seller dashboard is where most teams underestimate the scope. On day 1 of a functional MVP, the seller needs at minimum:
+
+**Catalog management:** create, edit, and pause products. This includes image upload, rich description, variants (size, color), and per-SKU stock control.
+
+**Order management:** view orders containing their products, update status (confirmed, picking, shipped, delivered), and communicate the tracking code.
+
+**Basic financials:** view available balance, pending balance (holdback period), and history of completed payouts. Financial transparency is essential for attracting serious sellers.
+
+**Account settings:** bank details for receiving payments, tax information (EIN/VAT), and shipping policy configuration.
+
+All of this before launch. Sellers who can't manage their products autonomously abandon the platform within the first few weeks.
+
+## Recommended Stack for Marketplaces in 2025
+
+Stack choice directly affects development speed and the ability to scale critical features.
+
+| Layer | Primary Option | Alternative |
+|---|---|---|
+| Buyer frontend | Next.js 14 + App Router | Remix |
+| Seller dashboard | Next.js 14 (separate panel) | React SPA |
+| Backend/API | Node.js + Fastify | NestJS |
+| Database | PostgreSQL (Supabase) | PlanetScale |
+| Payments | Stripe Connect | PayPal Marketplace |
+| Job queue | BullMQ (Redis) | Inngest |
+| Storage | Cloudflare R2 | AWS S3 |
+| Search | Typesense | Algolia |
+| Deploy | Vercel + Railway | AWS |
+
+Separating the buyer frontend from the seller dashboard isn't required in the MVP, but is highly recommended. The two interfaces have completely different UX needs and tend to grow in opposite directions.
+
+Using BullMQ or Inngest for async jobs is essential from day 1. Financial payouts, notification emails, stock updates, and image processing shouldn't happen synchronously in the HTTP request.
+
+## Roadmap: From MVP to Scalable Marketplace
+
+A realistic roadmap for a marketplace follows three distinct phases:
+
+**Phase 1 — Functional MVP (2-4 months):** seller registration and onboarding, basic catalog, cart and checkout with payment split, seller dashboard with order management and simple financials, basic review system (only buyers review sellers).
+
+**Phase 2 — Growth (3-6 months):** advanced search with seller/category/price filters, coupon and promotions program, shipping carrier integration for automatic rate calculation, mobile app (if target audience is primarily mobile), dispute resolution system.
+
+**Phase 3 — Scale (ongoing):** personalized recommendations with ML, premium seller program with differentiated commissions, public API for external integrations (seller ERPs), advanced category analytics, payment method expansion.
+
+The most common trap is trying to deliver Phase 3 together with Phase 1. The result is delayed launch, complex technology with few users to justify it, and technical debt that blocks future growth.
+
+## Conclusion
+
+Building a marketplace from scratch requires correct technical decisions from the start. A poorly planned data model, a wrong payment gateway choice, or an unusable seller dashboard can compromise months of development.
+
+SystemForge accelerates this process by generating all the technical documentation — PRD, architecture, LLD, User Stories, detailed tasks — before writing the first line of code. With this approach, the development team starts with clarity on what to build, in what order, and why.
+
+If you're starting a marketplace or need to reorganize an existing project, SystemForge can significantly reduce technical risk and uncertainty in your next project.

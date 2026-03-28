@@ -1,0 +1,145 @@
+---
+title: "Sistemi per agenzie immobiliari: integrazione con i portali"
+slug: "sistema-immobiliare-integrazione-portali"
+date: "2024-11-26"
+description: "Requisiti del CRM immobiliare: gestione immobili, integrazione con Idealista/Immobiliare.it/Subito.it, contratti digitali e provvigioni degli agenti."
+tags: ["agenzia immobiliare", "crm immobiliare", "idealista", "immobiliare.it", "integrazione portali"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Requisiti del CRM immobiliare: gestione immobili, integrazione con Idealista/Immobiliare.it/Subito.it, contratti digitali e provvigioni degli agenti."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistemas-imobiliarias-integracoes-portais'
+  - locale: 'en'
+    slug: 'real-estate-software-portal-integrations'
+---
+
+Un'agenzia immobiliare senza integrazione con i portali di annunci perde annunci ogni settimana. Non per mancanza di immobili — ma perché l'aggiornamento manuale degli annunci su Idealista, Immobiliare.it, Subito.it e sul sito dell'agenzia è un lavoro che nessun team mantiene con costanza. Un immobile venduto continua ad essere pubblicato per giorni, generando lead di qualità nulla. Un nuovo immobile acquisito impiega una settimana ad apparire sui portali perché il coordinatore degli annunci era in ferie. Un prezzo aggiornato nel sistema interno non si riflette sui portali finché qualcuno non ricorda di aggiornarlo manualmente.
+
+Il CRM immobiliare moderno non è solo un'agenda di lead e un foglio Excel di immobili. È la fonte unica della verità per il portafoglio, con sincronizzazione automatica su tutti i canali, gestione documentale dei contratti, firma elettronica e calcolo automatico delle provvigioni. Questo articolo dettaglia i requisiti tecnici di ciascuno di questi pilastri.
+
+## Integrazione con Idealista, Immobiliare.it e Subito.it tramite API
+
+I principali portali immobiliari italiani (Idealista, Immobiliare.it e Subito.it) hanno sistemi di pubblicazione distinti. L'integrazione con loro segue due modelli principali:
+
+**Modello XML Feed**: il sistema dell'agenzia genera un file XML standardizzato con tutti gli immobili disponibili. Il portale "preleva" questo XML a intervalli regolari (di solito ogni 2-4 ore) e aggiorna gli annunci. È il modello più semplice da implementare e il più comune per le agenzie di medie dimensioni.
+
+**Modello API REST**: integrazione diretta tramite API per creare, aggiornare e rimuovere annunci in tempo reale. Richiede credenziali di partner presso il portale e offre una sincronizzazione più rapida.
+
+Lo standard XML del mercato immobiliare italiano è basato su schema comuni che includono:
+
+```xml
+<Immobile>
+  <CodiceImmobile>IMM-2024-001</CodiceImmobile>
+  <TipoImmobile>Appartamento</TipoImmobile>
+  <Comune>Milano</Comune>
+  <Zona>Navigli</Zona>
+  <Provincia>MI</Provincia>
+  <CAP>20144</CAP>
+  <TipoContratto>Vendita</TipoContratto>
+  <PrezzoVendita>450000.00</PrezzoVendita>
+  <SpeseCondominiali>250.00</SpeseCondominiali>
+  <IMU>1800.00</IMU>
+  <SuperficieUtile>78</SuperficieUtile>
+  <SuperficieTotale>92</SuperficieTotale>
+  <NumeroLocali>3</NumeroLocali>
+  <NumeroServizi>2</NumeroServizi>
+  <PostiAuto>1</PostiAuto>
+  <Descrizione><![CDATA[Appartamento ottimamente posizionato...]]></Descrizione>
+  <Foto>
+    <Immagine Ordine="1">https://cdn.agenzia.it/foto/imm001-1.jpg</Immagine>
+    <Immagine Ordine="2">https://cdn.agenzia.it/foto/imm001-2.jpg</Immagine>
+  </Foto>
+  <Stato>Disponibile</Stato>
+</Immobile>
+```
+
+L'architettura di sincronizzazione ideale prevede:
+
+1. **Database immobili come fonte di verità**: qualsiasi modifica (prezzo, stato, foto) viene effettuata una sola volta nel sistema dell'agenzia.
+2. **Generazione automatica dell'XML feed**: job che rigenera il file XML ad ogni aggiornamento o a intervalli configurabili.
+3. **Webhook di stato**: quando un portale notifica che un annuncio è stato disattivato (foto inadeguata, prezzo fuori mercato), il sistema interno riceve la notifica e avvisa il responsabile.
+4. **Log di sincronizzazione**: storico di quando ogni immobile è stato inviato a ciascun portale, con stato di conferma o errore.
+
+Per portali minori o siti propri dell'agenzia, l'integrazione tramite API REST è più indicata. Il sistema interno espone un endpoint che il sito consuma direttamente:
+
+```
+GET /api/immobili?tipo=appartamento&zona=navigli&prezzo_max=500000
+GET /api/immobili/{codice}
+GET /api/immobili/{codice}/foto
+```
+
+## Gestione degli Immobili: Foto, Planimetrie e Documenti
+
+La qualità delle foto è il principale fattore di conversione negli annunci immobiliari — più di prezzo o posizione nel ranking dei portali. Il sistema necessita di una gestione robusta dei media.
+
+**Upload e ottimizzazione automatica**: le foto caricate dall'agente devono essere ridimensionate, convertite in WebP e archiviate su CDN con URL permanenti. Il sistema non deve accettare foto al di sotto di una risoluzione minima (es: 1280×720px).
+
+**Ordinamento e selezione della copertina**: l'agente deve poter definire l'ordine delle foto e selezionare l'immagine di copertina. La foto di copertina è il thumbnail nei risultati di ricerca dei portali — ha un impatto diretto sul CTR dell'annuncio.
+
+**Planimetrie e video**: oltre alle foto, il sistema deve supportare il caricamento di planimetrie (PDF o immagine), video tour virtuali e link a tour 360° (Matterport, Google Street View).
+
+**Documenti dell'immobile**: atto di provenienza, visura catastale aggiornata, certificato di agibilità, certificato energetico (APE), verbale di assemblea condominiale. Ogni documento con data di scadenza e avvisi per i documenti periodici.
+
+**Storico fotografico**: quando l'immobile viene ristrutturato o le foto vengono aggiornate, lo storico precedente deve essere conservato (con flag "archiviato"), non cancellato — utile per contestazioni sullo stato dell'immobile.
+
+| Tipo di media | Formati accettati | Dimensione massima | Archiviazione |
+|---------------|-------------------|--------------------|---------------|
+| Foto | JPG, PNG, HEIC | 20MB | CDN (S3 + CloudFront) |
+| Planimetrie | PDF, JPG | 50MB | S3 con accesso controllato |
+| Video | MP4 | 500MB | S3 o link esterno (YouTube) |
+| Documenti | PDF | 20MB | S3 con accesso limitato |
+
+## Contratti Digitali con Firma Elettronica
+
+La firma elettronica dei contratti immobiliari è giuridicamente valida in Italia ai sensi del Regolamento eIDAS (UE 910/2014) e del Codice del Consumo. Per i contratti che richiedono forma scritta (compravendita, locazione), è valida la firma elettronica avanzata con sistema di autenticazione adeguato.
+
+Per l'agenzia, la digitalizzazione del processo contrattuale elimina lo scambio fisico di documenti, riduce i tempi di chiusura da 15 giorni a 24-48 ore e crea un archivio verificabile di tutte le firme.
+
+Il flusso di contratto digitale integrato nel CRM:
+
+1. **Generazione del contratto**: selezione del template (locazione residenziale, compravendita, mandato di vendita), compilazione automatica con dati dell'immobile, parti coinvolte e condizioni concordate.
+2. **Revisione interna**: il responsabile approva la versione del contratto prima di inviarla per la firma.
+3. **Invio per la firma**: link sicuro inviato a tutte le parti (conduttore, locatore, garante, testimoni) via email e WhatsApp.
+4. **Firma elettronica**: ogni parte firma con certificato digitale qualificato eIDAS (firma qualificata) o tramite autenticazione con codice fiscale + selfie + biometria (firma avanzata, valida per la maggior parte delle locazioni).
+5. **Registrazione e archiviazione**: documento finale firmato da tutte le parti, con marca temporale qualificata, archiviato collegato all'immobile e alle parti nel CRM.
+6. **Notifiche**: avvisi automatici per firme in sospeso e conferma quando tutte le parti hanno firmato.
+
+Le piattaforme di firma elettronica più usate in Italia con API per integrazione sono Namirial, InfoCert e ARX One Sign. Namirial è molto usata nel settore immobiliare per il supporto a certificati ICP A1/A3 e i prezzi accessibili per il volume tipico del settore.
+
+## Provvigioni e Trasferimenti: Calcolo Automatico per Affare
+
+Il calcolo delle provvigioni nelle agenzie immobiliari è una fonte ricorrente di conflitti quando fatto manualmente. Chi ha acquisito l'immobile, chi ha portato l'acquirente, come viene divisa la provvigione in caso di collaborazione tra agenzie — ogni regola deve essere nel sistema affinché il trasferimento sia trasparente e tracciabile.
+
+Le regole di provvigione variano per agenzia, ma i modelli più comuni sono:
+
+**Provvigione per transazione**: percentuale sul valore della transazione (solitamente 2-4% sia per acquirente che venditore in Italia per la vendita, 1-2 mensilità per la locazione). Il sistema calcola automaticamente alla chiusura dell'affare.
+
+**Divisione per ruolo**:
+- Agente acquisitore (chi ha ottenuto il mandato): 30-40% della provvigione totale
+- Agente venditore (chi ha portato l'acquirente): 30-40% della provvigione totale
+- Agenzia: 20-40% della provvigione totale
+
+**Co-brokeraggio**: quando due agenzie partecipano alla transazione, la provvigione è divisa tra loro secondo accordo previo. Il sistema deve supportare affari con più agenzie coinvolte.
+
+**Provvigione a rate**: nelle vendite con rogito dilazionato, la provvigione può essere incassata in più tranche (alla firma del preliminare, al rogito). Il sistema deve gestire gli importi da ricevere in ogni fase.
+
+Il modulo finanziario delle provvigioni deve includere:
+
+- Dashboard per agente con provvigioni realizzate, da ricevere e previste
+- Report mensile di produzione individuale e di team
+- Nota di provvigione (documento per l'agente autonomo per emettere fattura)
+- Integrazione con il sistema contabile per gli agenti dipendenti
+- Storico completo di ogni affare con tutte le parti e percentuali applicate
+
+## Conclusione
+
+Il CRM immobiliare non è solo un'agenda di contatti e un elenco di immobili. È l'infrastruttura operativa che determina la velocità di chiusura, la qualità degli annunci sui portali, l'agilità nella documentazione e la trasparenza nelle provvigioni.
+
+Le agenzie che ancora operano con fogli di calcolo + WhatsApp + Google Drive pagano un costo invisibile elevato: lead persi per annuncio non aggiornato, contratti in ritardo per documento fisico smarrito, agenti insoddisfatti per provvigioni calcolate manualmente in modo opaco.
+
+SystemForge sviluppa CRM immobiliari con integrazione nativa con i principali portali, gestione documentale completa e modulo finanziario delle provvigioni parametrizzabile. Se stai riformulando il sistema della tua agenzia o costruendo una soluzione per il settore, parliamo dello scope ideale per il tuo modello di business.

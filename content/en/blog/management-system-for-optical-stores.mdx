@@ -1,0 +1,87 @@
+---
+title: "Management System for Optical Stores: From Registration to Inventory"
+slug: "management-system-for-optical-stores"
+date: "2024-10-05"
+description: "Software requirements for optical store management: optical prescription registration, customer history, frame/lens inventory control, and lab integration."
+tags: ["optical store", "sector management", "optical software", "inventory", "optical prescription"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Software requirements for optical store management: optical prescription registration, customer history, frame/lens inventory control, and lab integration."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-gestao-para-oticas'
+  - locale: 'it-IT'
+    slug: 'sistema-gestionale-per-ottici'
+---
+
+When an optical store tries to use a generic management system -- whether a retail ERP or a financial control tool -- it inevitably hits a fundamental problem: generic systems don't know what an optical prescription is. They don't understand sphere, cylinder, axis, addition, and PD. They don't know that a size 52 frame doesn't work with just any lens, that a progressive lens order has a different lead time than a single vision lens, or that a customer's prescription history is as important as their purchase history.
+
+The result is a proliferation of parallel spreadsheets, paper prescriptions that get lost, imprecise inventory control, and lab orders placed via text message. The invisible cost of these inefficiencies -- in rework, order errors, and optometrist time -- frequently exceeds the investment in a specialized system.
+
+## Data Model: Optical Prescription, Frame, and Lens
+
+The technical heart of an optical store system is the optical prescription data structure. An optical prescription isn't free text -- it's a set of numeric and categorical fields with specific validations that need to be treated as structured data to be useful.
+
+```sql
+CREATE TABLE optical_prescriptions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  customer_id UUID NOT NULL REFERENCES customers(id),
+  optometrist VARCHAR(200),
+  optometrist_license VARCHAR(20),
+  prescription_date DATE NOT NULL,
+  expiry_date DATE,
+
+  -- Right Eye (OD)
+  od_sph DECIMAL(4,2),   -- Sphere: -20.00 to +20.00, steps of 0.25
+  od_cyl DECIMAL(4,2),   -- Cylinder: -8.00 to +8.00, steps of 0.25
+  od_axis SMALLINT,      -- Axis: 0 to 180 degrees
+  od_add DECIMAL(3,2),   -- Addition (bifocal/progressive): +0.75 to +4.00
+  od_pd DECIMAL(4,1),    -- Pupillary distance OD (mm)
+
+  -- Left Eye (OS)
+  os_sph DECIMAL(4,2),
+  os_cyl DECIMAL(4,2),
+  os_axis SMALLINT,
+  os_add DECIMAL(3,2),
+  os_pd DECIMAL(4,1),
+
+  -- Additional data
+  total_pd DECIMAL(4,1),
+  fitting_height SMALLINT,  -- for progressive lenses (mm)
+  notes TEXT,
+  usage VARCHAR(20),        -- 'distance', 'near', 'progressive', 'sunglasses'
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+```
+
+The frame and lens model needs to handle inventory with grid granularity. A frame doesn't exist just as "model X brand Y" -- it exists in specific combinations of color, rim, and size. Similarly, lenses exist in different refraction indices (1.53, 1.56, 1.60, 1.67, 1.74), treatments (AR, Blue Light, photochromic), and designs (spherical, aspheric, progressive).
+
+## Customer History: Prescription Evolution Over Time
+
+One of the features that most differentiates specialized optical store systems is the visualization of prescription evolution over time. The system should offer a chronological timeline of all prescriptions with significant change indicators (variation greater than 0.50D in any field).
+
+**Expired prescription alerts**: optical prescriptions have medical validity (usually 12 months). The system should automatically alert when a customer returns for a purchase and their last prescription is expired.
+
+## Lab Orders: Integration and Tracking
+
+The lens-to-lab order flow is a critical operational point. The system should cover: complete order creation with all necessary lab data, digital submission via API, status tracking, deadline control with alerts, and incident logging.
+
+## Specialized Inventory: Lens and Frame Grid
+
+Inventory control for optical stores has particularities that generic retail systems don't adequately support.
+
+**Frame inventory by grid**: a silver frame size 50 is a different item from the same frame in gold size 52. The system needs to control inventory in attribute combinations (color x size x material), not just by model.
+
+**Consignment**: part of the frame inventory may be on consignment with suppliers -- the store only pays when it sells. The system needs to distinguish owned from consigned inventory.
+
+**Automatic reorder point**: based on each product's turnover history, the system should calculate the reorder point and generate alerts or automatic orders when stock reaches the minimum level.
+
+## Conclusion
+
+A management system for optical stores needs to be built by people who understand that the optical business isn't just retail -- it's a combination of commerce, technical service, and (for stores with optometrists) visual health. The software needs to speak the sector's language: sphere, cylinder, axis, addition, PD, refraction index, treatments.
+
+SystemForge develops sector-specific systems with data modeling specific to each vertical. Visit [systemforgesoftware.com](https://systemforgesoftware.com) if you're thinking about building or overhauling your optical store system.

@@ -20,7 +20,7 @@ export const brConfig: SiteConfig = {
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
   calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge',
-  budgetEngine: process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://forjadesistemas.com.br',
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.corgnati.com/quote'}?locale=pt-BR`,
   address: 'Curitiba/PR, Brasil',
   compliance: 'LGPD',
   currency: 'BRL',
@@ -42,7 +42,7 @@ export const brConfig: SiteConfig = {
     description:
       'Desenvolvemos software sob medida: SaaS, apps mobile, landing pages, e-commerce, dashboards e automações com IA.',
     titleTemplate: '%s | Forja de Sistemas',
-    ogImage: '/images/og-image.png',
+    ogImage: '/og/og-br.png',
   },
   routes: {
     home: '/',
@@ -61,10 +61,14 @@ export const brConfig: SiteConfig = {
     contact: '/#contato',
   },
   newsletter: {
-    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL  // fallback legado
+      ?? '',
     doubleOptIn: false,
   },
   newsletterApiUrl:
-    process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL
+      ?? '',
   ga4MeasurementId: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
 }

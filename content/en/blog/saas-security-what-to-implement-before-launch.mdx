@@ -1,0 +1,71 @@
+---
+title: "SaaS Security: What to Implement Before Launch"
+slug: "saas-security-what-to-implement-before-launch"
+date: "2024-10-30"
+description: "Mandatory security checklist for SaaS before launch: authentication, authorization, encryption, rate limiting, auditing, and data protection."
+tags: ["saas security", "authentication", "owasp", "encryption", "saas compliance"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Mandatory security checklist for SaaS before launch: authentication, authorization, encryption, rate limiting, auditing, and data protection."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-saas-o-que-implementar-antes-de-lancar'
+  - locale: 'it-IT'
+    slug: 'sicurezza-saas-cosa-implementare-prima-del-lancio'
+---
+
+A security failure right after launch can end a SaaS before it even has a chance to prove its value. Not because the attack is necessarily catastrophic in scale -- but because reputation is the most fragile asset of a new product. A customer data breach in the first month of operation is rarely recoverable.
+
+The good news is that most vulnerabilities exploited in new SaaS products aren't sophisticated zero-days. They're basic, predictable failures: passwords without attempt limits, tokens exposed in logs, missing permission validation on API endpoints, sensitive data without encryption. Addressing these vulnerabilities before launch is laborious but entirely feasible.
+
+## Authentication: MFA, Session Management, and Brute Force
+
+For B2B SaaS, MFA is not optional -- it's expected. Corporate clients frequently require TOTP (Google Authenticator, Authy) support as a security requirement.
+
+**Brute force protection:** Every login endpoint needs specific rate limiting by IP and by email.
+
+**Session Management:**
+- JWT access tokens with 15 to 60 minute expiration
+- Refresh tokens with rotation -- each use invalidates the previous one
+- Session revocation on password change or suspicious activity detection
+- HttpOnly cookies for browser token storage (never localStorage for sensitive access tokens)
+
+## Authorization: RBAC and Least Privilege Principle
+
+Authentication verifies *who* the user is. Authorization verifies *what they can do*. They're different problems, and confusing them is one of the most common vulnerability sources in SaaS.
+
+The most common mistake is checking authentication (is the user logged in?) but not authorization (does the user have permission for this specific resource?). A member with access to organization A should never be able to read or modify organization B's data -- even when authenticated.
+
+## Encryption: Data at Rest and in Transit
+
+**In transit:** HTTPS mandatory on all endpoints. No exceptions. Configure HSTS to force HTTPS even if someone tries to access via HTTP.
+
+**At rest:** Sensitive data needs encryption:
+- Passwords: never store in plain text. Use bcrypt, Argon2, or scrypt with salt
+- MFA secrets and API keys: symmetric encryption with key managed outside the database (AWS KMS, Vault, environment variable)
+- Sensitive personal data (SSN, health data, financial): field-level encryption when required by CCPA/GDPR
+
+## Pre-launch Security Checklist
+
+| Item | Priority |
+|------|----------|
+| HTTPS + HSTS on all endpoints | Mandatory |
+| Rate limiting on login and public routes | Mandatory |
+| Passwords with bcrypt/Argon2 | Mandatory |
+| Authorization verification on all endpoints | Mandatory |
+| HTTP security headers configured | Mandatory |
+| Environment variables never in repository | Mandatory |
+| MFA available (not mandatory in MVP) | Recommended |
+| Sensitive field encryption | Recommended |
+| Security audit logs | Recommended |
+| Dependency scanning (npm audit) | Recommended |
+
+## Conclusion
+
+Security isn't a feature you add later -- it's a layer that permeates the entire architecture. The mandatory items on this list take two to four days to implement correctly in a new SaaS. Those are days worth years of protected reputation.
+
+At **SystemForge**, security is part of the standard checklist for every SaaS we deliver: auth with MFA, implemented RBAC, configured headers, sensitive field encryption, and audit logs ready before the first deploy. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to build your SaaS with the right security from the foundation.

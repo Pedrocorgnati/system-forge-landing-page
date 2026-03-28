@@ -35,10 +35,6 @@ const EnvSchema = z.object({
   NEXT_PUBLIC_CLOUDFLARE_ZONE_ID: z
     .string()
     .optional(),
-  NEXT_PUBLIC_NEWSLETTER_API_URL: z
-    .string()
-    .url()
-    .optional(),
   NEXT_PUBLIC_LOCALE: z
     .enum(['pt-BR', 'it-IT', 'en'] as const)
     .optional(),

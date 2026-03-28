@@ -160,6 +160,7 @@ export interface LocaleMessages {
     managePreferences?: string
     gotIt?: string
     legalReference: string
+    cookiePreferences?: string
   }
   cookieModal?: {
     title: string

@@ -1,0 +1,89 @@
+---
+title: "RPA with Python: Automate Without Enterprise Tools"
+slug: "rpa-with-python-automate-without-enterprise-tools"
+date: "2024-08-12"
+description: "How to use Python for robotic process automation without UiPath or Automation Anywhere -- Playwright, Selenium, and PyAutoGUI with real examples."
+tags: ["rpa", "python", "automation", "playwright", "selenium"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to use Python for robotic process automation without UiPath or Automation Anywhere -- Playwright, Selenium, and PyAutoGUI with real examples."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rpa-com-python-automatize-tarefas-repetitivas'
+  - locale: 'it-IT'
+    slug: 'rpa-con-python-automatizzare-senza-investimento'
+---
+
+RPA -- Robotic Process Automation -- has become synonymous with UiPath, Automation Anywhere, and Blue Prism: enterprise platforms with six-figure annual contracts, implementation teams, and steep learning curves. But the truth is that most companies don't need any of that. If the process can be described in logical steps and happens on a computer, Python solves it.
+
+The premise of RPA is simple: automate the repetitive work a human does in front of a computer. Login to systems, data extraction from spreadsheets, form filling, rule-based email sending, report generation -- all of this can be done by a Python script running in the background, with no license cost, no vendor lock-in, and total control over the code.
+
+## Playwright vs Selenium vs PyAutoGUI: When to Use Each
+
+```
+Target system        -> Recommended tool
+-----------------------------------------
+Website / Web App    -> Playwright
+Legacy web system    -> Selenium (compatibility)
+Desktop app / ERP    -> PyAutoGUI
+PDF / Spreadsheet    -> pdfplumber + openpyxl (no RPA needed)
+API available        -> requests + httpx (no RPA needed)
+```
+
+Practical rule: if there's an API, use the API. RPA is the last resort, not the first.
+
+## Web Automation: Login, Data Extraction, and Forms
+
+```python
+from playwright.sync_api import sync_playwright
+import json
+
+def extract_orders_from_portal(username: str, password: str) -> list[dict]:
+    orders = []
+
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        page = browser.new_page()
+
+        # Login
+        page.goto("https://supplier-portal.example.com/login")
+        page.fill("#username", username)
+        page.fill("#password", password)
+        page.click("button[type='submit']")
+        page.wait_for_url("**/dashboard")
+
+        # Navigate to orders
+        page.click("nav >> text=Orders")
+        page.wait_for_selector("table.orders-table")
+
+        # Extract table rows
+        rows = page.query_selector_all("table.orders-table tbody tr")
+        for row in rows:
+            cols = row.query_selector_all("td")
+            orders.append({
+                "number": cols[0].inner_text(),
+                "date": cols[1].inner_text(),
+                "amount": cols[2].inner_text(),
+                "status": cols[3].inner_text(),
+            })
+
+        browser.close()
+
+    return orders
+```
+
+## Scheduling with Cron and Failure Monitoring
+
+An RPA script that runs once manually has little value. The real value comes from scheduled scripts that run autonomously. On Linux and macOS, the native scheduler is cron. On Windows, use Task Scheduler.
+
+Failure monitoring is where most amateur scripts fail silently. The solution is to send an alert on exceptions using email, Slack, or Sentry.
+
+## Conclusion
+
+RPA with Python isn't the solution for everything, but it's the right solution for repetitive processes in systems without an available API. The combination of Playwright for web, PyAutoGUI for desktop, cron scheduling, and failure monitoring covers 90% of the use cases that mid-size companies face -- without the license cost of enterprise platforms.
+
+At SystemForge, we implement custom RPA automations -- mapping your manual processes, identifying what can be safely automated, and delivering production-ready scripts with monitoring included. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to learn how much time your team can recover.

@@ -11,8 +11,8 @@
  *   locale: SupportedLocale          (ex: "pt-BR", "it-IT", "en")
  *
  * Campos opcionais para controle de visibilidade entre locales:
- *   hreflang_pair: 'universal'       (artigo aparece em todos os builds)
- *   exclusive: true                  (artigo apenas no seu locale)
+ *   hreflang_pair: Array<{locale, slug}>  (pares de tradução entre locales)
+ *   exclusive: true                       (artigo apenas no seu locale)
  *
  * Ver: module-7-blog-pipeline/TASK-1.md (ST003) para a estrutura de frontmatter.
  *
@@ -28,7 +28,7 @@ import { getActiveLocale } from '@/lib/i18n'
  *
  * Regras de filtro:
  * - `article.relatedService === service` (filtro por categoria)
- * - `article.locale === locale` OU `article.hreflang_pair === 'universal'`
+ * - `article.locale === locale` (filtro por locale ativo do build)
  * - Exclui artigos com `exclusive === true` cujo `article.locale !== locale`
  *
  * @param service - ServiceCategory do serviço
@@ -50,15 +50,13 @@ export function getRelatedArticles(
       // Filtro por serviço relacionado
       if (a.relatedService !== service) return false
 
-      // Artigos com hreflang_pair aparecem em múltiplos locales
-      if (a.hreflang_pair && a.hreflang_pair.length > 0) return true
-
       // Artigos exclusivos de outro locale são excluídos
       if (a.exclusive === true && a.locale !== locale) return false
 
       // Artigos sem locale definido aparecem em todos os builds (backwards compat)
       if (!a.locale) return true
 
+      // Filtro por locale ativo (Velite já isola por build, mas defesa em profundidade)
       return a.locale === locale
     })
     .slice(0, 3)

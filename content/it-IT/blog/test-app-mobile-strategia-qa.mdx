@@ -1,0 +1,190 @@
+---
+title: "Test per app mobile: strategia di QA completa"
+slug: "test-app-mobile-strategia-qa"
+date: "2024-09-23"
+description: "Come strutturare i test per app React Native — test unitari con Jest, componenti con Testing Library, E2E con Detox e test su dispositivi reali."
+tags: ["test mobile", "react native", "jest", "detox", "qa mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come strutturare i test per app React Native — test unitari con Jest, componenti con Testing Library, E2E con Detox e test su dispositivi reali.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'testes-apps-mobile-estrategia-qa'
+  - locale: 'en'
+    slug: 'mobile-app-testing-complete-qa-strategy'
+---
+
+Un'app senza test è un lancio con una bomba a orologeria. La domanda non è se esploderà, ma quando — e se sarà durante lo sviluppo, dove il costo è basso, o in produzione, dove il costo è alto: utenti che si lamentano, recensioni negative sullo store, churn che avrebbe potuto essere evitato. I test non sono opzionali nel software professionale. In mobile, dove il ciclo di deploy è più lento (qualsiasi aggiornamento deve superare la revisione degli store), testare è ancora più critico.
+
+La buona notizia è che non hai bisogno di testare tutto per avere un'app affidabile. Devi testare le cose giuste al livello giusto.
+
+## Piramide dei Test per Mobile: Dove Investire
+
+La piramide dei test è un modello mentale per distribuire l'effort di QA in modo efficiente. La base della piramide ha più test, più veloci e meno costosi. La cima ha meno test, più lenti e costosi, ma che validano il comportamento reale dell'app.
+
+```
+        /\
+       /E2E\          <- Detox, Appium (pochi, lenti, costosi)
+      /------\
+     /Integra-\       <- Componenti con Testing Library
+    /  zione   \
+   /------------\
+  /  Unitari    \     <- Jest (molti, veloci, economici)
+ /----------------\
+```
+
+**Test unitari (base):** Testano funzioni e logica di business isolate. Senza rendering, senza chiamate di rete. Sono i più veloci da scrivere e da eseguire. Ogni funzione che fa calcoli, trasforma dati o implementa regole di business deve avere un test unitario.
+
+**Test di componenti (centro):** Testano componenti React Native renderizzati, ma senza il dispositivo reale. Verificano se il componente esegue correttamente il rendering, risponde alle interazioni dell'utente e mostra gli stati previsti (loading, error, empty, filled).
+
+**Test E2E (cima):** Eseguono l'app reale su un simulatore o dispositivo fisico, simulando le azioni dell'utente. Sono i più vicini alla realtà ma i più lenti. Devono coprire solo i flussi critici: onboarding, login, azione principale dell'app, checkout.
+
+La distribuzione consigliata per i progetti React Native: 60-70% unitari, 20-30% componenti, 10% E2E.
+
+## Jest e React Native Testing Library: Unitari e Componenti
+
+Jest è il test runner standard per React Native. La combinazione con React Native Testing Library (RNTL) copre sia i test unitari che quelli di componenti.
+
+Test unitario di una funzione di business:
+
+```typescript
+// utils/currency.ts
+export function formatEUR(valueInCents: number): string {
+  return new Intl.NumberFormat('it-IT', {
+    style: 'currency',
+    currency: 'EUR',
+  }).format(valueInCents / 100);
+}
+
+// utils/currency.test.ts
+import { formatEUR } from './currency';
+
+describe('formatEUR', () => {
+  it('formatta i centesimi in euro con simbolo', () => {
+    expect(formatEUR(1990)).toBe('19,90 €');
+  });
+
+  it('formatta correttamente il valore zero', () => {
+    expect(formatEUR(0)).toBe('0,00 €');
+  });
+
+  it('formatta valori elevati senza perdita di precisione', () => {
+    expect(formatEUR(100000)).toBe('1.000,00 €');
+  });
+});
+```
+
+Test di componente con RNTL:
+
+```typescript
+// components/ProductCard.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react-native';
+import { ProductCard } from './ProductCard';
+
+const mockProduct = {
+  id: '1',
+  name: 'Caffè Speciale',
+  price: 490,
+  imageUrl: 'https://example.com/caffe.jpg',
+};
+
+describe('ProductCard', () => {
+  it('mostra il nome e il prezzo del prodotto', () => {
+    render(<ProductCard product={mockProduct} onPress={jest.fn()} />);
+
+    expect(screen.getByText('Caffè Speciale')).toBeTruthy();
+    expect(screen.getByText('4,90 €')).toBeTruthy();
+  });
+
+  it('chiama onPress al tocco della card', () => {
+    const onPressMock = jest.fn();
+    render(<ProductCard product={mockProduct} onPress={onPressMock} />);
+
+    fireEvent.press(screen.getByTestId('product-card'));
+
+    expect(onPressMock).toHaveBeenCalledWith('1');
+  });
+
+  it('mostra lo stato di loading quando imageUrl è null', () => {
+    render(
+      <ProductCard
+        product={{ ...mockProduct, imageUrl: null }}
+        onPress={jest.fn()}
+      />
+    );
+
+    expect(screen.getByTestId('image-placeholder')).toBeTruthy();
+  });
+});
+```
+
+Una pratica importante: aggiungi sempre `testID` nei componenti che verranno testati. RNTL dà priorità alle query per testo accessibile (`getByText`, `getByRole`), ma `getByTestId` è necessario per gli elementi senza testo visibile.
+
+## Detox: E2E su Simulatore e Dispositivo Reale
+
+Detox è il framework E2E più adottato per React Native. Esegue l'app reale su un simulatore (iOS Simulator o Android Emulator) e simula gesture, tocchi e input da tastiera.
+
+```typescript
+// e2e/login.test.ts
+import { device, element, by, expect as detoxExpect } from 'detox';
+
+describe('Flusso di Login', () => {
+  beforeAll(async () => {
+    await device.launchApp({ newInstance: true });
+  });
+
+  beforeEach(async () => {
+    await device.reloadReactNative();
+  });
+
+  it('esegue il login con credenziali valide', async () => {
+    await element(by.id('email-input')).typeText('utente@esempio.com');
+    await element(by.id('password-input')).typeText('password123');
+    await element(by.id('login-button')).tap();
+
+    await detoxExpect(element(by.id('home-screen'))).toBeVisible();
+  });
+
+  it('mostra messaggio di errore con credenziali non valide', async () => {
+    await element(by.id('email-input')).typeText('errato@esempio.com');
+    await element(by.id('password-input')).typeText('passworderrata');
+    await element(by.id('login-button')).tap();
+
+    await detoxExpect(
+      element(by.text('Email o password non corretti'))
+    ).toBeVisible();
+  });
+});
+```
+
+Detox richiede configurazione aggiuntiva nel `package.json` e file di build separati per i test. La curva di setup è la principale barriera all'adozione, ma una volta configurato, i test sono stabili e affidabili.
+
+| Flusso | Priorità E2E | Motivo |
+|--------|--------------|--------|
+| Onboarding e registrazione | Alta | Blocca nuovi utenti se si rompe |
+| Login e autenticazione | Alta | Blocca l'accesso all'app |
+| Azione principale (es: checkout) | Alta | Generazione di fatturato |
+| Impostazioni e profilo | Media | Importante ma non critico |
+| Flussi di contenuto | Bassa | Possono essere coperti dai componenti |
+
+## Firebase Test Lab e BrowserStack: Test su Dispositivi Reali
+
+I simulatori sono comodi ma non sostituiscono i dispositivi fisici. La frammentazione hardware su Android è reale: diversi produttori, versioni di Android e densità di schermo creano comportamenti che l'emulatore non riproduce. Su iOS, la frammentazione è minore, ma esiste comunque tra le generazioni di iPhone.
+
+**Firebase Test Lab**
+Esegue test strumentati (Android) o XCUITest (iOS) su dispositivi fisici ospitati da Google. Per React Native, è possibile eseguire i test Detox nel Test Lab con configurazione aggiuntiva. Il piano gratuito include accesso a dispositivi fisici per un numero limitato di minuti.
+
+**BrowserStack App Automate**
+Simile a Firebase Test Lab, con supporto a Detox e Appium. Offre una maggiore varietà di dispositivi e piani flessibili. Utile per riprodurre bug segnalati su dispositivi specifici.
+
+Una strategia pratica: esegui i test E2E sul simulatore nella CI (veloce, gratuito) e pianifica esecuzioni settimanali su dispositivi fisici tramite Firebase Test Lab o BrowserStack per intercettare problemi hardware che il simulatore non rileva.
+
+## Conclusione
+
+Una strategia di test ben strutturata non rallenta lo sviluppo — lo stabilizza. Il tempo che perdi scrivendo test lo recuperi non dovendo fare debug di bug in produzione, non dovendo passare per la revisione degli store per correggere regressioni urgenti e non dovendo gestire utenti insoddisfatti.
+
+La piramide dei test per mobile non è diversa da altri tipi di software, ma l'esecuzione ha le sue particolarità — strumenti, configurazioni e il fattore dei dispositivi fisici. In SystemForge, i test fanno parte del processo di sviluppo dalla prima riga di codice, non vengono aggiunti dopo. Se stai costruendo un'app e vuoi garantire che la qualità sia integrata nel processo, il nostro team può aiutarti a strutturare la strategia di QA fin dall'inizio.

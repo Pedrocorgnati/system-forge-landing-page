@@ -1,0 +1,79 @@
+---
+title: "Next.js for Landing Pages: Why Not WordPress"
+slug: "nextjs-for-landing-pages-vs-wordpress"
+date: "2024-09-13"
+description: "Why Next.js with static export outperforms WordPress in performance, security, and SEO for institutional landing pages -- with a technical comparison."
+tags: ["nextjs", "landing page", "wordpress", "performance", "jamstack"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Why Next.js with static export outperforms WordPress in performance, security, and SEO for institutional landing pages -- with a technical comparison."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'nextjs-para-landing-pages-vs-wordpress'
+  - locale: 'it-IT'
+    slug: 'nextjs-per-landing-page-vs-wordpress'
+---
+
+WordPress powers 43% of all websites on the internet. Saying that as an argument in favor of the platform is like saying economy cars are a good choice for Formula 1 because 90% of people drive economy cars. Popularity and fitness for purpose are different things.
+
+For landing pages -- especially institutional, product, or conversion-focused landing pages driven by paid traffic -- WordPress carries a set of structural limitations that make it the wrong choice. And modern alternatives, particularly Next.js with static export, eliminate those limitations while maintaining what WordPress does best: accessibility for non-developers.
+
+## WordPress: Why It Still Dominates and Its Limits
+
+WordPress dominates because it reduced the technical barrier to publishing a website to zero. In 2005, that was revolutionary. In 2025, that legacy became a burden.
+
+WordPress architecture is PHP server-side with MySQL database. Each page request generates a database query, processes PHP templates, and returns HTML. This means:
+
+- **High TTFB by default:** even with cache configured, WordPress needs to constantly invalidate and regenerate cache. Without cache, each request hits the database.
+- **Plugin stack conflicts:** install an SEO plugin, a performance plugin, a security plugin, a cache plugin, and a forms plugin -- and you have four layers of JavaScript and PHP that frequently conflict.
+- **Massive attack surface:** WordPress has over 60,000 public plugins, many outdated and with known vulnerabilities. The WordPress core itself is frequently targeted by exploits.
+
+## Next.js Static Export: Performance Impossible on WordPress
+
+With the `output: 'export'` flag in Next.js, the entire site is pre-rendered into static HTML at build time. The result is a set of HTML, CSS, and JavaScript files that can be served by any CDN -- no server, no database, no PHP.
+
+What this means in practice:
+
+```
+WordPress (no cache):        TTFB ~400-800ms, LCP ~3-5s
+WordPress (aggressive cache): TTFB ~80-150ms,  LCP ~1.5-2.5s
+Next.js static + CDN edge:   TTFB ~10-50ms,   LCP ~0.6-1.2s
+```
+
+These numbers aren't theoretical. They're real PageSpeed Insights measurements on sites of similar complexity.
+
+| Feature | Next.js (native) | WordPress (via plugin) |
+|---|---|---|
+| Image optimization (WebP/AVIF) | `next/image` -- automatic | ShortPixel, Smush -- paid, partial |
+| Automatic code splitting | Yes -- per route | No -- all JS loads everywhere |
+| Link prefetch | Yes -- automatic | Not available |
+| Font optimization | `next/font` -- zero layout shift | Various plugins, inconsistent results |
+| Critical CSS | Generated at build | Generated at runtime with plugins |
+| TypeScript native | Yes | No |
+
+## Security: Attack Surface Compared
+
+A statically exported Next.js landing page hosted on a CDN has near-zero attack surface. There's no application server running, no database, no PHP code being executed at runtime. An attacker who finds your static landing page URL will find HTML files served by a CDN -- there's nothing to attack.
+
+WordPress, by contrast, is the most frequent target of automated attacks on the web. Bots constantly scan the internet looking for WordPress installations with outdated plugin or theme versions.
+
+## Long-term Maintenance Cost
+
+The initial cost of a WordPress site may be lower. The total cost over 2-3 years rarely is.
+
+A Next.js static site hosted on Vercel or Cloudflare Pages:
+- Hosting: $0 on free plan (for sites without serverless functions), or $20/month on the pro plan
+- No plugins, no recurring security updates
+- Content maintenance via Git or headless CMS (Contentful, Sanity, Notion)
+
+For most institutional landing pages, WordPress maintenance costs exceed Next.js development costs in 18 to 24 months.
+
+## Conclusion
+
+WordPress still makes sense for projects with specific requirements: blogs with very high content volume managed by non-technical teams, small e-commerces that need WooCommerce, or projects where the plugin ecosystem is genuinely necessary. For product or service landing pages focused on conversion, performance, and SEO, Next.js with static export isn't an alternative -- it's the technically superior choice in every relevant dimension.
+
+At [SystemForge](https://systemforgesoftware.com), we develop exclusively in Next.js because our clients don't want a site that needs constant maintenance -- they want a landing page that converts, ranks, and doesn't break.

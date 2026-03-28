@@ -1,0 +1,146 @@
+---
+title: "Real Estate Software: Portal Integrations and CRM Requirements"
+slug: "real-estate-software-portal-integrations"
+date: "2024-11-26"
+description: "Real estate CRM requirements: property management, integration with Zillow/Realtor.com/MLS, digital contracts, and agent commission calculations."
+tags: ["real estate software", "real estate crm", "zillow integration", "realtor.com", "portal integrations"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Real estate CRM requirements: property management, Zillow/Realtor.com/MLS integrations, digital contracts, and agent commission calculations."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistemas-imobiliarias-integracoes-portais'
+  - locale: 'it-IT'
+    slug: 'sistema-immobiliare-integrazione-portali'
+---
+
+A real estate agency without portal integration loses listings every week. Not from lack of inventory — but because manually updating listings on Zillow, Realtor.com, MLS, and the agency's own website is work no team maintains consistently. A sold property stays listed for days, generating zero-quality leads. A newly acquired property takes a week to appear on portals because the listings coordinator was on vacation. A price updated in the internal system doesn't reflect on portals until someone remembers to update it manually.
+
+A modern real estate CRM isn't just a lead tracker and a spreadsheet of properties. It's the single source of truth for your portfolio, with automatic syndication across all channels, document management for contracts, electronic signatures, and automatic commission calculations. This article details the technical requirements of each of these pillars.
+
+## Integration with Zillow, Realtor.com, and MLS
+
+The major US real estate portals (Zillow, Realtor.com, Trulia, and MLS boards) have distinct publishing systems. Integration follows two main models:
+
+**IDX Feed Model**: the agency's system generates a standardized data feed (RETS or RESO Web API) that syndicates listings to portals and MLS boards. Portals pull or receive updates on regular intervals (typically every few hours) and update listings. This is the most common model for mid-size brokerages and is required for MLS compliance.
+
+**Direct API Model**: direct integration via platform-specific APIs to create, update, and remove listings in real time. Requires partner credentials with the portal and offers faster synchronization. Zillow and Realtor.com both offer Partner APIs for brokerages with sufficient volume.
+
+A standard XML/feed structure for real estate syndication:
+
+```xml
+<Listing>
+  <ListingId>LST-2024-001</ListingId>
+  <PropertyType>Residential</PropertyType>
+  <PropertySubType>Condominium</PropertySubType>
+  <City>Chicago</City>
+  <Neighborhood>Lincoln Park</Neighborhood>
+  <StateOrProvince>IL</StateOrProvince>
+  <PostalCode>60614</PostalCode>
+  <TransactionType>Sale</TransactionType>
+  <ListPrice>725000.00</ListPrice>
+  <HOAFee>450.00</HOAFee>
+  <PropertyTax>9800.00</PropertyTax>
+  <LivingArea>1250</LivingArea>
+  <LotSize>0</LotSize>
+  <BedroomsTotal>2</BedroomsTotal>
+  <BathroomsTotal>2</BathroomsTotal>
+  <GarageSpaces>1</GarageSpaces>
+  <PublicRemarks><![CDATA[Well-located condo in Lincoln Park...]]></PublicRemarks>
+  <Media>
+    <MediaObject Order="1">https://cdn.agency.com/photos/lst001-1.jpg</MediaObject>
+    <MediaObject Order="2">https://cdn.agency.com/photos/lst001-2.jpg</MediaObject>
+  </Media>
+  <StandardStatus>Active</StandardStatus>
+</Listing>
+```
+
+The ideal synchronization architecture involves:
+
+1. **Listing database as source of truth**: any change (price, status, photos) is made once in the agency's system.
+2. **Automatic feed generation**: a job that regenerates the feed on every update or at configurable intervals.
+3. **Status webhooks**: when a portal notifies that a listing was deactivated (policy violation, inactive, etc.), the internal system receives the notification and alerts the responsible agent.
+4. **Sync log**: history of when each listing was sent to each portal, with confirmation or error status.
+
+For smaller portals or the agency's own website, REST API integration is more appropriate. The internal system exposes endpoints the website consumes directly:
+
+```
+GET /api/listings?type=condo&neighborhood=lincoln-park&max_price=800000
+GET /api/listings/{id}
+GET /api/listings/{id}/photos
+```
+
+## Property Management: Photos, Floor Plans, and Documents
+
+Photo quality is the primary conversion factor in real estate listings — more than price or portal ranking position. The system needs robust media management.
+
+**Upload and automatic optimization**: photos uploaded by agents must be resized, converted to WebP format, and stored on CDN with permanent URLs. The system should reject photos below a minimum resolution (e.g., 1280×720px).
+
+**Ordering and cover photo selection**: agents must be able to set photo order and select the cover image. The cover photo is the thumbnail in portal search results — it directly impacts listing CTR.
+
+**Floor plans and videos**: beyond photos, the system must support floor plan uploads (PDF or image), virtual tour videos, and 360° tour links (Matterport, Google Street View, iGUIDE).
+
+**Property documents**: title deed, current title search, certificate of occupancy, property inspection reports, HOA documents. Each document with an expiration date and renewal alerts for time-sensitive documents.
+
+**Photo history**: when a property is renovated or photos are updated, the previous version should be preserved (with an "archived" flag), not deleted — useful for condition disputes.
+
+| Media type | Accepted formats | Max size | Storage |
+|------------|-----------------|----------|---------|
+| Photos | JPG, PNG, HEIC | 20MB | CDN (S3 + CloudFront) |
+| Floor plans | PDF, JPG | 50MB | S3 with controlled access |
+| Videos | MP4 | 500MB | S3 or external link (YouTube) |
+| Documents | PDF | 20MB | S3 with restricted access |
+
+## Digital Contracts with Electronic Signatures
+
+Electronic signatures on real estate contracts are legally valid in the US under the ESIGN Act (2000) and UETA (Uniform Electronic Transactions Act), which both equate electronic signatures with handwritten ones for most real estate transactions — including purchase and sale agreements and leases.
+
+For the brokerage, digitizing the contract process eliminates physical document logistics, reduces closing timelines from weeks to 24-48 hours, and creates an auditable archive of all signatures.
+
+The digital contract workflow integrated into the CRM:
+
+1. **Contract generation**: template selection (residential lease, purchase and sale agreement, listing agreement), automatic population with property data, parties involved, and negotiated terms.
+2. **Internal review**: manager approves the contract version before sending for signatures.
+3. **Signature request**: secure link sent to all parties (buyer/seller, tenant/landlord, guarantors, witnesses) via email and SMS.
+4. **Electronic signature**: each party signs via their preferred method. Dotloop and DocuSign both offer compliant e-signature workflows trusted by NAR (National Association of Realtors) members.
+5. **Recording and storage**: final document signed by all parties, with a tamper-evident audit trail, stored linked to the property and parties in the CRM.
+6. **Notifications**: automatic alerts for pending signatures and confirmation when all parties have signed.
+
+The most widely used e-signature platforms in US real estate with CRM integration APIs are Dotloop (acquired by Zillow Group, deeply integrated with real estate workflows), DocuSign, and SkySlope. Dotloop has the highest adoption in residential real estate due to its purpose-built transaction management features.
+
+## Commissions and Disbursements: Automatic Calculation Per Deal
+
+Commission calculations in real estate agencies are a recurring source of conflicts when done manually. Who listed the property, who brought the buyer, how the commission is split in co-brokerage deals — every rule needs to be in the system for disbursements to be transparent and auditable.
+
+Commission rules vary by brokerage, but the most common patterns are:
+
+**Per-transaction commission**: percentage of the transaction value (typically 5-6% total for sales, split between listing and buyer's agent sides; 1 month's rent for leasing). The system calculates automatically at closing.
+
+**Role-based split**:
+- Listing agent (who secured the listing): 30-40% of total commission
+- Buyer's agent (who brought the buyer): 30-40% of total commission
+- Brokerage: 20-40% of total commission
+
+**Co-brokerage**: when two brokerages participate in a transaction, the commission is split between them per a prior agreement. The system must support deals with multiple brokerages involved.
+
+**Commission payment schedule**: in some deals, commission is paid in installments (at contract signing, at closing, at key handover). The system must track amounts receivable at each milestone.
+
+The financial commission module must include:
+
+- Agent dashboard showing closed, pending, and projected commissions
+- Monthly individual and team production report
+- Commission disbursement statement (for 1099 contractor agents)
+- Payroll integration for W-2 agent employees
+- Complete deal history with all parties and applied percentages
+
+## Conclusion
+
+A real estate CRM is not just a contact database and a property spreadsheet. It's the operational infrastructure that determines closing velocity, listing quality across portals, document turnaround speed, and commission transparency.
+
+Agencies still operating with spreadsheets + WhatsApp + Google Drive are paying a high hidden cost: leads lost to stale listings, deals delayed by physical document logistics, agents frustrated by opaque manual commission calculations.
+
+SystemForge builds real estate CRMs with native integration to major US portals, full document management, and a parameterizable commission financial module. If you're rebuilding your agency's system or building a solution for the sector, let's talk about the right scope for your business model.

@@ -1,0 +1,179 @@
+---
+title: "Aggiornamento automatico nelle app desktop: Electron Forge"
+slug: "aggiornamento-automatico-app-desktop-electron"
+date: "2024-09-28"
+description: "Come implementare l'auto-update nelle app Electron con electron-updater e GitHub Releases — release channel, staging, rollback e notifica all'utente."
+tags: ["electron", "auto-update", "electron-updater", "desktop app", "ci cd"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come implementare l'auto-update nelle app Electron con electron-updater e GitHub Releases — release channel, staging, rollback e notifica all'utente.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'auto-update-apps-desktop-electron-forge'
+  - locale: 'en'
+    slug: 'auto-update-desktop-apps-electron-forge'
+---
+
+Distribuire un'app desktop senza un meccanismo di auto-update significa firmare un contratto con il caos futuro. Entro sei mesi avrete utenti su cinque versioni diverse dell'app, ciascuna con bug differenti, comportamenti differenti, e richieste di supporto per problemi gia risolti da settimane. Tracciare quale versione utilizza ogni cliente e convincerli ad aggiornare manualmente e un lavoro che non dovrebbe esistere.
+
+L'auto-update ben implementato elimina questo problema alla radice. L'utente installa una sola volta. Da quel momento, l'app si mantiene aggiornata silenziosamente in background — o con una notifica discreta quando un aggiornamento e disponibile. La base utenti converge verso la versione piu recente in giorni, non in mesi.
+
+La buona notizia e che l'ecosistema Electron ha una soluzione matura per questo: `electron-updater`, che funziona con GitHub Releases come server di distribuzione. La cattiva notizia e che implementarlo correttamente — con canali di release, rollout graduale e strategia di rollback — richiede piu attenzione di quanto suggerisca l'esempio base della documentazione.
+
+## electron-updater: setup base con GitHub Releases
+
+`electron-updater` fa parte del pacchetto `electron-builder` ed e la soluzione piu utilizzata per l'auto-update nelle app Electron. Verifica periodicamente se e disponibile una nuova versione su un server di aggiornamento — che puo essere GitHub Releases, S3 o un server proprietario.
+
+Il setup iniziale richiede configurazione nel `package.json` e nel main process:
+
+```javascript
+// main.js — configurazione dell'auto-updater
+const { autoUpdater } = require('electron-updater')
+const { ipcMain, dialog } = require('electron')
+const log = require('electron-log')
+
+// Configurare il logging per la diagnostica
+autoUpdater.logger = log
+autoUpdater.logger.transports.file.level = 'info'
+
+// Disabilitare l'auto-download per controllare quando installare
+autoUpdater.autoDownload = false
+
+function setupAutoUpdater(mainWindow) {
+  // Verificare aggiornamenti all'avvio (con delay di 3 secondi)
+  setTimeout(() => {
+    autoUpdater.checkForUpdates()
+  }, 3000)
+
+  // Verificare nuovamente ogni 4 ore
+  setInterval(() => {
+    autoUpdater.checkForUpdates()
+  }, 4 * 60 * 60 * 1000)
+
+  autoUpdater.on('update-available', (info) => {
+    // Notificare il renderer process
+    mainWindow.webContents.send('update-available', info)
+  })
+
+  autoUpdater.on('download-progress', (progress) => {
+    mainWindow.webContents.send('download-progress', progress)
+  })
+
+  autoUpdater.on('update-downloaded', (info) => {
+    mainWindow.webContents.send('update-downloaded', info)
+  })
+
+  // Avviare il download quando l'utente conferma
+  ipcMain.on('start-download', () => {
+    autoUpdater.downloadUpdate()
+  })
+
+  // Installare e riavviare quando l'utente conferma
+  ipcMain.on('install-update', () => {
+    autoUpdater.quitAndInstall(false, true)
+  })
+}
+
+module.exports = { setupAutoUpdater }
+```
+
+La configurazione nel `package.json` definisce il server di pubblicazione:
+
+```json
+{
+  "build": {
+    "publish": {
+      "provider": "github",
+      "owner": "vostro-utente",
+      "repo": "vostro-repository",
+      "private": false
+    }
+  }
+}
+```
+
+Con questa configurazione, pubblicando una GitHub Release con gli artefatti di build, `electron-updater` rileva automaticamente la nuova versione e avvia il processo di aggiornamento.
+
+## Release channel: stable, beta e nightly
+
+Un singolo canale di release non e sufficiente per la maggior parte dei progetti seri. La pratica standard del settore e avere almeno due canali: `stable` per la base utenti in produzione, e `beta` per i tester che accettano di ricevere versioni non definitive in cambio di accesso anticipato alle novita.
+
+`electron-updater` supporta i canali nativamente. La versione nel `package.json` definisce il canale:
+
+- `1.0.0` — versione stable
+- `1.1.0-beta.1` — versione beta
+- `1.1.0-alpha.1` — versione alpha/nightly
+
+Nel codice, il canale puo essere configurato dinamicamente in base a una preferenza dell'utente:
+
+```javascript
+// Leggere la preferenza del canale salvata nelle impostazioni
+const channel = store.get('updateChannel', 'stable')
+autoUpdater.channel = channel
+
+// Nell'interfaccia delle impostazioni, permettere all'utente di cambiare canale
+ipcMain.on('set-update-channel', (event, newChannel) => {
+  store.set('updateChannel', newChannel)
+  autoUpdater.channel = newChannel
+  autoUpdater.checkForUpdates()
+})
+```
+
+La comunicazione del canale con il pubblico giusto e importante: gli utenti che hanno optato per il canale beta sanno di poter ricevere versioni con bug occasionali. Questo segmenta il feedback e permette di identificare problemi prima che colpiscano l'intera base utenti.
+
+## Staging degli update: rollout graduale per percentuale
+
+Per applicazioni con una base utenti ampia, rilasciare una versione a tutti contemporaneamente e rischioso. Un bug critico che supera i test colpira tutti gli utenti allo stesso momento.
+
+Il rollout graduale — rilasciare al 5% degli utenti prima, osservare le metriche per 24 ore, poi espandere al 20%, 50% e 100% — e una pratica standard per mitigare questo rischio.
+
+`electron-updater` non ha supporto nativo al rollout percentuale, ma e possibile implementarlo con logica lato server o con un layer di feature flag:
+
+```javascript
+// Strategia: verificare il flag di rollout prima di avviare l'update
+autoUpdater.on('update-available', async (info) => {
+  // Generare un identificatore unico stabile per l'istanza
+  const instanceId = getOrCreateInstanceId()
+
+  // Consultare il server per verificare se questa istanza e nel rollout
+  try {
+    const response = await fetch(
+      `https://api.vostraapp.com/update-eligibility?version=${info.version}&instanceId=${instanceId}`
+    )
+    const { eligible } = await response.json()
+
+    if (eligible) {
+      mainWindow.webContents.send('update-available', info)
+    }
+  } catch {
+    // In caso di errore nella verifica, non bloccare l'update
+    mainWindow.webContents.send('update-available', info)
+  }
+})
+```
+
+Il server controlla la percentuale di istanze idonee per ogni versione, consentendo di aumentare gradualmente il rollout man mano che cresce la fiducia nella release.
+
+## Rollback: come ripristinare una versione problematica
+
+Nessun processo di QA e perfetto. Prima o poi una versione problematica raggiungera gli utenti. Disporre di un meccanismo di rollback — automatico o manuale — e la differenza tra un incidente controllato e una crisi di supporto.
+
+La strategia piu semplice e mantenere la versione precedente disponibile su GitHub Releases e reindirizzare il server di aggiornamento verso di essa quando necessario. Se il file `latest.yml` (che `electron-updater` consulta) punta alla versione precedente, le istanze che non hanno ancora aggiornato non riceveranno la versione problematica.
+
+Per gli utenti che hanno gia installato la versione difettosa, l'approccio piu efficace e pubblicare una nuova versione corretta — anche se si tratta di un hotfix minimo — il piu rapidamente possibile. L'auto-update sostituira quindi la versione problematica con quella corretta.
+
+Nei casi critici, in cui l'app crasha all'avvio e l'auto-update non riesce a essere eseguito, e necessario disporre di una procedura manuale documentata. Questo include mantenere gli installer delle versioni precedenti disponibili per il download diretto e avere un canale di comunicazione con gli utenti colpiti.
+
+Il punto piu importante riguardo al rollback e: pianificatelo prima di averne bisogno. Quando si verifica un incidente in produzione non e il momento di scoprire che il processo di rollback non e mai stato testato.
+
+## Conclusione
+
+L'auto-update ben implementato non e un dettaglio di distribuzione — e parte dell'esperienza del prodotto. Gli utenti che non devono mai preoccuparsi di aggiornare l'app manualmente hanno meno frizione nel quotidiano. I team di sviluppo che possono rilasciare aggiornamenti con fiducia, sapendo di disporre di canali di staging e rollback, costruiscono con maggiore agilita.
+
+La complessita reale sta nei dettagli: firmare gli installer correttamente (senza firma digitale Windows blocca gli update), gestire utenti che lasciano il computer acceso senza riavviare, comunicare aggiornamenti critici di sicurezza in modo urgente ma non intrusivo.
+
+In SystemForge, l'auto-update con channel, staged rollout e capacita di rollback fa parte del baseline di qualsiasi app desktop che costruiamo. Se state sviluppando un'app Electron e volete implementare una strategia di aggiornamento robusta fin dall'inizio, [possiamo aiutarvi](https://systemforge.it/contatto).

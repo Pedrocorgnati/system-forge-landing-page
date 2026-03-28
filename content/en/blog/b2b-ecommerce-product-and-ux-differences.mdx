@@ -1,0 +1,174 @@
+---
+title: "B2B E-Commerce: Product and UX Differences"
+slug: "b2b-ecommerce-product-and-ux-differences"
+date: "2024-11-25"
+description: "How B2B e-commerce differs from B2C: per-customer price tables, order approvals, invoicing, credit terms, and profile-restricted catalogs."
+tags: ["b2b ecommerce", "b2b", "ecommerce", "b2b ux", "b2b marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How B2B e-commerce differs from B2C: per-customer price tables, order approvals, invoicing, credit terms, and profile-restricted catalogs."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ecommerce-b2b-diferencas-produto-ux'
+  - locale: 'it-IT'
+    slug: 'ecommerce-b2b-differenze-prodotto-ux'
+---
+
+B2B e-commerce has a complexity that is nearly invisible to the buyer but immeasurably greater for whoever builds it. The enterprise buyer sees a catalog, adds products, and places an order -- apparently simple. Behind the scenes, there are individually negotiated price tables, multi-level approval workflows, automated invoice generation, net payment terms, profile-restricted catalogs, and integrations with procurement systems on the buyer's side.
+
+Applying the same logic from a B2C e-commerce to a B2B operation is a common mistake that results in platforms that sellers hate using and that fail to meet the real needs of corporate buyers.
+
+## Per-Customer Pricing: Tables, Discounts, and Contracts
+
+In B2C, a product has one price (with a possible coupon or promo discount). In B2B, the same product can have completely different prices for each customer -- the result of negotiated contracts, historical purchase volume, market segment, or region.
+
+B2B pricing architecture needs to support:
+
+**Price tables per customer or segment:** The "Gold Table" has prices X, the "Platinum Table" has prices Y, and Customer Z has specifically negotiated prices. The catalog displayed to each customer must show their contracted price, not the list price.
+
+**Volume discounts:** Orders above 100 units get a 5% discount, above 500 units get 12%. The discount may apply per item, per category, or per total order value.
+
+**Contract expiration:** Negotiated prices have validity periods. When the contract expires, the system needs to apply the default list price or block new orders until renewal.
+
+```typescript
+async function calculateB2BPrice(
+  skuId: string,
+  customerId: string,
+  quantity: number
+): Promise<B2BPrice> {
+  // 1. Check for active contract for this customer
+  const contract = await db.contracts.findActive(customerId);
+
+  if (contract) {
+    // 2. Look up contracted price for this SKU
+    const contractPrice = await db.priceTables.findItem({
+      tableId: contract.priceTableId,
+      skuId,
+    });
+
+    if (contractPrice) {
+      // 3. Apply volume discount if applicable
+      const volumeDiscount = calculateVolumeDiscount(
+        quantity,
+        contract.volumeRules
+      );
+
+      return {
+        unitPrice: contractPrice.value * (1 - volumeDiscount),
+        totalPrice: contractPrice.value * quantity * (1 - volumeDiscount),
+        discountApplied: volumeDiscount,
+        source: "contract",
+        contractId: contract.id,
+        validUntil: contract.endDate,
+      };
+    }
+  }
+
+  // 4. Fallback: public list price
+  const defaultPrice = await db.products.getPrice(skuId);
+  return {
+    unitPrice: defaultPrice,
+    totalPrice: defaultPrice * quantity,
+    discountApplied: 0,
+    source: "public_list",
+  };
+}
+```
+
+Pricing display in a B2B catalog requires attention: the buyer should clearly see whether the displayed price is the contracted price or the list price. Showing the list price crossed out with the contracted price beside it reinforces the value of the contract and incentivizes loyalty.
+
+## Approval Workflow: Buyer, Manager, and Finance
+
+In B2C purchases, the decision is individual and immediate. In B2B, especially for orders above a certain amount, the purchase goes through an internal approval workflow at the buying company. The e-commerce system needs to support this flow natively or via integration.
+
+The typical B2B approval flow has three levels:
+
+1. **Buyer/Requester:** Creates the order (or "quote") in the system. Cannot approve -- can only submit.
+2. **Manager/Approver:** Receives a notification, reviews the order, can approve, reject, or request changes (quantity, item substitution, shipping).
+3. **Finance:** For orders above the limit or outside the approved budget, finance has the final say. Can check available credit limit before approving.
+
+The UX for this flow needs to be clear for each role. The buyer sees their orders with "Pending Approval" status. The manager sees a queue of orders pending their approval, with enough context to decide without needing to contact the requester. Finance sees the credit impact before approving.
+
+| Order Status | Who Can See | Available Action |
+|---|---|---|
+| Draft | Buyer | Edit, submit, cancel |
+| Pending managerial approval | Manager, Buyer (read-only) | Approve, reject, request change |
+| Pending financial approval | Finance, Manager, Buyer | Financial approve, block for credit |
+| Approved -- pending processing | Seller, Buyer | Confirm, start fulfillment |
+| In fulfillment | Buyer (tracking) | -- |
+| Invoiced | Buyer, Finance | Download invoice, confirm receipt |
+
+Email and/or SMS notifications at every status change are essential -- B2B buyers don't sit monitoring the portal, but they need to know when something requires their action.
+
+## Invoicing and Tax System Integration
+
+In B2B commerce in the US, proper invoicing is a core requirement for transactions between business entities. The B2B e-commerce platform needs to generate invoices automatically upon order confirmation, or integrate with an external system that handles this.
+
+Invoice generation involves:
+- Validating buyer's business data (EIN, tax exemption certificates, billing address)
+- Calculating applicable sales tax based on nexus rules and destination state
+- Generating and storing the invoice in PDF format for audit
+- Supporting tax-exempt purchases for resellers with valid certificates
+
+Integrating with a dedicated invoicing or accounting platform (QuickBooks, Xero, NetSuite) is more practical than building invoicing from scratch. These services abstract state-by-state tax calculation and maintain compliance when regulations change.
+
+A critical consideration: invoice generation can fail (invalid business data, integration downtime, inconsistent tax data). The e-commerce flow needs to handle these errors gracefully -- retry queues, alerts for the accounting team, and manual reprocessing mechanisms are essential.
+
+## Credit and Billing: Net Terms in E-Commerce
+
+Immediate payment is the rule in B2C; net payment terms are the rule in B2B. "Net 30/60/90" is the language of B2B commercial relationships, and an e-commerce that only accepts credit card or wire transfer at checkout will lose corporate customers to the sales rep who offers invoiced billing.
+
+The B2B credit model in e-commerce involves:
+
+**Credit limit per customer:** Each buying company has an approved limit set by the seller's finance team. Orders that would exceed the limit are automatically blocked or routed for special review.
+
+**Payment terms:** Customer A has "Net 30" terms, Customer B has "Net 30/60" (50% at 30 days, 50% at 60 days), and so on. The system needs to store and apply these terms per customer.
+
+**Invoiced billing:** The invoice is generated after order confirmation and sent via email with a due date based on the payment terms. Payment reconciliation needs to update the customer's financials (credit balance, payment history).
+
+**Delinquency management:** Customers with overdue invoices should have new orders automatically blocked. Integration with the financial ERP is what makes this management viable without constant manual intervention.
+
+```typescript
+async function validateCreditForOrder(
+  customerId: string,
+  orderValue: number
+): Promise<CreditValidation> {
+  const customer = await db.b2bCustomers.findById(customerId);
+
+  // Check for delinquency
+  const overdueInvoices = await db.finance.countOverdueInvoices(customerId);
+  if (overdueInvoices > 0) {
+    return {
+      approved: false,
+      reason: "delinquency",
+      message: `There are ${overdueInvoices} overdue invoice(s). Please resolve to continue purchasing.`,
+    };
+  }
+
+  // Check credit limit
+  const usedBalance = await db.finance.getUsedBalance(customerId);
+  const availableBalance = customer.creditLimit - usedBalance;
+
+  if (orderValue > availableBalance) {
+    return {
+      approved: false,
+      reason: "insufficient_limit",
+      availableBalance,
+      requestedValue: orderValue,
+      message: `Available credit limit: $${availableBalance.toFixed(2)}`,
+    };
+  }
+
+  return { approved: true, availableBalance, totalLimit: customer.creditLimit };
+}
+```
+
+## Conclusion
+
+A well-built B2B e-commerce is a sales channel that operates 24/7, reduces support costs (fewer calls to place orders), accelerates the sales cycle (faster approvals with digital workflows), and generates purchasing behavior data that the sales team wouldn't have otherwise.
+
+The technical complexity is real -- per-customer pricing, multi-level approval workflows, invoicing, credit management -- and requires architecture designed for B2B from the start, not adaptations of a B2C system. At SystemForge, we develop B2B e-commerce platforms from scratch and customizations on existing platforms, with the commercial complexity that B2B operations demand. [Talk to our team](https://systemforgesoftware.com/contact) to discuss your project.

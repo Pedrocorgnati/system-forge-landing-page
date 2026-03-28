@@ -7,9 +7,25 @@ on:
 
 jobs:
   validate:
-    name: Validate & Build Check
+    name: Validate & Build Check (${{ matrix.locale }})
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - locale: pt-BR
+            build_suffix: br
+            site_url: https://forjadesistemas.com.br
+            contact_email: contato@forjadesistemas.com.br
+          - locale: it-IT
+            build_suffix: it
+            site_url: https://systemforge.it
+            contact_email: contatto@systemforge.it
+          - locale: en
+            build_suffix: en
+            site_url: https://systemforgesoftware.com
+            contact_email: contact@systemforgesoftware.com
 
     steps:
       - name: Checkout
@@ -42,16 +58,17 @@ jobs:
         run: npm run lint
 
       - name: Validate frontmatter
-        run: npm run validate:frontmatter
+        run: npm run prebuild:${{ matrix.build_suffix }}
         env:
-          NEXT_PUBLIC_SITE_URL: https://forjadesistemas.com.br
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
 
       - name: Build check
         run: npm run build
         env:
-          NEXT_PUBLIC_SITE_URL: https://forjadesistemas.com.br
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
           NEXT_PUBLIC_GA4_MEASUREMENT_ID: G-PLACEHOLDER
           NEXT_PUBLIC_WHATSAPP_NUMBER: "+5541999999999"
-          NEXT_PUBLIC_CONTACT_EMAIL: contato@forjadesistemas.com.br
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ matrix.contact_email }}
           NEXT_PUBLIC_CALENDLY_URL: https://calendly.com/placeholder
-          NEXT_PUBLIC_BUDGET_ENGINE_URL: https://placeholder.forjadesistemas.com.br
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: https://placeholder.example.com

@@ -1,0 +1,137 @@
+---
+title: "Inventory Management in E-commerce: Avoiding Overselling"
+slug: "inventory-management-ecommerce-avoid-overselling"
+date: "2024-10-28"
+description: "How to architect inventory management in e-commerce to avoid overselling — optimistic vs pessimistic reservation, multi-channel sync, and automatic alerts."
+tags: ["inventory management", "e-commerce", "overselling", "inventory", "ecommerce operations"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to architect inventory management in e-commerce to avoid overselling — optimistic vs pessimistic reservation, multi-channel sync, and automatic alerts.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-estoque-ecommerce-evitar-overselling'
+  - locale: 'it-IT'
+    slug: 'gestione-scorte-ecommerce-evitare-overselling'
+---
+
+Overselling happens when an e-commerce store sells more units of a product than it actually has in stock. What follows is always bad: the order must be canceled, the customer is frustrated, negative reviews roll in, and on platforms like Amazon and eBay, the seller score drops — directly hurting listing visibility. In serious cases, the consumer may file a dispute or report the seller for unfair practices.
+
+The problem is more common than it seems, especially in multi-channel operations (own store + marketplaces) where the same physical inventory feeds multiple sales channels. The technical solution exists, but it requires careful architecture and an understanding of the trade-offs.
+
+## Pessimistic vs Optimistic Reservation: Conversion Trade-offs
+
+There are two fundamental approaches to inventory reservation: pessimistic and optimistic.
+
+**Pessimistic reservation** decrements available stock the moment a product is added to the cart. If 10 customers put the last item in their cart, only the first sees the product as available — the other 9 see "out of stock" before even starting checkout.
+
+Advantage: overselling is practically impossible. Disadvantage: conversion rate drops, because abandoned carts "hold" inventory. A customer who adds to cart but doesn't buy keeps the product "reserved" for the configured time (usually 15–60 minutes), preventing others from purchasing.
+
+**Optimistic reservation** keeps inventory available throughout browsing and only decrements it at payment confirmation. Multiple customers can "see" the same product as available simultaneously.
+
+Advantage: higher conversion rate since there are no false "out of stock" warnings. Disadvantage: two customers may complete checkout on the same product simultaneously, causing overselling if there's no proper transactional control.
+
+Most e-commerce operations with healthy processes use a **hybrid approach**: temporary reservation at the start of checkout (not when adding to cart) with automatic expiration after 15–20 minutes if payment is not confirmed.
+
+```sql
+-- Inventory reservations table
+CREATE TABLE inventory_reservations (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  product_id UUID NOT NULL REFERENCES products(id),
+  variant_id UUID REFERENCES variants(id),
+  quantity INT NOT NULL,
+  order_id UUID REFERENCES orders(id),
+  session_id VARCHAR(64),             -- For anonymous reservations (pre-login)
+  expires_at TIMESTAMPTZ NOT NULL,    -- Automatic expiration
+  status VARCHAR(20) DEFAULT 'active', -- active | confirmed | expired | canceled
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Available inventory view (accounts for active reservations)
+CREATE VIEW available_inventory AS
+SELECT
+  i.product_id,
+  i.variant_id,
+  i.physical_quantity
+    - COALESCE(SUM(r.quantity) FILTER (WHERE r.status = 'active' AND r.expires_at > NOW()), 0)
+    AS available
+FROM inventory i
+LEFT JOIN inventory_reservations r USING (product_id, variant_id)
+GROUP BY i.product_id, i.variant_id, i.physical_quantity;
+```
+
+## Multi-channel Inventory: The Synchronization Problem
+
+The biggest overselling challenge in 2025 isn't the own store — it's multi-channel operations. When the same physical inventory feeds your own store, Amazon, eBay, and Walmart, any sale on any channel needs to be reflected across all others in real time (or as close as possible).
+
+The multi-channel sync problem is fundamentally a distributed consistency problem. You have N external systems (each marketplace is an independent system) and you need to ensure that the inventory displayed on each reflects the reality of the central warehouse.
+
+The approaches vary in complexity and reliability:
+
+| Approach | Sync latency | Reliability | Complexity |
+|---|---|---|---|
+| Periodic polling (every 5 min) | High (up to 5-min delay) | Low | Low |
+| Webhook + message queue | Low (seconds) | High | Medium |
+| Per-channel inventory buffer | Low (virtual) | High | Low-medium |
+| Unified inventory with locks | Very low | Very high | High |
+
+The most practical approach for mid-scale operations is the **per-channel inventory buffer**: you don't sync actual inventory, but assign an inventory quota to each channel. If you have 100 units, you configure 40 for your own store, 35 for Amazon, 25 for eBay. When a channel exhausts its quota, you redistribute manually or by automatic rule.
+
+This approach sacrifices optimal inventory utilization (in extreme scenarios, eBay may have 0 quota while your own store has 40 idle units), but eliminates the risk of overselling in high-concurrency unit scenarios.
+
+## Database Locks vs Message Queues
+
+For the own store, controlling overselling at payment confirmation is a classic concurrency problem. Two users completing checkout on the same product simultaneously can result in overselling if there's no control.
+
+The solution using **database locks** (SELECT FOR UPDATE) guarantees exclusivity at the transaction level:
+
+```typescript
+async function confirmOrder(orderId: string): Promise<void> {
+  await db.transaction(async (trx) => {
+    // Lock on the inventory row — blocks other simultaneous transactions
+    const [inventory] = await trx
+      .select()
+      .from("inventory")
+      .where({ product_id: order.productId })
+      .forUpdate() // SELECT ... FOR UPDATE
+      .noWait();   // Fails immediately if already locked
+
+    if (inventory.available < order.quantity) {
+      throw new InsufficientInventoryError(order.productId);
+    }
+
+    await trx("inventory")
+      .where({ product_id: order.productId })
+      .decrement("available", order.quantity);
+
+    await trx("orders")
+      .where({ id: orderId })
+      .update({ status: "confirmed", confirmed_at: new Date() });
+  });
+}
+```
+
+Locks work well for moderate volumes, but have limitations under high concurrency: waiting transactions pile up, increasing latency. For Black Friday or high-demand product launches with simultaneous demand, **message queues** (RabbitMQ, SQS, Redis Streams) are more scalable — orders enter the queue, a worker processes them one at a time, with no database concurrency.
+
+## Restock Alerts and ERP Integration
+
+Controlling overselling is half the problem; the other side is ensuring inventory is restocked before running out. Automated restock alerts are essential for operations that depend on suppliers with lead times.
+
+The reorder point (ROP) is calculated based on average consumption and supplier lead time:
+
+```
+ROP = (Average daily sales × Lead time in days) + Safety stock
+```
+
+A product that sells 10 units/day with a 7-day supplier lead time needs an alert when inventory reaches 70 units (+ 20% safety stock = 84 units). If you wait for inventory to hit zero before ordering, you'll be out of stock for 7 days.
+
+ERP integration (QuickBooks, NetSuite, SAP B1) closes the loop: automatic alerts generate purchase orders in the ERP, which updates projected inventory, which is reflected in the e-commerce store with future availability ("Available in 7 days"). Proactively communicating future availability converts customers who would have left due to stock shortage.
+
+## Conclusion
+
+Overselling isn't just a technical problem — it's a reputation problem, a marketplace relationship problem, and in extreme cases, a legal problem. The right inventory architecture depends on the operation's profile: hybrid reservation (at the start of checkout, with expiration), quota buffers for multi-channel, and transactional locks for payment confirmation are the essential building blocks.
+
+Complexity increases with growth: more channels, more SKUs, and more demand spikes require progressively more robust solutions. At SystemForge, we design inventory management modules from own store to integrations with multiple marketplaces and ERPs, with the architecture appropriate to the business's current stage. [Talk to our team](/contact).

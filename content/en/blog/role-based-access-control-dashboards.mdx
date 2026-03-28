@@ -1,0 +1,85 @@
+---
+title: "RBAC in Dashboards: Role-Based Access Control"
+slug: "role-based-access-control-dashboards"
+date: "2024-08-14"
+description: "How to implement Role-Based Access Control in B2B dashboards: role definition, route protection, UI hiding, and data filtering by permission."
+tags: ["rbac", "authorization", "dashboard", "security", "next.js"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to implement Role-Based Access Control in B2B dashboards: role definition, route protection, UI hiding, and data filtering by permission."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'role-based-access-control-dashboards'
+  - locale: 'it-IT'
+    slug: 'controllo-accessi-dashboard-rbac'
+---
+
+In a multi-user B2B dashboard, showing the wrong data to the wrong person isn't just a UX problem -- it's a security, compliance, and in some cases, legal problem. A junior analyst who sees gross margin by competing client within the company, a salesperson who accesses other salespeople's commissions, a branch user who sees data from another branch -- all these are real scenarios that happen when RBAC is implemented superficially.
+
+The correct RBAC implementation in dashboards has four layers that need to work together: the permission model, route protection, UI component hiding, and -- the most important -- data filtering on the backend.
+
+## Permission Model: Roles, Permissions, and Resources
+
+```typescript
+// types/rbac.ts
+export type Action = 'read' | 'write' | 'delete' | 'export';
+export type Resource =
+  | 'dashboard:financial'
+  | 'dashboard:operations'
+  | 'dashboard:hr'
+  | 'reports:revenue'
+  | 'reports:customers'
+  | 'users:management'
+  | 'settings:billing';
+
+export type Permission = `${Action}:${Resource}`;
+export type Role = 'super_admin' | 'admin' | 'manager' | 'analyst' | 'viewer';
+
+export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  super_admin: ['read:dashboard:financial', 'write:dashboard:financial', 'export:reports:revenue', /* ... all */],
+  admin: ['read:dashboard:financial', 'read:dashboard:operations', 'export:reports:revenue', 'write:users:management'],
+  manager: ['read:dashboard:financial', 'read:dashboard:operations', 'read:reports:revenue', 'read:reports:customers'],
+  analyst: ['read:dashboard:operations', 'read:reports:customers', 'export:reports:customers'],
+  viewer: ['read:dashboard:operations'],
+};
+
+export function hasPermission(role: Role, permission: Permission): boolean {
+  return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
+}
+```
+
+## Route Protection in Next.js with Middleware
+
+In Next.js App Router, edge middleware is the correct place for route protection -- it executes before any page renders.
+
+## UI Component Hiding by Permission
+
+```typescript
+// components/PermissionGate.tsx
+interface PermissionGateProps {
+  permission: Permission;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
+  const allowed = usePermission(permission);
+  return allowed ? <>{children}</> : <>{fallback}</>;
+}
+```
+
+The `fallback` component is important: simply hiding elements without explanation can confuse users who know the data exists. A "restricted access" card communicates that the data exists but requires permission.
+
+## Backend Data Filtering by Role
+
+All the UI protection described above is **comfort security**. The real protection lives on the backend. Every API endpoint or Server Action that returns sensitive data must verify the authenticated user's permissions and filter results accordingly.
+
+## Conclusion
+
+Well-implemented RBAC in B2B dashboards requires all four layers working together: clear permission model, route protection at the edge, component guards in the UI, and data filtering on the backend. Implementing only some of these layers creates false senses of security.
+
+At SystemForge, RBAC is defined during the technical documentation phase -- roles, resources, and permissions are part of the LLD before any code is written. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to learn more.

@@ -2,20 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { getSiteConfig } from '@config'
-
-/* ------------------------------------------------------------------ */
-/*  Types                                                              */
-/* ------------------------------------------------------------------ */
-
-type ConsentDecision = 'accepted' | 'rejected' | 'partial' | null
-type ComplianceFramework = 'LGPD' | 'GDPR' | 'CAN-SPAM'
-
-interface ConsentState {
-  decision: ConsentDecision
-  categories: { analytics: boolean; marketing: boolean }
-  timestamp: number | null
-  framework: ComplianceFramework
-}
+import type { ConsentDecision, ComplianceFramework, ConsentState } from '@/types/consent.types'
 
 export interface UseConsentManager {
   hasConsented: boolean
@@ -26,6 +13,7 @@ export interface UseConsentManager {
   acceptAll: () => void
   rejectAll: () => void
   savePreferences: (categories: { analytics: boolean; marketing: boolean }) => void
+  resetConsent: () => void
 }
 
 /* ------------------------------------------------------------------ */
@@ -50,6 +38,12 @@ function readStorage(): ConsentState | null {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as ConsentState & { timestamp: number }
+
+    // Invalidate consent with mismatched schema version
+    if (parsed.version !== '1.0') {
+      localStorage.removeItem(STORAGE_KEY)
+      return null
+    }
 
     // Expire stale consent
     if (parsed.timestamp && Date.now() - parsed.timestamp > EXPIRATION_MS) {
@@ -77,9 +71,10 @@ function writeStorage(state: ConsentState): void {
 
 const DEFAULT_STATE: ConsentState = {
   decision: null,
-  categories: { analytics: false, marketing: false },
+  categories: { essential: true, analytics: false, marketing: false },
   timestamp: null,
   framework: 'LGPD',
+  version: '1.0',
 }
 
 export function useCookieConsent(): UseConsentManager {
@@ -102,9 +97,10 @@ export function useCookieConsent(): UseConsentManager {
   const acceptAll = useCallback(() => {
     const next: ConsentState = {
       decision: 'accepted',
-      categories: { analytics: true, marketing: true },
+      categories: { essential: true, analytics: true, marketing: true },
       timestamp: Date.now(),
       framework: consent.framework,
+      version: '1.0',
     }
     setConsent(next)
     writeStorage(next)
@@ -113,9 +109,10 @@ export function useCookieConsent(): UseConsentManager {
   const rejectAll = useCallback(() => {
     const next: ConsentState = {
       decision: 'rejected',
-      categories: { analytics: false, marketing: false },
+      categories: { essential: true, analytics: false, marketing: false },
       timestamp: Date.now(),
       framework: consent.framework,
+      version: '1.0',
     }
     setConsent(next)
     writeStorage(next)
@@ -133,9 +130,10 @@ export function useCookieConsent(): UseConsentManager {
 
       const next: ConsentState = {
         decision,
-        categories,
+        categories: { essential: true, ...categories },
         timestamp: Date.now(),
         framework: consent.framework,
+        version: '1.0',
       }
       setConsent(next)
       writeStorage(next)
@@ -143,6 +141,15 @@ export function useCookieConsent(): UseConsentManager {
     },
     [consent.framework],
   )
+
+  const resetConsent = useCallback(() => {
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Silently handle storage errors
+    }
+    setConsent({ ...DEFAULT_STATE, framework: consent.framework })
+  }, [consent.framework])
 
   const openModal = useCallback(() => setIsModalOpen(true), [])
   const closeModal = useCallback(() => setIsModalOpen(false), [])
@@ -156,5 +163,6 @@ export function useCookieConsent(): UseConsentManager {
     acceptAll,
     rejectAll,
     savePreferences,
+    resetConsent,
   }
 }

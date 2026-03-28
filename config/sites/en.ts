@@ -20,7 +20,7 @@ export const enConfig: SiteConfig = {
   email: 'hello@systemforgesoftware.com',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+14155552671',
   calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge-en',
-  budgetEngine: process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://systemforgesoftware.com',
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.corgnati.com/quote'}?locale=en-US`,
   address: 'Remote, United States',
   compliance: 'CAN-SPAM',
   currency: 'USD',
@@ -42,7 +42,7 @@ export const enConfig: SiteConfig = {
     description:
       'We build custom software: SaaS, mobile apps, landing pages, e-commerce, dashboards and AI automations.',
     titleTemplate: '%s | SystemForge Software',
-    ogImage: '/images/og-image.png',
+    ogImage: '/og/og-en.png',
   },
   routes: {
     home: '/',
@@ -61,10 +61,14 @@ export const enConfig: SiteConfig = {
     contact: '/#contact',
   },
   newsletter: {
-    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    workerUrl: process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL  // fallback legado
+      ?? '',
     doubleOptIn: false,
   },
   newsletterApiUrl:
-    process.env.NEXT_PUBLIC_NEWSLETTER_API_URL ?? '',
+    process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN
+      ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL
+      ?? '',
   ga4MeasurementId: process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID,
 }

@@ -1,0 +1,102 @@
+---
+title: "How to Choose Your SaaS Tech Stack"
+slug: "how-to-choose-your-saas-tech-stack"
+date: "2025-11-10"
+description: "Practical guide for founders and CTOs choosing the ideal stack for a B2B or B2C SaaS. Next.js, Node.js, database, and more."
+tags: ["saas", "tech stack", "next.js", "web development"]
+coverImage: "/images/blog/stack-saas.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Practical guide for founders and CTOs choosing the ideal stack for a B2B or B2C SaaS. Next.js, Node.js, database, and more.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-escolher-stack-saas'
+  - locale: 'it-IT'
+    slug: 'come-scegliere-stack-saas'
+---
+
+## Introduction
+
+Choosing the right tech stack for your SaaS is one of the most important decisions you'll make as a founder or CTO. The wrong choice can cost months of rework, delay launch, and make hiring developers difficult. But with the right criteria, this decision becomes much clearer.
+
+In this guide, you'll learn what questions to ask before defining your stack, which technologies dominate the B2B and B2C SaaS market in 2025, and which mistakes to avoid in the first months.
+
+## Selection Criteria
+
+Before looking at any specific technology, answer three fundamental questions:
+
+### 1. Scalability
+
+Will your product grow from 10 to 10,000 users in the same year? If so, you need a stack that scales without requiring a complete rewrite. Think about databases with sharding support, stateless architecture, and container deployment capability.
+
+### 2. Time-to-Market
+
+What is your market window? Early-stage startups generally need speed above all else. Full-stack frameworks like Next.js with API routes allow a small team to build a functional product in weeks, not months.
+
+### 3. Infrastructure Cost
+
+Cloud services like Vercel, Railway, and Supabase have generous free plans for MVPs. But as the user base grows, costs scale quickly. Understand each service's pricing model before committing.
+
+## Recommended Stack for B2B SaaS
+
+For most B2B SaaS with small teams (2-8 devs) and focus on iteration speed, we recommend:
+
+```typescript
+// Modern stack for B2B SaaS
+const stack = {
+  frontend: "Next.js 15 (App Router)",
+  backend: "Next.js API Routes + Server Actions",
+  database: "PostgreSQL via Supabase",
+  cache: "Redis (Upstash)",
+  auth: "Clerk or NextAuth",
+  payments: "Stripe",
+  email: "Resend",
+  deploy: "Vercel"
+}
+```
+
+### Why Next.js?
+
+Next.js in 2025 is the most pragmatic choice for SaaS for several reasons:
+
+- **Server Components** drastically reduce client-side JavaScript
+- **API Routes and Server Actions** enable a backend without a separate server
+- **App Router** simplifies route and layout structure
+- **Robust ecosystem** with libraries for auth, payments, and more
+
+### Why PostgreSQL?
+
+Relational with JSON support, PostgreSQL is the most versatile database for SaaS. With Supabase, you get managed PostgreSQL with authentication, row-level security, and automatic API — all integrated.
+
+## Common Mistakes
+
+### Microservices from Day 1
+
+The biggest mistake I see in startups is starting with microservices. You'll spend 80% of the time configuring infrastructure and 20% building product. Start monolithic, extract services when you actually need them.
+
+### Choosing Technology for the Hype
+
+GraphQL, Kubernetes, Rust — all incredible technologies for the right cases. But for an early-stage SaaS, REST + PostgreSQL + TypeScript solves 99% of problems with far less complexity.
+
+### Ignoring Scale Costs
+
+Calculate the monthly cost when you have 1,000 paying users. If it's not sustainable with your margin, reconsider the architecture before scaling.
+
+## Decision Checklist
+
+Before defining your stack, answer:
+
+- [ ] Does my team have experience with this technology?
+- [ ] Is there an active community and good documentation?
+- [ ] Does the infra cost fit my business model?
+- [ ] Can I hire devs for this in my local market?
+- [ ] Will this stack serve me for at least 2 years?
+
+## Conclusion
+
+The best stack isn't the most technically advanced — it's the one that lets your team deliver value to customers fastest. In 2025, Next.js + PostgreSQL + Stripe remains an unbeatable combination for B2B SaaS.
+
+If you're building a SaaS and want help defining the ideal architecture, SystemForge specializes in exactly this. We work with founders from architecture conception through the first paying customer.

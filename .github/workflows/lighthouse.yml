@@ -1,0 +1,76 @@
+name: Lighthouse CI
+
+# Aguarda o workflow "Triple Market Build" completar (padrão do projeto)
+# Idêntico ao deploy.yml e smoke-test.yml
+on:
+  workflow_run:
+    workflows: ["Triple Market Build"]
+    types:
+      - completed
+
+jobs:
+  lighthouse-ci:
+    # Só roda se o build passou
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - locale: pt-BR
+            artifact: build-pt-BR
+            build_suffix: br
+            port: 3001
+          - locale: it-IT
+            artifact: build-it-IT
+            build_suffix: it
+            port: 3002
+          - locale: en
+            artifact: build-en
+            build_suffix: en
+            port: 3003
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifact (${{ matrix.locale }})
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          # Artifact do workflow de build que disparou este
+          run-id: ${{ github.event.workflow_run.id }}
+          path: out/
+
+      - name: Install serve
+        run: npm install -g serve
+
+      - name: Serve static build (${{ matrix.locale }})
+        run: serve out/ -p ${{ matrix.port }} &
+
+      - name: Wait for server (${{ matrix.locale }})
+        run: npx wait-on http://localhost:${{ matrix.port }} --timeout 30000
+
+      - name: Run Lighthouse CI (${{ matrix.locale }})
+        id: lighthouse
+        uses: treosh/lighthouse-ci-action@v11
+        with:
+          configPath: lighthouserc.json
+          urls: |
+            http://localhost:${{ matrix.port }}
+            http://localhost:${{ matrix.port }}/servicos
+          uploadArtifacts: true
+          artifactName: lighthouse-results-${{ matrix.build_suffix }}
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      # Gate explícito — exit 1 se Lighthouse falhar
+      # (complementa gate automático via assertions "error" no lighthouserc.json)
+      - name: Performance gate check (${{ matrix.locale }})
+        if: always()
+        run: |
+          if [ "${{ steps.lighthouse.outcome }}" = "failure" ]; then
+            echo "❌ Lighthouse CI FAILED for locale: ${{ matrix.locale }}"
+            echo "Performance < 90 OR SEO < 95. Deploy blocked."
+            exit 1
+          fi
+          echo "✅ Performance gate PASSED for locale: ${{ matrix.locale }}"

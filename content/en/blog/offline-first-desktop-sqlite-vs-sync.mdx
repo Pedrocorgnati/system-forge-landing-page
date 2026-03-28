@@ -1,0 +1,83 @@
+---
+title: "Offline-First Desktop: SQLite Local vs Sync"
+slug: "offline-first-desktop-sqlite-vs-sync"
+date: "2024-10-19"
+description: "Offline-first architecture for desktop apps: local SQLite with better-sqlite3, server synchronization, and conflict resolution in environments without internet."
+tags: ["offline first", "sqlite", "electron", "sync", "desktop app"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Offline-first architecture for desktop apps: local SQLite with better-sqlite3, server synchronization, and conflict resolution in environments without internet."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-desktop-sqlite-vs-sync'
+  - locale: 'it-IT'
+    slug: 'offline-first-desktop-sqlite-vs-sincronizzazione'
+---
+
+Industrial applications live in a world where connectivity cannot be assumed. A factory in a rural area may have variable-quality internet. A warehouse may have Wi-Fi dead spots. A field construction site may lose signal for hours. A ship may operate in waters without coverage for days.
+
+For these scenarios, building an application that depends on a constant connection to a remote server is a choice that will predictably generate production incidents. The correct model is offline-first: the application works completely with local data and synchronizes with the server whenever connectivity is available.
+
+## SQLite with better-sqlite3: Synchronous Performance in the Main Process
+
+SQLite is the most used database in the world for a simple reason: it's reliable, lightweight, and works anywhere. For offline-first desktop apps, it's the natural choice for local storage.
+
+```javascript
+// main/database.js
+const Database = require('better-sqlite3')
+const path = require('path')
+const { app } = require('electron')
+
+const DB_PATH = path.join(app.getPath('userData'), 'app.db')
+const db = new Database(DB_PATH)
+
+// Enable WAL mode for better concurrent read performance
+db.pragma('journal_mode = WAL')
+db.pragma('foreign_keys = ON')
+
+// Initial migration
+db.exec(`
+  CREATE TABLE IF NOT EXISTS production_records (
+    id TEXT PRIMARY KEY,
+    line_id TEXT NOT NULL,
+    product_id TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    operator_id TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER,
+    deleted_at INTEGER,
+    server_updated_at INTEGER
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_production_not_synced
+    ON production_records(synced_at)
+    WHERE synced_at IS NULL;
+`)
+```
+
+The `synced_at` column is central to the offline-first strategy: records not yet synchronized with the server have `synced_at = NULL`. A partial index on this column makes querying pending items extremely fast, even with thousands of records.
+
+## Synchronization: Merge Strategy with Timestamps
+
+Synchronization happens in two directions: sending local data to the server (push) and pulling new data from the server to local (pull). The most common pattern is: upon recovering connectivity, first push pending local data, then pull server updates.
+
+## Conflicts: Last-Write-Wins vs Manual Resolution
+
+The simplest strategy is "last write wins" -- the record with the most recent `updated_at` simply replaces the older one. Works well when conflicts are rare and losing a modification is acceptable. For production records where each machine operates independently, LWW is frequently sufficient.
+
+For data where losing a modification is unacceptable -- like critical configurations or financial data -- the system needs to detect the conflict and present both versions to the user for decision.
+
+## Local Encryption with SQLCipher
+
+In environments where data is sensitive, the standard SQLite file is readable by anyone with file system access. SQLCipher adds transparent AES-256 encryption with typically 10-20% performance overhead -- completely negligible for most industrial applications.
+
+## Conclusion
+
+The offline-first architecture for desktop apps isn't more complex than it seems -- it's complex in the right details. SQLite with `better-sqlite3` for local storage, timestamps for synchronization, and a clear conflict resolution policy cover the vast majority of industrial scenarios.
+
+At SystemForge, we build offline-first systems for industrial environments where connectivity cannot be assumed. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to discuss your project requirements.

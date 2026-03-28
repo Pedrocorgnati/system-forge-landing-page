@@ -1,0 +1,105 @@
+---
+title: "Zapier vs Make vs n8n: quale strumento scegliere"
+slug: "zapier-vs-make-vs-n8n-quale-scegliere"
+date: "2024-09-09"
+description: "Confronto dettagliato tra Zapier, Make (Integromat) e n8n per l'automazione dei flussi di lavoro — prezzo, flessibilità, self-hosting e casi d'uso."
+tags: ["zapier", "make", "n8n", "automazione", "no-code"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Confronto dettagliato tra Zapier, Make (Integromat) e n8n per l'automazione dei flussi di lavoro — prezzo, flessibilità, self-hosting e casi d'uso.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'zapier-vs-make-vs-n8n-qual-escolher'
+  - locale: 'en'
+    slug: 'zapier-vs-make-vs-n8n-which-to-choose'
+---
+
+Automatizzare i flussi di lavoro tra applicazioni diverse richiedeva un tempo un developer disponibile a scrivere integrazioni personalizzate. Oggi, strumenti come Zapier, Make e n8n hanno democratizzato questo processo — chiunque abbia un minimo di ragionamento logico riesce a connettere due sistemi e automatizzare attività ripetitive senza scrivere codice.
+
+Ma i tre strumenti sono molto diversi tra loro. Scegliere quello sbagliato significa pagare più del necessario, rimanere intrappolati in un ecosistema limitante o avere grattacapi di manutenzione che non esisterebbero con lo strumento giusto. In questo articolo facciamo un confronto onesto tra i tre, inclusi i punti deboli che i siti ufficiali non ti diranno mai.
+
+## Zapier: Il Classico con il Maggiore Ecosistema
+
+Zapier esiste dal 2011 e ha costruito il catalogo di integrazioni più grande del mercato: oltre 6.000 applicazioni connettibili. Se devi integrare due app popolari, è quasi certo che Zapier abbia già il connettore pronto, funzionante e documentato.
+
+La proposta di Zapier è essere il più semplice possibile: si creano i "Zap" — flussi con un trigger e una o più azioni. L'interfaccia guida passo dopo passo. Per un flusso di base come "quando ricevo un modulo su Typeform, aggiungere una riga su Google Sheets e inviare un'e-mail via Gmail", la configurazione richiede meno di dieci minuti senza alcuna competenza tecnica.
+
+Il problema di Zapier è il prezzo. Il piano gratuito è estremamente limitato (100 task al mese, solo flussi a due passaggi). Per qualsiasi uso professionale reale, sarà necessario almeno il piano Starter ($19,99/mese) — e man mano che il volume di task cresce, il prezzo aumenta in modo piuttosto aggressivo.
+
+Un altro punto debole: la logica di flussi complessi in Zapier è frustrante. Le ramificazioni condizionali esistono, ma sono limitate rispetto a Make. Loop, iterazioni su array e trasformazioni di dati sofisticate richiedono workaround che complicano la manutenzione.
+
+Usa Zapier quando: l'integrazione di cui hai bisogno è tra le 6.000+ opzioni disponibili, il flusso è semplice (meno di 5 passaggi), il volume è basso e la velocità di configurazione è la priorità assoluta.
+
+## Make: Flussi Visivi Complessi a Costo Inferiore
+
+Make (ex Integromat) è dove la potenza visiva risplende davvero. Invece dell'interfaccia lineare di Zapier, Make usa un canvas in cui si vede l'intero flusso come un diagramma — moduli collegati da linee, ramificazioni visive, loop espliciti.
+
+Per flussi complessi, questo è un enorme vantaggio: si riesce a visualizzare e fare debug di ciò che accade in ogni fase. Make dispone di strumenti nativi per la manipolazione di array, iteratori, aggregatori e router con condizioni multiple — cose che in Zapier richiedono workaround.
+
+Il costo è significativamente inferiore a Zapier per volumi equivalenti. Il piano Core ($10,59/mese) include già 10.000 operazioni — molto più generoso. Anche l'unità di fatturazione è diversa: Make addebita per operazione (ogni modulo eseguito), mentre Zapier addebita per task (ogni azione completata con successo). Nei flussi complessi, questo può essere vantaggioso o svantaggioso a seconda della struttura.
+
+Il catalogo di integrazioni di Make (~1.800 app) è più piccolo di quello di Zapier, ma copre le app più popolari con maggiore profondità — i connettori tendono ad esporre più campi e funzionalità rispetto agli equivalenti di Zapier.
+
+Usa Make quando: i tuoi flussi hanno logica complessa (ramificazioni, loop, trasformazione di dati), hai bisogno di un miglior rapporto qualità-prezzo rispetto a Zapier e l'app che vuoi connettere è nel catalogo.
+
+## n8n: Self-hosted, Gratuito e Senza Limiti di Esecuzione
+
+n8n è filosoficamente diverso dai due precedenti: è open-source, può essere ospitato autonomamente e, nella versione self-hosted, non ha limiti di esecuzioni. Gira sul proprio server, i dati rimangono nella propria infrastruttura, e il costo operativo è sostanzialmente il costo del server.
+
+L'interfaccia di n8n è simile a Make — canvas visivo con nodi e connessioni. Ma n8n va oltre in termini di personalizzazione: è possibile scrivere codice JavaScript o Python direttamente all'interno dei nodi del flusso, creare trigger HTTP personalizzati, usare credenziali OAuth complesse e costruire integrazioni con qualsiasi API che abbia una documentazione, anche senza un connettore ufficiale.
+
+```json
+// Esempio di nodo "Code" in n8n — trasforma dati in JavaScript
+// Input: array di ordini dall'e-commerce
+// Output: solo ordini superiori a €500 con campo calcolato
+
+const ordini = $input.all();
+
+return ordini
+  .filter(item => {
+    const valore = parseFloat(item.json.importo.replace('€', '').replace(',', '.'));
+    return valore > 500;
+  })
+  .map(item => ({
+    json: {
+      ...item.json,
+      categoria: item.json.importo > 2000 ? 'premium' : 'standard',
+      elaborato_il: new Date().toISOString()
+    }
+  }));
+```
+
+Il punto negativo di n8n è la curva di apprendimento e la responsabilità operativa. Nella versione self-hosted, occorre gestire il server, gli aggiornamenti, i backup e la disponibilità. Se il server si interrompe, le automazioni si bloccano. Per chi non vuole questo overhead, esiste la versione cloud (n8n.cloud) con piani a pagamento.
+
+L'altra limitazione è la maturità dei connettori: le app meno popolari possono avere connettori con bug o incompleti. Per questi casi, il nodo HTTP generico risolve manualmente.
+
+Usa n8n quando: hai un volume elevato di esecuzioni (il self-hosted elimina i costi per volume), i tuoi flussi necessitano di logica personalizzata in codice, hai bisogno che i dati rimangano nella tua infrastruttura (GDPR, dati sensibili) o vuoi costo zero di piattaforma.
+
+## Confronto dei Prezzi per Volume di Operazioni
+
+Confrontando i piani di ingresso di ciascuno strumento per uso professionale:
+
+| Strumento | Piano | Prezzo/mese | Volume incluso | Costo aggiuntivo |
+|---|---|---|---|---|
+| Zapier | Starter | USD 19,99 | 750 task | USD 0,016/task extra |
+| Zapier | Professional | USD 49,00 | 2.000 task | USD 0,018/task extra |
+| Make | Core | USD 10,59 | 10.000 operazioni | USD 1,00/1.000 ops |
+| Make | Pro | USD 18,82 | 10.000 operazioni | USD 0,90/1.000 ops |
+| n8n Cloud | Starter | USD 20,00 | 2.500 esecuzioni | USD 0,00040/exec |
+| n8n Self-hosted | - | ~USD 5-20/server | Illimitato | - |
+
+Per 50.000 operazioni al mese, la differenza di costo tra Zapier (caro) e n8n self-hosted (quasi gratuito) può raggiungere centinaia di dollari mensili. Per 500 operazioni al mese, Zapier probabilmente è già nel piano gratuito e la differenza non conta.
+
+La regola pratica: fino a 5.000 operazioni/mese con flussi semplici, Zapier o Make senza pensarci troppo. Oltre quella soglia, n8n self-hosted inizia ad avere senso dal punto di vista finanziario. Se i dati sono sensibili o soggetti al GDPR, n8n self-hosted indipendentemente dal volume.
+
+## Conclusione
+
+Non esiste uno strumento superiore — esiste lo strumento giusto per il tuo contesto. Zapier vince in ecosistema e semplicità. Make vince in potenza visiva per flussi complessi. n8n vince in costo per volumi elevati e controllo totale dei dati.
+
+La buona notizia è che nessuno dei tre crea un vero vendor lock-in: i flussi sono logica di business, e migrare tra strumenti (sebbene laborioso) è possibile. Inizia con ciò che soddisfa le tue esigenze attuali e migra quando la scala lo giustifica.
+
+In SystemForge, implementiamo automazioni su tutte e tre le piattaforme — e sappiamo quando raccomandare ciascuna. Se hai un processo manuale che vuoi automatizzare ma non sai da dove iniziare, [scrivici](/contatto). Mappiamo il flusso, scegliamo lo strumento giusto e mettiamo l'automazione in produzione.

@@ -11,6 +11,11 @@ locale: 'pt-BR'
 published: true
 exclusive: false
 excerpt: Como implementar rate limiting em APIs Node.js — algoritmos (token bucket, leaky bucket), Redis para contagem distribuída e respostas 429 com Retry-After.
+hreflang_pair:
+  - locale: 'it-IT'
+    slug: 'rate-limiting-proteggere-api-produzione'
+  - locale: 'en'
+    slug: 'rate-limiting-how-to-protect-your-api'
 ---
 
 Imagine que você lançou sua API e, na primeira semana, um único cliente com um bug no código de integração começa a fazer 10.000 requisições por minuto. Sem rate limiting, sua API cai para todos os outros clientes. Com rate limiting, aquele cliente recebe respostas `429 Too Many Requests`, o bug dele fica visível nos logs e os demais usuários nem percebem o problema.

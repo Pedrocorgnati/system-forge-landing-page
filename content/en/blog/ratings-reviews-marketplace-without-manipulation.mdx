@@ -1,0 +1,179 @@
+---
+title: "Marketplace Ratings and Reviews Without Manipulation"
+slug: "ratings-reviews-marketplace-without-manipulation"
+date: "2024-10-10"
+description: "How to build a trustworthy review system in a marketplace: purchase verification, moderation, seller response, and ranking algorithm."
+tags: ["marketplace", "reviews", "ratings", "moderation", "trust"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to build a trustworthy review system in a marketplace — purchase verification, moderation, seller response, and ranking algorithm.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rating-reviews-marketplace-sem-manipulacao'
+  - locale: 'it-IT'
+    slug: 'rating-recensioni-marketplace-senza-manipolazione'
+---
+
+Fake reviews are the silent cancer of any marketplace. They don't show up in technical monitoring, don't generate system alerts, and take time to affect business metrics — but when the damage is done, trust built over years crumbles in weeks. Amazon lost billions in GMV in the electronics segment when the manipulation of reviews by third-party sellers became evident. Trustpilot and Google Maps invest continuously in moderation precisely because they know the credibility of the review system is part of the product itself.
+
+Building a trustworthy review system isn't just a technical question. It's a product decision that establishes clear rules about who can review, what can be said, how content is moderated, and how reviews influence the positioning of sellers and products. These decisions need to be made before any implementation.
+
+## Purchase Verification: Only Buyers Can Review
+
+The most important rule of any review system is also the simplest: only verified buyers can leave reviews. "Verified" means there was a completed transaction between that user and that seller or product.
+
+The technical implementation needs to be robust enough to resist bypass attempts:
+
+```typescript
+// Verification before accepting a review
+async function canUserReviewProduct(
+  userId: string,
+  productId: string,
+  sellerId: string
+): Promise<{ allowed: boolean; reason?: string }> {
+  // 1. Verify a completed order exists
+  const completedOrder = await db.orderItems.findFirst({
+    where: {
+      order: {
+        buyerId: userId,
+        status: { in: ['delivered', 'completed'] },
+      },
+      productId,
+      sellerId,
+    },
+    include: { order: true },
+  });
+
+  if (!completedOrder) {
+    return { allowed: false, reason: 'NO_COMPLETED_PURCHASE' };
+  }
+
+  // 2. Check if already reviewed this item
+  const existingReview = await db.reviews.findFirst({
+    where: { userId, orderItemId: completedOrder.id },
+  });
+
+  if (existingReview) {
+    return { allowed: false, reason: 'ALREADY_REVIEWED' };
+  }
+
+  // 3. Verify minimum period after delivery (prevents immediate bot reviews)
+  const deliveredAt = completedOrder.order.deliveredAt;
+  const minimumWait = 2 * 60 * 60 * 1000; // 2 hours in ms
+  if (Date.now() - deliveredAt.getTime() < minimumWait) {
+    return { allowed: false, reason: 'TOO_SOON' };
+  }
+
+  // 4. Verify maximum period (very late reviews are suspicious)
+  const maximumPeriod = 90 * 24 * 60 * 60 * 1000; // 90 days in ms
+  if (Date.now() - deliveredAt.getTime() > maximumPeriod) {
+    return { allowed: false, reason: 'EXPIRED' };
+  }
+
+  return { allowed: true };
+}
+```
+
+The minimum period check (2 hours) prevents bots from reviewing immediately after delivery confirmation is marked. The maximum period (90 days) prevents very late reviews — organically uncommon — from being used for manipulation.
+
+The review invitation should be proactive. Automated emails sent 3 to 5 days after delivery generate significantly higher response rates than waiting for buyers to remember to review on their own.
+
+## Automatic and Human Moderation
+
+Not every published review is valid. Offensive content, spam, personal information, threats, and misinformation need to be detected and removed. Effective moderation combines automatic filters with human review for edge cases.
+
+**Automatic moderation — immediate approval:**
+
+- Text without blocked words
+- Neutral or positive sentiment score
+- No links or emails in the text
+- No spam patterns (repeated text, excessive characters)
+- User with no history of violations
+
+**Automatic moderation — review queue:**
+
+- Potentially offensive words (configurable list)
+- 1-star rating with short text (< 20 characters)
+- Very negative sentiment score with high emotion indicators
+- Link detected in text
+- User with previous violations
+
+**Mandatory human moderation:**
+
+- Content reported by other users
+- Reviews from recently registered users for high-value products
+- Reviews on products with a recent volume spike (manipulation indicator)
+
+| Content type | Default action | Human review? |
+|--------------|----------------|--------------|
+| Offensive language | Remove, notify author | No (automatic) |
+| Competitor mention | Review queue | Yes |
+| Personal information | Auto-remove | Yes |
+| Suspected fabrication | Hide, investigate | Yes |
+| Detected spam | Remove, block account | No |
+| Review inconsistent with product | Review queue | Yes |
+
+It's important to communicate to users when a review is removed and why. Transparency in the moderation process reduces the perception of arbitrariness and increases trust in the system.
+
+## Ranking Algorithm: More Than a Simple Average
+
+The arithmetic mean of stars is the most naive way to calculate a product's or seller's reputation. A product with 4 five-star ratings has a 5.0 average — but statistically it's no more reliable than a product with 200 ratings and a 4.7 average.
+
+The Wilson Score algorithm is widely used for rankings that need to be reliable across varying review volumes:
+
+```typescript
+// Wilson Score Interval for reliable rankings
+function wilsonScore(positiveRatings: number, totalRatings: number): number {
+  if (totalRatings === 0) return 0;
+
+  const z = 1.96; // 95% confidence
+  const p = positiveRatings / totalRatings;
+  const n = totalRatings;
+
+  const numerator = p + (z * z) / (2 * n) - z * Math.sqrt((p * (1 - p) + (z * z) / (4 * n)) / n);
+  const denominator = 1 + (z * z) / n;
+
+  return numerator / denominator;
+}
+
+// Usage: define "positive" as 4+ stars
+function calculateProductScore(reviews: Review[]): number {
+  const total = reviews.length;
+  const positive = reviews.filter(r => r.rating >= 4).length;
+  return wilsonScore(positive, total);
+}
+```
+
+Beyond the Wilson Score, other factors that should influence rankings:
+
+**Recency:** recent reviews weigh more than old ones. A product with 50 reviews averaging 4.5 stars in the last 3 months is more relevant than one with 200 reviews averaging 4.8 stars from 2 years ago.
+
+**Helpfulness:** reviews marked as "helpful" by other buyers should carry more weight. Detailed reviews with product photos receive more helpfulness marks and better reflect the actual experience.
+
+**Purchase verification:** reviews from verified buyers carry more weight than unverified ones (if you allow external reviews, which is debatable).
+
+## Seller Response: UX and Buyer Impact
+
+The seller's ability to publicly respond to reviews — positive or negative — is one of the most underestimated elements in review systems. Research from the Harvard Business Review shows that sellers who consistently respond to negative reviews have a 30% higher repurchase rate than those who ignore them.
+
+The UX of the seller response needs special attention:
+
+The seller should be notified of new reviews via email (with a direct link to respond). In the dashboard, the queue of unanswered reviews should be visible and prominent. The response deadline should be reasonable — 72 hours is a good standard.
+
+On the buyer's side, the seller's response appears below the original review, clearly identified as "Seller response." This is not a discussion — the seller responds once and the buyer cannot continue the thread (prevents public conflicts that degrade the experience).
+
+A good response to a negative review follows this structure: thanks for the feedback → acknowledgment of the specific issue → solution offered or action taken → invitation for direct contact. Defensive responses or those that blame the buyer do more damage than not responding at all.
+
+Reviews with a seller response should appear with a slightly different highlight in the listing — a visual indicator that the seller is active and engaged increases the confidence of new buyers.
+
+## Conclusion
+
+A well-implemented review system is a durable competitive asset. It increases the trust of new buyers, creates incentives for sellers to maintain quality, and generates valuable data about the strengths and weaknesses of each product and category.
+
+But poorly designed systems — with easy manipulation, absent moderation, or naive ranking — cause proportional damage. Experienced buyers quickly identify fake reviews, and once the system's reputation is questioned, it's very difficult to recover.
+
+SystemForge supports detailed specification of features like this during the documentation phase, with user stories covering moderation flows, ranking algorithms, and edge cases that tend to only emerge in production. This ensures the system is built correctly from the first version.

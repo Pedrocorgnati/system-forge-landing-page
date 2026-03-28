@@ -2,7 +2,7 @@
  * lib/data/portfolio.ts
  * Projetos reais entregues pela SystemForge.
  *
- * Projetos reais (25): importados de my-fckng-landing-page, traduzidos para PT-BR.
+ * Projetos reais (25): metadados técnicos no TS, strings traduzíveis em content/pt-BR/pages/portfolio.json
  * Sugestões (19): projetos fictícios gerados, exibidos na aba "Sugestões".
  *
  * coverImage: imagem estática em public/images/sugestoes/{slug}.png
@@ -15,10 +15,20 @@ import {
   ProjectStatus,
 } from '../types'
 import type { PortfolioProject } from '../types'
+import portfolioJson from '../../../content/pt-BR/pages/portfolio.json'
+
+/** Lookup map: slug → {name, description} — fonte: content/pt-BR/pages/portfolio.json */
+const _portfolioStrings = new Map(
+  portfolioJson.map(p => [p.id, { name: p.title, description: p.description }])
+)
+
+function _str(slug: string): { name: string; description: string } | undefined {
+  return _portfolioStrings.get(slug)
+}
 
 // ===== PROJETOS REAIS (25) =====
 
-export const portfolioProjects: PortfolioProject[] = [
+const _portfolioProjectsRaw: PortfolioProject[] = [
   {
     slug: 'servizi-per-casa',
     name: 'ServiziPerCasa',
@@ -311,6 +321,12 @@ export const portfolioProjects: PortfolioProject[] = [
     filters: ['website', 'ai'],
   },
 ]
+
+/** Projetos reais com name/description vindos do JSON (strings traduzíveis) */
+export const portfolioProjects: PortfolioProject[] = _portfolioProjectsRaw.map(p => {
+  const s = _str(p.slug)
+  return s ? { ...p, name: s.name, description: s.description } : p
+})
 
 // ===== SUGESTÕES (19 projetos fictícios gerados por IA) =====
 // Mantidos como referência e inspiração. Visíveis apenas na aba "Sugestões".

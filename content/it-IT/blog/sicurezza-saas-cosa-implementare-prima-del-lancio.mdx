@@ -1,0 +1,216 @@
+---
+title: "Sicurezza nei SaaS: cosa implementare prima del lancio"
+slug: "sicurezza-saas-cosa-implementare-prima-del-lancio"
+date: "2024-10-30"
+description: "Checklist di sicurezza obbligatoria per i SaaS prima del lancio: autenticazione, autorizzazione, crittografia, rate limiting, audit e protezione dei dati."
+tags: ["sicurezza saas", "autenticazione", "owasp", "crittografia", "compliance saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Checklist di sicurezza obbligatoria per i SaaS prima del lancio: autenticazione, autorizzazione, crittografia, rate limiting, audit e protezione dei dati."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-saas-o-que-implementar-antes-de-lancar'
+  - locale: 'en'
+    slug: 'saas-security-what-to-implement-before-launch'
+---
+
+Una falla di sicurezza subito dopo il lancio puo chiudere un SaaS prima ancora che abbia la possibilita di dimostrare il proprio valore. Non perche l'attacco sia necessariamente catastrofico in scala — ma perche la reputazione e l'asset piu fragile di un prodotto nuovo. Un data breach dei clienti nel primo mese di operativita raramente e recuperabile.
+
+La buona notizia e che la maggior parte delle vulnerabilita sfruttate nei SaaS nuovi non sono zero-day sofisticati. Sono falle basilari e prevedibili: password senza limite di tentativi, token esposti nei log, assenza di validazione delle autorizzazioni negli endpoint API, dati sensibili senza crittografia. Risolvere queste vulnerabilita prima del lancio e impegnativo, ma interamente fattibile.
+
+Questa guida copre i cinque livelli di sicurezza che ogni SaaS deve avere implementati prima di accogliere i primi utenti reali.
+
+## Autenticazione: MFA, Gestione Sessioni e Brute Force
+
+L'autenticazione e la porta d'ingresso — e la maggior parte degli attacchi riusciti inizia da qui. Implementare l'autenticazione sicura va oltre il semplice "verificare email e password".
+
+**MFA (Multi-Factor Authentication):**
+
+Per i SaaS B2B, l'MFA non e opzionale — e atteso. I clienti aziendali spesso richiedono il supporto a TOTP (Google Authenticator, Authy) come requisito di sicurezza. L'implementazione puo essere realizzata con librerie come `otplib` (Node.js) in meno di un giorno.
+
+```javascript
+import { authenticator } from 'otplib';
+import { toDataURL } from 'qrcode';
+
+// Generare secret e QR Code per la configurazione MFA dell'utente
+async function setupMFA(userId: string) {
+  const secret = authenticator.generateSecret();
+  const otpauth = authenticator.keyuri(userEmail, 'MioSaaS', secret);
+  const qrCodeUrl = await toDataURL(otpauth);
+
+  // Salvare il secret crittografato nel database (mai in chiaro)
+  await db.user.update({
+    where: { id: userId },
+    data: { mfaSecret: encrypt(secret), mfaEnabled: false }, // attivare solo dopo la verifica
+  });
+
+  return { qrCodeUrl, secret };
+}
+
+// Verificare il codice TOTP al login
+function verifyMFAToken(secret: string, token: string): boolean {
+  return authenticator.check(token, secret);
+}
+```
+
+**Protezione contro il brute force:**
+
+Ogni endpoint di login necessita di rate limiting specifico per IP e per email. Senza di esso, strumenti automatizzati testano migliaia di password in pochi secondi.
+
+```javascript
+// Rate limiting sull'endpoint di login
+import rateLimit from 'express-rate-limit';
+
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // finestra di 15 minuti
+  max: 5,                    // massimo 5 tentativi per IP
+  message: 'Troppi tentativi. Riprova tra 15 minuti.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.post('/auth/login', loginLimiter, handleLogin);
+```
+
+**Gestione delle sessioni:**
+
+- Token JWT con scadenza di 15-60 minuti per gli access token
+- Refresh token con rotazione — ogni utilizzo invalida il precedente
+- Revoca della sessione al cambio password o al rilevamento di attivita sospetta
+- Cookie HttpOnly per conservare i token nel browser (mai localStorage per gli access token sensibili)
+
+## Autorizzazione: RBAC e Principio del Minimo Privilegio
+
+L'autenticazione verifica *chi e* l'utente. L'autorizzazione verifica *cosa puo fare*. Sono problemi diversi, e confonderli e una delle fonti piu comuni di vulnerabilita nei SaaS.
+
+**RBAC (Role-Based Access Control):**
+
+Implementa ruoli chiari fin dall'inizio. Per la maggior parte dei SaaS B2B, tre ruoli sono sufficienti nell'MVP:
+
+| Ruolo | Permessi tipici |
+|-------|-----------------|
+| Owner | Tutto, incluso billing e cancellazione dell'organizzazione |
+| Admin | Gestire membri, configurazioni, tutti i dati |
+| Member | Creare e modificare i propri record, visualizzare quelli del team |
+| Viewer (opzionale) | Solo lettura |
+
+**Verifica delle autorizzazioni su TUTTI gli endpoint:**
+
+L'errore piu comune e verificare l'autenticazione (l'utente e loggato?) ma non l'autorizzazione (l'utente ha il permesso per questa risorsa specifica?). Un membro con accesso all'organizzazione A non deve mai poter leggere o modificare i dati dell'organizzazione B — anche se autenticato.
+
+```typescript
+// Middleware di autorizzazione per risorsa
+async function requireOrganizationAccess(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { organizationId } = req.params;
+  const userId = req.user.id;
+
+  const membership = await db.organizationMember.findUnique({
+    where: { organizationId_userId: { organizationId, userId } },
+  });
+
+  if (!membership) {
+    return res.status(403).json({ error: 'Accesso negato' });
+  }
+
+  req.membership = membership; // ruolo disponibile per l'handler
+  next();
+}
+```
+
+**Principio del minimo privilegio:**
+
+Ogni servizio, utente del database e token API deve avere solo i permessi minimi necessari per la sua funzione. L'utente del database usato dall'applicazione non ha bisogno di `DROP TABLE`. L'API key di integrazione di un servizio terzo non ha bisogno di accesso ai dati di billing.
+
+## Crittografia: Dati a Riposo e in Transito
+
+**In transito:** HTTPS obbligatorio su tutti gli endpoint. Senza eccezioni. Configura HSTS (HTTP Strict Transport Security) per forzare HTTPS anche se qualcuno tenta di accedere via HTTP. Su Vercel e sulla maggior parte dei provider moderni, HTTPS e automatico — ma verificalo esplicitamente.
+
+**A riposo:** Non tutti i dati necessitano di crittografia nel database, ma i dati sensibili si:
+
+- Password: non conservare mai le password in chiaro o con crittografia reversibile. Usa bcrypt, Argon2 o scrypt con salt
+- Segreti MFA e API key: crittografia simmetrica con chiave gestita fuori dal database (AWS KMS, Vault, variabile d'ambiente)
+- Dati personali sensibili (codice fiscale, dati sanitari, finanziari): crittografia a livello di campo quando richiesta dal GDPR
+
+```typescript
+// Crittografia di campo con AES-256-GCM
+import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
+
+const ALGORITHM = 'aes-256-gcm';
+const KEY = Buffer.from(process.env.ENCRYPTION_KEY!, 'hex'); // 32 byte
+
+export function encrypt(text: string): string {
+  const iv = randomBytes(16);
+  const cipher = createCipheriv(ALGORITHM, KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(text, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return `${iv.toString('hex')}:${tag.toString('hex')}:${encrypted.toString('hex')}`;
+}
+
+export function decrypt(data: string): string {
+  const [ivHex, tagHex, encryptedHex] = data.split(':');
+  const decipher = createDecipheriv(ALGORITHM, KEY, Buffer.from(ivHex, 'hex'));
+  decipher.setAuthTag(Buffer.from(tagHex, 'hex'));
+  return decipher.update(Buffer.from(encryptedHex, 'hex')) + decipher.final('utf8');
+}
+```
+
+## Rate Limiting, WAF e Header di Sicurezza
+
+**Rate limiting su tutte le rotte pubbliche:**
+
+Non solo sul login. Endpoint di creazione account, recupero password, invio inviti, qualsiasi rotta che possa essere abusata tramite automazione necessita di rate limiting.
+
+**Header di sicurezza HTTP:**
+
+Una configurazione completa degli header di sicurezza si implementa in pochi minuti e blocca un'intera classe di attacchi (XSS, clickjacking, MIME sniffing):
+
+```javascript
+// next.config.js — header di sicurezza
+const securityHeaders = [
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  {
+    key: 'Content-Security-Policy',
+    value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline'; ...",
+  },
+];
+```
+
+**Audit dei log:**
+
+Prima del lancio, implementa il logging degli eventi di sicurezza: login riusciti e falliti, modifiche dei permessi, accessi ai dati sensibili, operazioni di billing. Non per monitorare gli utenti — per rilevare anomalie e avere evidenze in caso di incidente.
+
+**Checklist di sicurezza pre-lancio riassuntiva:**
+
+| Elemento | Priorita |
+|----------|----------|
+| HTTPS + HSTS su tutti gli endpoint | Obbligatorio |
+| Rate limiting su login e rotte pubbliche | Obbligatorio |
+| Password con bcrypt/Argon2 | Obbligatorio |
+| Verifica dell'autorizzazione su tutti gli endpoint | Obbligatorio |
+| Header di sicurezza HTTP configurati | Obbligatorio |
+| Variabili d'ambiente mai nel repository | Obbligatorio |
+| MFA disponibile (non obbligatorio nell'MVP) | Consigliato |
+| Crittografia dei campi sensibili | Consigliato |
+| Log di audit di sicurezza | Consigliato |
+| Scansione delle dipendenze (npm audit) | Consigliato |
+
+## Conclusione
+
+La sicurezza non e una funzionalita che si aggiunge dopo — e uno strato che permea l'intera architettura. Gli elementi obbligatori di questa lista richiedono da due a quattro giorni per essere implementati correttamente in un SaaS nuovo. Sono giorni che valgono anni di reputazione protetta.
+
+Il costo di rimediare a una falla di sicurezza dopo un incidente — notifica ai clienti, potenziale intervento del Garante Privacy o sanzioni GDPR, rilavorazione tecnica d'emergenza — e di ordini di grandezza superiore al costo di implementare queste protezioni prima del lancio.
+
+In **SystemForge**, la sicurezza e parte della checklist standard di ogni SaaS che consegniamo: auth con MFA, RBAC implementato, header configurati, crittografia dei campi sensibili e audit dei log pronti prima del primo deploy. [Contattaci](/contatto) per costruire il tuo SaaS con la sicurezza giusta fin dalle fondamenta.

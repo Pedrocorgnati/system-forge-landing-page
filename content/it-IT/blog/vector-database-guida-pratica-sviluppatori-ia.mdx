@@ -1,0 +1,198 @@
+---
+title: "Vector database: guida pratica per sviluppatori IA"
+slug: "vector-database-guida-pratica-sviluppatori-ia"
+date: "2024-11-20"
+description: "Cosa sono i database vettoriali, quando usarli, confronto tra Pinecone, Weaviate, pgvector e Chroma con esempi pratici."
+tags: ["vector database", "embeddings", "rag", "pgvector", "pinecone"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Cosa sono i database vettoriali, quando usarli, confronto tra Pinecone, Weaviate, pgvector e Chroma con esempi pratici.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'vector-databases-guia-pratico-devs-ia'
+  - locale: 'en'
+    slug: 'vector-databases-practical-guide-for-ai-devs'
+---
+
+## Il Problema che i Vector Database Risolvono
+
+I sistemi IA basati su LLM spesso devono cercare informazioni rilevanti in un database — contratti, documenti, knowledge base, storico delle conversazioni. La ricerca tradizionale (SQL LIKE, full-text search) funziona con parole chiave esatte. Ma "qual è la policy sulle ferie?" e "quali sono i diritti di riposo dei dipendenti?" sono semanticamente equivalenti e lessicalmente completamente diverse.
+
+I vector database risolvono questo problema archiviando rappresentazioni numeriche del significato (embedding) e consentendo la ricerca per similarità semantica — non per parola chiave.
+
+## Come Funziona: Embedding e Similarità
+
+Un embedding è un vettore di numeri (solitamente 1.536 dimensioni per il `text-embedding-3-small` di OpenAI) che rappresenta il significato di un testo. Testi con significato simile hanno vettori vicini nello spazio multidimensionale.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+def genera_embedding(testo: str) -> list[float]:
+    response = client.embeddings.create(
+        model="text-embedding-3-small",  # Più economico e veloce
+        input=testo
+    )
+    return response.data[0].embedding
+
+# Gli embedding di testi simili sono vicini
+embedding_ferie = genera_embedding("policy sulle ferie")
+embedding_riposo = genera_embedding("diritti di riposo dei dipendenti")
+# Similarità coseno ≈ 0.89 (molto simile)
+
+embedding_pizza = genera_embedding("ricetta della pizza")
+# Similarità con ferie ≈ 0.12 (molto diverso)
+```
+
+## pgvector: Vector DB Dentro PostgreSQL
+
+Per la maggior parte dei progetti, la soluzione più semplice è aggiungere capacità vettoriale al PostgreSQL esistente con l'estensione pgvector.
+
+```sql
+-- Abilitare l'estensione
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Tabella con colonna vettoriale
+CREATE TABLE documenti (
+  id SERIAL PRIMARY KEY,
+  contenuto TEXT,
+  embedding vector(1536),  -- Dimensione di text-embedding-3-small
+  metadata JSONB,
+  creato_il TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Indice per ricerca efficiente (HNSW è più veloce per le query)
+CREATE INDEX ON documenti USING hnsw (embedding vector_cosine_ops);
+```
+
+```python
+import psycopg2
+import numpy as np
+from openai import OpenAI
+
+client = OpenAI()
+conn = psycopg2.connect(DATABASE_URL)
+
+def indicizza_documento(contenuto: str, metadata: dict):
+    embedding = genera_embedding(contenuto)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            "INSERT INTO documenti (contenuto, embedding, metadata) VALUES (%s, %s, %s)",
+            (contenuto, embedding, psycopg2.extras.Json(metadata))
+        )
+    conn.commit()
+
+def cerca_simili(query: str, limite: int = 5) -> list[dict]:
+    query_embedding = genera_embedding(query)
+
+    with conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT contenuto, metadata, 1 - (embedding <=> %s::vector) AS similarita
+            FROM documenti
+            ORDER BY embedding <=> %s::vector
+            LIMIT %s
+            """,
+            (query_embedding, query_embedding, limite)
+        )
+        return [{"contenuto": row[0], "metadata": row[1], "score": row[2]}
+                for row in cur.fetchall()]
+
+# Utilizzo
+indicizza_documento("I dipendenti hanno diritto a 30 giorni di ferie all'anno.", {"fonte": "hr_policy.pdf"})
+risultati = cerca_simili("quanti giorni di riposo ho diritto?")
+```
+
+**Quando usare pgvector:** Il progetto usa già PostgreSQL, volume moderato (fino a qualche milione di vettori), preferenza a non aggiungere nuova infrastruttura, Supabase (che include pgvector nativamente).
+
+## Pinecone: Vector Database Gestito
+
+Pinecone è l'opzione managed più popolare — senza infrastruttura da gestire, scaling automatico e interfaccia semplice.
+
+```python
+from pinecone import Pinecone, ServerlessSpec
+
+pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+
+# Creare un indice
+pc.create_index(
+    name="knowledge-base",
+    dimension=1536,
+    metric="cosine",
+    spec=ServerlessSpec(cloud="aws", region="eu-west-1")
+)
+
+index = pc.Index("knowledge-base")
+
+# Inserire vettori
+def indicizza_lotto(documenti: list[dict]):
+    vettori = []
+    for doc in documenti:
+        embedding = genera_embedding(doc["contenuto"])
+        vettori.append({
+            "id": doc["id"],
+            "values": embedding,
+            "metadata": {"contenuto": doc["contenuto"], **doc["metadata"]}
+        })
+    index.upsert(vectors=vettori)
+
+# Cercare
+def cerca_pinecone(query: str, filtro: dict = None) -> list:
+    embedding = genera_embedding(query)
+    risultato = index.query(
+        vector=embedding,
+        top_k=5,
+        include_metadata=True,
+        filter=filtro  # Es: {"dipartimento": "hr"} — filtra per metadata
+    )
+    return risultato.matches
+```
+
+**Quando usare Pinecone:** Volume elevato (decine di milioni di vettori), necessità di filtri per metadata complessi, team senza capacità di gestire infrastruttura di database.
+
+## Chroma: Vector DB Locale per lo Sviluppo
+
+Chroma è ideale per la prototipazione e lo sviluppo locale — senza infrastruttura, funziona in-memory o persiste su disco.
+
+```python
+import chromadb
+
+client = chromadb.PersistentClient(path="./chroma_db")
+collection = client.get_or_create_collection("documenti")
+
+# Inserire (Chroma fa l'embedding automaticamente se configurato)
+collection.add(
+    documents=["Ferie: 30 giorni all'anno.", "Benefits: assicurazione sanitaria dopo 90 giorni."],
+    metadatas=[{"fonte": "hr.pdf"}, {"fonte": "hr.pdf"}],
+    ids=["doc1", "doc2"]
+)
+
+# Cercare
+risultati = collection.query(
+    query_texts=["quanti giorni di ferie?"],
+    n_results=3
+)
+```
+
+## Confronto
+
+| Criterio | pgvector | Pinecone | Chroma | Weaviate |
+|----------|----------|----------|--------|---------|
+| Setup | Medio | Facile | Molto facile | Medio |
+| Infrastruttura | PostgreSQL | Gestito | Locale/Self-hosted | Self-hosted |
+| Scala | Milioni | Miliardi | Prototipi | Grande |
+| Costo | PostgreSQL | Pay-per-use | Gratuito | Self-hosted |
+| Filtri per metadata | Via SQL | Sì | Limitato | Avanzato |
+| Ideale per | Progetti con PostgreSQL | Produzione in scala | Dev/Prototipazione | Dati ibridi |
+
+## Conclusione
+
+Per la maggior parte dei progetti IA con RAG, **pgvector è la prima scelta** — sfrutta l'infrastruttura PostgreSQL esistente, ha prestazioni adeguate per la maggior parte dei volumi ed elimina la necessità di un servizio aggiuntivo. Per i progetti che devono scalare a decine di milioni di vettori o hanno esigenze complesse di filtri, **Pinecone** offre la soluzione managed più matura. **Chroma** è ideale per la prototipazione e lo sviluppo.
+
+SystemForge implementa sistemi RAG con vector database per aziende che hanno bisogno che i loro sistemi IA rispondano sulla base di dati proprietari. Contatta il nostro team per capire quale approccio ha senso per il tuo caso.

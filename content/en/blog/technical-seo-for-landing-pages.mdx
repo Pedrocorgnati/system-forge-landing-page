@@ -1,0 +1,91 @@
+---
+title: "Technical SEO for Landing Pages: Beyond Content"
+slug: "technical-seo-for-landing-pages"
+date: "2024-08-29"
+description: "How to optimize landing pages for technical SEO: Core Web Vitals, Schema.org, canonical tags, hreflang, crawlability, and correct indexing."
+tags: ["technical seo", "landing page", "core web vitals", "schema.org", "indexing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to optimize landing pages for technical SEO: Core Web Vitals, Schema.org, canonical tags, hreflang, crawlability, and correct indexing."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seo-tecnico-para-landing-pages'
+  - locale: 'it-IT'
+    slug: 'seo-tecnico-per-landing-page'
+---
+
+Good content on a slow site doesn't rank. This reality became explicit in 2021 when Google officially made Core Web Vitals a ranking factor. Before that, technical SEO was frequently treated as a complement -- something you did after having the right content. Now, server performance, visual stability during page loading, and responsiveness to user interactions are metrics that directly affect search result positions.
+
+But Core Web Vitals are just one layer of technical SEO. There are other equally critical elements that most landing pages ignore: Schema.org for rich snippets, correct canonical tag management for pages with multiple variations, guaranteed crawlability for Googlebot to index correctly, and -- when applicable -- hreflang for multilingual sites.
+
+## Core Web Vitals: LCP, CLS, and INP in Practice
+
+**LCP (Largest Contentful Paint)** measures the time until the largest visible element above the fold is rendered. In practice, it's usually the hero image or headline block. Target is below 2.5 seconds.
+
+Most common causes of high LCP on landing pages:
+- Hero image in unoptimized PNG or JPEG format (use WebP or AVIF)
+- Hero image not marked with `fetchpriority="high"`
+- Third-party CSS or JavaScript blocking rendering before LCP
+- No CDN, with assets served from the origin server
+
+**CLS (Cumulative Layout Shift)** measures visual instability -- elements that move while the page loads. Target is below 0.1. The biggest CLS culprits are images without defined dimensions, web fonts causing FOUT, and cookie banners that appear after the layout has already rendered.
+
+**INP (Interaction to Next Paint)** replaced FID in March 2024. Measures response latency to any user interaction throughout the entire session. Target is below 200ms.
+
+## Schema.org: Rich Snippets That Increase CTR
+
+Schema.org is a structured data vocabulary that Google uses to understand page content and, in some cases, display rich snippets in search results.
+
+For FAQ sections (common on landing pages), the `FAQPage` schema generates question-and-answer display directly in search results, increasing SERP real estate:
+
+```json
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How long does it take to develop a landing page?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Between 5 and 10 business days depending on complexity and content approval."
+      }
+    }
+  ]
+}
+```
+
+## Canonical Tags and Duplicate Content
+
+The canonical tag tells Google which URL is the "true" version of a page, consolidating link equity from all variations into a single URL:
+
+```html
+<link rel="canonical" href="https://yoursite.com/landing-page-service" />
+```
+
+The most common mistake is not configuring the canonical tag on pages accessed via UTM parameters. Google doesn't automatically ignore UTM parameters -- if the URL with parameters is indexable, it can be interpreted as duplicate content.
+
+## Crawlability: Robots.txt, Sitemap, and Forced Indexing
+
+A correct robots.txt for Next.js sites:
+
+```txt
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+Sitemap: https://yoursite.com/sitemap.xml
+```
+
+**Forced indexing:** when you publish a new landing page and want Google to index it quickly, use Google Search Console > URL Inspection > Request Indexing. The process takes between hours and 3 days.
+
+## Conclusion
+
+Technical SEO isn't optional for landing pages that depend on organic traffic. Performance below Core Web Vitals targets, absence of structured data, misconfigured canonical tags, and crawlability problems are gaps that the best content in the world won't compensate.
+
+The advantage of developing landing pages with Next.js is that much of this technical SEO comes by default: static export eliminates high TTFB, the `next/image` component resolves LCP and CLS automatically, and sitemap generation can be automated. At [SystemForge](https://systemforgesoftware.com), we configure all this technical SEO infrastructure as part of development -- not as an additional service.

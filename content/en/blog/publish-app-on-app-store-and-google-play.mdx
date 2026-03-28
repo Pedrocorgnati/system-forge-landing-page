@@ -1,0 +1,104 @@
+---
+title: "Publishing Your App on App Store and Google Play: A Complete Guide"
+slug: "publish-app-on-app-store-and-google-play"
+date: "2024-07-15"
+description: "Step-by-step guide to publishing an app on App Store and Google Play — developer accounts, review guidelines, basic ASO, and mistakes that cause rejection."
+tags: ["app store", "google play", "publish app", "aso", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Step-by-step guide to publishing an app on App Store and Google Play — developer accounts, review guidelines, basic ASO, and mistakes that cause rejection.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'publicar-app-app-store-google-play-guia'
+  - locale: 'it-IT'
+    slug: 'pubblicare-app-store-google-play-guida'
+---
+
+You spent months developing your app. The code is working, tests are passing, the team has approved. Now just publish and watch the downloads roll in, right? Not quite. The publishing phase has more layers than most founders expect, and skipping any one of them costs time — sometimes weeks of launch delay.
+
+This guide covers the complete process: from creating developer accounts to ASO practices that increase your app's organic visibility.
+
+## Developer Accounts: Apple and Google — Costs and Requirements
+
+First, you need active accounts on both platforms. The models are different, and it's worth understanding what each requires.
+
+**Apple Developer Program**
+- Cost: USD 99/year (individual or organization)
+- Organizations need a D-U-N-S Number — a global business identifier. The process can take 5 to 30 business days if the company isn't already registered.
+- Requires an Apple device for submission via Xcode or Transporter
+- Individual account publishes the app under your personal name; organizational account publishes under the company name
+
+**Google Play Console**
+- Cost: USD 25 (one-time fee, not annual)
+- Since 2023, new accounts must complete a closed testing period with at least 20 testers for 14 days before being able to publish to the general public
+- Accepts submission via web interface, no specific hardware required
+
+| Platform | Cost | Account activation time | Special requirement |
+|----------|------|------------------------|---------------------|
+| App Store (Apple) | USD 99/year | 24–48h (individual) / up to 30 days (organization with D-U-N-S) | Xcode or Transporter |
+| Google Play | USD 25 (one-time) | 24–48h | 20 testers for 14 days (new accounts) |
+
+An important decision: publish as individual or organization? For commercial products, always prefer the organizational account. The company name appears in the store, not the developer's personal name, which conveys more credibility.
+
+## App Store Review: What Apple Rejects Most Frequently
+
+Apple has the most rigorous review process of the two platforms. The average approval time is 24 to 48 hours, but a rejection restarts the cycle. The most common rejection reasons are:
+
+**1. Crashes during review**
+The reviewer will test the app manually. Any crash, especially at launch or in main flows, results in immediate rejection. Always test on a physical device before submitting, not just on the simulator.
+
+**2. Misleading metadata**
+Screenshots that show features not present in the submitted version, descriptions that promise non-existent features, or incorrect categories. Apple checks manually.
+
+**3. Incomplete functionality**
+Apps that submit placeholder content, broken links, blank screens, or flows that end without action are rejected. Guideline 2.1 ("App Completeness") is frequently cited.
+
+**4. Payments outside Apple's system**
+Any link for purchases outside of Apple's IAP (In-App Purchase) in iOS apps — including links to a website — violates guidelines. Apple takes this very seriously.
+
+**5. Data collection without declaration**
+The App Privacy Report (Privacy Nutrition Label) must accurately reflect exactly what data the app collects. Inconsistencies cause rejection.
+
+The App Store Review Guidelines is publicly available and should be read in full before the first submission. It's not a short document, but it's more straightforward than it looks.
+
+## Google Play: Policies and Review Process
+
+Google Play has a more automated process, but no less rigorous. The review combines automatic analysis with human review in suspicious cases.
+
+The most common rejection or suspension reasons include:
+
+- **Privacy policy violation:** apps that collect data without a clear and accessible privacy policy are rejected. The policy must be a valid URL, not inline text.
+- **Excessive permissions:** requesting permissions the app doesn't use (for example, camera access in a calculator app) triggers manual review.
+- **Intellectual property content:** using trademarks, logos, or characters from third parties without authorization.
+- **Deceptive behavior:** apps that impersonate another app, mimic the OS interface, or display ads outside the app's context.
+
+A practical Google Play advantage: publication can be done in stages (staged rollout), releasing the app progressively to 5%, 10%, 20% of users. This allows detecting production issues before full rollout.
+
+## Basic ASO: Name, Icon, Screenshots, and Description
+
+ASO (App Store Optimization) is the SEO equivalent for app stores. A well-optimized app ranks higher in search and converts more visitors into downloads.
+
+**App name**
+This is the field with the most weight for organic search. Include the main keyword naturally. Limit: 30 characters on App Store, 50 on Google Play. Example: "Fintag — Expense Tracker" instead of just "Fintag".
+
+**Icon**
+The icon is the first impression. Practical rules: solid color or simple gradient background, a recognizable central element, no text (unreadable at small sizes). Test on both light and dark backgrounds.
+
+**Screenshots**
+Screenshots are the most impactful conversion factor. Each one should contain a headline describing the benefit, not the feature. "Control your spending in real time" converts more than "Transactions screen".
+
+**Description**
+The first three lines appear before "show more" — use that space to communicate the main benefit and differentiator. The rest of the description can be more detailed, with feature bullet points.
+
+**Keywords (App Store)**
+The App Store has a specific keywords field (100 characters) that isn't visible to users but influences ranking. Use words that aren't in the title or subtitle. Don't repeat terms.
+
+## Conclusion
+
+Successfully publishing an app isn't just about the code — it's about understanding each platform's rules, preparing metadata correctly, and launching with a visibility strategy from day one. A single mistake in the submission process can delay launch by weeks.
+
+At SystemForge, we treat publication as part of development, not as a subsequent step. From account setup to initial ASO and rollout planning, every detail is documented and executed with the same rigor as the code itself. If you're building an app and want to guarantee the launch happens on schedule and without surprises, talk to us.

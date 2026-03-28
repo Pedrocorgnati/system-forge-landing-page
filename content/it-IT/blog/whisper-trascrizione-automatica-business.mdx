@@ -1,0 +1,206 @@
+---
+title: "Whisper: trascrizione automatica per le aziende"
+slug: "whisper-trascrizione-automatica-business"
+date: "2024-11-05"
+description: "Come usare Whisper di OpenAI per la trascrizione automatica di riunioni, assistenza clienti e contenuti in italiano con alta precisione."
+tags: ["whisper", "trascrizione automatica", "openai", "ia audio", "automazione"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come usare Whisper di OpenAI per la trascrizione automatica di riunioni, assistenza clienti e contenuti in italiano con alta precisione.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'whisper-transcricao-automatica-negocios'
+  - locale: 'en'
+    slug: 'whisper-automatic-transcription-for-business'
+---
+
+## Trascrizione Audio: dall'Impossibile al Banale
+
+Fino al 2022, la trascrizione automatica in italiano con qualità utilizzabile costava molto e richiedeva comunque una revisione manuale estesa. Whisper, rilasciato da OpenAI nel settembre 2022 come modello open-source, ha cambiato radicalmente questo scenario.
+
+Whisper è un modello di riconoscimento automatico del parlato (ASR) addestrato su 680.000 ore di audio multilingue. Le sue prestazioni in italiano sono notevolmente superiori ai precedenti servizi commerciali — e può essere eseguito in locale (senza costo per trascrizione) oppure tramite l'API di OpenAI.
+
+## Casi d'Uso in Ambito Aziendale
+
+**Riunioni e videoconferenze:** Trascrivere riunioni automaticamente permette di creare verbali, estrarre decisioni e action item tramite LLM post-trascrizione. La combinazione Whisper + GPT-4 trasforma 1 ora di riunione in un verbale strutturato in meno di 5 minuti.
+
+**Call center e assistenza clienti:** Trascrizione delle chiamate per l'analisi della qualità, l'identificazione dei problemi ricorrenti e la formazione dei team.
+
+**Contenuti video:** Generazione automatica di sottotitoli per video istituzionali, corsi di formazione e webinar.
+
+**Ricerca qualitativa:** Trascrizione di interviste e focus group per l'analisi.
+
+## Setup Locale con faster-whisper
+
+Per volumi elevati, l'esecuzione in locale consente un risparmio significativo rispetto all'API. `faster-whisper` è l'implementazione ottimizzata con quantizzazione, 4 volte più veloce dell'originale con un utilizzo di memoria inferiore:
+
+```bash
+pip install faster-whisper
+```
+
+```python
+from faster_whisper import WhisperModel
+
+# Modelli disponibili: tiny, base, small, medium, large-v3
+# Per l'italiano: medium o large-v3 offrono la migliore precisione
+model = WhisperModel("large-v3", device="cpu", compute_type="int8")
+
+def trascrivi_audio(percorso_file: str) -> dict:
+    segmenti, info = model.transcribe(
+        percorso_file,
+        language="it",  # Forzare l'italiano migliora la precisione
+        beam_size=5,
+        best_of=5,
+        temperature=0.0,  # Più deterministico
+        vad_filter=True,  # Rimuove i silenzi (più veloce)
+    )
+
+    risultato = {
+        "lingua": info.language,
+        "probabilita_lingua": info.language_probability,
+        "segmenti": []
+    }
+
+    for segmento in segmenti:
+        risultato["segmenti"].append({
+            "inizio": segmento.start,
+            "fine": segmento.end,
+            "testo": segmento.text.strip(),
+        })
+
+    return risultato
+
+# Utilizzo
+trascrizione = trascrivi_audio("riunione-2024-10-30.mp3")
+testo_completo = " ".join(s["testo"] for s in trascrizione["segmenti"])
+print(testo_completo)
+```
+
+## Trascrizione tramite API OpenAI
+
+Per volumi ridotti o quando non è disponibile una GPU, l'API di OpenAI è l'opzione più semplice:
+
+```python
+from openai import OpenAI
+import os
+
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
+
+def trascrivi_via_api(percorso_audio: str) -> str:
+    # Limite: 25MB per file
+    with open(percorso_audio, "rb") as f:
+        trascrizione = client.audio.transcriptions.create(
+            model="whisper-1",
+            file=f,
+            language="it",
+            response_format="verbose_json",  # Include timestamp per segmento
+            timestamp_granularities=["segment"],
+        )
+
+    return trascrizione.text
+
+# Costo: $0.006 al minuto (giugno 2024)
+# 100 ore di audio ≈ $36
+```
+
+## Pipeline Completa: Riunione → Verbale Strutturato
+
+```python
+import anthropic
+from faster_whisper import WhisperModel
+
+whisper = WhisperModel("large-v3", device="cpu", compute_type="int8")
+claude = anthropic.Anthropic()
+
+def riunione_a_verbale(file_audio: str, partecipanti: list[str]) -> str:
+    # Passo 1: Trascrivi
+    segmenti, _ = whisper.transcribe(file_audio, language="it", vad_filter=True)
+    trascrizione = " ".join(s.text for s in segmenti)
+
+    # Passo 2: Genera verbale strutturato con IA
+    prompt = f"""In base alla trascrizione della riunione riportata di seguito, genera un verbale strutturato con:
+
+1. **Sommario esecutivo** (3-5 righe)
+2. **Decisioni prese** (elenco)
+3. **Action Item** (responsabile, scadenza, azione)
+4. **Prossimi passi**
+
+Partecipanti menzionati: {', '.join(partecipanti)}
+
+Trascrizione:
+{trascrizione[:8000]}"""  # Limite di contesto
+
+    response = claude.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=2000,
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    return response.content[0].text
+
+verbale = riunione_a_verbale("riunione-sprint-planning.mp3", ["Marco", "Giulia", "Pietro"])
+print(verbale)
+```
+
+## Formati Audio Supportati
+
+Whisper accetta: mp3, mp4, m4a, wav, flac, ogg, webm, mpeg. Per formati non supportati o file > 25MB (limite dell'API), convertire con ffmpeg:
+
+```bash
+# Convertire qualsiasi formato in mp3
+ffmpeg -i input.opus -ac 1 -ar 16000 output.mp3
+
+# Dividere un file lungo in segmenti da 10 minuti
+ffmpeg -i lungo.mp3 -f segment -segment_time 600 -c copy chunk_%03d.mp3
+```
+
+## Diarizzazione: Identificare Chi Sta Parlando
+
+Whisper standard non differenzia i parlanti. Per identificare "chi ha detto cosa", si può combinare con `pyannote.audio`:
+
+```python
+from pyannote.audio import Pipeline
+from faster_whisper import WhisperModel
+
+pipeline_diarizzazione = Pipeline.from_pretrained(
+    "pyannote/speaker-diarization-3.1",
+    use_auth_token="HF_TOKEN"
+)
+
+def trascrivi_con_parlanti(file: str) -> list:
+    # Diarizzazione (chi parla quando)
+    diarizzazione = pipeline_diarizzazione(file)
+
+    # Trascrizione
+    modello_whisper = WhisperModel("large-v3", compute_type="int8")
+    segmenti, _ = modello_whisper.transcribe(file, language="it")
+
+    # Combina: per ogni segmento di trascrizione, identifica il parlante
+    risultato = []
+    for segmento in segmenti:
+        tempo_medio = (segmento.start + segmento.end) / 2
+        parlante = "Sconosciuto"
+
+        for turno, _, etichetta in diarizzazione.itertracks(yield_label=True):
+            if turno.start <= tempo_medio <= turno.end:
+                parlante = etichetta
+                break
+
+        risultato.append({
+            "parlante": parlante,
+            "inizio": segmento.start,
+            "testo": segmento.text.strip()
+        })
+
+    return risultato
+```
+
+## Conclusione
+
+Whisper ha reso la trascrizione automatica di alta qualità in italiano accessibile a qualsiasi azienda. Le applicazioni spaziano dalla generazione automatica di verbali all'analisi della qualità nei call center e alla trascrizione di contenuti video. La combinazione con LLM come Claude e GPT-4 per l'analisi e la strutturazione del contenuto trascritto crea pipeline di automazione ad alto valore.
+
+SystemForge implementa pipeline di trascrizione e analisi audio con IA per le aziende. Se vuoi esplorare un caso d'uso specifico, contatta il nostro team.

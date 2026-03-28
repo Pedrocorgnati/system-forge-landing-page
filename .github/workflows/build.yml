@@ -1,0 +1,155 @@
+# .github/workflows/build.yml
+# Triple Market Build — 3 builds paralelos por locale
+# Secrets documentados em: docs/ci-cd-secrets.md
+#
+# Fluxo:
+#   push para main → este workflow → artifacts build-{locale}
+#   → deploy.yml (via workflow_run) → 3 deploys SFTP paralelos
+#   → smoke-test.yml (via workflow_run) → 3 smoke tests paralelos
+name: Triple Market Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancela runs anteriores para o mesmo branch/PR
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  build:
+    name: Build (${{ matrix.locale }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false   # Outros locales continuam se um falhar
+      matrix:
+        locale: [pt-BR, it-IT, en]
+        include:
+          - locale: pt-BR
+            build_suffix: br
+            site_url: https://forjadesistemas.com.br
+            contact_email: contato@forjadesistemas.com.br
+          - locale: it-IT
+            build_suffix: it
+            site_url: https://systemforge.it
+            contact_email: contatto@systemforge.it
+          - locale: en
+            build_suffix: en
+            site_url: https://systemforgesoftware.com
+            contact_email: contact@systemforgesoftware.com
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Cache node_modules + velite
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: |
+            node_modules
+            .velite
+          key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+
+      - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Check content parity
+        run: npx tsx scripts/check-content-parity.ts
+        if: matrix.locale == 'pt-BR'   # roda uma vez (não precisa rodar 3×)
+
+      - name: Validate frontmatter (${{ matrix.locale }})
+        run: npm run prebuild:${{ matrix.build_suffix }}
+        env:
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
+
+      - name: Optimize images
+        run: npm run optimize:images
+
+      - name: Build content & search index
+        run: npm run prebuild
+        env:
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+
+      - name: Build (${{ matrix.locale }})
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
+          OUT_DIR: out
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ matrix.contact_email }}
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
+          NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+          NEXT_PUBLIC_CALENDLY_URL: ${{ secrets.NEXT_PUBLIC_CALENDLY_URL }}
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: ${{ secrets.NEXT_PUBLIC_BUDGET_ENGINE_URL }}
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.locale }}
+          path: out/
+          retention-days: 1
+          if-no-files-found: error
+
+  # ─── Post-build isolation check ────────────────────────────────────────────
+  build-isolation-check:
+    name: Build Isolation Check
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact (pt-BR)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-pt-BR
+          path: dist-br/
+
+      - name: Download build artifact (it-IT)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-it-IT
+          path: dist-it/
+
+      - name: Download build artifact (en)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-en
+          path: dist-en/
+
+      - name: Check build isolation (zero cross-contamination)
+        run: npx tsx scripts/check-build-isolation.ts
+
+      - name: Check broken links (internal only)
+        run: npx tsx scripts/check-broken-links.ts --internal-only

@@ -1,0 +1,27 @@
+name = "newsletter-br"
+main = "src/index.ts"
+compatibility_date = "2026-03-26"
+
+[[kv_namespaces]]
+binding = "NEWSLETTER_KV"
+id = "3502ec738f164c29ade29146a0767371"
+preview_id = "957b83f697a64827a907d9aef9732bbc"
+
+[[d1_databases]]
+binding = "D1_AUDIT"
+database_name = "newsletter-audit"
+database_id = "85f58928-0f2a-4e72-881e-2ae337f1875c"
+
+[vars]
+SITE_LOCALE = "pt-BR"
+ALLOWED_ORIGINS = "https://forjadesistemas.com.br,http://localhost:3000"
+WORKER_DOMAIN = "newsletter-br.corgnati-pedro.workers.dev"
+FROM_EMAIL = "newsletter@forjadesistemas.com.br"
+AUDIT_PEPPER = "9bf1e79683b44adce95e574df1b8367d8e5c2c8b7b38e30539c376ef0a01bbca"
+TURNSTILE_EXPECTED_HOSTNAME = "forjadesistemas.com.br"
+
+# Secrets — configurar via:
+#   wrangler secret put RESEND_API_KEY
+#   wrangler secret put RESEND_AUDIENCE_ID_BR    (audience_id da lista "newsletter-br" no Resend)
+#   wrangler secret put TURNSTILE_SECRET_KEY
+# Nunca committar secrets no wrangler.toml

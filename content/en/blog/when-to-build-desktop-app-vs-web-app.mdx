@@ -1,0 +1,90 @@
+---
+title: "When to Build a Desktop App vs a Web App"
+slug: "when-to-build-desktop-app-vs-web-app"
+date: "2024-09-04"
+description: "Criteria for deciding between a desktop app and a web app: hardware access, offline performance, local security, and OS integration."
+tags: ["desktop app", "web app", "technical decision", "electron", "tauri"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Criteria for deciding between a desktop app and a web app — hardware access, offline performance, local security, and OS integration.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'quando-construir-app-desktop-vs-web'
+  - locale: 'it-IT'
+    slug: 'quando-costruire-app-desktop-vs-web'
+---
+
+The web is an incredibly powerful environment. With Next.js, React, modern browser APIs, and a good CDN, you can build sophisticated applications that run on any device with a browser. For the overwhelming majority of use cases — dashboards, e-commerce, SaaS platforms, management systems — a well-built web app is cheaper, easier to update, and more accessible than a desktop app.
+
+But there's a specific set of requirements where the web simply can't deliver what the business needs. When you encounter those requirements, trying to force a web solution typically results in hacks, fragile workarounds, degraded user experience — and eventually the need to rewrite everything as a desktop app anyway.
+
+Understanding when desktop is the right choice saves months of development and rework. These are the technical criteria that determine that decision.
+
+## Hardware Access: Camera, Printer, and Industrial Peripherals
+
+The browser has hardware APIs. The MediaDevices API allows camera and microphone access. The Web USB API enables communication with some USB devices. The Web Serial API was added to Chrome and allows serial communication in some cases.
+
+The problem is these APIs are limited by design — and for good security reasons. The browser runs in a sandboxed environment that deliberately prevents unrestricted hardware access. For general use, that's great. For applications that need precise hardware control, it's a serious obstacle.
+
+Consider an inventory control system that needs to communicate with an industrial scale via RS232. The Web Serial API might work in theory, but it depends on user permissions each session, can behave inconsistently across Chrome updates, and doesn't offer control over communication parameters like baud rate, stop bits, and parity with the same reliability as a native library.
+
+With a desktop app using Electron and the `serialport` library, communication is direct, stable, and fully controllable. The same applies to fiscal printers, industrial barcode readers, PLC controllers, precision scales, and any device that communicates via serial or USB protocols with specific drivers.
+
+If the system needs to communicate reliably with specialized hardware, the web will create more problems than solutions.
+
+## Offline Performance: Local Data Without Network Latency
+
+Progressive Web Apps can work offline via Service Workers. For reading apps, simple forms, or cached content, this is sufficient. But there's a fundamental difference between "functioning in degraded mode without internet" and "designed to operate primarily locally."
+
+Industrial environments often have intermittent or no connectivity: factories with poor network infrastructure, warehouses with Wi-Fi dead zones, field construction sites, vessels, mines in remote locations. For these scenarios, the correct mental model isn't "syncs with the cloud and has offline fallback" — it's "works locally and syncs when network is available."
+
+A desktop app with local SQLite has query latency in the microsecond range. Operations that would involve an HTTP request with 50–300ms latency happen instantaneously. For systems where operators perform hundreds of operations per hour — production logging, quality inspection, movement control — this performance difference is perceptible and directly impacts productivity.
+
+Additionally, with local data there's no dependency on server availability. A connectivity interruption doesn't stop operations. A server failure doesn't affect floor operators. The app simply keeps working.
+
+## Local Security: Data That Can't Go to the Cloud
+
+Not all data can or should travel over the internet. There are scenarios where regulations, contracts, or simply internal policy require data to remain within the company's local infrastructure — or on the user's own machine.
+
+Medical offices with patient data subject to privacy regulations (HIPAA). Law firms with confidential client documents. Defense contractors and government agencies with classification requirements. Industries with sensitive intellectual property that can't leave the internal network. All these cases share the need for control over where data is stored.
+
+A desktop app with an encrypted local database — like SQLite with SQLCipher — keeps data on the machine or local network. There's no traffic to external servers. No risk of breach from a remote server vulnerability. Control over data is complete and auditable.
+
+This is fundamentally different from a web app, even one hosted on company servers, because the access model and attack vectors are different.
+
+## OS Integration: Notifications, Tray Icon, and File System
+
+Applications that require deep integration with the operating system — beyond what the browser offers — are natural desktop candidates.
+
+Concrete examples of integrations that web apps can't replicate natively:
+
+```javascript
+// Electron: system tray icon with context menu
+const { Tray, Menu, nativeImage } = require('electron')
+
+const tray = new Tray(nativeImage.createFromPath('./icon.png'))
+const contextMenu = Menu.buildFromTemplate([
+  { label: 'Open Dashboard', click: () => mainWindow.show() },
+  { label: 'Sync Now', click: () => syncData() },
+  { type: 'separator' },
+  { label: 'Quit', role: 'quit' }
+])
+tray.setContextMenu(contextMenu)
+tray.setToolTip('Monitoring System — Online')
+```
+
+Native OS notifications (not browser notifications), global keyboard shortcuts that work even when the app is minimized, unrestricted filesystem access to read and write arbitrary directories, integration with custom URL protocols (`myapp://`), drag-and-drop of files with full path access, execution of external processes — all these integrations are native in Electron or Tauri and difficult or impossible in a web app.
+
+If the application needs to "live" in the operating system — be available in the background, react to system events, extensively manipulate files — desktop is the correct environment.
+
+## Conclusion
+
+The choice between desktop and web isn't a matter of favorite technology or team familiarity. It's a matter of requirements. Web apps are faster to develop, easier to distribute and update, and cover most modern enterprise software use cases.
+
+But when the system needs reliable access to specialized hardware, guaranteed performance without network dependency, complete control over where data is stored, or deep OS integration — a desktop app isn't a nostalgic choice. It's the technically correct one.
+
+At SystemForge, we build desktop applications for exactly these cases: industrial systems, management tools for environments with limited connectivity, applications with strict data security requirements. If you're mapping a system's requirements and aren't sure whether desktop or web is the right call, we can help with that analysis before any line of code.

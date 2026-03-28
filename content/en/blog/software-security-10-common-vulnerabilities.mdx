@@ -1,0 +1,125 @@
+---
+title: "Software Security: 10 Common Vulnerabilities"
+slug: "software-security-10-common-vulnerabilities"
+date: "2024-10-30"
+description: "The 10 most common security vulnerabilities in web and mobile applications -- based on OWASP Top 10 -- with code examples and how to fix them."
+tags: ["security", "owasp", "vulnerabilities", "secure development", "sql injection"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "The 10 most common security vulnerabilities in web and mobile applications -- based on OWASP Top 10 -- with code examples and how to fix them."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-software-10-vulnerabilidades-comuns'
+  - locale: 'it-IT'
+    slug: 'sicurezza-software-10-vulnerabilita-comuni'
+---
+
+## 95% of Exploited Vulnerabilities Are Known and Preventable
+
+Most successful attacks don't exploit sophisticated zero-day vulnerabilities. They exploit known, documented flaws that could have been prevented with basic secure development practices. The OWASP (Open Web Application Security Project) has documented the most critical web application vulnerabilities since 2003, and the same categories appear repeatedly.
+
+## 1. Injection (SQL, NoSQL, Command)
+
+Injection occurs when untrusted data is sent to an interpreter as part of a command or query.
+
+```javascript
+// NEVER do this
+const query = `SELECT * FROM users WHERE email = '${email}' AND password = '${password}'`;
+
+// Correct: parameterized queries
+const result = await db.query(
+  'SELECT * FROM users WHERE email = $1 AND password = $2',
+  [email, hashedPassword]
+);
+```
+
+Modern ORMs like Prisma and Drizzle use parameterized queries by default. The risk arises when developers use `$queryRaw` or build SQL manually.
+
+## 2. Broken Authentication and Session Management
+
+```typescript
+// Correct hashing with bcrypt (minimum cost 10)
+import bcrypt from 'bcryptjs';
+const SALT_ROUNDS = 12;
+const hashedPassword = await bcrypt.hash(plainPassword, SALT_ROUNDS);
+
+// JWT with short expiration and refresh token
+const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, { expiresIn: '15m' });
+```
+
+## 3. Sensitive Data Exposure
+
+Common errors: sensitive data in application logs, API keys in the Git repository, data in cache without TTL or encryption, HTTP communication instead of HTTPS.
+
+## 4. XML External Entities (XXE)
+
+Affects applications that process XML. In modern applications using JSON, the risk is minimal -- but legacy APIs still process XML.
+
+## 5. Broken Access Control
+
+Includes IDOR (Insecure Direct Object Reference) -- accessing other users' resources by changing an ID in the URL.
+
+```typescript
+// Vulnerable: doesn't check if the order belongs to the logged-in user
+app.get('/orders/:orderId', async (req, res) => {
+  const order = await db.order.findUnique({ where: { id: req.params.orderId } });
+  res.json(order);
+});
+
+// Correct: verifies resource ownership
+app.get('/orders/:orderId', authenticate, async (req, res) => {
+  const order = await db.order.findUnique({
+    where: { id: req.params.orderId, userId: req.user.id }
+  });
+  if (!order) return res.status(404).json({ error: 'Not found' });
+  res.json(order);
+});
+```
+
+## 6. Security Misconfiguration
+
+Essential security headers:
+
+```typescript
+const securityHeaders = [
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'X-Frame-Options', value: 'DENY' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
+  { key: 'Content-Security-Policy', value: "default-src 'self'; script-src 'self' 'unsafe-inline'" }
+];
+```
+
+## 7. Cross-Site Scripting (XSS)
+
+Modern frameworks like React escape content automatically. The risk arises with `dangerouslySetInnerHTML` or direct DOM manipulation with `innerHTML`. Use `DOMPurify` when you need to render user HTML.
+
+## 8. Insecure Deserialization
+
+Validate and sanitize deserialized data with schemas (Zod, Joi) before processing.
+
+## 9. Using Components with Known Vulnerabilities
+
+```bash
+npm audit
+npm audit fix
+npx snyk test
+```
+
+Configure automatic alerts in GitHub (Dependabot) to receive automatic PRs when dependencies with CVEs are identified.
+
+## 10. Insufficient Logging and Monitoring
+
+**What to log:** authentication attempts (success and failure), permission changes and sensitive data access, authorization errors (403), anomalous request spikes.
+
+**What NOT to log:** passwords (not even as hash), complete session tokens, sensitive personal data (SSN, credit cards).
+
+## Conclusion
+
+Security isn't an additional feature -- it's part of professional development. The OWASP Top 10 categories represent preventable vulnerabilities with basic practices: parameterized queries, input validation, server-side access control verification, updated dependencies, and correct headers.
+
+SystemForge includes security review in all projects -- Code Review focused on OWASP, dependency audit, and header validation. Visit [systemforgesoftware.com](https://systemforgesoftware.com) to audit the security of an existing system.

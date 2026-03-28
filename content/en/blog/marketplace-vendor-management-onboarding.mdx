@@ -1,0 +1,119 @@
+---
+title: "Marketplace Vendor Management: Onboarding and Compliance"
+slug: "marketplace-vendor-management-onboarding"
+date: "2024-08-28"
+description: "How to structure vendor onboarding, identity verification, quality policies, and vendor deactivation in marketplaces."
+tags: ["marketplace", "vendor management", "kyc", "onboarding", "compliance"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to structure vendor onboarding, identity verification, quality policies, and vendor deactivation in marketplaces.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-vendedores-marketplace-onboarding'
+  - locale: 'it-IT'
+    slug: 'gestione-venditori-marketplace-onboarding'
+---
+
+The quality of a marketplace is, ultimately, the quality of its vendors. Buyers don't come back because of your technology — they come back because they found real products, with honest descriptions, delivered on time by vendors who respond to questions. That means supply-side management is as critical as any other technical feature of the platform.
+
+The process starts long before the vendor publishes their first product. A poorly structured onboarding attracts inadequate profiles, complicates KYC, and creates compliance problems that drag on for months. A well-designed onboarding, on the other hand, filters serious vendors from the start and creates a quality base that sustains itself as the platform grows.
+
+## Onboarding Flow: Registration, Verification, and Approval
+
+Vendor onboarding should be treated as a separate product, with its own UX flow and its own success criteria. The goal isn't just to collect data — it's to move the vendor to the "active and publishing" state as quickly as possible, without sacrificing necessary checks.
+
+A well-structured onboarding flow has five stages:
+
+**Stage 1 — Basic registration:** email, password, and account type (individual or business). Don't ask for anything more at this point. The goal is to reduce initial friction and create the account as quickly as possible. Email verification should happen here.
+
+**Stage 2 — Profile data:** store display name, main category, short description, profile photo/logo. This is what the buyer sees — help the vendor create a good first impression.
+
+**Stage 3 — Documentation and KYC:** SSN/EIN, identity documents, proof of address, banking information. This is the most sensitive stage and must be handled carefully in the UX — explain why each piece of information is required and how long the review takes.
+
+**Stage 4 — Financial setup:** payment receiving details (bank account, routing number), agreement to financial terms including fee structures and payout schedule.
+
+**Stage 5 — First product publication:** guided, with checklist. Vendors who publish their first product within the first 48 hours have a much higher activation rate than those who delay this step.
+
+The vendor status must transition between clearly defined states:
+
+```typescript
+type VendorStatus =
+  | 'draft'           // registration started, no verification
+  | 'pending_kyc'     // awaiting document review
+  | 'kyc_review'      // documents under manual review
+  | 'active'          // approved, can sell
+  | 'suspended'       // temporarily suspended (with notice)
+  | 'deactivated';    // permanently deactivated
+```
+
+Every status transition should trigger an automatic email informing the vendor what happened and what is expected of them next.
+
+## Automated KYC: Document Verification
+
+KYC (Know Your Customer) is the process of verifying that the vendor is who they claim to be. In the marketplace context, it serves two purposes: regulatory compliance (required by FinCEN for payment platforms) and fraud reduction.
+
+The recommended approach combines automatic verification for simple cases and human review for edge cases.
+
+**Viable automatic verifications:**
+
+- EIN/SSN: verification through services like Stripe Identity, Persona, or Socure
+- Business registration: entity status, ownership structure, formation date (via IRS or Secretary of State APIs)
+- Banking information: account ownership validation via Plaid or micro-deposit verification
+- Address: cross-reference with USPS address database and consistency validation
+
+**Verifications requiring human review or advanced OCR:**
+
+- Facial recognition (liveness check) to confirm the person is real
+- Reading and validating identity documents (driver's license, passport, state ID)
+- Verification of proof of address documents
+
+Tools like Persona, Jumio, Onfido, and Stripe Identity cover most of these needs via API. The cost per complete verification ranges from $3 to $15 depending on the services used — a cost that pays for itself quickly by blocking fraudulent vendors.
+
+The SLA for manual review must be communicated explicitly. "Your registration is under review and will be processed within 2 business days" is far better than leaving the vendor waiting without feedback.
+
+## Quality Policies and Scoring System
+
+After onboarding, vendor quality management becomes ongoing. A well-implemented scoring system creates the right incentives and allows identifying problematic vendors before they cause reputational damage to the platform.
+
+The most relevant metrics for vendor scoring in marketplaces are:
+
+| Metric | Suggested weight | Target |
+|---|---|---|
+| Positive review rate | 30% | > 90% |
+| Cancellation rate | 20% | < 5% |
+| Average response time | 15% | < 4 hours |
+| On-time shipping rate | 20% | > 95% |
+| Return rate | 15% | < 3% |
+
+The final score (0 to 100) defines the vendor tier:
+
+- **Platinum (90–100):** featured in search results, reduced commission rate, quality badge
+- **Gold (75–89):** standard positioning, normal conditions
+- **Silver (60–74):** warning about declining metrics, access to improvement program
+- **At Risk (below 60):** formal notice, recovery deadline, restriction on new products
+
+Transparency is critical: the vendor must be able to see their current score, which metrics are pulling it down, and what they need to improve. A detailed metrics dashboard isn't a luxury — it's an essential part of the vendor panel.
+
+## Vendor Deactivation: Process and Communication
+
+Deactivating a vendor is inevitable in any growing marketplace. The process needs to be fair, documented, and respectful — even when the cause is fraud, because how you handle termination is watched by other vendors and can become a topic in communities.
+
+The recommended process has three layers:
+
+**Automatic temporary suspension:** triggered when metrics fall below critical thresholds (e.g., 3 chargebacks in 30 days, score below 50 for 2 consecutive weeks). The vendor receives an email explaining the suspension, the metrics that caused it, and a clear deadline (e.g., 15 days) to resolve the issues.
+
+**Manual suspension:** triggered by the operations team after reviewing reports, suspicious behavior, or policy violations. Requires internal record of the reason and evidence, which may be needed in legal disputes.
+
+**Permanent deactivation:** after temporary suspension without improvement, or immediately for proven fraud. The vendor must receive formal communication with the specific reasons and information about the pending balance and payment timeline.
+
+The financial balance of a deactivated vendor cannot simply be withheld indefinitely. Define in the policy (and communicate during onboarding) that deactivated vendors receive already-processed amounts within X days, with holdback only for amounts in the chargeback window to cover open disputes.
+
+## Conclusion
+
+Vendor management is one of the most underrated parts of building a marketplace. Teams that plan only the technical side and leave onboarding, KYC, and quality processes as "phase 2" invariably face credibility crises when the platform starts to scale.
+
+SystemForge supports this phase by generating structured documentation for all these flows — from the data model to User Stories with error scenarios — before any implementation. With complete documentation in hand, the technical team can build with confidence and the operations team knows exactly which processes they need to execute.
