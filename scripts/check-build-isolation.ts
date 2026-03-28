@@ -86,11 +86,15 @@ for (const check of checks) {
   let fileErrors = 0
   for (const file of htmlFiles) {
     const content = readFileSync(file, 'utf-8')
-    // Remove tags hreflang (cross-domain esperado) antes de verificar
-    const contentWithoutAlternate = content.replace(
-      /<link[^>]*rel=["']alternate["'][^>]*>/gi,
-      ''
-    )
+    // Remove elementos legítimos com refs cross-domain antes de verificar:
+    // - tags hreflang alternate
+    // - JSON-LD scripts (sameAs, url de outros locales)
+    // - language switcher (nav/footer com links para outros locales)
+    const contentWithoutAlternate = content
+      .replace(/<link[^>]*rel=["']alternate["'][^>]*>/gi, '')
+      .replace(/<script[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
     for (const forbidden of check.forbiddenStrings) {
       if (contentWithoutAlternate.includes(forbidden)) {
         recordError(`${file}: string proibida fora de hreflang: "${forbidden}"`)
