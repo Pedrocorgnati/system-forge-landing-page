@@ -32,7 +32,7 @@ export function BlogListPage({
   searchSlot,
 }: BlogListPageProps) {
   return (
-    <div className="flex flex-col gap-8">
+    <div data-testid="blog-list" className="flex flex-col gap-8">
       {/* Search slot */}
       {showSearch && searchSlot}
 
@@ -53,7 +53,7 @@ export function BlogListPage({
 
       {/* Article grid or empty state */}
       {articles.length === 0 ? (
-        <div className="flex flex-col items-center justify-center gap-4 py-20 rounded-2xl border border-border border-dashed bg-surface">
+        <div data-testid="blog-list-empty-state" className="flex flex-col items-center justify-center gap-4 py-20 rounded-2xl border border-border border-dashed bg-surface">
           <div
             className="w-16 h-16 rounded-full bg-accent flex items-center justify-center text-3xl"
             aria-hidden="true"
@@ -74,7 +74,7 @@ export function BlogListPage({
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div data-testid="blog-list-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((article) => (
             <ArticleCard key={article.slug} article={article} />
           ))}

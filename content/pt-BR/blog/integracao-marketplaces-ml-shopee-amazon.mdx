@@ -1,0 +1,108 @@
+---
+title: "Integração com Mercado Livre, Shopee e Amazon"
+slug: "integracao-marketplaces-ml-shopee-amazon"
+date: "2024-08-17"
+description: "Como integrar sua loja com os principais marketplaces brasileiros via API — catálogo, estoque, pedidos e ERP — com armadilhas técnicas para evitar."
+tags: ["marketplace", "mercado livre", "shopee", "amazon", "integracao ecommerce"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Como integrar sua loja com os principais marketplaces brasileiros via API — catálogo, estoque, pedidos e ERP — com armadilhas técnicas para evitar.
+---
+
+Vender apenas na loja própria limita o alcance a quem já te conhece ou te encontra via SEO/ads. Os marketplaces — Mercado Livre, Shopee, Amazon Brasil — já têm o tráfego. Milhões de compradores ativos que buscam produtos todos os dias. Estar presente nesses canais pode multiplicar o volume de pedidos sem o custo de aquisição de tráfego de uma loja independente.
+
+O desafio está na integração: cada marketplace tem API própria, quirks específicos, limites de rate e modelos de autenticação diferentes. Fazer isso manualmente para cada canal é inviável em escala. Fazer errado resulta em anúncios desatualizados, overselling e pedidos que chegam sem estoque para atender.
+
+## Mercado Livre API: Catálogo, Anúncios e Pedidos
+
+O Mercado Livre é o maior marketplace da América Latina, com mais de 40 milhões de compradores ativos no Brasil. A API do ML (Marketplace API) é bem documentada e relativamente madura. O fluxo de integração envolve três domínios principais: catálogo de produtos, gestão de anúncios e processamento de pedidos.
+
+A autenticação usa OAuth 2.0 com tokens de acesso de 6 horas. Isso significa que sua integração precisa de um mecanismo robusto de refresh de token — uma fonte frequente de erros em integrações mal construídas.
+
+```python
+import httpx
+from datetime import datetime, timedelta
+
+class MLClient:
+    BASE_URL = "https://api.mercadolibre.com"
+
+    def __init__(self, client_id: str, client_secret: str, redirect_uri: str):
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.redirect_uri = redirect_uri
+        self._access_token: str | None = None
+        self._refresh_token: str | None = None
+        self._token_expiry: datetime | None = None
+
+    async def get_valid_token(self) -> str:
+        if self._token_expiry and datetime.utcnow() < self._token_expiry - timedelta(minutes=5):
+            return self._access_token
+
+        # Refresh token antes de expirar
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(f"{self.BASE_URL}/oauth/token", data={
+                "grant_type": "refresh_token",
+                "client_id": self.client_id,
+                "client_secret": self.client_secret,
+                "refresh_token": self._refresh_token,
+            })
+            resp.raise_for_status()
+            data = resp.json()
+            self._access_token = data["access_token"]
+            self._refresh_token = data["refresh_token"]
+            self._token_expiry = datetime.utcnow() + timedelta(seconds=data["expires_in"])
+            return self._access_token
+```
+
+Para anúncios, o ML trabalha com o conceito de "item" — cada anúncio tem atributos obrigatórios que variam por categoria. Roupas exigem tamanho e cor; eletrônicos exigem voltagem; alimentos exigem informações nutricionais. Ignorar atributos obrigatórios resulta em anúncios pausados automaticamente.
+
+Pedidos chegam via webhook (notificação em tempo real) ou podem ser consultados por polling. A recomendação é webhook com polling como fallback para pedidos perdidos. O ML garante entrega de webhooks "ao menos uma vez", então sua integração precisa ser idempotente — processar o mesmo pedido duas vezes não deve duplicar registros.
+
+## Shopee Open API: Peculiaridades e Limitações
+
+A Shopee Open API é funcionalmente similar à do ML, mas tem algumas peculiaridades que pegam as integrações desprevenidas:
+
+**Rate limits agressivos:** A Shopee limita 1.000 chamadas por minuto por loja. Para operações com catálogo grande, sincronização de estoque em lote é obrigatória. A API tem endpoints específicos para atualização em batch que reduzem o número de chamadas.
+
+**Assinatura HMAC obrigatória:** Toda chamada à Shopee API precisa de um header de assinatura calculado com o timestamp e o path da requisição. Diferente do ML, onde o token Bearer é suficiente, a Shopee exige criptografia por chamada.
+
+**Categorias e atributos distintos:** O mapeamento de categorias entre sua loja e a Shopee raramente é 1:1. Produtos em categorias erradas têm visibilidade drasticamente reduzida. O processo de categorização precisa ser semi-automatizado com revisão humana para casos ambíguos.
+
+**Logística integrada:** A Shopee tem logística própria (Shopee Express) e espera que as integrações se conectem ao sistema de etiquetas deles. Ignorar isso e usar sua própria transportadora resulta em penalização do seller rating.
+
+## Amazon SP-API: A Mais Complexa e Mais Lucrativa
+
+A Amazon SP-API (Selling Partner API) é a mais poderosa e a mais complexa das três. A complexidade vem em parte da variedade de cenários suportados (FBA, FBM, múltiplos marketplaces internacionais) e em parte da burocracia de credenciais — o processo de aprovação para acesso à API pode levar semanas.
+
+O modelo de autenticação usa AWS IAM + LWA (Login With Amazon). Para cada chamada, você precisa assinar a requisição com AWS Signature V4 usando credenciais IAM temporárias, além de incluir o token LWA. É substancialmente mais complexo que OAuth 2.0 padrão.
+
+O que torna a Amazon lucrativa é a base de compradores premium e o programa FBA (Fulfillment by Amazon): você envia o estoque para um centro de distribuição da Amazon e eles cuidam de armazenamento, picking, packing e entrega. Para produtos com margem suficiente, o FBA elimina toda a operação logística própria.
+
+| Dimensão | Mercado Livre | Shopee | Amazon |
+|---|---|---|---|
+| Complexidade de integração | Média | Média | Alta |
+| Tempo para aprovação de API | Imediato | Imediato | 1-4 semanas |
+| Rate limit | Variável por endpoint | 1.000/min | Por operação |
+| Logística própria | Opcional (Full) | Shopee Express | FBA (opcional) |
+| Comissão média (BR) | 11-17% | 10-20% | 8-15% |
+| Alcance no Brasil | Maior | Crescendo | Menor |
+
+## Hub de Integração vs API Direta: Bling, Tiny e Skyhub
+
+Para a maioria das operações, construir integração direta com cada marketplace não faz sentido. Hubs de integração como Bling, Tiny ERP, Skyhub e Plugg.to funcionam como camada intermediária: você conecta sua loja ao hub e o hub se comunica com os marketplaces.
+
+As vantagens são claras: um único ponto de integração, suporte técnico dedicado para as particularidades de cada marketplace, mapeamento de categorias já resolvido e sincronização de estoque gerenciada pelo hub.
+
+As desvantagens aparecem quando você precisa de controle fino: o hub abstrai detalhes que às vezes são importantes (como estratégias de precificação dinâmica por marketplace ou regras de frete específicas). Também há um custo por pedido ou mensalidade sobre o GMV.
+
+A decisão depende do volume e da necessidade de customização. Até 500 pedidos/mês por marketplace, um hub bem configurado é mais eficiente. Acima disso, ou quando as regras de negócio são muito específicas, integração direta com a API pode ser justificada.
+
+## Conclusão com CTA
+
+Integrar marketplaces certo é a diferença entre um canal de vendas que cresce sozinho e um que consome tempo da equipe com erros de sincronização, anúncios pausados e pedidos sem estoque. A base técnica precisa ser sólida: autenticação robusta, idempotência no processamento de pedidos, sincronização de estoque em tempo real e tratamento adequado dos quirks de cada plataforma.
+
+Na SystemForge, desenvolvemos integrações com Mercado Livre, Shopee e Amazon usando arquitetura de eventos que garante consistência mesmo em falhas parciais. Se você está expandindo para marketplaces ou precisa substituir uma integração frágil, [fale com nossa equipe](/contato).

@@ -24,11 +24,13 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
 
   return (
     <nav
+      data-testid="blog-pagination"
       aria-label="Paginação"
       className="flex items-center justify-center gap-4 mt-8"
     >
       {currentPage > 1 ? (
         <Link
+          data-testid="blog-pagination-prev"
           href={prevHref}
           aria-label={`Ir para a página ${prevPage}`}
           className={cn(
@@ -82,6 +84,7 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
 
       {currentPage < totalPages ? (
         <Link
+          data-testid="blog-pagination-next"
           href={nextHref}
           aria-label={`Ir para a página ${nextPage}`}
           className={cn(

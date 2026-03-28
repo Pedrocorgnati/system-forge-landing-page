@@ -1,0 +1,119 @@
+---
+title: "Autenticação em APIs: JWT, OAuth2 e sessions"
+slug: "autenticacao-apis-jwt-oauth2-session"
+date: "2024-07-26"
+description: "Quando usar JWT, OAuth2 ou sessions em APIs — segurança, revogação de tokens, refresh tokens e implementação prática no Next.js com Auth.js."
+tags: ["autenticacao", "jwt", "oauth2", "session", "seguranca api"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Quando usar JWT, OAuth2 ou sessions em APIs — segurança, revogação de tokens, refresh tokens e implementação prática no Next.js com Auth.js.
+---
+
+Autenticação mal implementada não é apenas um bug — é uma vulnerabilidade. Segundo o OWASP Top 10, falhas de autenticação e controle de acesso representam as duas primeiras categorias de risco mais críticas em aplicações web. E a ironia é que a maioria dos erros não está na criptografia em si, mas em decisões arquiteturais equivocadas: usar JWT onde session funcionaria melhor, não implementar revogação de tokens, ou confundir autenticação com autorização.
+
+Este guia cobre as três abordagens mais comuns — JWT, sessions e OAuth2 — com foco em quando usar cada uma e onde os times costumam errar.
+
+## JWT: Como Funciona e Onde Errar
+
+JWT (JSON Web Token) é um padrão aberto (RFC 7519) para transmitir claims entre partes como um objeto JSON assinado. Um token JWT tem três partes: header (algoritmo), payload (claims) e signature, separados por pontos e codificados em Base64URL.
+
+```
+eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyXzEyMyIsInJvbGUiOiJhZG1pbiIsImV4cCI6MTcyMDAwMDAwMH0.SIGNATURE
+```
+
+A grande vantagem do JWT é ser **stateless**: o servidor não precisa consultar um banco de dados para validar o token. A assinatura garante que o payload não foi alterado. Isso torna JWT ideal para sistemas distribuídos e microsserviços onde múltiplos servidores precisam validar requisições sem compartilhar estado de sessão.
+
+**Onde os times erram com JWT:**
+
+**1. Algoritmo `none`:** A spec JWT permite algoritmo `none`, que desabilita a verificação de assinatura. Algumas bibliotecas aceitam isso por padrão. Sempre configure explicitamente o algoritmo esperado (`HS256`, `RS256`).
+
+**2. Segredo fraco:** `HS256` usa uma chave simétrica. Um segredo curto ou previsível pode ser quebrado por força bruta. Use pelo menos 256 bits de entropia.
+
+**3. Dados sensíveis no payload:** O payload é codificado, não criptografado. Qualquer pessoa com o token consegue ler o payload com `atob()`. Nunca coloque senhas, PII completa ou dados financeiros no JWT.
+
+**4. Sem expiração curta:** Tokens sem expiração ou com expiração longa (dias, semanas) são um vetor de ataque permanente se vazarem. Use `exp` curtos (15-60 minutos) combinados com refresh tokens.
+
+```typescript
+// Validação correta no Next.js com jose
+import { jwtVerify } from "jose";
+
+export async function verifyToken(token: string) {
+  const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+  const { payload } = await jwtVerify(token, secret, {
+    algorithms: ["HS256"], // algoritmo explícito — nunca aceite "none"
+    issuer: "api.meusite.com.br",
+    audience: "app.meusite.com.br",
+  });
+  return payload;
+}
+```
+
+## Sessions: Simples, Seguras e Subestimadas
+
+Sessions são frequentemente descartadas como "tecnologia antiga", mas para a maioria das aplicações web tradicionais — onde você controla o frontend e o backend — sessions são a opção mais simples e mais segura.
+
+No modelo de session, o servidor gera um ID opaco (um UUID aleatório), armazena os dados da sessão no servidor (banco de dados, Redis) e envia apenas o ID para o cliente via cookie `HttpOnly`. O cliente nunca vê os dados da sessão.
+
+**Vantagens das sessions sobre JWT:**
+
+- **Revogação instantânea:** delete a session do banco e o usuário é deslogado imediatamente — nenhum token "zumbi" continua válido.
+- **Sem vazamento de dados:** o cookie contém apenas um ID opaco, não dados do usuário.
+- **Simples de implementar:** `express-session`, Auth.js database sessions, Django sessions — tooling maduro.
+- **Auditabilidade:** você sabe exatamente quantas sessions ativas existem, de quais IPs, desde quando.
+
+**Desvantagem real:** sessions exigem armazenamento compartilhado entre instâncias do servidor. Se você tem múltiplas instâncias sem Redis, cada instância tem sessions diferentes. A solução é Redis como session store — um custo de infraestrutura pequeno para a maioria dos projetos.
+
+Sessions são a escolha certa para: aplicações web monolíticas, apps Next.js com banco de dados, qualquer sistema onde revogação imediata é um requisito (bancário, saúde, e-commerce).
+
+## OAuth2 e OIDC: Delegação de Identidade
+
+OAuth2 não é um protocolo de autenticação — é um protocolo de **autorização**. Ele responde à pergunta: "este aplicativo tem permissão para acessar esses recursos em nome do usuário?" OIDC (OpenID Connect) é a camada de autenticação construída sobre OAuth2, que adiciona a pergunta: "quem é este usuário?"
+
+O fluxo mais comum é o Authorization Code Flow:
+
+1. Usuário clica em "Login com Google"
+2. App redireciona para `accounts.google.com/auth` com `client_id`, `redirect_uri` e `scope`
+3. Usuário autentica no Google e concede permissões
+4. Google redireciona de volta com um `code` temporário
+5. App troca o `code` por `access_token` e `id_token` no servidor (nunca no frontend)
+6. App valida o `id_token`, extrai o `sub` (user ID) e cria/recupera o usuário local
+
+**Quando implementar OAuth2/OIDC:**
+
+- Login social (Google, GitHub, Apple, Microsoft) — não reinvente a autenticação
+- Sistemas B2B com SSO corporativo (Azure AD, Okta, Keycloak)
+- APIs que precisam agir em nome do usuário em outro serviço (acessar Google Drive, postar no Slack)
+- Plataformas que precisam expor API para aplicações de terceiros (como o Mercado Livre faz com lojistas)
+
+Auth.js (antigo NextAuth.js) abstrai toda essa complexidade para Next.js, mas entender o fluxo OAuth2 é essencial para depurar problemas de autenticação que inevitavelmente aparecem em produção.
+
+## Refresh Tokens e Revogação: o Problema Esquecido do JWT
+
+O maior problema do JWT stateless é que **você não pode revogar um token antes do `exp`**. Se um token com 1 hora de validade vazar, o atacante tem 1 hora garantida de acesso, mesmo que você redefina a senha do usuário.
+
+A solução padrão é o par access token + refresh token:
+
+| Token | Vida útil | Onde armazenar | Enviado em |
+|---|---|---|---|
+| Access Token (JWT) | 15 minutos | Memória (não localStorage) | Header `Authorization` |
+| Refresh Token | 30 dias | Cookie `HttpOnly; Secure; SameSite=Strict` | Cookie automático |
+
+O access token curto limita a janela de exposição. O refresh token longo, armazenado em cookie `HttpOnly`, é usado para renovar o access token silenciosamente. Quando o usuário faz logout, você invalida o refresh token no banco.
+
+Para revogação de access tokens em casos críticos (senha comprometida, suspeita de fraude), você precisa de uma blocklist — um Redis com os JTIs (JWT IDs) revogados. Na validação, você verifica se o JTI está na blocklist antes de aceitar o token. Isso adiciona uma consulta ao Redis, mas mantém o benefício da validação stateless na maioria dos casos.
+
+## Conclusão
+
+A escolha entre JWT, sessions e OAuth2 raramente é exclusiva — arquiteturas maduras usam todas as três:
+
+- **Sessions** para a interface web principal (revogação fácil, simples)
+- **JWT** para comunicação entre microsserviços internos (stateless, sem necessidade de revogação imediata)
+- **OAuth2/OIDC** para login social e integrações com sistemas externos
+
+O erro mais comum é escolher JWT porque "é moderno" sem considerar os requisitos de revogação. Para a maioria das aplicações web, sessions com Redis são a escolha mais segura e mais simples.
+
+No SystemForge, o fluxo de autenticação é definido na fase de documentação, antes de uma linha de código ser escrita. Isso evita que decisões arquiteturais sejam tomadas no calor do desenvolvimento, quando a pressão por entrega muitas vezes leva a atalhos de segurança que custam caro depois. Se você precisa estruturar a autenticação do seu sistema do jeito certo desde o início, podemos ajudar.

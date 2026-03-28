@@ -16,7 +16,7 @@ export function ArticleCard({ article, className }: ArticleCardProps) {
   })
 
   return (
-    <article className={cn('flex flex-col gap-3', className)}>
+    <article data-testid={`shared-article-card-${article.slug}`} className={cn('flex flex-col gap-3', className)}>
       <Link
         href={ROUTES.blogSlug(article.slug)}
         className="group block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-xl"

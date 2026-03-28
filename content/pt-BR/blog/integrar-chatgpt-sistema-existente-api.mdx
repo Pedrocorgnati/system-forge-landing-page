@@ -1,0 +1,238 @@
+---
+title: "Como integrar ChatGPT a um sistema existente"
+slug: "integrar-chatgpt-sistema-existente-api"
+date: "2024-10-10"
+description: "Guia técnico para integrar a API da OpenAI a sistemas existentes — autenticação, streaming, gestão de contexto, custos e fallback."
+tags: ["chatgpt", "openai api", "integracao ia", "llm", "automacao com ia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Guia técnico para integrar a API da OpenAI a sistemas existentes — autenticação, streaming, gestão de contexto, custos e fallback.
+---
+
+## Integrar ChatGPT Não É Só Chamar uma API
+
+A integração da API da OpenAI com um sistema existente parece simples na documentação. Na prática, produção exige pensar em: gestão de contexto (token limits), streaming para UX responsiva, tratamento de erros e timeouts, controle de custos, fallback quando a API falha e segurança da API key.
+
+Este guia cobre a implementação completa de uma integração com ChatGPT (GPT-4o) em um sistema existente — do setup até a produção.
+
+## Setup Inicial e Autenticação
+
+```typescript
+// lib/openai.ts
+import OpenAI from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  timeout: 30000, // 30s timeout
+  maxRetries: 2,   // 2 tentativas automáticas em erros transitórios
+});
+
+export default openai;
+```
+
+**Segurança da API Key:**
+- Nunca expor no frontend — toda chamada deve passar pelo backend
+- Usar variável de ambiente (nunca hardcoded)
+- Rotacionar a key se ela for comprometida
+- Usar usage limits na dashboard da OpenAI para evitar surpresas de custo
+
+## Streaming para UX Responsiva
+
+Sem streaming, o usuário espera 5-15 segundos sem feedback antes de ver a resposta. Com streaming, o texto aparece palavra por palavra — como no próprio ChatGPT.
+
+```typescript
+// app/api/chat/route.ts (Next.js)
+import openai from '@/lib/openai';
+import { OpenAIStream, StreamingTextResponse } from 'ai';
+
+export async function POST(req: Request) {
+  const { messages } = await req.json();
+  
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages,
+    stream: true,
+    temperature: 0.7,
+    max_tokens: 1000,
+  });
+  
+  const stream = OpenAIStream(response);
+  return new StreamingTextResponse(stream);
+}
+```
+
+```typescript
+// components/ChatInterface.tsx (frontend)
+import { useChat } from 'ai/react';
+
+export function ChatInterface() {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+    api: '/api/chat',
+  });
+  
+  return (
+    <div>
+      {messages.map(m => (
+        <div key={m.id}>
+          <strong>{m.role === 'user' ? 'Você' : 'Assistente'}:</strong>
+          <p>{m.content}</p>
+        </div>
+      ))}
+      
+      <form onSubmit={handleSubmit}>
+        <input value={input} onChange={handleInputChange} placeholder="Digite sua pergunta..." />
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Processando...' : 'Enviar'}
+        </button>
+      </form>
+    </div>
+  );
+}
+```
+
+## Gestão de Contexto e Token Limits
+
+O GPT-4o aceita até 128.000 tokens de contexto (entrada + saída). Em conversas longas, o histórico precisa ser gerenciado para não exceder o limite — e para controlar custos (você paga por token processado, incluindo o histórico).
+
+```typescript
+// lib/context-manager.ts
+const MAX_CONTEXT_TOKENS = 8000; // Manter bem abaixo do limite
+
+function countTokens(text: string): number {
+  // Estimativa: ~4 caracteres por token (aproximação válida para português)
+  return Math.ceil(text.length / 4);
+}
+
+export function trimMessages(
+  messages: { role: string; content: string }[],
+  maxTokens = MAX_CONTEXT_TOKENS
+): { role: string; content: string }[] {
+  let totalTokens = 0;
+  const trimmed = [];
+  
+  // Sempre incluir a system message e a última mensagem do usuário
+  const systemMessage = messages.find(m => m.role === 'system');
+  if (systemMessage) {
+    totalTokens += countTokens(systemMessage.content);
+    trimmed.push(systemMessage);
+  }
+  
+  // Adicionar mensagens recentes de trás para frente
+  const conversationMessages = messages.filter(m => m.role !== 'system').reverse();
+  
+  for (const message of conversationMessages) {
+    const tokens = countTokens(message.content);
+    if (totalTokens + tokens > maxTokens) break;
+    totalTokens += tokens;
+    trimmed.unshift(message);
+  }
+  
+  return trimmed;
+}
+```
+
+## Tratamento de Erros e Fallback
+
+A API da OpenAI pode falhar por rate limits, timeouts ou instabilidade. Sistemas de produção precisam de estratégia de fallback.
+
+```typescript
+// lib/chat-service.ts
+import openai from './openai';
+import Anthropic from '@anthropic-ai/sdk';
+
+const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+export async function generateResponse(
+  messages: { role: string; content: string }[],
+  preferredModel: 'gpt-4o' | 'claude-opus-4-6' = 'gpt-4o'
+): Promise<string> {
+  try {
+    // Tentativa com modelo preferido (OpenAI)
+    if (preferredModel === 'gpt-4o') {
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: messages as any,
+        max_tokens: 1000,
+      });
+      return response.choices[0].message.content || '';
+    }
+  } catch (error: any) {
+    // Rate limit ou timeout — usar fallback
+    if (error.status === 429 || error.code === 'ECONNABORTED') {
+      console.warn('OpenAI indisponível, usando fallback Anthropic');
+      
+      const response = await anthropic.messages.create({
+        model: 'claude-opus-4-6',
+        max_tokens: 1000,
+        messages: messages.filter(m => m.role !== 'system') as any,
+        system: messages.find(m => m.role === 'system')?.content,
+      });
+      
+      return response.content[0].type === 'text' ? response.content[0].text : '';
+    }
+    throw error;
+  }
+  
+  return '';
+}
+```
+
+## Controle de Custos
+
+Em produção, o custo da API escala com o volume. Estratégias para controle:
+
+**Cache de respostas:** Para perguntas frequentes e similares, cachear respostas economiza significativamente.
+
+```typescript
+import { Redis } from 'ioredis';
+import crypto from 'crypto';
+
+const redis = new Redis(process.env.REDIS_URL!);
+
+export async function getCachedOrGenerate(
+  messages: { role: string; content: string }[],
+  ttl = 3600 // 1 hora
+): Promise<string> {
+  const cacheKey = crypto
+    .createHash('md5')
+    .update(JSON.stringify(messages))
+    .digest('hex');
+  
+  const cached = await redis.get(`chat:${cacheKey}`);
+  if (cached) return cached;
+  
+  const response = await generateResponse(messages);
+  await redis.setex(`chat:${cacheKey}`, ttl, response);
+  
+  return response;
+}
+```
+
+**Monitoramento de uso:**
+
+```typescript
+// Registrar cada chamada com custo estimado
+async function logUsage(model: string, inputTokens: number, outputTokens: number) {
+  const costs = {
+    'gpt-4o': { input: 0.005, output: 0.015 }, // por 1K tokens
+    'gpt-4o-mini': { input: 0.00015, output: 0.0006 },
+  };
+  
+  const cost = (costs[model]?.input * inputTokens / 1000) +
+               (costs[model]?.output * outputTokens / 1000);
+  
+  await db.aiUsageLog.create({
+    data: { model, inputTokens, outputTokens, costUsd: cost, createdAt: new Date() }
+  });
+}
+```
+
+## Conclusão
+
+Integrar ChatGPT a um sistema existente vai muito além de chamar a API. Streaming, gestão de contexto, tratamento de erros com fallback e controle de custos são componentes essenciais de uma integração de produção.
+
+A SystemForge integra LLMs a sistemas empresariais existentes — desde chatbots internos até automação de processos com IA. Se quiser discutir um caso específico, fale com nosso time.

@@ -7,12 +7,14 @@ import { TestimonialsSection } from '@/components/sections/TestimonialsSection'
 import { CTASection } from '@/components/sections/CTASection'
 import { BlogPreview } from '@/components/sections/BlogPreview'
 import { ContactSection } from '@/components/sections/ContactSection'
-import { SITE } from '@/lib/constants'
+import { FaqSection } from '@/components/sections/FaqSection'
+import { getSiteConfig } from '@config'
+
+const config = getSiteConfig()
 
 export const metadata: Metadata = {
-  title: `${SITE.name} — Software House sob medida`,
-  description:
-    'Software House especializada em desenvolvimento sob medida: SaaS, apps mobile, landing pages, e-commerce, dashboards e automações com IA. Do MVP ao produto escalável.',
+  title: `${config.siteName} — ${config.tagline}`,
+  description: config.seo.description,
   alternates: {
     canonical: '/',
   },
@@ -26,6 +28,7 @@ export default function HomePage() {
       <PortfolioGallery />
       <WhySystemForge />
       <TestimonialsSection />
+      <FaqSection />
       <CTASection />
       <BlogPreview />
       <ContactSection />

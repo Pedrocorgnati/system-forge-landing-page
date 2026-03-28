@@ -1,0 +1,164 @@
+---
+title: "Extração de dados com LLM: de PDFs a JSON"
+slug: "extracao-de-dados-com-llm-documentos"
+date: "2024-09-26"
+description: "Como usar LLMs para extrair dados estruturados de documentos — contratos, notas fiscais e formulários — com validação de schema e tratamento de erros."
+tags: ["extracao dados", "llm", "ocr", "pdf", "dados estruturados"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Como usar LLMs para extrair dados estruturados de documentos — contratos, notas fiscais e formulários — com validação de schema e tratamento de erros.
+---
+
+Documentos são onde dados empresariais importantes ficam presos. Contratos com datas de vencimento, notas fiscais com valores e fornecedores, formulários de cadastro digitalizados, laudos técnicos com especificações — tudo em PDF, imagem ou texto não estruturado. Extrair esses dados manualmente é lento, caro e sujeito a erros. Automatizar essa extração com LLMs é uma das aplicações práticas mais diretas e com ROI mais rápido da IA generativa.
+
+O pipeline de extração de documentos mudou radicalmente nos últimos dois anos. OCR tradicional extraía texto mas não entendia contexto. Regex capturava padrões fixos mas quebrava em qualquer variação de formato. LLMs entendem o documento semanticamente — conseguem extrair "valor total do contrato" mesmo que o campo esteja chamado de "montante global da avença" em um documento jurídico específico.
+
+## LLM vs OCR Tradicional: Quando Cada Um Ganha
+
+OCR (Optical Character Recognition) converte imagens em texto. LLMs entendem texto e extraem significado. São tecnologias complementares, não concorrentes: documentos digitalizados precisam de OCR primeiro, depois de LLM para extração semântica.
+
+| Critério | OCR + Regex | LLM (GPT-4o Vision / Claude) |
+|----------|-------------|------------------------------|
+| Custo por documento | Muito baixo | Médio (depende do tamanho) |
+| Velocidade | Muito rápido | Moderado (latência de API) |
+| Formatos fixos | Excelente | Bom (overhead desnecessário) |
+| Formatos variados | Ruim (quebra em variações) | Excelente |
+| Documentos manuscritos | Ruim | Bom (GPT-4o Vision) |
+| Tabelas complexas | Razoável | Bom |
+| Raciocínio contextual | Inexistente | Excelente |
+
+Para notas fiscais eletrônicas brasileiras (NF-e), que têm formato XML padronizado, parse direto do XML é melhor que LLM — mais rápido, mais barato e sem variação. Para contratos jurídicos, laudos médicos ou formulários legados digitalizados, LLM ganha em todos os critérios relevantes.
+
+A decisão prática: use regex/parser quando o formato é 100% previsível. Use LLM quando há variação de layout, terminologia ou idioma.
+
+## Structured Output com Zod e Instructor
+
+O maior desafio da extração com LLM não é extrair — é garantir que o output seja sempre um JSON válido e conforme ao schema esperado. Um modelo que responde "Encontrei as seguintes informações: valor = R$ 1.500,00..." é inútil para um pipeline automatizado.
+
+A solução é forçar o modelo a gerar saída estruturada com validação via schema. Em TypeScript, `zod` define o schema; em Python, `pydantic` + `instructor` fazem o mesmo.
+
+```typescript
+import OpenAI from "openai";
+import { zodResponseFormat } from "openai/helpers/zod";
+import { z } from "zod";
+
+const SchemaNotaFiscal = z.object({
+  numero_nf: z.string(),
+  data_emissao: z.string().describe("Formato YYYY-MM-DD"),
+  cnpj_emitente: z.string(),
+  nome_emitente: z.string(),
+  cnpj_destinatario: z.string().nullable(),
+  nome_destinatario: z.string().nullable(),
+  itens: z.array(z.object({
+    descricao: z.string(),
+    quantidade: z.number(),
+    valor_unitario: z.number(),
+    valor_total: z.number(),
+  })),
+  valor_total_nf: z.number(),
+  impostos: z.object({
+    icms: z.number().nullable(),
+    pis: z.number().nullable(),
+    cofins: z.number().nullable(),
+  }).nullable(),
+});
+
+type NotaFiscal = z.infer<typeof SchemaNotaFiscal>;
+
+const client = new OpenAI();
+
+async function extrairNotaFiscal(textoDocumento: string): Promise<NotaFiscal> {
+  const response = await client.beta.chat.completions.parse({
+    model: "gpt-4o",
+    messages: [
+      {
+        role: "system",
+        content: "Extraia os dados da nota fiscal. Para campos não encontrados, use null. Valores monetários em número decimal (ex: 1500.00).",
+      },
+      { role: "user", content: textoDocumento },
+    ],
+    response_format: zodResponseFormat(SchemaNotaFiscal, "nota_fiscal"),
+  });
+
+  return response.choices[0].message.parsed!;
+}
+```
+
+O `zodResponseFormat` faz o modelo aderir ao schema por construção — não é um prompt pedindo para retornar JSON, é um constraint no nível do protocolo. O resultado é muito mais confiável.
+
+## Pipeline de Processamento de Documentos
+
+Um pipeline de produção para extração de documentos tem mais etapas do que apenas "chamar a API":
+
+```
+PDF/Imagem → Pré-processamento → Extração de texto → Chunking → LLM → Validação → Banco de dados
+```
+
+**Pré-processamento:** PDFs nativos (gerados digitalmente) são extraídos diretamente. PDFs de imagem precisam de OCR. Use `pdfplumber` para PDFs nativos e `pytesseract` ou AWS Textract para documentos digitalizados.
+
+**Extração de texto:** para documentos longos, você não pode jogar o texto completo no prompt por limite de contexto e custo. Divida o documento em seções e processe cada uma separadamente, depois consolide.
+
+**LLM com structured output:** a etapa central descrita acima.
+
+**Validação pós-extração:** valide o JSON extraído além do schema. Uma data "2024-02-30" passa na validação de string mas é inválida como data. Um CNPJ com formato correto mas dígitos verificadores errados passa no regex mas é inválido.
+
+```python
+from datetime import datetime
+import re
+
+def validar_cnpj(cnpj: str) -> bool:
+    # Remove formatação
+    cnpj = re.sub(r'\D', '', cnpj)
+    if len(cnpj) != 14:
+        return False
+    # Lógica de dígitos verificadores aqui
+    return True
+
+def validar_dados_extraidos(dados: dict) -> list[str]:
+    erros = []
+
+    try:
+        datetime.strptime(dados["data_emissao"], "%Y-%m-%d")
+    except ValueError:
+        erros.append(f"Data inválida: {dados['data_emissao']}")
+
+    if dados.get("cnpj_emitente") and not validar_cnpj(dados["cnpj_emitente"]):
+        erros.append(f"CNPJ emitente inválido: {dados['cnpj_emitente']}")
+
+    # Validar soma dos itens vs total
+    soma_itens = sum(item["valor_total"] for item in dados.get("itens", []))
+    total_nf = dados.get("valor_total_nf", 0)
+    if abs(soma_itens - total_nf) > 0.02:  # tolerância de R$ 0,02 para arredondamento
+        erros.append(f"Total inconsistente: soma itens={soma_itens:.2f}, total NF={total_nf:.2f}")
+
+    return erros
+```
+
+## Validação e Tratamento de Erros de Extração
+
+Mesmo com structured output, erros acontecem. O modelo pode extrair um campo incorretamente, interpretar uma abreviação de forma errada ou simplesmente não encontrar uma informação que existe no documento.
+
+Três estratégias para lidar com isso:
+
+**Confiança por campo:** instrua o modelo a incluir um score de confiança por campo crítico. Campos com baixa confiança vão para revisão humana em vez de direto para o banco de dados.
+
+**Retry automático:** se a validação falhar, refaça a extração com um prompt diferente, incluindo a mensagem de erro como contexto: "Na extração anterior, o total extraído (R$ 1.500) não confere com a soma dos itens (R$ 1.650). Revise e corrija."
+
+**Human-in-the-loop para baixa confiança:** construa uma fila de revisão para documentos onde a extração automática ficou abaixo do threshold de confiança. Humanos revisam apenas os casos difíceis, não todos os documentos.
+
+| Confiança | Ação |
+|-----------|------|
+| > 0.95 | Aceite automático |
+| 0.80 - 0.95 | Aceite com flag para auditoria amostral |
+| 0.65 - 0.80 | Revisão humana obrigatória |
+| < 0.65 | Reprocessamento automático, depois revisão |
+
+## Conclusão com CTA
+
+Extração de dados com LLM transforma documentos de silos de informação em dados estruturados que alimentam sistemas, relatórios e automações. O ROI é tipicamente rápido: uma empresa que processa 500 documentos por mês manualmente pode automatizar 80-90% desse volume com precisão superior a 95% após um pipeline bem configurado.
+
+No **SystemForge**, construímos pipelines de extração de documentos para empresas que precisam transformar volumes grandes de PDFs e formulários em dados utilizáveis. Se você tem documentos acumulados esperando para serem processados, entre em contato — provavelmente conseguimos automatizar mais do que você imagina.

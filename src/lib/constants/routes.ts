@@ -1,42 +1,45 @@
 /**
  * lib/constants/routes.ts
- * Todas as rotas do site em um único objeto.
- * Usar ROUTES.X ao invés de strings hardcoded em Links/hrefs.
+ * Todas as rotas do site.
+ * Delegam para getSiteConfig().routes — locale-aware desde i18n-triple-market.
  */
+import { getSiteConfig } from '@config'
+
+const r = getSiteConfig().routes
 
 export const ROUTES = {
-  HOME: '/',
-  home: '/',
-  SERVICES: '/servicos',
-  servicos: '/servicos',
-  SERVICE: (slug: string) => `/servicos/${slug}`,
-  service: (slug: string) => `/servicos/${slug}`,
-  servicoSlug: (slug: string) => `/servicos/${slug}`,
-  PORTFOLIO: '/portfolio',
-  portfolio: '/portfolio',
-  PORTFOLIO_PROJECT: (slug: string) => `/portfolio/${slug}`,
-  portfolioProject: (slug: string) => `/portfolio/${slug}`,
-  BLOG: '/blog',
-  blog: '/blog',
-  BLOG_POST: (slug: string) => `/blog/${slug}`,
-  blogPost: (slug: string) => `/blog/${slug}`,
-  blogSlug: (slug: string) => `/blog/${slug}`,
-  BLOG_PAGE: (n: number) => `/blog/page/${n}`,
-  blogPage: (n: number) => `/blog/page/${n}`,
-  BLOG_CATEGORY: (cat: string) => `/blog/categoria/${cat}`,
-  blogCategoria: (cat: string) => `/blog/categoria/${cat}`,
-  BLOG_TAG: (tag: string) => `/blog/tag/${encodeURIComponent(tag)}`,
-  blogTag: (tag: string) => `/blog/tag/${encodeURIComponent(tag)}`,
-  PRIVACY: '/privacidade',
-  privacidade: '/privacidade',
-  NEWSLETTER_CONFIRMED: '/newsletter/confirmado',
-  newsletterConfirmed: '/newsletter/confirmado',
-  ADVISOR: '/conselheiro',
-  conselheiro: '/conselheiro',
+  HOME: r.home,
+  home: r.home,
+  SERVICES: r.services,
+  servicos: r.services,
+  SERVICE: r.service,
+  service: r.service,
+  servicoSlug: r.service,
+  PORTFOLIO: r.portfolio,
+  portfolio: r.portfolio,
+  PORTFOLIO_PROJECT: r.portfolioProject,
+  portfolioProject: r.portfolioProject,
+  BLOG: r.blog,
+  blog: r.blog,
+  BLOG_POST: r.blogPost,
+  blogPost: r.blogPost,
+  blogSlug: r.blogPost,
+  BLOG_PAGE: r.blogPage,
+  blogPage: r.blogPage,
+  BLOG_CATEGORY: r.blogCategory,
+  blogCategoria: r.blogCategory,
+  BLOG_TAG: r.blogTag,
+  blogTag: r.blogTag,
+  PRIVACY: r.privacy,
+  privacidade: r.privacy,
+  NEWSLETTER_CONFIRMED: r.newsletterConfirmed,
+  newsletterConfirmed: r.newsletterConfirmed,
+  ADVISOR: r.advisor,
+  conselheiro: r.advisor,
   SITEMAP: '/sitemap.xml',
   RSS: '/rss.xml',
-  CONTACT: '/#contato',
-  contato: '/#contato',
+  CONTACT: r.contact,
+  contato: r.contact,
 } as const
 
 export type RouteKey = keyof typeof ROUTES

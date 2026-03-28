@@ -2,24 +2,35 @@
   "name": "system-forge-landing-page",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "dev": "next dev",
     "build:content": "velite build",
     "generate:search-index": "node --import tsx scripts/generate-search-index.ts",
     "validate:frontmatter": "tsx scripts/validate-frontmatter.ts",
+    "validate:hreflang": "tsx scripts/hreflang-validator.ts",
+    "prebuild:br": "NEXT_PUBLIC_LOCALE=pt-BR tsx scripts/validate-frontmatter.ts",
+    "prebuild:it": "NEXT_PUBLIC_LOCALE=it-IT tsx scripts/validate-frontmatter.ts",
+    "prebuild:en": "NEXT_PUBLIC_LOCALE=en tsx scripts/validate-frontmatter.ts",
     "optimize:images": "tsx scripts/optimize-images.ts",
     "type-check": "tsc --noEmit",
     "prebuild": "npm run build:content && npm run generate:search-index",
     "build": "next build",
+    "build:br": "NEXT_PUBLIC_LOCALE=pt-BR NEXT_PUBLIC_SITE_URL=https://forjadesistemas.com.br OUT_DIR=dist-br next build",
+    "build:it": "NEXT_PUBLIC_LOCALE=it-IT NEXT_PUBLIC_SITE_URL=https://systemforge.it OUT_DIR=dist-it next build",
+    "build:en": "NEXT_PUBLIC_LOCALE=en NEXT_PUBLIC_SITE_URL=https://systemforgesoftware.com OUT_DIR=dist-en next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "glob": "^11.0.3",
-    "gray-matter": "^4.0.3",
     "fuse.js": "^7.1.0",
+    "glob": "^11.0.3",
     "lucide-react": "^1.0.1",
     "next": "16.2.1",
     "next-themes": "^0.4.6",
@@ -39,9 +50,12 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "tsx": "^4.20.5",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.2"
   }
 }

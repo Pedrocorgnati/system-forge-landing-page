@@ -1,0 +1,145 @@
+---
+title: "PIX no e-commerce: implementação e conversão"
+slug: "pix-no-ecommerce-implementacao-conversao"
+date: "2024-09-02"
+description: "Como implementar PIX no e-commerce com QR Code dinâmico, confirmação automática via webhook e como o PIX impactou as taxas de conversão no Brasil."
+tags: ["pix", "e-commerce", "pagamento", "qr code", "gateway de pagamento"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Como implementar PIX no e-commerce com QR Code dinâmico, confirmação automática via webhook e como o PIX impactou as taxas de conversão no Brasil.
+---
+
+O PIX se tornou o método de pagamento mais usado no Brasil em menos de três anos de existência. Em e-commerce, o impacto foi imediato: pagamento instantâneo, confirmação em segundos, sem risco de chargeback e com custo de transação inferior ao cartão de crédito. Para lojas que não implementaram PIX corretamente — ou que ainda não implementaram — há conversão sendo deixada para trás todos os dias.
+
+Mas "adicionar PIX" vai além de exibir uma chave no checkout. Uma implementação profissional envolve QR Code dinâmico por pedido, webhook para confirmação automática, lógica de expiração com UX adequada e tratamento de edge cases como pagamentos duplicados ou pagamentos após expiração.
+
+## QR Code Dinâmico: Como Gerar e Validar
+
+Existem dois tipos de QR Code PIX: estático e dinâmico. O QR Code estático é uma chave fixa — qualquer valor pode ser pago para aquela chave. É útil para doações ou pontos de venda físicos, mas inadequado para e-commerce, pois não vincula o pagamento a um pedido específico.
+
+O QR Code dinâmico é gerado por transação, contém o valor exato, um identificador único (txid) e pode ter prazo de validade. Quando o cliente paga, o banco consulta o QR Code no servidor do pagador (sua PSP — Mercado Pago, PagSeguro, Gerencianet, etc.) e confirma os dados antes de processar.
+
+A geração de QR Code dinâmico é feita via API do seu gateway de pagamento. O payload retornado contém a string EMV (padrão BR Code) que o cliente usa para pagar via aplicativo bancário:
+
+```typescript
+interface PixCobranca {
+  txid: string;          // Identificador único, máx 35 chars
+  valor: { original: string }; // Valor em string com 2 casas decimais
+  expiracao: number;     // Segundos até expiração (ex: 3600 = 1 hora)
+  devedor?: { cpf: string; nome: string };
+  infoAdicionais?: Array<{ nome: string; valor: string }>;
+}
+
+async function criarCobrancaPix(pedido: Pedido): Promise<PixCriado> {
+  const cobranca: PixCobranca = {
+    txid: gerarTxid(pedido.id), // ex: "PEDIDO20240902001234"
+    valor: { original: pedido.total.toFixed(2) },
+    expiracao: 3600, // 1 hora
+    devedor: { cpf: pedido.cliente.cpf, nome: pedido.cliente.nome },
+    infoAdicionais: [{ nome: "Pedido", valor: String(pedido.id) }],
+  };
+
+  const resposta = await gatewayPix.criarCobranca(cobranca);
+
+  return {
+    txid: resposta.txid,
+    qrCode: resposta.pixCopiaECola,     // String EMV para "copia e cola"
+    qrCodeImagem: resposta.imagemQrCode, // Base64 da imagem do QR Code
+    expiracaoEm: new Date(Date.now() + 3600 * 1000),
+  };
+}
+```
+
+Uma boa UX exibe tanto a imagem do QR Code para scan quanto o código "copia e cola" para quem prefere usar o método textual. Nos mobile, o botão "Copiar código PIX" deve estar em destaque — a maioria dos usuários em dispositivos móveis paga pelo "copia e cola", não escaneando o QR.
+
+## Webhook de Confirmação: Processando Pagamentos em Tempo Real
+
+A confirmação via webhook é o que torna o PIX realmente instantâneo para o fluxo do e-commerce. Quando o pagamento é liquidado (normalmente em segundos), o gateway envia uma notificação HTTP POST para uma URL do seu servidor. Sua aplicação processa a notificação e atualiza o status do pedido.
+
+O processamento do webhook precisa ser idempotente: se o mesmo evento chegar duas vezes (o que acontece por garantias de entrega do gateway), o pedido não deve ser confirmado duas vezes.
+
+```typescript
+// Endpoint de webhook PIX
+app.post("/webhooks/pix", async (req, res) => {
+  // 1. Validar assinatura do gateway (implementação varia por provider)
+  if (!validarAssinaturaWebhook(req)) {
+    return res.status(401).send("Assinatura inválida");
+  }
+
+  // 2. Responder imediatamente para evitar timeout do gateway
+  res.status(200).send("OK");
+
+  // 3. Processar em background (fila ou async)
+  await filaProcessamento.push({
+    tipo: "pix_confirmado",
+    payload: req.body,
+  });
+});
+
+// Worker que processa a fila
+async function processarPagamentoPix(evento: WebhookPix): Promise<void> {
+  const { txid, valor, horario } = evento.pix[0];
+
+  // Idempotência: verificar se já foi processado
+  const jaProcessado = await db.pagamentos.exists({ txid });
+  if (jaProcessado) return;
+
+  const pedido = await db.pedidos.findByTxid(txid);
+  if (!pedido) {
+    logger.warn("Pagamento PIX sem pedido correspondente", { txid });
+    return;
+  }
+
+  // Validar valor recebido vs valor esperado
+  if (Math.abs(parseFloat(valor) - pedido.total) > 0.01) {
+    await pedido.marcarComoPagamentoParcial({ valorRecebido: parseFloat(valor) });
+    await notificarEquipe("pagamento_divergente", { pedido, valorRecebido: valor });
+    return;
+  }
+
+  await db.transaction(async (trx) => {
+    await pedido.confirmar(trx);
+    await db.pagamentos.registrar({ txid, valor, horario, pedidoId: pedido.id }, trx);
+    await estoque.reservar(pedido.itens, trx);
+  });
+
+  await notificarCliente(pedido, "pagamento_confirmado");
+  await iniciarSeparacao(pedido);
+}
+```
+
+Um detalhe importante: alguns gateways enviam o webhook antes de confirmar a liquidação no extrato. Valide com o gateway se a notificação representa liquidação definitiva ou apenas autorização.
+
+## Expiração do PIX: UX e Lógica de Negócio
+
+O QR Code dinâmico expira. Definir o tempo certo de expiração envolve um trade-off: tempo curto reduz o risco de pedidos "bloqueados" (produto reservado mas não pago), mas pressiona o cliente a agir rápido; tempo longo melhora a experiência, mas aumenta o tempo de indisponibilidade de estoque.
+
+Para produtos físicos com estoque limitado, 30 a 60 minutos é o padrão mais comum. Para produtos digitais ou com estoque amplo, 24 horas é razoável.
+
+A UX de expiração precisa de atenção: um contador regressivo visível no checkout cria urgência legítima. Quando o QR expira, a página deve oferecer um botão "Gerar novo QR Code" sem perder os dados do pedido. Forçar o cliente a refazer o checkout do zero por causa de expiração de PIX é um abandono evitável.
+
+Também existe o caso de pagamento após expiração: tecnicamente, o banco pode processar o pagamento mesmo após o QR ter expirado (depende do gateway e da janela de tempo). Sua integração precisa definir o comportamento: aceitar o pagamento tardio e reativar o pedido, ou devolver automaticamente via devolução PIX.
+
+## Impacto do PIX nas Taxas de Conversão por Segmento
+
+O PIX não impacta a conversão de forma uniforme. O efeito varia significativamente por ticket médio, público e categoria:
+
+| Segmento | Impacto do PIX na conversão | Motivo principal |
+|---|---|---|
+| Eletrônicos (ticket alto) | Alto (+8-15%) | Evita limite de crédito; aprovação imediata |
+| Moda e vestuário | Médio (+4-8%) | Público jovem prefere PIX; sem parcelamento |
+| Alimentos e consumo rápido | Baixo (+2-4%) | Boleto já era secundário; cartão dominava |
+| B2B / empresas | Alto (+10-20%) | Empresas preferem não usar cartão corporativo |
+| Infoprodutos | Muito alto (+15-25%) | Decisão impulsiva; PIX elimina barreira da espera |
+
+Oferecer desconto para PIX (geralmente 3-5%, equivalente à taxa do cartão) é uma prática que aumenta a adoção do método e melhora a margem do lojista simultaneamente. Muitas lojas exibem o preço PIX em destaque e o preço no cartão como secundário — o que muda completamente a ancoragem de preço do cliente.
+
+## Conclusão com CTA
+
+PIX bem implementado não é apenas mais um método de pagamento — é uma vantagem operacional. Aprovação instantânea reduz o ciclo do pedido, a ausência de chargeback simplifica o financeiro e o custo de transação menor melhora a margem em cada venda. O impacto na conversão é real e mensurável, especialmente em segmentos onde o comprador tem resistência ao uso de cartão.
+
+A implementação técnica — QR Code dinâmico, webhook idempotente, tratamento de expiração e lógica de validação de valor — requer atenção a detalhes que a documentação dos gateways nem sempre deixa clara. Na SystemForge, implementamos fluxos de pagamento PIX completos, incluindo cenários de borda que a maioria das integrações ignora. [Fale com nossa equipe](/contato) para discutir seu projeto.

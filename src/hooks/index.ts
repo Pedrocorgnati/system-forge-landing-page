@@ -5,4 +5,4 @@
 export { useDebounce } from './useDebounce'
 export { useIntersectionObserver } from './useIntersectionObserver'
 export { useCookieConsent } from './useCookieConsent'
-export type { CookieConsent } from './useCookieConsent'
+export type { UseConsentManager } from './useCookieConsent'

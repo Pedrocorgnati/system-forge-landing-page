@@ -1,0 +1,209 @@
+---
+title: "RBAC em dashboards: controle de acesso por perfil"
+slug: "role-based-access-control-dashboards"
+date: "2024-08-14"
+description: "Como implementar Role-Based Access Control em dashboards B2B: definição de roles, proteção de rotas, ocultação de UI e filtragem de dados por permissão."
+tags: ["rbac", "autorizacao", "dashboard", "seguranca", "next.js"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Como implementar Role-Based Access Control em dashboards B2B: definição de roles, proteção de rotas, ocultação de UI e filtragem de dados por permissão."
+---
+
+Em um dashboard B2B multi-usuário, mostrar os dados errados para a pessoa errada não é apenas um problema de UX — é um problema de segurança, compliance e, em alguns casos, um problema legal. Um analista júnior que vê a margem bruta por cliente concorrente dentro da empresa, um vendedor que acessa comissões de outros vendedores, um usuário de uma filial que enxerga dados de outra — todos esses são cenários reais que acontecem quando RBAC é implementado superficialmente.
+
+A implementação correta de RBAC em dashboards tem quatro camadas que precisam funcionar em conjunto: o modelo de permissões, a proteção de rotas, a ocultação de componentes na UI e — a mais importante — a filtragem de dados no backend.
+
+## Modelo de Permissões: Roles, Permissions e Resources
+
+O erro mais comum em RBAC iniciante é confundir roles com permissions. Role é um agrupamento (admin, gerente, analista, operador). Permission é uma capacidade atômica (ler_relatorio_financeiro, exportar_dados, editar_configuracoes). Resource é o objeto sobre o qual a permission se aplica (relatorio, dashboard, usuario).
+
+A estrutura mais robusta para dashboards B2B usa os três níveis:
+
+```typescript
+// types/rbac.ts
+export type Action = 'read' | 'write' | 'delete' | 'export';
+export type Resource =
+  | 'dashboard:financial'
+  | 'dashboard:operations'
+  | 'dashboard:hr'
+  | 'reports:revenue'
+  | 'reports:customers'
+  | 'users:management'
+  | 'settings:billing';
+
+export type Permission = `${Action}:${Resource}`;
+
+export type Role = 'super_admin' | 'admin' | 'manager' | 'analyst' | 'viewer';
+
+export const ROLE_PERMISSIONS: Record<Role, Permission[]> = {
+  super_admin: ['read:dashboard:financial', 'write:dashboard:financial', 'export:reports:revenue', /* ... todos */],
+  admin: ['read:dashboard:financial', 'read:dashboard:operations', 'export:reports:revenue', 'write:users:management'],
+  manager: ['read:dashboard:financial', 'read:dashboard:operations', 'read:reports:revenue', 'read:reports:customers'],
+  analyst: ['read:dashboard:operations', 'read:reports:customers', 'export:reports:customers'],
+  viewer: ['read:dashboard:operations'],
+};
+
+export function hasPermission(role: Role, permission: Permission): boolean {
+  return ROLE_PERMISSIONS[role]?.includes(permission) ?? false;
+}
+```
+
+Esse modelo é facilmente extensível. Quando um cliente pede "quero que o gerente regional veja só as métricas da região dele mas não possa exportar", você cria um role `regional_manager` com as permissions específicas sem mexer na lógica existente.
+
+Armazene roles no token JWT ou na sessão, mas **nunca confie apenas no cliente para determinar permissões**. O JWT pode carregar o role para evitar uma query de banco em cada request, mas o backend precisa validar independentemente.
+
+## Proteção de Rotas no Next.js com Middleware
+
+Em Next.js App Router, o middleware de edge é o lugar correto para proteção de rotas — ele executa antes que qualquer página seja renderizada, sem necessidade de carregar o bundle da aplicação completa.
+
+```typescript
+// middleware.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
+
+const ROUTE_PERMISSIONS: Record<string, string> = {
+  '/dashboard/financial': 'read:dashboard:financial',
+  '/dashboard/hr': 'read:dashboard:hr',
+  '/reports/revenue': 'read:reports:revenue',
+  '/settings/billing': 'read:settings:billing',
+};
+
+export async function middleware(request: NextRequest) {
+  const token = request.cookies.get('session')?.value;
+
+  if (!token) {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+
+  try {
+    const { payload } = await jwtVerify(
+      token,
+      new TextEncoder().encode(process.env.JWT_SECRET!)
+    );
+
+    const userRole = payload.role as string;
+    const path = request.nextUrl.pathname;
+
+    // Verifica se a rota requer permissão específica
+    const requiredPermission = Object.entries(ROUTE_PERMISSIONS).find(
+      ([route]) => path.startsWith(route)
+    )?.[1];
+
+    if (requiredPermission) {
+      const rolePerms = ROLE_PERMISSIONS[userRole as Role] ?? [];
+      if (!rolePerms.includes(requiredPermission as Permission)) {
+        return NextResponse.redirect(new URL('/unauthorized', request.url));
+      }
+    }
+
+    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL('/login', request.url));
+  }
+}
+
+export const config = {
+  matcher: ['/dashboard/:path*', '/reports/:path*', '/settings/:path*'],
+};
+```
+
+O middleware protege contra acesso direto por URL. Um analista que tenta acessar `/dashboard/financial` diretamente vai ser redirecionado para `/unauthorized` — não vai ver uma tela em branco, não vai ver um erro 500, não vai ver os dados.
+
+## Ocultação de Componentes na UI por Permissão
+
+Proteção de rota é necessária mas não suficiente. Dentro de uma mesma tela, diferentes elementos podem estar disponíveis para diferentes roles. O botão "Exportar para Excel", o card de margem bruta, o link "Gerenciar Usuários" no menu — todos podem precisar de proteção em nível de componente.
+
+A abordagem recomendada é um hook e um componente de guard:
+
+```typescript
+// hooks/usePermission.ts
+import { useSession } from 'next-auth/react';
+
+export function usePermission(permission: Permission): boolean {
+  const { data: session } = useSession();
+  const role = session?.user?.role as Role | undefined;
+
+  if (!role) return false;
+  return hasPermission(role, permission);
+}
+
+// components/PermissionGate.tsx
+interface PermissionGateProps {
+  permission: Permission;
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}
+
+export function PermissionGate({ permission, children, fallback = null }: PermissionGateProps) {
+  const allowed = usePermission(permission);
+  return allowed ? <>{children}</> : <>{fallback}</>;
+}
+
+// Uso em qualquer componente:
+<PermissionGate permission="export:reports:revenue">
+  <ExportButton />
+</PermissionGate>
+
+<PermissionGate
+  permission="read:dashboard:financial"
+  fallback={<LockedMetricCard message="Acesso restrito" />}
+>
+  <RevenueMetricCard />
+</PermissionGate>
+```
+
+O componente `fallback` é importante: simplesmente esconder elementos sem explicação pode confundir usuários que sabem que o dado existe. Um card de "acesso restrito" comunica que o dado existe mas requer permissão, o que é mais honesto do que simplesmente não renderizar nada.
+
+## Filtragem de Dados no Backend por Role
+
+Toda a proteção de UI descrita acima é **segurança de conforto**. Ela melhora a experiência e evita confusão, mas não protege os dados de verdade. A proteção real vive no backend.
+
+Qualquer API endpoint ou Server Action que retorna dados sensíveis precisa verificar as permissões do usuário autenticado e filtrar os resultados de acordo:
+
+```typescript
+// app/api/reports/revenue/route.ts
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { hasPermission } from '@/lib/rbac';
+import { db } from '@/lib/db';
+
+export async function GET(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return Response.json({ error: 'Não autenticado' }, { status: 401 });
+  }
+
+  const role = session.user.role as Role;
+
+  if (!hasPermission(role, 'read:reports:revenue')) {
+    return Response.json({ error: 'Permissão insuficiente' }, { status: 403 });
+  }
+
+  // Managers veem apenas dados das suas unidades organizacionais
+  const orgUnitFilter = role === 'manager'
+    ? { orgUnitId: session.user.orgUnitId }
+    : {};
+
+  const data = await db.revenue.findMany({
+    where: orgUnitFilter,
+    orderBy: { date: 'desc' },
+  });
+
+  return Response.json(data);
+}
+```
+
+O padrão `orgUnitFilter` acima é o início da implementação de multi-tenancy por role — não apenas "você pode ou não pode ver receita" mas "você pode ver receita, mas apenas da sua unidade organizacional". Esse tipo de controle granular geralmente requer Row Level Security no banco de dados (PostgreSQL RLS) para garantias mais sólidas.
+
+## Conclusão
+
+RBAC bem implementado em dashboards B2B exige as quatro camadas trabalhando juntas: modelo de permissões claro, proteção de rotas no edge, guards de componente na UI e filtragem de dados no backend. Implementar apenas algumas dessas camadas cria falsas sensações de segurança.
+
+O investimento em RBAC correto é particularmente importante em SaaS B2B com múltiplos clientes e múltiplos roles por cliente. Uma vez que o sistema de permissões está bem definido no início do projeto, adicionar novos roles e novas resources é simples. Tentar adicionar RBAC em um sistema que não foi projetado para isso é um dos refactoring mais dolorosos que existem.
+
+Na SystemForge, RBAC é definido na fase de documentação técnica — os roles, resources e permissions são parte do LLD antes de qualquer linha de código ser escrita. Isso garante que a implementação seja consistente entre frontend, backend e banco de dados desde o início.

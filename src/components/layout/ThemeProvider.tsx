@@ -66,6 +66,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       setTheme,
       toggleTheme,
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setTheme/toggleTheme are stable inline functions
     [theme, mounted],
   )
 

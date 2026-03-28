@@ -6,13 +6,33 @@ import Link from 'next/link'
 import { CTAButton } from '@/components/ui/CTAButton'
 import { Container } from '@/components/ui/Container'
 import { buildDefaultCTAs, buildWhatsAppCTA } from '@/lib/cta'
-import { SITE } from '@/lib/constants'
-import { ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages, loadPageMessages } from '@config/content'
 
+const config = getSiteConfig()
+const messages = loadMessages()
+const pageMessages = loadPageMessages()
+
+const locale = config.locale
 const kpiData = [
-  { value: '50+', label: 'Projetos', bg: 'bg-primary/5', color: 'text-primary' },
-  { value: '100%', label: 'No prazo', bg: 'bg-success/5', color: 'text-success' },
-  { value: '24/7', label: 'Suporte', bg: 'bg-info/5', color: 'text-info' },
+  {
+    value: '50+',
+    label: locale === 'it-IT' ? 'Progetti' : locale === 'en' ? 'Projects' : 'Projetos',
+    bg: 'bg-primary/5',
+    color: 'text-primary',
+  },
+  {
+    value: '100%',
+    label: locale === 'it-IT' ? 'Nei tempi' : locale === 'en' ? 'On time' : 'No prazo',
+    bg: 'bg-success/5',
+    color: 'text-success',
+  },
+  {
+    value: '24/7',
+    label: locale === 'it-IT' ? 'Supporto' : locale === 'en' ? 'Support' : 'Suporte',
+    bg: 'bg-info/5',
+    color: 'text-info',
+  },
 ]
 
 
@@ -30,7 +50,7 @@ export function HeroSection() {
   return (
     <section
       data-testid="section-hero"
-      aria-label="Apresentação SystemForge"
+      aria-label={messages.sections.hero.ariaLabel}
       className="relative w-full overflow-hidden bg-background"
     >
       {/* Dot grid background */}
@@ -52,7 +72,7 @@ export function HeroSection() {
             {/* Badge */}
             <div className="hero-enter hero-delay-0 inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-sm font-medium border border-border">
               <span className="w-2 h-2 rounded-full bg-success" aria-hidden="true" />
-              Software House · Curitiba, PR
+              {messages.pages.hero.badge}
             </div>
 
             {/* Headline */}
@@ -60,14 +80,12 @@ export function HeroSection() {
               data-testid="hero-headline"
               className="hero-enter hero-delay-100 text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground leading-[1.1] tracking-tight"
             >
-              Software sob medida para{' '}
-              <span className="headline-gradient">transformar negócios</span>
+              {pageMessages.hero.titulo}
             </h1>
 
             {/* Subheadline */}
             <p className="hero-enter hero-delay-200 text-lg text-muted-foreground leading-relaxed">
-              Da landing page ao sistema complexo com IA — entregamos software de alta qualidade
-              com documentação completa, código limpo e suporte dedicado.
+              {pageMessages.hero.subtitulo}
             </p>
 
             {/* CTAs */}
@@ -79,10 +97,10 @@ export function HeroSection() {
                 className="hover:-translate-y-px active:translate-y-0 shadow-[0_4px_14px_rgba(37,99,235,0.2)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.38)] transition-all duration-200"
               />
               <Link
-                href={ROUTES.PORTFOLIO}
+                href={config.routes.portfolio}
                 className="group inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-lg"
               >
-                Ver cases reais
+                {messages.cta.portfolio}
                 <ArrowRight size={16} className="ml-0.5 transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
               </Link>
             </div>
@@ -99,7 +117,11 @@ export function HeroSection() {
 
             {/* Trust signals */}
             <p className="hero-enter hero-delay-300 text-sm text-muted-foreground">
-              ✓ Sem fidelidade &nbsp;&nbsp; ✓ Orçamento gratuito &nbsp;&nbsp; ✓ Resposta em até 2h
+              {locale === 'it-IT'
+                ? '✓ Senza vincoli \u00a0\u00a0 ✓ Preventivo gratuito \u00a0\u00a0 ✓ Risposta entro 2h'
+                : locale === 'en'
+                ? '✓ No lock-in \u00a0\u00a0 ✓ Free estimate \u00a0\u00a0 ✓ Response within 2h'
+                : '✓ Sem fidelidade \u00a0\u00a0 ✓ Orçamento gratuito \u00a0\u00a0 ✓ Resposta em até 2h'}
             </p>
           </div>
 
@@ -107,7 +129,9 @@ export function HeroSection() {
           <div className="hidden lg:flex items-center justify-center hero-enter-scale hero-delay-300">
             <Image
               src="/hero-illustration.png"
-              alt="Ilustração SystemForge — software sob medida"
+              alt={locale === 'it-IT' ? 'Illustrazione SystemForge — software su misura'
+                : locale === 'en' ? 'SystemForge illustration — custom software'
+                : 'Ilustração SystemForge — software sob medida'}
               width={1024}
               height={1024}
               className="w-full max-w-[480px] h-auto"
@@ -119,7 +143,9 @@ export function HeroSection() {
         {/* Client names marquee */}
         <div className="hero-enter hero-delay-400 border-t border-border pb-12 pt-6">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-4 text-center">
-            Empresas que já cresceram
+            {locale === 'it-IT' ? 'Aziende che hanno già cresciuto'
+              : locale === 'en' ? 'Companies that have already grown'
+              : 'Empresas que já cresceram'}
           </p>
           <div
             className="relative overflow-hidden"

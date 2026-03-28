@@ -3,17 +3,21 @@ import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PortfolioGallery } from '@/components/sections/PortfolioGallery'
 import { CTASection } from '@/components/sections/CTASection'
-import { SITE, ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 export const metadata: Metadata = {
-  title: 'Portfólio',
-  description: `Conheça os projetos desenvolvidos pela ${SITE.name}: SaaS, apps mobile, e-commerce, dashboards, APIs e sistemas com IA.`,
-  alternates: { canonical: '/portfolio' },
+  title: messages.breadcrumb.portfolio,
+  description: `${messages.breadcrumb.portfolio} — ${config.siteName}`,
+  alternates: { canonical: config.routes.portfolio },
 }
 
 const breadcrumbs = [
-  { label: 'Início', href: ROUTES.home },
-  { label: 'Portfólio', href: ROUTES.portfolio },
+  { label: messages.breadcrumb.home, href: config.routes.home },
+  { label: messages.breadcrumb.portfolio, href: config.routes.portfolio },
 ]
 
 export default function PortfolioPage() {
@@ -24,10 +28,10 @@ export default function PortfolioPage() {
           <div className="flex flex-col gap-4 pb-0">
             <Breadcrumb items={breadcrumbs} />
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-              Portfólio completo
+              {messages.pages.portfolio.title}
             </h1>
             <p className="text-lg text-muted-foreground">
-              Todos os projetos desenvolvidos pela SystemForge, filtráveis por categoria.
+              {messages.pages.portfolio.description}
             </p>
           </div>
         </Container>

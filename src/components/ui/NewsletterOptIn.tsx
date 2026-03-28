@@ -3,6 +3,8 @@
 import { useState, useRef } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/Button'
+import { getSiteConfig } from '@config'
+import { loadMessages, interpolate } from '@config/content'
 
 // Local interfaces — NOT exported to lib/types.ts (ARCH-001: types.ts FROZEN after module-2/TASK-1)
 interface NewsletterFormData {
@@ -17,10 +19,48 @@ interface NewsletterApiResponse {
   error?: string
 }
 
-type FormStatus = 'idle' | 'submitting' | 'success'
+type FormStatus = 'idle' | 'submitting' | 'success' | 'pending-confirmation'
+
+const config = getSiteConfig()
+const msg = loadMessages().newsletter
+const requiresCheckbox = config.compliance === 'LGPD' || config.compliance === 'GDPR'
+const isGDPR = config.compliance === 'GDPR'
+const privacyHref = config.routes.privacy
+
+/** Builds the privacy link element used inside consent text */
+function PrivacyLink() {
+  return (
+    <a
+      href={privacyHref}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-primary hover:underline"
+    >
+      {msg.privacyLinkText}
+    </a>
+  )
+}
+
+/**
+ * Renders consent text that may contain a {privacyLink} placeholder.
+ * Splits on the placeholder and inserts an <a> element.
+ */
+function ConsentText({ template }: { template: string }) {
+  if (!template) return null
+  const parts = template.split('{privacyLink}')
+  if (parts.length === 1) return <>{template}</>
+  return (
+    <>
+      {parts[0]}
+      <PrivacyLink />
+      {parts[1]}
+    </>
+  )
+}
 
 export function NewsletterOptIn() {
   const [status, setStatus] = useState<FormStatus>('idle')
+  const [submittedEmail, setSubmittedEmail] = useState('')
   const [emailError, setEmailError] = useState('')
   const [consentError, setConsentError] = useState('')
   const [formData, setFormData] = useState<NewsletterFormData>({
@@ -35,14 +75,14 @@ export function NewsletterOptIn() {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
     if (!emailRegex.test(formData.email)) {
-      setEmailError('Por favor, insira um email válido')
+      setEmailError(msg.emailInvalid)
       valid = false
     } else {
       setEmailError('')
     }
 
-    if (!formData.consent) {
-      setConsentError('Você precisa aceitar a Política de Privacidade para continuar')
+    if (requiresCheckbox && !formData.consent) {
+      setConsentError(msg.consentRequired)
       valid = false
     } else {
       setConsentError('')
@@ -68,7 +108,7 @@ export function NewsletterOptIn() {
 
     if (!apiUrl) {
       setStatus('idle')
-      toast.error('Erro ao se inscrever. Tente novamente.')
+      toast.error(msg.error)
       return
     }
 
@@ -83,7 +123,7 @@ export function NewsletterOptIn() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: formData.email,
-          consent: formData.consent,
+          consent: requiresCheckbox ? formData.consent : true,
           website: formData.website,
         }),
         signal: controller.signal,
@@ -94,22 +134,58 @@ export function NewsletterOptIn() {
         throw new Error(json.error ?? `HTTP ${response.status}`)
       }
 
-      setStatus('success')
+      // GDPR: show pending-confirmation state (double opt-in)
+      if (isGDPR) {
+        setSubmittedEmail(formData.email)
+        setStatus('pending-confirmation')
+      } else {
+        setStatus('success')
+      }
     } catch (err) {
       setStatus('idle')
       if (err instanceof Error && err.name === 'AbortError') {
-        toast.error('A requisição excedeu o tempo limite. Verifique sua conexão.')
+        toast.error(msg.timeoutError)
       } else {
-        toast.error('Erro ao se inscrever. Tente novamente.')
+        toast.error(msg.error)
       }
     } finally {
       clearTimeout(timeoutId)
     }
   }
 
+  // GDPR pending-confirmation state
+  if (status === 'pending-confirmation') {
+    return (
+      <section data-testid="newsletter-pending" aria-live="polite" className="my-6">
+        <div className="flex items-center gap-2">
+          <span
+            className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-warning/20"
+            aria-hidden="true"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              className="w-3.5 h-3.5 text-warning"
+              aria-hidden="true"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+          </span>
+          <p role="status" className="text-sm font-medium text-foreground">
+            {interpolate(msg.pendingConfirmation, { email: submittedEmail })}
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   if (status === 'success') {
     return (
-      <section aria-live="polite" className="my-6">
+      <section data-testid="newsletter-success" aria-live="polite" className="my-6">
         <div className="flex items-center gap-2">
           <span
             className="flex-shrink-0 inline-flex items-center justify-center w-6 h-6 rounded-full bg-success/20"
@@ -127,7 +203,7 @@ export function NewsletterOptIn() {
             </svg>
           </span>
           <p role="status" className="text-sm font-medium text-foreground">
-            Verifique seu email para confirmar sua inscrição!
+            {msg.success}
           </p>
         </div>
       </section>
@@ -135,22 +211,23 @@ export function NewsletterOptIn() {
   }
 
   return (
-    <section className="my-6 max-w-md">
+    <section data-testid="newsletter-section" className="my-6 max-w-md">
       <h3 className="text-base font-semibold text-foreground mb-3">
-        Receba artigos sobre engenharia de software
+        {msg.heading}
       </h3>
-      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
+      <form data-testid="newsletter-form" onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
         {/* Campo de email */}
         <div>
           <input
+            data-testid="newsletter-email-input"
             type="email"
             name="email"
             required
             value={formData.email}
             onChange={e => setFormData(prev => ({ ...prev, email: e.target.value }))}
             disabled={status === 'submitting'}
-            placeholder="seu@email.com"
-            aria-label="Seu email"
+            placeholder={msg.placeholder}
+            aria-label={msg.ariaLabel}
             aria-invalid={emailError ? 'true' : 'false'}
             aria-describedby={emailError ? 'newsletter-email-error' : undefined}
             className="w-full h-11 px-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50 disabled:cursor-not-allowed text-base"
@@ -166,49 +243,51 @@ export function NewsletterOptIn() {
           )}
         </div>
 
-        {/* Checkbox LGPD */}
-        <div>
-          <label
-            htmlFor="newsletter-consent"
-            className="flex items-start gap-2 cursor-pointer"
-          >
-            <input
-              type="checkbox"
-              id="newsletter-consent"
-              name="consent"
-              required
-              checked={formData.consent}
-              onChange={e =>
-                setFormData(prev => ({ ...prev, consent: e.target.checked }))
-              }
-              disabled={status === 'submitting'}
-              aria-describedby={consentError ? 'newsletter-consent-error' : undefined}
-              className="mt-0.5 h-4 w-4 accent-primary flex-shrink-0 disabled:opacity-50"
-            />
-            <span className="text-xs text-muted-foreground leading-relaxed">
-              Aceito receber comunicações da SystemForge e a{' '}
-              <a
-                href="/privacidade"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-primary hover:underline"
-              >
-                Política de Privacidade
-              </a>
-            </span>
-          </label>
-          {consentError && (
-            <span
-              id="newsletter-consent-error"
-              role="alert"
-              className="text-destructive text-xs mt-1 block"
+        {/* Checkbox — LGPD/GDPR only */}
+        {requiresCheckbox && (
+          <div>
+            <label
+              htmlFor="newsletter-consent"
+              className="flex items-start gap-2 cursor-pointer"
             >
-              {consentError}
-            </span>
-          )}
-        </div>
+              <input
+                data-testid="newsletter-consent-checkbox"
+                type="checkbox"
+                id="newsletter-consent"
+                name="consent"
+                required
+                checked={formData.consent}
+                onChange={e =>
+                  setFormData(prev => ({ ...prev, consent: e.target.checked }))
+                }
+                disabled={status === 'submitting'}
+                aria-describedby={consentError ? 'newsletter-consent-error' : undefined}
+                className="mt-0.5 h-4 w-4 accent-primary flex-shrink-0 disabled:opacity-50"
+              />
+              <span className="text-xs text-muted-foreground leading-relaxed">
+                <ConsentText template={msg.consentLabel} />
+              </span>
+            </label>
+            {consentError && (
+              <span
+                id="newsletter-consent-error"
+                role="alert"
+                className="text-destructive text-xs mt-1 block"
+              >
+                {consentError}
+              </span>
+            )}
+          </div>
+        )}
 
-        {/* Honeypot — invisível para humanos, armadilha para bots */}
+        {/* Informational text — CAN-SPAM only (no checkbox) */}
+        {!requiresCheckbox && msg.consentInfo && (
+          <p className="text-xs text-muted-foreground leading-relaxed">
+            <ConsentText template={msg.consentInfo} />
+          </p>
+        )}
+
+        {/* Honeypot — invisivel para humanos, armadilha para bots */}
         <input
           type="text"
           name="website"
@@ -220,14 +299,15 @@ export function NewsletterOptIn() {
           autoComplete="off"
         />
 
-        {/* Botão de submit */}
+        {/* Botao de submit */}
         <Button
+          data-testid="newsletter-submit-button"
           type="submit"
           loading={status === 'submitting'}
           disabled={status === 'submitting'}
           className="w-full sm:w-auto"
         >
-          {status === 'submitting' ? 'Enviando...' : 'Inscrever-se'}
+          {status === 'submitting' ? msg.loading : msg.submit}
         </Button>
       </form>
     </section>

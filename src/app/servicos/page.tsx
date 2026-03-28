@@ -4,17 +4,21 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { ServiceCard } from '@/components/shared/ServiceCard'
 import { CTASection } from '@/components/sections/CTASection'
 import { services } from '@/lib/data'
-import { SITE, ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 export const metadata: Metadata = {
-  title: 'Serviços',
-  description: `Conheça os serviços de desenvolvimento de software da ${SITE.name}: SaaS, mobile, landing pages, e-commerce, dashboards, APIs, automação com IA e muito mais.`,
-  alternates: { canonical: '/servicos' },
+  title: messages.breadcrumb.services,
+  description: `${messages.breadcrumb.services} — ${config.siteName}`,
+  alternates: { canonical: config.routes.services },
 }
 
 const breadcrumbs = [
-  { label: 'Início', href: ROUTES.home },
-  { label: 'Serviços', href: ROUTES.servicos },
+  { label: messages.breadcrumb.home, href: config.routes.home },
+  { label: messages.breadcrumb.services, href: config.routes.services },
 ]
 
 export default function ServicosPage() {
@@ -27,11 +31,10 @@ export default function ServicosPage() {
 
             <div className="flex flex-col gap-3 max-w-2xl">
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-                Nossos serviços
+                {messages.pages.services.title}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Do MVP ao produto escalável — soluções de software sob medida para cada
-                etapa do seu negócio. Trabalhamos com as stacks mais modernas do mercado.
+                {messages.pages.services.description}
               </p>
             </div>
 

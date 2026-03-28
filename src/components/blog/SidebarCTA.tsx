@@ -35,6 +35,7 @@ export function SidebarCTA({ relatedService }: SidebarCTAProps) {
 
   return (
     <aside
+      data-testid="sidebar-cta"
       aria-label={`CTA: ${serviceName}`}
       className="p-4 rounded-xl border border-border bg-accent/20 flex flex-col gap-3"
     >
@@ -46,6 +47,7 @@ export function SidebarCTA({ relatedService }: SidebarCTAProps) {
 
       {relatedService && (
         <a
+          data-testid="sidebar-cta-service-link"
           href={ROUTES.SERVICE(relatedService)}
           aria-label={`Ver detalhes do serviço: ${serviceName}`}
           className="text-xs text-muted-foreground hover:text-foreground transition-colors text-center"

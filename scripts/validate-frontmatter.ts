@@ -1,57 +1,68 @@
 /**
- * scripts/validate-frontmatter.ts — ATUALIZADO em module-2/TASK-2/ST006
- * Agora usa ArticleFrontmatterSchema completo de lib/schemas.ts
+ * scripts/validate-frontmatter.ts — Validação Zod em build-time
+ * Lê artigos do locale ativo (NEXT_PUBLIC_LOCALE), extrai frontmatter com gray-matter
+ * e valida contra PostFrontmatterSchema. Falha o build com exit(1) se qualquer arquivo for inválido.
+ *
+ * Uso:
+ *   NEXT_PUBLIC_LOCALE=pt-BR tsx scripts/validate-frontmatter.ts
+ *   tsx scripts/validate-frontmatter.ts  (fallback: pt-BR)
  */
-import { glob } from 'glob'
-import matter from 'gray-matter'
 import fs from 'fs'
 import path from 'path'
-import { validateArticle } from '../src/lib/schemas'
+import matter from 'gray-matter'
+import { PostFrontmatterSchema } from '../src/lib/blog/post-schema'
 
-async function validateFrontmatter(): Promise<void> {
-  const files = await glob('content/blog/**/*.mdx')
+const locale = process.env.NEXT_PUBLIC_LOCALE || 'pt-BR'
+const blogDir = path.join(process.cwd(), 'content', locale, 'blog')
 
-  if (files.length === 0) {
-    console.log('[validate-frontmatter] Nenhum artigo encontrado — OK.')
-    process.exit(0)
-  }
-
-  let hasErrors = false
-  let validated = 0
-
-  for (const file of files) {
-    const content = fs.readFileSync(file, 'utf-8')
-    const { data } = matter(content)
-
-    // Verificar que slug no frontmatter corresponde ao nome do arquivo
-    const filenameSlug = path.basename(file, '.mdx')
-    if (data.slug && data.slug !== filenameSlug) {
-      console.error(`\n[validate-frontmatter] ✗ ${file}:`)
-      console.error(`  - slug: slug "${data.slug}" não corresponde ao nome do arquivo "${filenameSlug}"`)
-      hasErrors = true
-      continue
-    }
-
-    const result = validateArticle(data)
-
-    if (!result.success) {
-      hasErrors = true
-      const filename = path.relative(process.cwd(), file)
-      console.error(`\n[validate-frontmatter] ✗ ${filename}:`)
-      result.errors?.forEach(e => console.error(`  - ${e}`))
-    } else {
-      console.log(`[validate-frontmatter] ✓ ${path.relative(process.cwd(), file)}`)
-      validated++
-    }
-  }
-
-  if (hasErrors) {
-    console.error(`\n[validate-frontmatter] FALHOU — ${validated} válidos, alguns com erros. Corrija antes do deploy.`)
-    process.exit(1)
-  }
-
-  console.log(`\n[validate-frontmatter] ✓ ${validated} artigos válidos.`)
+if (!fs.existsSync(blogDir)) {
+  console.warn(`⚠️  Pasta ${blogDir} não encontrada — sem artigos para validar`)
   process.exit(0)
 }
 
-validateFrontmatter()
+const files = fs.readdirSync(blogDir).filter(f => f.endsWith('.mdx'))
+
+if (files.length === 0) {
+  console.log(`✅ Todos os 0 artigos ${locale} válidos`)
+  process.exit(0)
+}
+
+let hasErrors = false
+const errorsByFile = new Map<string, string[]>()
+
+for (const file of files) {
+  const filePath = path.join(blogDir, file)
+  let data: Record<string, unknown>
+
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8')
+    data = matter(raw).data as Record<string, unknown>
+  } catch (err) {
+    errorsByFile.set(file, [`  - [parse] Erro ao parsear frontmatter: ${(err as Error).message}`])
+    hasErrors = true
+    continue
+  }
+
+  const result = PostFrontmatterSchema.safeParse(data)
+
+  if (!result.success) {
+    const msgs = result.error.issues.map(i => `  - [${i.path.join('.') || 'root'}] ${i.message}`)
+    errorsByFile.set(file, msgs)
+    hasErrors = true
+  } else {
+    console.log(`✓ ${file}`)
+  }
+}
+
+if (hasErrors) {
+  console.error('\n❌ Validação falhou:\n')
+  for (const [file, msgs] of errorsByFile) {
+    console.error(`❌ ${file}:`)
+    msgs.forEach(m => console.error(m))
+    console.error('')
+  }
+  console.error('❌ Corrija os erros acima antes de continuar o build')
+  process.exit(1)
+}
+
+console.log(`\n✅ Todos os ${files.length} artigos ${locale} válidos`)

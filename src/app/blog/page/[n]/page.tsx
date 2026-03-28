@@ -12,6 +12,12 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
+const pageLabel = config.locale === 'it-IT' ? 'Pagina' : config.locale === 'en' ? 'Page' : 'Página'
 import type { ArticleFrontmatter } from '@/lib/types'
 
 interface PageProps {
@@ -68,8 +74,8 @@ export default async function BlogPaginatedPage({ params }: PageProps) {
     .map(([tag]) => tag)
 
   const breadcrumbs = [
-    { label: 'Blog', href: ROUTES.BLOG },
-    { label: `Página ${pageNum}`, href: '' },
+    { label: messages.breadcrumb.blog, href: ROUTES.BLOG },
+    { label: `${pageLabel} ${pageNum}`, href: '' },
   ]
 
   return (

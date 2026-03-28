@@ -6,10 +6,13 @@ import { ChevronLeft, ChevronRight, Quote } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { testimonials } from '@/lib/data'
 import { cn } from '@/lib/utils'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 
 function StarRating({ animate = false }: { animate?: boolean }) {
   return (
-    <div className="flex gap-0.5" aria-label="5 estrelas" role="img">
+    <div className="flex gap-0.5" aria-label={messages.sections.testimonials.ratingLabel} role="img">
       {Array.from({ length: 5 }).map((_, i) => (
         <svg
           key={i}
@@ -140,7 +143,7 @@ export function TestimonialsSection() {
   return (
     <section
       data-testid="section-testimonials"
-      aria-label="Depoimentos de clientes"
+      aria-label={messages.sections.testimonials.ariaLabel}
       className="section-testimonials relative w-full bg-surface py-20 md:py-28"
     >
       <Container>
@@ -148,16 +151,16 @@ export function TestimonialsSection() {
           {/* Header — MC-2: pill badge + MC-6: refined typography */}
           <div className="flex flex-col gap-4 max-w-2xl">
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/8 border border-primary/15 text-[0.7rem] font-bold uppercase tracking-[0.15em] text-primary w-fit">
-              Depoimentos
+              {messages.sections.testimonials.eyebrow}
             </span>
             <h2
               className="font-extrabold text-foreground leading-[1.15] tracking-[-0.02em]"
               style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}
             >
-              O que nossos clientes dizem
+              {messages.sections.testimonials.title}
             </h2>
             <p className="text-muted-foreground leading-relaxed">
-              Resultados reais de quem confiou na SystemForge para transformar ideias em software.
+              {messages.sections.testimonials.subtitle}
             </p>
           </div>
 
@@ -168,7 +171,7 @@ export function TestimonialsSection() {
               data-testid="testimonial-card-active"
               className="testimonial-active-card relative flex flex-col gap-6 p-8 md:p-10 rounded-2xl border border-border bg-card overflow-hidden"
               role="article"
-              aria-label={`Depoimento de ${current.author}`}
+              aria-label={`${messages.sections.testimonials.eyebrow} — ${current.author}`}
             >
               {/* MC-3: Oversized gradient quote mark */}
               <Quote
@@ -200,13 +203,13 @@ export function TestimonialsSection() {
             {/* Navigation */}
             <div className="flex items-center justify-between mt-6">
               {/* Dots */}
-              <div className="flex gap-2" role="tablist" aria-label="Navegar entre depoimentos">
+              <div className="flex gap-2" role="tablist" aria-label={messages.sections.testimonials.ariaLabel}>
                 {testimonials.map((t, i) => (
                   <button
                     key={t.id}
                     role="tab"
                     aria-selected={i === active}
-                    aria-label={`Depoimento de ${t.author}`}
+                    aria-label={`${messages.sections.testimonials.eyebrow} — ${t.author}`}
                     onClick={() => {
                       goTo(i)
                       resetTimer()
@@ -224,7 +227,7 @@ export function TestimonialsSection() {
                 <button
                   data-testid="testimonial-prev-button"
                   onClick={handlePrev}
-                  aria-label="Depoimento anterior"
+                  aria-label={messages.sections.testimonials.prevLabel}
                   className={cn(
                     'w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center',
                     'hover:border-primary/40 hover:bg-accent hover:-translate-y-0.5 transition-all duration-200',
@@ -236,7 +239,7 @@ export function TestimonialsSection() {
                 <button
                   data-testid="testimonial-next-button"
                   onClick={handleNext}
-                  aria-label="Próximo depoimento"
+                  aria-label={messages.sections.testimonials.nextLabel}
                   className={cn(
                     'w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center',
                     'hover:border-primary/40 hover:bg-accent hover:-translate-y-0.5 transition-all duration-200',

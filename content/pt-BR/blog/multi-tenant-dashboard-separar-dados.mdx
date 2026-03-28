@@ -1,0 +1,226 @@
+---
+title: "Multi-tenant em dashboards: separando dados por cliente"
+slug: "multi-tenant-dashboard-separar-dados"
+date: "2024-10-09"
+description: "Como implementar isolamento de dados em dashboards multi-tenant — Row Level Security no PostgreSQL, middleware de tenant e prevenção de data leakage."
+tags: ["multi-tenancy", "dashboard", "row level security", "postgresql", "saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Como implementar isolamento de dados em dashboards multi-tenant — Row Level Security no PostgreSQL, middleware de tenant e prevenção de data leakage.
+---
+
+Um bug de multi-tenancy é diferente de todos os outros bugs. Não é um crash, não é uma tela quebrada, não é um número errado. É silencioso: um usuário da Empresa A consegue ver dados da Empresa B. E geralmente ninguém percebe até que um cliente liga para reclamar que viu informações confidenciais de um concorrente.
+
+As consequências são sérias: perda de contrato, processo jurídico, notificação à ANPD (Lei Geral de Proteção de Dados), dano irreparável à reputação. Em SaaS B2B com dados corporativos sensíveis, data leakage entre tenants é um dos poucos bugs que podem encerrar uma empresa.
+
+## Row Level Security no PostgreSQL: Setup Completo
+
+Row Level Security (RLS) é o mecanismo do PostgreSQL que aplica políticas de acesso diretamente no banco de dados, independentemente de como a query chegou até lá. Mesmo que a aplicação envie uma query sem filtro de tenant, o PostgreSQL vai aplicar a política e retornar apenas as linhas que o usuário tem permissão de ver.
+
+O RLS é a última linha de defesa — e por isso é a mais importante.
+
+```sql
+-- 1. Habilitar RLS na tabela
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- 2. Forçar RLS mesmo para o owner da tabela (crucial!)
+ALTER TABLE orders FORCE ROW LEVEL SECURITY;
+
+-- 3. Criar política de leitura por tenant
+CREATE POLICY tenant_isolation_policy ON orders
+  AS PERMISSIVE
+  FOR ALL
+  TO authenticated_role
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- 4. Replicar para todas as tabelas do schema
+ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation_policy ON customers
+  AS PERMISSIVE FOR ALL TO authenticated_role
+  USING (tenant_id = current_setting('app.current_tenant_id')::uuid);
+
+-- 5. Tabelas de referência global (sem tenant_id)
+-- NÃO habilite RLS em tabelas globais como 'countries', 'currencies'
+
+-- Verificar quais tabelas têm RLS habilitado:
+SELECT schemaname, tablename, rowsecurity, forcerowsecurity
+FROM pg_tables
+WHERE schemaname = 'public'
+ORDER BY tablename;
+```
+
+A variável `app.current_tenant_id` precisa ser definida em cada conexão antes de qualquer query de negócio. Isso acontece no middleware da aplicação (próxima seção).
+
+**Atenção crítica:** `FORCE ROW LEVEL SECURITY` é obrigatório. Sem ele, o superuser e o owner da tabela bypassam o RLS — e o usuário de banco da sua aplicação frequentemente tem esses privilégios.
+
+## Middleware de Tenant: Injeção do tenant_id em Todas as Queries
+
+O middleware de tenant é responsável por:
+1. Identificar qual tenant está fazendo a requisição
+2. Validar que o usuário autenticado pertence àquele tenant
+3. Injetar o `tenant_id` na conexão de banco antes de qualquer query
+
+```typescript
+// lib/db/tenant-middleware.ts
+import { PrismaClient } from '@prisma/client';
+import { getServerSession } from 'next-auth';
+
+// Pool de clientes Prisma por tenant (evita criar um novo client por request)
+const tenantClients = new Map<string, PrismaClient>();
+
+function getTenantClient(tenantId: string): PrismaClient {
+  if (!tenantClients.has(tenantId)) {
+    const client = new PrismaClient({
+      datasources: { db: { url: process.env.DATABASE_URL } }
+    });
+
+    // Middleware Prisma: injeta tenant_id em TODA transação
+    client.$use(async (params, next) => {
+      // Executa SET LOCAL antes de cada query no contexto da sessão
+      await client.$executeRawUnsafe(
+        `SET LOCAL app.current_tenant_id = '${tenantId}'`
+      );
+      return next(params);
+    });
+
+    tenantClients.set(tenantId, client);
+  }
+  return tenantClients.get(tenantId)!;
+}
+
+// Abordagem mais segura: usar transação explícita
+export async function withTenant<T>(
+  tenantId: string,
+  fn: (db: PrismaClient) => Promise<T>
+): Promise<T> {
+  const db = new PrismaClient();
+
+  return db.$transaction(async (tx) => {
+    // SET LOCAL aplica apenas dentro da transação
+    await tx.$executeRawUnsafe(
+      `SET LOCAL app.current_tenant_id = $1`,
+      tenantId
+    );
+    // Passa o client transacional para a função
+    return fn(tx as unknown as PrismaClient);
+  });
+}
+
+// Uso em Server Actions ou API Routes:
+export async function getOrders() {
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.tenantId) throw new Error('Não autenticado');
+
+  return withTenant(session.user.tenantId, async (db) => {
+    // O RLS garante que apenas orders do tenant correto serão retornadas
+    // MESMO se a query não tiver filtro explícito de tenant_id
+    return db.order.findMany({ orderBy: { createdAt: 'desc' } });
+  });
+}
+```
+
+A abordagem com `SET LOCAL` dentro de uma transação é mais segura do que `SET` global porque a configuração é automaticamente revertida ao final da transação, evitando vazamento entre requests em um pool de conexões.
+
+## Testes de Isolamento: Como Verificar que Não Há Data Leakage
+
+Testes de isolamento de tenant devem ser parte do suite de testes de integração e devem ser executados em toda PR que toca queries de banco.
+
+```typescript
+// tests/integration/tenant-isolation.test.ts
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { createTestTenant, createTestUser } from './helpers';
+import { getOrders, getCustomers } from '@/lib/data';
+
+describe('Isolamento de Tenant', () => {
+  let tenantA: { id: string; apiKey: string };
+  let tenantB: { id: string; apiKey: string };
+
+  beforeAll(async () => {
+    // Cria dois tenants de teste com dados distintos
+    tenantA = await createTestTenant('empresa-a', {
+      orders: 5,
+      customers: 3
+    });
+    tenantB = await createTestTenant('empresa-b', {
+      orders: 8,
+      customers: 6
+    });
+  });
+
+  it('usuário do Tenant A não deve ver orders do Tenant B', async () => {
+    const userA = await createTestUser({ tenantId: tenantA.id });
+    const orders = await getOrders({ userId: userA.id });
+
+    // Todos os orders retornados devem pertencer ao Tenant A
+    expect(orders.every(o => o.tenantId === tenantA.id)).toBe(true);
+    expect(orders.length).toBe(5);
+
+    // Nenhum order do Tenant B deve aparecer
+    const tenantBOrderIds = orders.filter(o => o.tenantId === tenantB.id);
+    expect(tenantBOrderIds.length).toBe(0);
+  });
+
+  it('query sem filtro explícito não deve retornar dados cross-tenant', async () => {
+    // Simula um bug onde o desenvolvedor esqueceu o filtro de tenant
+    const userB = await createTestUser({ tenantId: tenantB.id });
+    const customers = await getCustomers({ userId: userB.id });
+
+    expect(customers.every(c => c.tenantId === tenantB.id)).toBe(true);
+    expect(customers.length).toBe(6);
+  });
+
+  afterAll(async () => {
+    await cleanupTestTenants([tenantA.id, tenantB.id]);
+  });
+});
+```
+
+## Performance: Índices por tenant_id
+
+O RLS adiciona um predicado implícito de `tenant_id = ?` em todas as queries. Sem índice no campo `tenant_id`, isso resulta em full table scans à medida que a tabela cresce.
+
+```sql
+-- Índices compostos: tenant_id sempre como primeira coluna
+-- PostgreSQL usa o índice quando tenant_id está no predicado de busca
+
+CREATE INDEX CONCURRENTLY idx_orders_tenant_date
+  ON orders (tenant_id, created_at DESC);
+
+CREATE INDEX CONCURRENTLY idx_orders_tenant_status
+  ON orders (tenant_id, status);
+
+CREATE INDEX CONCURRENTLY idx_customers_tenant_name
+  ON customers (tenant_id, name);
+
+-- Para queries de dashboard que agregam por período:
+CREATE INDEX CONCURRENTLY idx_orders_tenant_date_status
+  ON orders (tenant_id, DATE_TRUNC('month', created_at), status)
+  WHERE status != 'cancelled'; -- índice parcial reduz tamanho
+
+-- Verificar uso dos índices:
+EXPLAIN (ANALYZE, BUFFERS)
+SELECT COUNT(*), SUM(total_amount)
+FROM orders
+WHERE status = 'completed'
+  AND created_at >= CURRENT_DATE - INTERVAL '30 days';
+-- O plano deve mostrar "Index Scan" usando idx_orders_tenant_date_status
+```
+
+A coluna `tenant_id` como primeiro campo do índice composto é crítica. PostgreSQL pode usar um índice composto quando o predicado inclui o primeiro campo — mas não quando inclui apenas campos subsequentes.
+
+Em tabelas muito grandes (> 10M linhas por tenant), considere particionamento por `tenant_id` como complemento aos índices. O PostgreSQL vai fazer pruning de partições automaticamente, reduzindo drasticamente o volume de dados escaneado por query.
+
+## Conclusão
+
+Multi-tenancy correto não é uma feature que você adiciona depois — é uma decisão arquitetural que permeia o schema de banco, o middleware da aplicação, os testes de integração e o modelo de deployment.
+
+A combinação de RLS no PostgreSQL com middleware de tenant na aplicação cria duas camadas independentes de proteção. Se a aplicação enviar uma query sem o tenant correto (seja por bug ou por tentativa maliciosa), o banco de dados recusa. Se o RLS estiver mal configurado, o middleware previne que queries sem contexto de tenant sequer cheguem ao banco.
+
+O custo de implementar multi-tenancy corretamente desde o início é uma semana de trabalho focado. O custo de remediar um incident de data leakage entre tenants — tecnicamente, juridicamente e reputacionalmente — é incomparavelmente maior.
+
+Na SystemForge, multi-tenancy é tratado como requisito de segurança de primeira classe, documentado no LLD com a estratégia de RLS, a especificação dos índices e o plano de testes de isolamento. É parte do projeto, não um detalhe de implementação.

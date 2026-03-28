@@ -2,18 +2,21 @@ import type { Metadata } from 'next'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { CTASection } from '@/components/sections/CTASection'
-import { ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 export const metadata: Metadata = {
-  title: 'Conselheiro de IA',
-  description:
-    'Conselheiro de IA da SystemForge: análise rápida do seu projeto de software com recomendações personalizadas de tecnologia, arquitetura e investimento.',
-  alternates: { canonical: '/conselheiro' },
+  title: messages.breadcrumb.advisor,
+  description: `${messages.breadcrumb.advisor} — ${config.siteName}`,
+  alternates: { canonical: config.routes.advisor },
 }
 
 const breadcrumbs = [
-  { label: 'Início', href: ROUTES.home },
-  { label: 'Conselheiro', href: ROUTES.conselheiro },
+  { label: messages.breadcrumb.home, href: config.routes.home },
+  { label: messages.breadcrumb.advisor, href: config.routes.advisor },
 ]
 
 export default function ConselheiroPage() {
@@ -27,14 +30,13 @@ export default function ConselheiroPage() {
             <div className="flex flex-col gap-3 max-w-2xl">
               <div className="inline-flex items-center gap-2 w-fit px-3 py-1.5 rounded-full bg-accent text-accent-foreground text-sm font-medium border border-border">
                 <span className="w-2 h-2 rounded-full bg-warning animate-pulse" aria-hidden="true" />
-                Em breve
+                {messages.sections.advisorTeaser.badge}
               </div>
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-                Conselheiro de IA
+                {messages.sections.advisorTeaser.title}
               </h1>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Descreva seu projeto e receba em segundos uma análise completa com
-                recomendações de tecnologia, estimativa de investimento e roadmap sugerido.
+                {messages.sections.advisorTeaser.description}
               </p>
             </div>
 
@@ -45,11 +47,10 @@ export default function ConselheiroPage() {
               </div>
               <div className="flex flex-col gap-2 text-center">
                 <h2 className="text-xl font-semibold text-foreground">
-                  Ferramenta em desenvolvimento
+                  {messages.sections.advisorTeaser.comingSoonTitle}
                 </h2>
                 <p className="text-muted-foreground max-w-xs">
-                  O Conselheiro de IA estará disponível em breve. Enquanto isso, fale
-                  diretamente com nossa equipe para uma análise personalizada.
+                  {messages.sections.advisorTeaser.comingSoonDescription}
                 </p>
               </div>
             </div>

@@ -14,11 +14,12 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ categories, currentCategory }: CategoryFilterProps) {
   return (
-    <nav aria-label="Filtrar por categoria">
+    <nav data-testid="blog-category-filter" aria-label="Filtrar por categoria">
       <ul className="overflow-x-auto flex flex-wrap gap-2 pb-2">
         {/* "Todos" link */}
         <li>
           <Link
+            data-testid="blog-category-filter-all"
             href={ROUTES.BLOG}
             aria-current={!currentCategory ? 'page' : undefined}
             className={cn(
@@ -39,6 +40,7 @@ export function CategoryFilter({ categories, currentCategory }: CategoryFilterPr
           return (
             <li key={cat}>
               <Link
+                data-testid={`blog-category-filter-${cat.toLowerCase().replace(/\s+/g, '-')}`}
                 href={ROUTES.BLOG_CATEGORY(encodeURIComponent(cat))}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(

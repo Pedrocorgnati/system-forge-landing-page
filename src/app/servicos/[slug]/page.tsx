@@ -6,7 +6,11 @@ import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { CTASection } from '@/components/sections/CTASection'
 import { services } from '@/lib/data'
-import { SITE, ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 export function generateStaticParams() {
   return services.map((s) => ({ slug: s.slug }))
@@ -23,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: service.name,
     description: service.longDescription,
-    alternates: { canonical: `/servicos/${slug}` },
+    alternates: { canonical: config.routes.service(slug) },
   }
 }
 
@@ -33,9 +37,9 @@ export default async function ServicoPage({ params }: Props) {
   if (!service) notFound()
 
   const breadcrumbs = [
-    { label: 'Início', href: ROUTES.home },
-    { label: 'Serviços', href: ROUTES.servicos },
-    { label: service.name, href: ROUTES.servicoSlug(service.slug) },
+    { label: messages.breadcrumb.home, href: config.routes.home },
+    { label: messages.breadcrumb.services, href: config.routes.services },
+    { label: service.name, href: config.routes.service(service.slug) },
   ]
 
   const related = services.filter(
@@ -50,12 +54,12 @@ export default async function ServicoPage({ params }: Props) {
             <Breadcrumb items={breadcrumbs} />
 
             <Link
-              href={ROUTES.servicos}
+              href={config.routes.services}
               data-testid="servico-back-link"
               className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md w-fit"
             >
               <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-              Todos os serviços
+              {messages.pages.services.backToAll}
             </Link>
 
             <div className="flex flex-col gap-4">
@@ -72,12 +76,12 @@ export default async function ServicoPage({ params }: Props) {
 
             {related.length > 0 && (
               <div className="flex flex-col gap-4 pt-8 border-t border-border">
-                <h2 className="font-semibold text-foreground">Serviços relacionados</h2>
+                <h2 className="font-semibold text-foreground">{messages.pages.services.relatedTitle}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {related.map((s) => (
                     <Link
                       key={s.slug}
-                      href={ROUTES.servicoSlug(s.slug)}
+                      href={config.routes.service(s.slug)}
                       className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card hover:border-primary/40 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
                     >
                       <span className="text-2xl" role="img" aria-label={s.name}>{s.icon}</span>

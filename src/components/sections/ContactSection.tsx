@@ -4,18 +4,24 @@ import { useEffect, useRef } from 'react'
 import { MessageCircle, CalendarDays, Calculator, ArrowRight, Mail } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { buildWhatsAppUrl } from '@/lib/cta'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 import { SITE } from '@/lib/constants'
+
+const config = getSiteConfig()
+const messages = loadMessages()
+const ct = messages.contact
+
+/** Derive the section id from config.routes.contact (e.g. "/#contato" -> "contato") */
+const sectionId = config.routes.contact.replace(/^\/?#?/, '')
 
 const channels = [
   {
     icon: MessageCircle,
     label: 'WhatsApp',
-    description: 'Resposta rápida em horário comercial. Ideal para tirar dúvidas e obter orçamentos.',
-    cta: 'Iniciar conversa',
-    href: buildWhatsAppUrl(
-      '5512934859127',
-      'Olá! Vi o site da SystemForge e gostaria de conversar sobre um projeto.',
-    ),
+    description: ct.whatsappDesc,
+    cta: ct.whatsappCta,
+    href: buildWhatsAppUrl(config.whatsapp, ct.whatsappMessage),
     external: true,
     highlight: true,
     accent: {
@@ -28,9 +34,9 @@ const channels = [
   },
   {
     icon: CalendarDays,
-    label: 'Agendar reunião',
-    description: 'Marque uma call de 30 minutos para apresentar seu projeto com calma.',
-    cta: 'Ver agenda',
+    label: ct.scheduleLabel,
+    description: ct.scheduleDesc,
+    cta: ct.scheduleCta,
     href: SITE.calendly,
     external: true,
     highlight: false,
@@ -44,9 +50,9 @@ const channels = [
   },
   {
     icon: Calculator,
-    label: 'Calcular orçamento',
-    description: 'Use nossa calculadora interativa para ter uma estimativa instantânea.',
-    cta: 'Calcular grátis',
+    label: ct.budgetLabel,
+    description: ct.budgetDesc,
+    cta: ct.budgetCta,
     href: SITE.budgetEngine,
     external: true,
     highlight: false,
@@ -84,9 +90,9 @@ export function ContactSection() {
   return (
     <section
       ref={sectionRef}
-      id="contato"
+      id={sectionId}
       data-testid="section-contact"
-      aria-label="Entre em contato"
+      aria-label={messages.sections.contact.ariaLabel}
       className="relative w-full overflow-hidden bg-[#0C1120] py-20 md:py-28"
     >
       {/* Background layers */}
@@ -104,17 +110,17 @@ export function ContactSection() {
           {/* Header */}
           <div className="flex flex-col gap-4 max-w-2xl">
             <span className="contact-stagger-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-white/40">
-              Contato
+              {ct.sectionLabel}
             </span>
             <h2 className="contact-stagger-2 text-[clamp(1.75rem,5vw,2.75rem)] font-bold text-white leading-[1.15]">
-              Vamos conversar sobre{' '}
+              {ct.heading}{' '}
               <span className="bg-gradient-to-r from-blue-400 to-blue-300 bg-clip-text text-transparent">
-                seu projeto
+                {ct.headingHighlight}
               </span>
               ?
             </h2>
             <p className="contact-stagger-3 text-white/70 text-lg leading-relaxed">
-              Escolha o canal que preferir. Respondemos em até 2 horas em dias úteis.
+              {ct.responseTime}
             </p>
           </div>
 
@@ -180,7 +186,7 @@ export function ContactSection() {
             >
               <Mail size={14} className="text-white/40" aria-hidden="true" />
               <span className="text-sm text-white/50">
-                Prefere e-mail?{' '}
+                {ct.emailFallback}{' '}
                 <span className="text-blue-400 font-medium">{SITE.email}</span>
               </span>
             </a>

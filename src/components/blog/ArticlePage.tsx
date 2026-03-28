@@ -54,7 +54,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
   ]
 
   return (
-    <div className="py-8 md:py-12 bg-background">
+    <div data-testid="article-page" className="py-8 md:py-12 bg-background">
       <Container>
         {/* 1. Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} className="mb-6" />
@@ -70,7 +70,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
             </div>
 
             {/* 2. Header do artigo */}
-            <header className="mb-8">
+            <header data-testid="article-page-header" className="mb-8">
               {/* Cover image */}
               <div className="relative aspect-video rounded-xl overflow-hidden mb-6">
                 <OptimizedImage
@@ -113,6 +113,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
 
             {/* 3. Conteúdo MDX */}
             <div
+              data-testid="article-page-content"
               className="prose prose-lg max-w-none
                 prose-headings:text-foreground
                 prose-p:text-muted-foreground
@@ -129,7 +130,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
             <CTAContextual relatedService={article.relatedService} />
 
             {/* 5. Artigos relacionados */}
-            <section className="mt-10" aria-labelledby="related-articles-heading">
+            <section data-testid="article-page-related" className="mt-10" aria-labelledby="related-articles-heading">
               <h2 id="related-articles-heading" className="text-xl font-bold text-foreground mb-4">
                 Artigos Relacionados
               </h2>

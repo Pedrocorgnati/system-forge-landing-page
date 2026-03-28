@@ -42,8 +42,9 @@ export function SearchBar() {
   const showDropdown = inputValue.trim().length >= 2 && !isSearching && !isLoading
 
   return (
-    <div className="relative w-full max-w-md">
+    <div data-testid="blog-search" className="relative w-full max-w-md">
       <input
+        data-testid="blog-search-input"
         type="search"
         value={inputValue}
         onChange={handleChange}
@@ -60,7 +61,7 @@ export function SearchBar() {
       )}
 
       {isSearching && !isLoading && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Buscando..." role="status">
+        <div data-testid="blog-search-spinner" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Buscando..." role="status">
           <svg
             className="w-4 h-4 text-muted-foreground animate-spin"
             viewBox="0 0 24 24"
@@ -76,6 +77,7 @@ export function SearchBar() {
 
       {showDropdown && (
         <div
+          data-testid="blog-search-results"
           className="absolute top-full left-0 right-0 z-50 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-80 overflow-y-auto"
           role="listbox"
           aria-label="Resultados da busca"
@@ -91,6 +93,7 @@ export function SearchBar() {
               {results.slice(0, 5).map(result => (
                 <li key={result.slug} role="option" aria-selected={false}>
                   <Link
+                    data-testid={`blog-search-result-${result.slug}`}
                     href={`/blog/${result.slug}`}
                     className="block px-4 py-3 hover:bg-muted transition-colors"
                   >

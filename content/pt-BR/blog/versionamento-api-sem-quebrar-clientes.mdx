@@ -1,0 +1,147 @@
+---
+title: "Versionamento de API: sem quebrar clientes existentes"
+slug: "versionamento-api-sem-quebrar-clientes"
+date: "2024-09-06"
+description: "Estratégias de versionamento de API — URL versioning, header versioning e sunset headers — com política de deprecação que não gera churn de clientes."
+tags: ["versionamento api", "breaking changes", "api design", "deprecacao", "rest api"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Estratégias de versionamento de API — URL versioning, header versioning e sunset headers — com política de deprecação que não gera churn de clientes.
+---
+
+No dia em que você precisar renomear um campo, remover um endpoint ou alterar o formato de uma resposta, você vai descobrir se sua API tem versionamento ou não. Sem versionamento, cada breaking change força todos os clientes a atualizar ao mesmo tempo — o que em prática significa ou você congela a API para sempre, ou você quebra integrações de parceiros sem aviso e perde a confiança deles.
+
+Versionamento de API não é burocracia — é a diferença entre uma API que pode evoluir e uma API que vira legado imutável em 18 meses.
+
+## URL Versioning (/v1/, /v2/): Simples e Explícito
+
+URL versioning é a abordagem mais comum e mais pragmática: a versão faz parte do path da URL.
+
+```
+https://api.meusite.com.br/v1/orders
+https://api.meusite.com.br/v2/orders
+```
+
+**Por que URL versioning ganhou o mercado:**
+
+É explícito. Qualquer desenvolvedor olhando para um log, uma URL em um email de erro ou um curl em um terminal consegue identificar imediatamente qual versão está sendo usada. Não há ambiguidade.
+
+É simples de implementar. No Next.js, basta criar pastas `app/api/v1/` e `app/api/v2/`. Em Express, você cria routers separados. Não precisa de middleware especial para roteamento.
+
+É simples de testar. Você pode ter coleções separadas no Postman/Insomnia para cada versão e testá-las independentemente.
+
+É compatível com caching. Proxies e CDNs cacheiam por URL. `/v1/products` e `/v2/products` são URLs diferentes, portanto políticas de cache diferentes.
+
+**A crítica válida:** URL versioning viola a ideia REST de que uma URL identifica um recurso, não uma versão de representação. Um pedido é um pedido — `/v1/orders/123` e `/v2/orders/123` são o mesmo recurso, apenas representados diferente. Mas essa é uma crítica filosófica que raramente importa na prática de desenvolvimento de produtos.
+
+## Header Versioning: Mais Limpo, Menos Visível
+
+No header versioning, a versão é passada como um header HTTP, mantendo a URL "limpa":
+
+```http
+GET /orders HTTP/1.1
+Host: api.meusite.com.br
+Accept: application/vnd.meusite.v2+json
+```
+
+Ou com um header customizado:
+
+```http
+GET /orders HTTP/1.1
+Host: api.meusite.com.br
+API-Version: 2024-09-01
+```
+
+A variante de data de versão (usada pelo Stripe e GitHub) é particularmente elegante: cada cliente "paga" a versão da API que estava vigente quando fez a integração. Mudanças futuras não afetam clientes existentes automaticamente.
+
+```typescript
+// Middleware de roteamento por versão no Next.js
+export function middleware(request: NextRequest) {
+  const apiVersion = request.headers.get("API-Version") ?? "2024-01-01";
+  const url = request.nextUrl.clone();
+
+  // Redireciona internamente para o handler correto
+  if (apiVersion >= "2024-09-01") {
+    url.pathname = url.pathname.replace("/api/", "/api/v2/");
+  } else {
+    url.pathname = url.pathname.replace("/api/", "/api/v1/");
+  }
+
+  return NextResponse.rewrite(url);
+}
+```
+
+**Desvantagem real:** invisibilidade. Você não consegue testar versões diferentes simplesmente copiando URLs. Você precisa sempre configurar o header. Isso aumenta o atrito para onboarding de novos integradores e torna difícil compartilhar exemplos.
+
+Para APIs internas entre microsserviços do mesmo time, header versioning é ótimo. Para APIs públicas com integradores externos, URL versioning ganha em praticidade.
+
+## Política de Deprecação: Sunset Header e Comunicação
+
+A parte mais negligenciada do versionamento é o ciclo de vida de versões antigas. Muitos times lançam v2 mas nunca desligam v1, acumulando dívida de manutenção indefinidamente.
+
+Uma política de deprecação bem definida tem quatro elementos:
+
+**1. Anúncio antecipado:** Comunique o plano de deprecação com pelo menos 6 a 12 meses de antecedência para APIs públicas. Para APIs internas, 3 meses geralmente é suficiente.
+
+**2. Sunset Header (RFC 8594):** Adicione o header `Sunset` nas respostas dos endpoints deprecated. O valor é uma data no formato HTTP-date:
+
+```http
+HTTP/1.1 200 OK
+Sunset: Sat, 31 Dec 2024 23:59:59 GMT
+Deprecation: true
+Link: <https://api.meusite.com.br/v2/orders>; rel="successor-version"
+```
+
+Clientes que monitoram os headers (boas SDKs fazem isso) conseguem alertar automaticamente seus times sobre endpoints prestes a expirar.
+
+**3. Período de sunset progressivo:** Não desligue de uma vez. Introduza degradação gradual:
+
+| Fase | Ação |
+|---|---|
+| T-6 meses | Header `Sunset` nas respostas, aviso no dashboard |
+| T-3 meses | Email para todos os clientes com requisições na v1 nos últimos 30 dias |
+| T-1 mês | Rate limit reduzido para v1 (50% da quota normal) |
+| T-2 semanas | Rate limit 10%, status page com countdown |
+| T-0 | Retorna 410 Gone com mensagem clara e link para v2 |
+
+**4. Monitoramento de adoção:** Antes de desligar v1, verifique que o tráfego real caiu para zero (ou perto disso). Um cliente que não migrou apesar de todos os avisos merece uma ligação — e provavelmente tem um motivo técnico que você precisa conhecer.
+
+## Versionamento Semântico em APIs Privadas
+
+Para APIs privadas consumidas apenas por aplicações internas do mesmo time, semver (versionamento semântico) pode ser mais expressivo que v1/v2:
+
+- **Major (1.x.x → 2.x.x):** Breaking change. Renomear campo, remover endpoint, alterar tipo.
+- **Minor (1.1.x → 1.2.x):** Adição retrocompatível. Novo campo opcional, novo endpoint.
+- **Patch (1.1.1 → 1.1.2):** Correção de bug sem alterar contrato.
+
+A regra mais importante: **toda adição de campo novo em response é retrocompatível**. Toda remoção de campo, renomeação ou alteração de tipo é breaking. Adicionar um campo obrigatório em um request também é breaking.
+
+Um contrato de API bem versionado documenta explicitamente o que é e o que não é considerado breaking change:
+
+```
+NÃO é breaking change:
+- Adicionar novo campo opcional em response
+- Adicionar novo endpoint
+- Adicionar novo valor em enum de response (desde que o cliente ignore valores desconhecidos)
+- Reduzir restricoes de validação (aceitar mais inputs)
+
+É breaking change:
+- Remover campo de response
+- Renomear campo
+- Alterar tipo de campo (string → number)
+- Adicionar campo obrigatório em request
+- Alterar semântica de um campo existente
+- Remover endpoint
+```
+
+## Conclusão
+
+Versionamento de API é uma das decisões que você precisa tomar antes de publicar seu primeiro endpoint, não depois. Retroalimentar versionamento em uma API que já tem integradores é doloroso — você está essencialmente criando uma nova API do zero enquanto mantém a antiga.
+
+A receita pragmática para a maioria dos projetos: URL versioning (`/v1/`, `/v2/`) para clareza e simplicidade, Sunset headers para comunicação proativa de deprecação, e uma política escrita de o que constitui breaking change para que o time tome decisões consistentes.
+
+No SystemForge, o versionamento de API faz parte do design técnico documentado antes do desenvolvimento começar. Isso inclui a estratégia de versioning, a política de deprecação e o contrato explícito de breaking changes — tudo registrado antes que os primeiros integradores dependam da sua API. Se você está desenhando uma API que vai durar anos, podemos ajudar a estruturar esse ciclo de vida desde o início.

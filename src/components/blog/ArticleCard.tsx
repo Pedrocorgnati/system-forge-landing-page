@@ -26,6 +26,7 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
 
   return (
     <article
+      data-testid={`blog-article-card-${article.slug}`}
       data-blog-reveal
       style={{ '--reveal-delay': `${index * 120}ms` } as React.CSSProperties}
       className={[

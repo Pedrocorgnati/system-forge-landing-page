@@ -1,0 +1,188 @@
+---
+title: "Integrações com ERPs brasileiros: SAP, TOTVS e Omie"
+slug: "integracoes-erps-brasileiros-sap-totvs-omie"
+date: "2024-09-20"
+description: "Como integrar sistemas modernos com SAP, TOTVS Protheus e Omie via API — autenticação, mapeamento de entidades e estratégias de sincronização."
+tags: ["sap", "totvs", "omie", "erp", "integracao sistemas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Como integrar sistemas modernos com SAP, TOTVS Protheus e Omie via API — autenticação, mapeamento de entidades e estratégias de sincronização.
+---
+
+ERP é o sistema de registro da empresa: onde os pedidos são faturados, onde os estoques existem oficialmente, onde a contabilidade acontece. Todo sistema moderno que um cliente desenvolve — e-commerce, app de delivery, portal B2B, plataforma de gestão — eventualmente precisa conversar com o ERP. E essa conversa é quase sempre mais difícil do que parece.
+
+A complexidade não está na tecnologia. Está no mapeamento de entidades: o que você chama de "produto" tem dezenas de campos no SAP, metade deles opcionais, a maioria com nomes enigmáticos vindos de terminologia contábil dos anos 1990. Este guia cobre as três plataformas ERP mais comuns no mercado brasileiro — SAP, TOTVS Protheus e Omie — e como integrar com cada uma de forma sustentável.
+
+## SAP: BAPI, RFC e OData API
+
+SAP é o ERP das grandes corporações. Instalações SAP custam milhões de reais, rodam em data centers dedicados e têm configurações tão personalizadas que dois clientes SAP raramente têm a mesma API.
+
+**Mecanismos de integração do SAP:**
+
+**BAPIs (Business Application Programming Interfaces):** Funções RFC (Remote Function Call) expostas pelo SAP para operações de negócio padrão. `BAPI_SALESORDER_CREATEFROMDAT2` cria pedidos de venda. `BAPI_MATERIAL_GETLIST` lista materiais. São estáveis, documentadas e disponíveis na maioria das instalações SAP.
+
+**RFC direto:** Comunicação de baixo nível com o servidor SAP via protocolo proprietário. Requer biblioteca `node-rfc` (bindings para SAP NW RFC SDK). Mais poderoso que BAPIs, mas requer acesso de rede direto ao SAP (geralmente via VPN corporativa).
+
+**OData API (SAP Gateway):** A abordagem moderna. SAP Gateway expõe entidades SAP como APIs REST/OData, consumíveis via HTTP padrão. Presente no S/4HANA e em instalações ECC com SAP Gateway configurado.
+
+```typescript
+// Exemplo: buscar pedidos via SAP OData API
+const sapConfig = {
+  baseUrl: "https://erp.empresa.com.br:8000/sap/opu/odata/sap",
+  service: "API_SALES_ORDER_SRV",
+  auth: Buffer.from(`${process.env.SAP_USER}:${process.env.SAP_PASS}`).toString("base64"),
+};
+
+async function getSalesOrders(dateFrom: string): Promise<SAPOrder[]> {
+  const url = new URL(`${sapConfig.baseUrl}/${sapConfig.service}/A_SalesOrder`);
+  url.searchParams.set("$filter", `CreationDate ge datetime'${dateFrom}'`);
+  url.searchParams.set("$expand", "to_Item,to_Partner");
+  url.searchParams.set("$format", "json");
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Authorization: `Basic ${sapConfig.auth}`,
+      Accept: "application/json",
+    },
+  });
+
+  const data = await response.json();
+  return data.d.results.map(mapSAPOrderToInternal);
+}
+
+// Mapeamento de entidades SAP → modelo interno
+function mapSAPOrderToInternal(sapOrder: SAPOrderRaw): Order {
+  return {
+    id: sapOrder.SalesOrder,
+    status: mapSAPStatus(sapOrder.OverallSDProcessStatus),
+    customer: {
+      id: sapOrder.to_Partner?.results?.find(p => p.PartnerFunction === "AG")?.Customer,
+      name: sapOrder.to_Partner?.results?.find(p => p.PartnerFunction === "AG")?.PartnerName,
+    },
+    items: sapOrder.to_Item?.results?.map(item => ({
+      productCode: item.Material,
+      quantity: parseFloat(item.RequestedQuantity),
+      unit: item.RequestedQuantityUnit,
+      price: parseFloat(item.NetAmount),
+    })) ?? [],
+    currency: sapOrder.TransactionCurrency,
+    createdAt: parseSAPDate(sapOrder.CreationDate),
+  };
+}
+```
+
+**Desafio principal com SAP:** autenticação e conectividade. SAP raramente está exposto diretamente na internet — você vai precisar de VPN ou SAP Cloud Connector. Coordene com a equipe de BASIS do cliente logo no início do projeto, não na véspera do go-live.
+
+## TOTVS Protheus: REST API e Fluig
+
+TOTVS é o ERP dominante nas médias empresas brasileiras. O Protheus tem uma história longa de integrações via formatos proprietários (arquivos texto, XML do SPED), mas nos últimos anos evoluiu para uma API REST decente.
+
+**TOTVS Protheus REST API:**
+
+A API REST do Protheus é documentada no portal `tdn.totvs.com`. Os endpoints seguem a convenção `/rest/{modulo}/{versao}/{entidade}`.
+
+```
+GET /rest/PRCPO/v1/BestPrice — Melhor preço de produto
+GET /rest/FINA/v1/AccountReceivable — Títulos a receber
+POST /rest/ORCA/v1/SaleOrder — Criar pedido de venda
+```
+
+Autenticação: Basic Auth ou token JWT via `POST /rest/api/access/v1/login`.
+
+**Fluig (TOTVS Fluig):** Plataforma de workflow e integração do ecossistema TOTVS. Permite criar integrações via scripts JavaScript no servidor Fluig, com conectores prontos para Protheus. É a abordagem preferida quando a empresa já usa Fluig — você cria um "dataset" no Fluig que abstrai a complexidade do Protheus e expõe uma API mais simples para sistemas externos.
+
+**Peculiaridade brasileira:** muitas instalações Protheus usam dicionários de dados customizados (campos ZA_, ZB_, ZC_...). Esses campos personalizados geralmente não aparecem na documentação padrão — você precisa conversar com o consultor TOTVS do cliente para mapear os campos relevantes.
+
+## Omie: A API Mais Amigável para PMEs
+
+Omie é o ERP cloud mais popular entre pequenas e médias empresas brasileiras, e tem a API mais bem documentada e mais amigável para desenvolvedores dos três. Não tem surpresas de VPN, não tem campos enigmáticos e a documentação está em português.
+
+```typescript
+// Omie usa um padrão de RPC via POST com chamadas nomeadas
+async function omieRequest(call: string, param: object) {
+  const response = await fetch("https://app.omie.com.br/api/v1/geral/clientes/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      call,
+      app_key: process.env.OMIE_APP_KEY,
+      app_secret: process.env.OMIE_APP_SECRET,
+      param: [param],
+    }),
+  });
+  return response.json();
+}
+
+// Listar clientes
+const clientes = await omieRequest("ListarClientes", {
+  pagina: 1,
+  registros_por_pagina: 50,
+  apenas_importado_api: "N",
+});
+
+// Criar pedido de venda
+const pedido = await omieRequest("IncluirPedido", {
+  cabecalho: {
+    codigo_parceiro: "123456",
+    data_previsao: "25/09/2024",
+    etapa: "10", // 10 = em aberto
+  },
+  det: [
+    {
+      produto: {
+        codigo_produto: "PROD001",
+        quantidade: 2,
+        valor_unitario: 49.90,
+      },
+    },
+  ],
+});
+```
+
+A Omie usa um modelo de autenticação por `app_key` e `app_secret` por empresa. Cada empresa cliente precisa gerar suas próprias credenciais no painel Omie e compartilhar com você — o que significa que sua integração vai ter um processo de onboarding de credenciais para cada cliente.
+
+## Estratégias de Sincronização: Polling, Webhooks e CDC
+
+Independente do ERP, você precisa definir como os dados se movem entre o ERP e seu sistema.
+
+| Estratégia | Como funciona | Quando usar | Latência |
+|---|---|---|---|
+| Polling | Seu sistema consulta o ERP periodicamente | ERP sem webhooks (SAP legado, Protheus antigo) | Minutos |
+| Webhooks | ERP notifica seu sistema quando há mudança | Omie (suporte nativo), TOTVS Fluig | Segundos |
+| CDC (Change Data Capture) | Captura mudanças direto no banco do ERP | Acesso ao banco do ERP, DBZ/Kafka disponível | Segundos |
+| Fila de mensagens | ERP publica em fila, seu sistema consome | Integrações críticas, alto volume | Segundos |
+
+Para a maioria dos projetos com SAP ou TOTVS Protheus sem Fluig, polling é a única opção viável. Implemente com cuidado:
+
+```typescript
+// Polling robusto com cursor de última sincronização
+async function syncOrdersFromERP(): Promise<void> {
+  const cursor = await getSyncCursor("erp_orders"); // busca última data sincronizada
+  const orders = await fetchERPOrders({ createdAfter: cursor.lastSync });
+
+  for (const order of orders) {
+    await upsertOrder(mapERPOrderToInternal(order));
+  }
+
+  if (orders.length > 0) {
+    await updateSyncCursor("erp_orders", new Date());
+  }
+}
+
+// Agenda polling a cada 5 minutos
+setInterval(syncOrdersFromERP, 5 * 60 * 1000);
+```
+
+Sempre use cursor de sincronização em vez de buscar todos os registros. Para ERPs com dados de anos, uma consulta sem filtro pode travar o servidor.
+
+## Conclusão
+
+Integrações com ERP são um dos projetos mais subestimados em complexidade e mais superestimados em velocidade de entrega. O mapeamento de entidades, as peculiaridades de cada instalação, as limitações de conectividade e os processos de aprovação de acesso no lado do cliente facilmente dobram ou triplicam o prazo estimado.
+
+A regra de ouro: comece a conversa técnica com o time de TI do cliente no primeiro dia do projeto, não quando o desenvolvimento estiver quase pronto. Descobrir que o SAP do cliente não tem o módulo correto habilitado na véspera do go-live é um problema evitável.
+
+No SystemForge, integrações com ERPs são documentadas na fase de LLD com o mapeamento completo de entidades, estratégia de sincronização e plano de contingência para falhas do ERP. Isso evita surpresas durante a execução e garante que todos os envolvidos — desenvolvedor, cliente e consultor ERP — estejam alinhados antes do código começar. Se você tem uma integração ERP pela frente, podemos ajudar a estruturá-la corretamente.

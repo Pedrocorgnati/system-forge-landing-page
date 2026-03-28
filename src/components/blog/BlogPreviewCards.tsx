@@ -46,7 +46,7 @@ export function BlogPreviewCards({ articles }: BlogPreviewCardsProps) {
   }, [])
 
   return (
-    <div ref={gridRef} className="blog-grid">
+    <div data-testid="blog-preview-grid" ref={gridRef} className="blog-grid">
       {articles.map((article, index) => (
         <ArticleCard
           key={article.slug}

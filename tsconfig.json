@@ -21,7 +21,13 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/.velite": ["./.velite/index"]
+      "@config": ["./config/index"],
+      "@config/*": ["./config/*"],
+      "config/sites": ["./config/sites/index.ts"],
+      "config/sites/*": ["./config/sites/*"],
+      "@content/*": ["./content/*"],
+      "@/.velite": ["./.velite/index"],
+      "#site/*": ["./.velite/*"]
     }
   },
   "include": [

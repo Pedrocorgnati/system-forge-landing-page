@@ -7,8 +7,8 @@ export function GoogleAnalytics() {
   const { consent } = useCookieConsent()
   const measurementId = process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID
 
-  // GA4 APENAS se consent = 'accepted' e measurement ID definido
-  if (consent !== 'accepted' || !measurementId) {
+  // GA4 APENAS se analytics consent = true e measurement ID definido
+  if (!consent.categories.analytics || !measurementId) {
     return null
   }
 

@@ -1,0 +1,128 @@
+---
+title: "Split de pagamentos em marketplace no Brasil"
+slug: "split-pagamentos-marketplace-brasil"
+date: "2024-08-10"
+description: "Como implementar split de pagamentos em marketplace brasileiro: Stripe Connect, Pagar.me Marketplace e Adyen — comparativo técnico com exemplos."
+tags: ["split pagamento", "marketplace", "stripe connect", "pagar.me", "fintech"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Como implementar split de pagamentos em marketplace brasileiro: Stripe Connect, Pagar.me Marketplace e Adyen — comparativo técnico com exemplos."
+---
+
+O split de pagamento é o mecanismo que transforma um e-commerce em marketplace. É ele que garante que, quando um cliente paga R$ 300 por produtos de três vendedores diferentes, cada um receba sua parcela automaticamente, já descontada a comissão da plataforma. Simples na descrição, complexo na implementação — e é exatamente aqui que a maioria dos projetos de marketplace trava.
+
+A boa notícia é que existem soluções maduras no mercado brasileiro. A má notícia é que cada uma tem suas próprias limitações, custos e requisitos de compliance que precisam ser avaliados antes de qualquer linha de código.
+
+## Stripe Connect vs Pagar.me Marketplace vs Adyen
+
+Estas são as três opções mais usadas em marketplaces brasileiros com necessidade de split automático. Cada uma serve um perfil diferente de projeto.
+
+| Critério | Stripe Connect | Pagar.me Marketplace | Adyen for Platforms |
+|---|---|---|---|
+| Presença no Brasil | Sim (desde 2021) | Nativa | Sim |
+| Moeda local (BRL) | Sim | Sim | Sim |
+| PIX | Não nativo | Sim | Sim |
+| Boleto | Não | Sim | Sim |
+| MDR médio | 2,9% + R$1,60 | 2,49% a 3,99% | Sob negociação |
+| KYC de vendedores | Automatizado | Parcialmente manual | Automatizado |
+| Holdback padrão | 7 a 14 dias | 2 dias úteis | Configurável |
+| Volume mínimo | Não há | Não há | Sim (alto) |
+| Documentação | Excelente | Boa | Boa |
+| Sandbox | Completo | Completo | Completo |
+
+**Stripe Connect** é a melhor escolha para times que já conhecem o ecossistema Stripe ou que precisam internacionalizar o marketplace no futuro. A documentação é superior e a API é consistente. A ausência de PIX nativo é uma limitação relevante para o mercado brasileiro — é possível contornar via integrações de terceiros, mas adiciona complexidade.
+
+**Pagar.me Marketplace** é a opção mais aderente ao mercado local. Suporta todos os meios de pagamento brasileiros nativamente, incluindo PIX, boleto e parcelamento. O processo de KYC dos vendedores exige mais intervenção manual em alguns casos, o que pode ser um gargalo em plataformas com alto volume de cadastros.
+
+**Adyen for Platforms** é indicado para marketplaces com volume relevante (acima de R$ 5 milhões mensais) que precisam de taxas negociadas e cobertura internacional. O processo de onboarding da própria plataforma é mais burocrático.
+
+## Taxas, Repasses e Cronograma de Liquidação
+
+Além do MDR (Merchant Discount Rate) cobrado sobre cada transação, os marketplaces precisam entender o cronograma de liquidação — ou seja, quando o dinheiro chega na conta do vendedor após a compra.
+
+O modelo mais comum funciona assim:
+
+1. Cliente paga com cartão de crédito
+2. A gateway aprova a transação e retém o valor
+3. O marketplace retém a comissão (ex: 10%)
+4. Após o período de holdback (proteção contra chargebacks), o valor líquido é transferido para o vendedor
+
+O período de holdback varia por gateway e pode ser configurado. No Stripe Connect, o padrão é 7 dias para vendedores novos. No Pagar.me, 2 dias úteis após a captura. É importante alinhar esse cronograma com os vendedores no onboarding — muitos chegam esperando D+1 e ficam surpresos com D+7.
+
+O repasse em si pode ser automático (a gateway transfere para a subconta do vendedor) ou manual (sua plataforma controla o saldo e faz PIX/TED periodicamente). O automático é preferível em escala, mas exige que cada vendedor tenha uma subconta na gateway.
+
+## Compliance: KYC dos Vendedores e Regulamentação BACEN
+
+Se o seu marketplace faz intermediação financeira — o que é o caso em praticamente todos — você está sujeito à regulação do Banco Central do Brasil. A Resolução BCB nº 80/2021 e o Marco Legal das Fintechs exigem que plataformas com volume relevante se registrem como Instituição de Pagamento ou operem sob o guarda-chuva de uma IP já registrada.
+
+As gateways como Pagar.me e Stripe já são IPs registradas e assumem parte do ônus regulatório. Mas você ainda é responsável pelo KYC (Know Your Customer) dos seus vendedores.
+
+No mínimo, o KYC de vendedores deve incluir:
+
+- Verificação de CPF/CNPJ na Receita Federal
+- Validação de dados bancários (nome do titular bate com o cadastro?)
+- Verificação de endereço (conta de luz, extrato bancário)
+- Para vendedores PJ: verificação de quadro societário e representantes legais
+
+Ferramentas como Serpro DataValid, Unico Check e Truora automatizam boa parte desse processo via API. O custo por verificação varia de R$ 0,50 a R$ 5,00 dependendo do nível de profundidade.
+
+Evite a tentação de pular o KYC no MVP. Além do risco regulatório, marketplaces sem KYC atraem vendedores fraudulentos e chargebacks em volume.
+
+## Implementação Básica com Stripe Connect
+
+O fluxo de split com Stripe Connect usa o modelo "Express Accounts" para a maioria dos marketplaces. Nesse modelo, o vendedor cria uma subconta no Stripe vinculada à sua plataforma:
+
+```typescript
+// 1. Criar subconta do vendedor no onboarding
+const account = await stripe.accounts.create({
+  type: 'express',
+  country: 'BR',
+  email: seller.email,
+  capabilities: {
+    transfers: { requested: true },
+    card_payments: { requested: true },
+  },
+  business_type: seller.businessType, // 'individual' ou 'company'
+});
+
+// Salvar o account ID no seu banco
+await db.sellers.update({
+  where: { id: seller.id },
+  data: { stripeAccountId: account.id },
+});
+
+// 2. Gerar link de onboarding para o vendedor completar o KYC
+const accountLink = await stripe.accountLinks.create({
+  account: account.id,
+  refresh_url: `${BASE_URL}/seller/onboarding/retry`,
+  return_url: `${BASE_URL}/seller/onboarding/success`,
+  type: 'account_onboarding',
+});
+
+// Redirecionar o vendedor para accountLink.url
+
+// 3. Criar PaymentIntent com split automático na compra
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: orderTotalCents,
+  currency: 'brl',
+  payment_method_types: ['card'],
+  application_fee_amount: commissionCents, // Fica com a plataforma
+  transfer_data: {
+    destination: seller.stripeAccountId, // Vai para o vendedor
+  },
+});
+```
+
+Para pedidos com múltiplos vendedores, a abordagem recomendada é criar um PaymentIntent único para o total e depois usar `Transfer` objects para distribuir os valores após a captura. Isso evita que o cliente veja múltiplas cobranças no cartão.
+
+## Conclusão com CTA
+
+O split de pagamento bem implementado é um diferencial competitivo real — ele garante que vendedores recebam pontualmente, reduz disputas financeiras e torna a plataforma profissional desde o primeiro dia.
+
+A escolha errada de gateway, um cronograma de liquidação mal comunicado ou um KYC superficial podem custar caro em chargebacks, multas regulatórias e perda de vendedores. Essa decisão merece atenção antes de qualquer implementação.
+
+O SystemForge ajuda times a documentar e arquitetar essas decisões de forma estruturada, com LLD detalhado, contratos de API e fluxos de integração definidos antes da implementação. Com toda a documentação técnica gerada antecipadamente, o time de desenvolvimento sabe exatamente o que precisa construir — sem surpresas no meio do caminho.

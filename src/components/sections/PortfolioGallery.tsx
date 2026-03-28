@@ -5,18 +5,27 @@ import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { PortfolioCard } from '@/components/shared/PortfolioCard'
+import { EmptyStatePortfolio } from '@/components/shared/EmptyStatePortfolio'
 import { portfolioProjects } from '@/lib/data'
 import { ServiceCategory } from '@/lib/types'
-import { ROUTES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
+const locale = config.locale
+
+const ALL_LABEL =
+  locale === 'it-IT' ? 'Tutti' : locale === 'en' ? 'All' : 'Todos'
 
 const categoryLabels: Record<string, string> = {
-  all: 'Todos',
+  all: ALL_LABEL,
   [ServiceCategory.SAAS]: 'SaaS',
   [ServiceCategory.MOBILE]: 'Mobile',
   [ServiceCategory.ECOMMERCE]: 'E-commerce',
   [ServiceCategory.DASHBOARD]: 'Dashboard',
-  [ServiceCategory.AI]: 'IA',
+  [ServiceCategory.AI]: locale === 'it-IT' ? 'AI' : locale === 'en' ? 'AI' : 'IA',
   [ServiceCategory.MARKETPLACE]: 'Marketplace',
   [ServiceCategory.ERP]: 'ERP',
   [ServiceCategory.API]: 'API',
@@ -40,13 +49,13 @@ export function PortfolioGallery() {
   const filtered =
     activeFilter === 'all'
       ? portfolioProjects
-      : portfolioProjects.filter((p) => p.category === activeFilter)
+      : portfolioProjects.filter((p) => p.categories.includes(activeFilter as ServiceCategory))
 
   return (
     <section
       id="portfolio"
       data-testid="section-portfolio"
-      aria-label="Portfólio de projetos"
+      aria-label={messages.sections.portfolio.ariaLabel}
       className="w-full bg-surface py-16 md:py-20"
     >
       <Container>
@@ -55,21 +64,21 @@ export function PortfolioGallery() {
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div className="flex flex-col gap-2">
               <span className="text-sm font-semibold text-primary uppercase tracking-wide">
-                Portfólio
+                {locale === 'it-IT' ? 'Portfolio' : locale === 'en' ? 'Portfolio' : 'Portfólio'}
               </span>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-                Projetos que entregamos
+                {locale === 'it-IT' ? 'Progetti che abbiamo consegnato' : locale === 'en' ? 'Projects we have delivered' : 'Projetos que entregamos'}
               </h2>
               <p className="text-muted-foreground">
-                {portfolioProjects.length} projetos e contando.
+                {portfolioProjects.length} {locale === 'it-IT' ? 'progetti e in crescita.' : locale === 'en' ? 'projects and counting.' : 'projetos e contando.'}
               </p>
             </div>
             <Link
-              href={ROUTES.portfolio}
+              href={config.routes.portfolio}
               data-testid="portfolio-view-all-link"
               className="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md"
             >
-              Ver portfólio completo
+              {messages.cta.portfolio}
               <ArrowRight className="w-4 h-4" aria-hidden="true" />
             </Link>
           </div>
@@ -79,7 +88,7 @@ export function PortfolioGallery() {
             data-testid="portfolio-filters"
             className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
             role="tablist"
-            aria-label="Filtrar por categoria"
+            aria-label={locale === 'it-IT' ? 'Filtra per categoria' : locale === 'en' ? 'Filter by category' : 'Filtrar por categoria'}
           >
             {filterTabs.map((cat) => (
               <button
@@ -110,16 +119,7 @@ export function PortfolioGallery() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center gap-3 py-16 rounded-xl border border-border border-dashed bg-background">
-              <span className="text-4xl" aria-hidden="true">🔍</span>
-              <p className="font-medium text-foreground">Nenhum projeto nessa categoria ainda</p>
-              <button
-                onClick={() => setActiveFilter('all')}
-                className="text-sm text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-sm"
-              >
-                Ver todos os projetos
-              </button>
-            </div>
+            <EmptyStatePortfolio onReset={() => setActiveFilter('all')} />
           )}
         </div>
       </Container>

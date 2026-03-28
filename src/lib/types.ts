@@ -1,4 +1,6 @@
 // Tipos e enums compartilhados — SystemForge Landing Page
+import type { SupportedLocale } from '@config/types'
+export type { SupportedLocale }
 
 export const ServiceCategory = {
   SAAS: 'saas',
@@ -91,10 +93,11 @@ export interface CTAConfig {
 export interface PortfolioProject {
   id?: string
   slug: string
+  /** Locale principal do projeto. Quando ausente, aparece em todos os builds. */
+  locale?: SupportedLocale
   name?: string
   title?: string
   description: string
-  category?: ServiceCategory
   categories: ServiceCategory[]
   techs?: TechTag[]
   technologies: TechTag[]
@@ -167,6 +170,14 @@ export interface ArticleFrontmatter {
   readingTime?: number
   slug: string
   relatedService?: ServiceCategory
+  /** Locale do artigo. Definido no frontmatter MDX. */
+  locale?: SupportedLocale
+  /** Pares hreflang para artigos universais: { locale, slug } por locale de destino. */
+  hreflang_pair?: { locale: SupportedLocale; slug: string }[]
+  /** Se true, o artigo é exclusivo do seu locale — não aparece em outros builds. */
+  exclusive?: boolean
+  /** published: false = draft (não indexado). */
+  published?: boolean
 }
 
 export interface PageMetadataConfig {

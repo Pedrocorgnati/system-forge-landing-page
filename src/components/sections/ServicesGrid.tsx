@@ -4,20 +4,38 @@ import { useState, useEffect } from 'react'
 import { Container } from '@/components/ui/Container'
 import { services } from '@/lib/data'
 import type { ServiceFilterGroup } from '@/lib/types'
-import { ROUTES } from '@/lib/constants'
 import Link from 'next/link'
 import { ChevronRight, ChevronDown, Check, Clock } from 'lucide-react'
 import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
+import { getSiteConfig } from '@config'
+import { loadMessages, loadPageMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
+const pageMessages = loadPageMessages()
 
 // ── h2 text split into words for word-reveal animation ──
-const H2_WORDS = ['Soluções', 'completas', 'para', 'cada', 'etapa', 'do', 'seu', 'negócio']
+const H2_WORDS = pageMessages.services.titulo_secao.split(' ')
 
-// ── Filter pill config ──
+// ── Filter pill config — locale-aware ──
+const locale = config.locale
 const FILTER_PILLS: { label: string; value: 'all' | ServiceFilterGroup }[] = [
-  { label: 'Todos',          value: 'all'       },
-  { label: 'Produto Digital',value: 'produto'   },
-  { label: 'Mobile & IA',    value: 'mobile-ia' },
-  { label: 'Dados & APIs',   value: 'dados'     },
+  {
+    label: locale === 'it-IT' ? 'Tutti' : locale === 'en' ? 'All' : 'Todos',
+    value: 'all',
+  },
+  {
+    label: locale === 'it-IT' ? 'Prodotto Digitale' : locale === 'en' ? 'Digital Product' : 'Produto Digital',
+    value: 'produto',
+  },
+  {
+    label: locale === 'it-IT' ? 'Mobile & IA' : locale === 'en' ? 'Mobile & AI' : 'Mobile & IA',
+    value: 'mobile-ia',
+  },
+  {
+    label: locale === 'it-IT' ? 'Dati & API' : locale === 'en' ? 'Data & APIs' : 'Dados & APIs',
+    value: 'dados',
+  },
 ]
 
 export function ServicesGrid() {
@@ -41,6 +59,7 @@ export function ServicesGrid() {
     const first = filterGroup === 'all'
       ? services[0]
       : services.find((s) => s.filterGroup === filterGroup)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional derived state reset on filter change
     if (first) setActiveId(first.slug)
   }, [filterGroup])
 
@@ -49,7 +68,7 @@ export function ServicesGrid() {
       ref={sectionRef as React.RefObject<HTMLElement>}
       id="servicos"
       data-testid="section-services"
-      aria-label="Nossos serviços"
+      aria-label={messages.sections.services.ariaLabel}
       className="section-services relative w-full overflow-hidden bg-background py-20 md:py-28"
     >
       {/* MC-7: Ambient glow background */}
@@ -65,12 +84,12 @@ export function ServicesGrid() {
               <div className="flex items-center gap-2">
                 <div className="h-px w-8 bg-primary" aria-hidden="true" />
                 <span className="text-sm font-semibold text-primary uppercase tracking-widest">
-                  O que fazemos
+                  {messages.sections.services.eyebrow}
                 </span>
               </div>
               {/* MC-2: Count badge */}
-              <span className="svc-count-badge" aria-label="12 especialidades disponíveis">
-                12 especialidades
+              <span className="svc-count-badge" aria-label={messages.sections.services.badge}>
+                {messages.sections.services.badge}
               </span>
             </div>
 
@@ -78,7 +97,7 @@ export function ServicesGrid() {
             <h2
               className={`font-semibold text-foreground leading-tight ${hasIntersected ? 'svc-word-revealed' : ''}`}
               style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)' }}
-              aria-label="Soluções completas para cada etapa do seu negócio"
+              aria-label={pageMessages.services.titulo_secao}
             >
               {H2_WORDS.map((word, i) => (
                 <span key={i} className={`svc-word svc-word-${i + 1}`} aria-hidden="true">
@@ -88,8 +107,7 @@ export function ServicesGrid() {
             </h2>
 
             <p className="text-muted-foreground leading-relaxed">
-              Do MVP ao produto escalável — desenvolvemos software sob medida em todas
-              as frentes que seu negócio precisa.
+              {pageMessages.services.subtitulo}
             </p>
           </div>
 
@@ -97,7 +115,7 @@ export function ServicesGrid() {
           <div
             className={`svc-filter-bar ${hasIntersected ? 'svc-stagger-2' : 'opacity-0'}`}
             role="group"
-            aria-label="Filtrar por categoria"
+            aria-label={locale === 'it-IT' ? 'Filtra per categoria' : locale === 'en' ? 'Filter by category' : 'Filtrar por categoria'}
           >
             {FILTER_PILLS.map((pill) => (
               <button
@@ -196,7 +214,7 @@ export function ServicesGrid() {
                   {activeService.deliverables && activeService.deliverables.length > 0 && (
                     <>
                       <div className="svc-panel-divider" aria-hidden="true" />
-                      <ul className="flex flex-col gap-2.5 mb-4" aria-label="O que está incluído">
+                      <ul className="flex flex-col gap-2.5 mb-4" aria-label={messages.sections.services.includedLabel}>
                         {activeService.deliverables.map((item, i) => (
                           <li key={i} className="svc-deliverable">
                             <Check size={13} className="svc-deliverable-icon" aria-hidden="true" />
@@ -222,10 +240,10 @@ export function ServicesGrid() {
 
                   {/* CTA link */}
                   <Link
-                    href={ROUTES.servicoSlug(activeService.slug)}
+                    href={config.routes.service(activeService.slug)}
                     className="group/link inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:underline"
                   >
-                    Explorar serviço
+                    {messages.cta.exploreService}
                     <ChevronRight size={14} className="transition-transform duration-150 group-hover/link:translate-x-0.5" aria-hidden="true" />
                   </Link>
                 </div>
@@ -277,7 +295,7 @@ export function ServicesGrid() {
 
                       {/* Deliverables on mobile */}
                       {service.deliverables && (
-                        <ul className="flex flex-col gap-2" aria-label="O que está incluído">
+                        <ul className="flex flex-col gap-2" aria-label={messages.sections.services.includedLabel}>
                           {service.deliverables.map((item, i) => (
                             <li key={i} className="svc-deliverable">
                               <Check size={12} className="svc-deliverable-icon" aria-hidden="true" />
@@ -303,10 +321,10 @@ export function ServicesGrid() {
                       )}
 
                       <Link
-                        href={ROUTES.servicoSlug(service.slug)}
+                        href={config.routes.service(service.slug)}
                         className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline mt-1"
                       >
-                        Explorar serviço
+                        {messages.cta.exploreService}
                         <ChevronRight size={13} aria-hidden="true" />
                       </Link>
                     </div>

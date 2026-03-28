@@ -4,10 +4,24 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, Sun, Moon } from 'lucide-react'
-import { NAV_LINKS, SITE } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 import { MobileNav } from './MobileNav'
 import { useTheme } from './ThemeProvider'
 import { cn } from '@/lib/utils'
+
+const config = getSiteConfig()
+const messages = loadMessages()
+
+const locale = config.locale
+const NAV_ARIA_LABEL = locale === 'it-IT' ? 'Navigazione principale'
+  : locale === 'en' ? 'Main navigation'
+  : 'Navegação principal'
+const THEME_LABELS = locale === 'it-IT'
+  ? { light: 'Attiva modalità chiara', dark: 'Attiva modalità scura' }
+  : locale === 'en'
+  ? { light: 'Switch to light mode', dark: 'Switch to dark mode' }
+  : { light: 'Ativar modo claro', dark: 'Ativar modo escuro' }
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -49,18 +63,18 @@ export function Header() {
             >
               <Image
                 src="/images/logo.png"
-                alt={`${SITE.name} logo`}
+                alt={`${config.siteName} logo`}
                 width={32}
                 height={32}
                 className="h-8 w-8 object-contain"
                 priority
               />
-              {SITE.name}
+              {config.siteName}
             </Link>
 
             {/* Nav Desktop */}
-            <nav data-testid="header-nav" className="hidden md:flex items-center gap-6" aria-label="Navegação principal">
-              {NAV_LINKS.map((link) => (
+            <nav data-testid="header-nav" className="hidden md:flex items-center gap-6" aria-label={NAV_ARIA_LABEL}>
+              {config.navigation.map((link) => (
                 <Link
                   key={link.href}
                   href={link.href}
@@ -82,11 +96,11 @@ export function Header() {
                 data-testid="header-theme-toggle-button"
                 onClick={toggleTheme}
                 className={cn(
-                  'w-10 h-10 flex items-center justify-center rounded-md',
+                  'min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md',
                   'text-foreground hover:bg-accent transition-colors',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
                 )}
-                aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
+                aria-label={isDark ? THEME_LABELS.light : THEME_LABELS.dark}
               >
                 {isDark ? (
                   <Sun className="w-5 h-5" />
@@ -101,9 +115,9 @@ export function Header() {
                 data-testid="header-mobile-menu-button"
                 onClick={() => setIsMobileNavOpen(true)}
                 aria-expanded={isMobileNavOpen}
-                aria-label="Abrir menu de navegação"
+                aria-label={messages.accessibility.openMenu}
                 className={cn(
-                  'md:hidden w-10 h-10 flex items-center justify-center rounded-md',
+                  'md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-md',
                   'text-foreground hover:bg-accent transition-colors',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
                 )}

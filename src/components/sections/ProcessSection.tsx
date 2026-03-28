@@ -5,6 +5,9 @@ import { Search, Zap, TrendingUp } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { buildWhatsAppCTA } from '@/lib/cta'
 import { CTAButton } from '@/components/ui/CTAButton'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 
 const steps = [
   {
@@ -62,7 +65,7 @@ export function ProcessSection() {
       ref={sectionRef}
       id="processo"
       data-testid="section-process"
-      aria-label="Como trabalhamos"
+      aria-label={messages.sections.process.ariaLabel}
       className="relative w-full overflow-hidden bg-surface py-20 md:py-28"
     >
       {/* Background radial blobs */}

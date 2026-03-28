@@ -14,6 +14,7 @@ interface CTAGroupProps {
 export function CTAGroup({ configs, layout = 'horizontal', size = 'md', className }: CTAGroupProps) {
   return (
     <div
+      data-testid="cta-group"
       className={cn(
         'flex gap-3',
         layout === 'horizontal' && 'flex-col sm:flex-row',

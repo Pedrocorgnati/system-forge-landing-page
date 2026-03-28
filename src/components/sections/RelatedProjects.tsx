@@ -21,12 +21,12 @@ export function RelatedProjects({ projects, serviceName }: RelatedProjectsProps)
     <Section id="projetos-relacionados">
       <Container>
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h2 data-testid="related-projects-heading" className="text-2xl sm:text-3xl font-bold text-foreground">
             Projetos Relacionados
           </h2>
 
           {projects.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div data-testid="related-projects-empty" className="text-center py-8 text-muted-foreground">
               <p>Em breve novos projetos em {serviceName}.</p>
               <p className="mt-2">
                 <Link
@@ -39,12 +39,14 @@ export function RelatedProjects({ projects, serviceName }: RelatedProjectsProps)
             </div>
           ) : (
             <div
+              data-testid="related-projects-grid"
               role="list"
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {projects.map((project) => (
                 <div
                   key={project.slug}
+                  data-testid={`related-project-${project.slug}`}
                   role="listitem"
                   className="flex flex-col gap-4 rounded-xl border border-border bg-card overflow-hidden hover:border-primary/40 hover:shadow-md transition-all duration-200"
                 >

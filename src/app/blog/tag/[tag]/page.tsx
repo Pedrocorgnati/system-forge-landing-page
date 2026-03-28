@@ -12,6 +12,9 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 import type { ArticleFrontmatter } from '@/lib/types'
 
 interface PageProps {
@@ -61,7 +64,7 @@ export default async function BlogTagPage({ params }: PageProps) {
     .map(([tag]) => tag)
 
   const breadcrumbs = [
-    { label: 'Blog', href: ROUTES.BLOG },
+    { label: messages.breadcrumb.blog, href: ROUTES.BLOG },
     { label: `#${decoded}`, href: '' },
   ]
 

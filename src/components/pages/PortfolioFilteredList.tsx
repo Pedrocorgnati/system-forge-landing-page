@@ -42,6 +42,7 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
     <div className="flex flex-col gap-6">
       {/* Botões de filtro */}
       <div
+        data-testid="portfolio-filter-group"
         className="overflow-x-auto flex gap-2 pb-2 -mx-4 px-4"
         role="group"
         aria-label="Filtrar projetos por categoria"
@@ -49,6 +50,7 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
         {filterTabs.map((tab) => (
           <button
             key={tab.value}
+            data-testid={`portfolio-filter-tab-${tab.value}`}
             onClick={() => setFilter(tab.value)}
             aria-pressed={filter === tab.value}
             className={cn(
@@ -67,7 +69,7 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
       </div>
 
       {/* Contador */}
-      <p aria-live="polite" className="text-sm text-muted-foreground">
+      <p data-testid="portfolio-project-counter" aria-live="polite" className="text-sm text-muted-foreground">
         {filter === 'sugestoes'
           ? `${filteredProjects.length} sugestões de projetos`
           : filteredProjects.length === 1
@@ -84,7 +86,7 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
 
       {/* Grid ou Empty State */}
       {filteredProjects.length === 0 ? (
-        <div className="text-center py-12 col-span-full">
+        <div data-testid="portfolio-empty-state" className="text-center py-12 col-span-full">
           <p className="text-muted-foreground">
             Nenhum projeto nesta categoria ainda.
           </p>
@@ -101,11 +103,13 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
       ) : (
         <div
           role="list"
+          data-testid="portfolio-project-grid"
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
         >
           {filteredProjects.map((project) => (
             <div
               key={project.slug}
+              data-testid={`portfolio-project-card-${project.slug}`}
               role="listitem"
               className="flex flex-col gap-4 rounded-xl border border-border bg-card overflow-hidden hover:border-primary/40 hover:shadow-md transition-all duration-200"
             >

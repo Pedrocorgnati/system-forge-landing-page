@@ -5,16 +5,16 @@ import { Check } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { CTAButton } from '@/components/ui/CTAButton'
 import { buildDefaultCTAs } from '@/lib/cta'
+import { loadMessages } from '@config/content'
 
-const trustSignals = [
-  { text: 'Orçamento gratuito', icon: Check },
-  { text: 'Resposta em até 2h', icon: Check },
-  { text: 'Contrato claro', icon: Check },
-  { text: 'Código seu, sem lock-in', icon: Check },
-]
+const messages = loadMessages()
+
+const trustSignals = (messages.sections.cta.trustSignals as string[]).map(
+  (text: string) => ({ text, icon: Check }),
+)
 
 export function CTASection() {
-  const ctas = buildDefaultCTAs('desenvolvimento de software sob medida')
+  const ctas = buildDefaultCTAs(messages.sections.cta.headline)
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function CTASection() {
     <section
       ref={sectionRef}
       data-testid="section-cta"
-      aria-label="Fale com a SystemForge"
+      aria-label={messages.sections.cta.ariaLabel}
       className="relative w-full overflow-hidden bg-[#0C1120] py-20 md:py-28"
     >
       {/* Gradient transition from light to dark */}
@@ -64,18 +64,17 @@ export function CTASection() {
         <div className="relative z-10 flex flex-col items-center gap-10 text-center">
           {/* Eyebrow */}
           <span className="cta-stagger-1 text-[0.7rem] font-bold uppercase tracking-[0.3em] text-white/40">
-            Próximo passo
+            {messages.sections.cta.eyebrow}
           </span>
 
           {/* Headline */}
           <h2 className="cta-stagger-2 text-[clamp(1.75rem,5vw,2.75rem)] font-bold text-white leading-[1.15] max-w-2xl">
-            Pronto para transformar sua ideia em software?
+            {messages.sections.cta.headline}
           </h2>
 
           {/* Description */}
           <p className="cta-stagger-3 text-white/80 text-lg leading-relaxed max-w-xl">
-            Fale com a gente agora. Sem enrolação — analisamos seu projeto e
-            apresentamos uma proposta em até 24 horas.
+            {messages.sections.cta.description}
           </p>
 
           {/* CTA Button */}

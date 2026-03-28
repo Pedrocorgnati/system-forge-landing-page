@@ -1,36 +1,33 @@
 /**
  * lib/constants/site.ts
  * Configurações globais do site e navegação.
+ * Delegam para getSiteConfig() — locale-aware desde i18n-triple-market.
  */
-import { ROUTES } from './routes'
+import { getSiteConfig } from '@config'
+
+const config = getSiteConfig()
 
 export const SITE = {
-  name: 'SystemForge',
-  tagline: 'Software sob medida para transformar negócios',
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://forjadesistemas.com.br',
-  domain: 'forjadesistemas.com.br',
-  author: 'SystemForge',
-  email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
-  calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge',
-  budgetEngine: process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://forjadesistemas.com.br',
-  linkedin: 'https://www.linkedin.com/company/systemforge',
-  github: 'https://github.com/Pedrocorgnati/system-forge-landing-page',
-  instagram: 'https://www.instagram.com/systemforge',
-  tiktok: 'https://www.tiktok.com/@systemforge',
+  name: config.siteName,
+  tagline: config.tagline,
+  url: config.url,
+  domain: config.domain,
+  author: config.author,
+  email: config.email,
+  whatsapp: config.whatsapp,
+  calendly: config.calendly,
+  budgetEngine: config.budgetEngine,
+  linkedin: config.socialLinks.linkedin,
+  github: config.socialLinks.github,
+  instagram: config.socialLinks.instagram,
+  tiktok: config.socialLinks.tiktok,
 } as const
 
-export const NAV_LINKS = [
-  { label: 'Início', href: ROUTES.HOME },
-  { label: 'Serviços', href: ROUTES.SERVICES },
-  { label: 'Portfólio', href: ROUTES.PORTFOLIO },
-  { label: 'Blog', href: ROUTES.BLOG },
-  { label: 'Contato', href: ROUTES.CONTACT },
-] as const
+export const NAV_LINKS = config.navigation
 
 export const BLOG_ITEMS_PER_PAGE = 12
 
-/** Status dos projetos do portfólio — mapeados para os novos valores de ProjectStatus */
+/** Status dos projetos do portfólio */
 export const STATUS_CONFIG = {
   completed: {
     label: 'Em produção',

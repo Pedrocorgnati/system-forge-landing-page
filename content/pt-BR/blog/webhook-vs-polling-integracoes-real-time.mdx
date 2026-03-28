@@ -1,0 +1,208 @@
+---
+title: "Webhook vs polling: integrações em tempo real"
+slug: "webhook-vs-polling-integracoes-real-time"
+date: "2024-09-23"
+description: "Quando usar webhooks e quando usar polling em integrações de sistema — arquitetura, resiliência, retry e validação de assinatura com exemplos."
+tags: ["webhook", "polling", "integracao", "real-time", "arquitetura"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Quando usar webhooks e quando usar polling em integrações de sistema — arquitetura, resiliência, retry e validação de assinatura com exemplos.
+---
+
+Toda integração entre sistemas enfrenta o mesmo problema fundamental: como o sistema A sabe quando algo mudou no sistema B? Existem duas respostas para essa pergunta — polling e webhooks — e a escolha entre elas impacta diretamente a latência, o custo de infraestrutura e a complexidade do código de tratamento de erros.
+
+Polling é o equivalente digital de ligar para o banco a cada cinco minutos perguntando "caiu algum pagamento?". Webhooks são o contrário: o banco liga para você quando algo acontece. A metáfora deixa claro qual é mais eficiente, mas como toda metáfora, esconde os casos onde a versão menos elegante é a única opção viável.
+
+## Como Webhooks Funcionam: Registro, Entrega e Retry
+
+Um webhook é essencialmente uma requisição HTTP POST que o sistema de origem envia para a URL que você configurou, sempre que um evento acontece. Você não pede — você recebe.
+
+O fluxo básico tem três etapas:
+
+1. **Registro**: você informa ao sistema de origem qual URL deve receber as notificações (geralmente via painel de configuração ou API).
+2. **Evento**: algo acontece no sistema de origem (pagamento processado, formulário enviado, status atualizado).
+3. **Entrega**: o sistema de origem faz um POST para sua URL com o payload do evento em JSON.
+
+Do ponto de vista de implementação, receber um webhook é simples — é só um endpoint HTTP:
+
+```python
+from fastapi import FastAPI, Request, HTTPException
+import hmac
+import hashlib
+
+app = FastAPI()
+
+WEBHOOK_SECRET = "seu_segredo_compartilhado"
+
+@app.post("/webhooks/pagamento")
+async def receber_pagamento(request: Request):
+    # 1. Validar assinatura (ver seção abaixo)
+    assinatura_recebida = request.headers.get("X-Signature-SHA256", "")
+    corpo = await request.body()
+    assinatura_esperada = hmac.new(
+        WEBHOOK_SECRET.encode(),
+        corpo,
+        hashlib.sha256
+    ).hexdigest()
+
+    if not hmac.compare_digest(assinatura_recebida, f"sha256={assinatura_esperada}"):
+        raise HTTPException(status_code=401, detail="Assinatura inválida")
+
+    # 2. Processar o payload
+    payload = await request.json()
+    evento = payload.get("event")
+    dados = payload.get("data", {})
+
+    if evento == "payment.approved":
+        # Enfileirar para processamento assíncrono
+        await fila.enqueue("processar_pagamento", dados)
+
+    # 3. Responder 200 IMEDIATAMENTE
+    # O sistema de origem vai fazer retry se não receber 2xx em tempo hábil
+    return {"status": "received"}
+```
+
+O detalhe mais importante está no comentário final: você deve responder 200 o mais rápido possível, antes de processar o evento. Se o processamento demorar e o timeout da origem esgotar, ela vai entender que a entrega falhou e vai tentar novamente — gerando eventos duplicados.
+
+A maioria das plataformas sérias tem política de retry automático: se não receberem 2xx em X segundos, tentam novamente com backoff exponencial (1 minuto, 5 minutos, 30 minutos, 1 hora, etc.). Isso é ótimo para resiliência, mas exige que você trate duplicatas.
+
+## Polling: Quando é a Única Opção Viável
+
+Webhooks são elegantes, mas nem sempre estão disponíveis. Há três situações onde polling é a única saída:
+
+**O sistema não suporta webhooks.** Sistemas legados, ERPs antigos, APIs de governo — muitos simplesmente não implementam webhooks. Você precisa perguntar periodicamente se algo mudou.
+
+**Você está atrás de um firewall.** Se sua aplicação roda em uma rede interna sem endereço público acessível, nenhum sistema externo consegue fazer POST para você. Você precisa ir buscar os dados, não recebê-los.
+
+**A fonte é um arquivo ou banco de dados compartilhado.** Quando a "integração" é verificar se apareceu um arquivo novo em um FTP ou se uma tabela do banco teve novos registros, polling é o modelo natural.
+
+Um polling eficiente não precisa ser ingênuo. Em vez de buscar tudo sempre, use estratégias que minimizam transferência de dados:
+
+```python
+import httpx
+from datetime import datetime, timedelta
+import asyncio
+
+async def poll_novos_pedidos(ultima_verificacao: datetime) -> list[dict]:
+    """
+    Polling inteligente: busca apenas pedidos criados desde a última verificação.
+    Usa timestamp incremental para evitar buscar dados já processados.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            "https://api.sistema-externo.com/pedidos",
+            params={
+                "criado_apos": ultima_verificacao.isoformat(),
+                "limit": 100,
+                "status": "pendente"
+            },
+            headers={"Authorization": "Bearer TOKEN"}
+        )
+        response.raise_for_status()
+        return response.json()["pedidos"]
+
+async def loop_de_polling():
+    ultima_verificacao = datetime.utcnow() - timedelta(minutes=5)
+
+    while True:
+        try:
+            novos = await poll_novos_pedidos(ultima_verificacao)
+            ultima_verificacao = datetime.utcnow()
+
+            for pedido in novos:
+                await processar_pedido(pedido)
+
+        except Exception as e:
+            # Não atualiza ultima_verificacao em caso de erro
+            # Para não perder eventos durante a janela de falha
+            print(f"Erro no polling: {e}")
+
+        await asyncio.sleep(60)  # aguarda 1 minuto antes da próxima verificação
+```
+
+O detalhe crítico: não atualize o timestamp de última verificação quando ocorre um erro. Se você atualizar, você vai pular os eventos que deveriam ter sido processados durante a janela de falha.
+
+## Validação de Assinatura: Evitando Webhook Spoofing
+
+Seu endpoint de webhook está exposto publicamente na internet. Qualquer um pode descobrir a URL e enviar POSTs falsos — simulando pagamentos aprovados, pedidos criados ou qualquer evento que seu sistema processe.
+
+A solução padrão é HMAC (Hash-based Message Authentication Code): o sistema de origem e o seu sistema compartilham um segredo. Para cada evento, a origem calcula um hash do payload usando o segredo e inclui no header. Você recalcula o hash na sua ponta e compara.
+
+```python
+import hmac
+import hashlib
+
+def validar_assinatura_stripe(payload: bytes, header_recebido: str, segredo: str) -> bool:
+    """
+    O Stripe usa um formato específico: t=timestamp,v1=hash
+    Isso previne replay attacks — assinaturas antigas não são válidas
+    """
+    partes = dict(p.split("=", 1) for p in header_recebido.split(","))
+    timestamp = partes.get("t", "")
+    assinatura_recebida = partes.get("v1", "")
+
+    # Previne replay: rejeita eventos com mais de 5 minutos
+    import time
+    if abs(time.time() - int(timestamp)) > 300:
+        return False
+
+    # Recalcula a assinatura com o timestamp incluído
+    payload_assinado = f"{timestamp}.".encode() + payload
+    assinatura_esperada = hmac.new(
+        segredo.encode(),
+        payload_assinado,
+        hashlib.sha256
+    ).hexdigest()
+
+    # compare_digest previne timing attacks
+    return hmac.compare_digest(assinatura_recebida, assinatura_esperada)
+```
+
+Nunca valide assinaturas comparando strings com `==` — isso é vulnerável a timing attacks. Use sempre `hmac.compare_digest` (Python) ou equivalente em outras linguagens.
+
+## Idempotência: Processando o Mesmo Evento Mais de Uma Vez
+
+Mesmo com tudo configurado corretamente, eventos duplicados vão acontecer. O sistema de origem não sabe se seu 200 chegou antes do timeout — então ele tenta de novo. Sua lógica de negócio precisa ser idempotente: processar o mesmo evento duas, três ou dez vezes precisa ter o mesmo efeito que processar uma vez.
+
+A implementação padrão usa um registro de eventos já processados:
+
+```python
+import redis
+
+redis_client = redis.Redis()
+
+def processar_evento_idempotente(evento_id: str, payload: dict) -> bool:
+    """
+    Retorna True se processou, False se já tinha processado antes.
+    Usa Redis com TTL de 24h para não acumular dados indefinidamente.
+    """
+    chave = f"webhook:processado:{evento_id}"
+
+    # SET NX (só define se não existir) + EXPIRE
+    foi_definido = redis_client.set(chave, "1", nx=True, ex=86400)
+
+    if not foi_definido:
+        # Já processamos esse evento antes
+        print(f"Evento {evento_id} já processado — ignorando duplicata")
+        return False
+
+    # Processar o evento
+    executar_logica_de_negocio(payload)
+    return True
+```
+
+O `evento_id` deve ser um identificador único fornecido pelo sistema de origem (o Stripe chama de `id`, o PayPal de `resource_id`, etc.). Nunca use o timestamp como identificador de idempotência — dois eventos podem ter o mesmo timestamp em alto volume.
+
+## Conclusão
+
+A escolha entre webhook e polling não é uma questão de preferência — é uma questão de o que a fonte de dados suporta e de onde seu sistema está acessível.
+
+Quando webhooks estão disponíveis, prefira-os sempre: latência próxima de zero, sem desperdício de requisições e sem carga desnecessária nos dois lados. Quando polling é inevitável, torne-o eficiente com filtros incrementais e nunca pule eventos em caso de erro.
+
+E em qualquer dos dois casos: valide assinaturas, responda rápido, processe de forma assíncrona e implemente idempotência. Esses quatro princípios eliminam 90% dos problemas que surgem em integrações via webhook em produção.
+
+Na SystemForge, desenhamos e implementamos integrações entre sistemas com foco em resiliência e manutenibilidade — seja via webhook, polling ou filas de mensagem. [Fale com a gente](/contato) se você precisa conectar sistemas que não foram feitos para conversar.

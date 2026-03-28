@@ -1,0 +1,146 @@
+---
+title: "Chart.js vs Recharts vs D3: qual biblioteca usar"
+slug: "chartjs-vs-recharts-vs-d3-qual-biblioteca"
+date: "2024-07-31"
+description: "Comparativo prático entre Chart.js, Recharts e D3.js para dashboards em React — performance, personalização, bundle size e curva de aprendizado."
+tags: ["chart.js", "recharts", "d3", "graficos", "data visualization"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: Comparativo prático entre Chart.js, Recharts e D3.js para dashboards em React — performance, personalização, bundle size e curva de aprendizado.
+---
+
+A escolha da biblioteca de gráficos parece uma decisão técnica de segundo plano. Não é. Ela afeta bundle size, performance com grandes volumes de dados, capacidade de customização visual e, principalmente, a velocidade com que o time consegue iterar no produto ao longo do tempo.
+
+Escolher a biblioteca errada no início de um projeto de dashboard significa carregar dívida técnica em cada feature nova. O componente de gráfico que "quase atende" o requisito vai exigir workarounds cada vez mais elaborados, até o momento em que a decisão de trocar a biblioteca — com toda a reescrita que isso implica — se torna inevitável.
+
+Este comparativo foca nas três principais bibliotecas usadas em dashboards React e em duas alternativas modernas que vale conhecer.
+
+## Chart.js: Simples, Rápido e com Limitações de Customização
+
+Chart.js é a biblioteca mais usada para gráficos na web, segundo dados do npm. Para projetos React, a integração mais comum é via `react-chartjs-2`, um wrapper que expõe a API do Chart.js como componentes React.
+
+**Pontos fortes:** configuração rápida, boa documentação, suporte nativo a animações, performance razoável com datasets de até dezenas de milhares de pontos usando canvas (em vez de SVG), e plugins oficiais para extensões comuns como zoom e anotações.
+
+**Limitações relevantes para B2B:** a API de customização é baseada em opções de configuração em vez de composição de componentes. Quando você precisa de um tooltip muito customizado, de um eixo com comportamento específico ou de uma legenda interativa fora do padrão, você acaba escrevendo código de plugin que parece um hack. Chart.js foi projetado para casos de uso genéricos, e dashboards B2B frequentemente saem desse escopo.
+
+```javascript
+// react-chartjs-2: configuração básica de linha
+import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
+
+const data = {
+  labels: ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun'],
+  datasets: [{
+    label: 'Receita (R$)',
+    data: [42000, 47000, 44000, 51000, 58000, 63000],
+    borderColor: '#6366f1',
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    tension: 0.4,
+  }]
+};
+
+const options = {
+  responsive: true,
+  plugins: {
+    legend: { position: 'top' },
+    tooltip: { mode: 'index', intersect: false }
+  },
+  scales: {
+    y: { beginAtZero: false }
+  }
+};
+
+export function RevenueChart() {
+  return <Line data={data} options={options} />;
+}
+```
+
+**Quando usar Chart.js:** protótipos rápidos, dashboards internos simples, projetos onde a equipe já tem familiaridade com a biblioteca, ou quando o canvas rendering é necessário para performance com muitos dados.
+
+## Recharts: O Padrão React para a Maioria dos Casos
+
+Recharts é construído com SVG e projetado especificamente para React, usando composição de componentes em vez de configuração imperativa. Um gráfico de linha com Recharts é composto de `<LineChart>`, `<XAxis>`, `<YAxis>`, `<Line>`, `<Tooltip>` — cada parte é um componente React com props tipadas.
+
+Essa abordagem declarativa se alinha com como times React pensam sobre UI. Customizar um tooltip em Recharts é criar um componente React normal passado como `content` prop. Customizar uma linha é passar uma prop `dot` com um componente personalizado. A curva de aprendizado é baixa para quem já programa em React.
+
+**Bundle size:** Recharts adiciona aproximadamente 300KB ao bundle (minificado, não gzipado), o que é um ponto de atenção para aplicações onde tamanho importa. Para dashboards B2B acessados em desktop em redes corporativas, geralmente não é um bloqueador.
+
+**Performance:** Recharts renderiza com SVG, o que implica que para datasets muito grandes (>50.000 pontos) a performance pode degradar. Para a maioria dos dashboards B2B, isso não é um problema real — dashboards que mostram 50 mil pontos por gráfico geralmente têm problemas de UX antes de ter problemas de performance.
+
+**Quando usar Recharts:** é a escolha padrão para dashboards React quando você não tem requisitos extremos de performance ou customização de baixo nível. Cobre 80% dos casos de uso de dashboards B2B com código limpo e manutenível.
+
+## D3.js: Poder Total, Curva de Aprendizado Alta
+
+D3 (Data-Driven Documents) não é uma biblioteca de gráficos — é uma biblioteca de manipulação de documentos baseada em dados. Você escreve os gráficos do zero usando primitivas de SVG manipuladas via seleções D3.
+
+Isso significa poder ilimitado de customização: qualquer visualização que você consegue imaginar pode ser construída em D3. Também significa que para um gráfico de linha simples você vai escrever 80 linhas de código contra 15 linhas de Recharts.
+
+Integrar D3 com React requer atenção porque ambos querem controlar o DOM. A abordagem recomendada é usar D3 apenas para cálculos (escalas, paths, layouts) e deixar o React renderizar o SVG declarativamente:
+
+```javascript
+import { useMemo } from 'react';
+import { scaleLinear, scaleTime, line, extent } from 'd3';
+
+export function D3LineChart({ data, width = 600, height = 300 }) {
+  const margin = { top: 20, right: 20, bottom: 30, left: 50 };
+  const innerWidth = width - margin.left - margin.right;
+  const innerHeight = height - margin.top - margin.bottom;
+
+  const { xScale, yScale, pathD } = useMemo(() => {
+    const xScale = scaleTime()
+      .domain(extent(data, d => d.date))
+      .range([0, innerWidth]);
+
+    const yScale = scaleLinear()
+      .domain([0, Math.max(...data.map(d => d.value))])
+      .range([innerHeight, 0]);
+
+    const lineGenerator = line()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.value));
+
+    return { xScale, yScale, pathD: lineGenerator(data) };
+  }, [data, innerWidth, innerHeight]);
+
+  return (
+    <svg width={width} height={height}>
+      <g transform={`translate(${margin.left},${margin.top})`}>
+        <path d={pathD} fill="none" stroke="#6366f1" strokeWidth={2} />
+        {/* eixos, tooltips, etc renderizados como JSX */}
+      </g>
+    </svg>
+  );
+}
+```
+
+**Quando usar D3:** visualizações customizadas que nenhuma biblioteca pronta suporta (mapas temáticos, force-directed graphs, tree maps com comportamento específico), ou quando você tem um designer que produziu uma spec visual que as abstrações de alto nível não conseguem replicar.
+
+**Quando NÃO usar D3:** dashboards operacionais com requisitos de entrega rápida. O custo de desenvolvimento é 3-5x maior do que com Recharts para visualizações equivalentes.
+
+## Nivo e Tremor: Alternativas Modernas para Dashboards
+
+**Nivo** é construído sobre D3 e React, mas expõe uma API declarativa de alto nível. O diferencial é a qualidade visual padrão e a variedade de tipos de gráfico — incluindo treemap, sunburst, chord, network e outros que Recharts não cobre. Para dashboards que precisam de visualizações menos convencionais sem descer ao nível do D3 raw, Nivo é uma boa opção.
+
+**Tremor** é mais recente e tem uma proposta diferente: um sistema de componentes de dashboard completo — não apenas gráficos, mas cards de KPI, layouts, badges de status. É opinionado visualmente (usa Tailwind CSS) e reduz o tempo de desenvolvimento de dashboards simples de forma significativa. A limitação é justamente essa opinionatedness: sair do visual padrão do Tremor pode ser mais difícil do que com Recharts.
+
+| Biblioteca | Bundle Size | React-native | Customização | Curva de Aprendizado | Ideal para |
+|------------|-------------|--------------|--------------|----------------------|------------|
+| Chart.js   | ~200KB      | Via wrapper  | Média        | Baixa                | Protótipos, canvas rendering |
+| Recharts   | ~300KB      | Sim          | Alta         | Baixa                | Maioria dos dashboards |
+| D3         | ~80KB (core)| Integração manual | Total  | Alta                 | Visualizações customizadas |
+| Nivo       | ~400KB      | Sim          | Alta         | Média                | Variedade de tipos |
+| Tremor     | ~150KB + Tailwind | Sim   | Limitada     | Muito baixa          | MVPs, dashboards simples |
+
+## Conclusão
+
+Para a maioria dos dashboards B2B em React, **Recharts é a escolha padrão correta**. Ela equilibra facilidade de uso, customização suficiente para a maioria dos casos e integração natural com o modelo mental de React.
+
+Use Chart.js quando performance de canvas for necessária ou quando o time já tem proficiência. Use D3 para visualizações que não existem em nenhuma biblioteca de alto nível. Experimente Nivo quando precisar de tipos de gráfico exóticos, e Tremor para MVPs onde velocidade é mais importante que customização.
+
+Na SystemForge, a escolha de biblioteca de gráficos faz parte das decisões técnicas documentadas no HLD — junto com a estratégia de caching de queries, o modelo de permissões e a arquitetura de real-time. Essas decisões tomadas antes da primeira linha de código evitam refatorações custosas no meio do projeto.

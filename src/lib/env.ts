@@ -56,6 +56,19 @@ const EnvSchema = z.object({
 
   // NOTA: RESEND_API_KEY é secret do Cloudflare Worker (wrangler secret put),
   // NÃO pertence ao schema do Next.js — configurar apenas no Worker.
+
+  // ===== i18n Triple-Market =====
+  // Obrigatório nos scripts build:br / build:it / build:en
+  // Opcional em dev e no script build genérico (fallback: 'pt-BR' via getActiveLocale)
+  NEXT_PUBLIC_LOCALE: z
+    .enum(['pt-BR', 'it-IT', 'en'] as const, {
+      errorMap: () => ({ message: 'NEXT_PUBLIC_LOCALE deve ser um de: pt-BR, it-IT, en' }),
+    })
+    .optional(),
+
+  // Obrigatório nos scripts build:br / build:it / build:en
+  // Ausente em dev → next.config.ts usa '.next' como fallback
+  OUT_DIR: z.string().min(1, 'OUT_DIR não pode ser vazio').optional(),
 })
 
 export type Env = z.infer<typeof EnvSchema>
@@ -75,6 +88,8 @@ export function getValidatedEnv(): Env {
     NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
     NEXT_PUBLIC_CLOUDFLARE_ZONE_ID: process.env.NEXT_PUBLIC_CLOUDFLARE_ZONE_ID,
     NEXT_PUBLIC_NEWSLETTER_API_URL: process.env.NEXT_PUBLIC_NEWSLETTER_API_URL,
+    NEXT_PUBLIC_LOCALE: process.env.NEXT_PUBLIC_LOCALE,
+    OUT_DIR: process.env.OUT_DIR,
   })
 
   if (!result.success) {
@@ -99,24 +114,7 @@ export const ALLOWED_CTA_DOMAINS = [
   'budgetengine.app',
 ] as const
 
-/**
- * Valida se um href é seguro para uso em CTAButton.
- * Retorna true se: path relativo (/…) ou domínio na allowlist.
- * Erro ENV_004 se domínio não permitido.
- */
-export function isAllowedCTAHref(href: string): boolean {
-  if (href.startsWith('/')) return true
-  try {
-    const url = new URL(href)
-    const isAllowed = ALLOWED_CTA_DOMAINS.some(d => url.hostname === d || url.hostname.endsWith(`.${d}`))
-    if (!isAllowed) {
-      console.error(`ENV_004: Domínio não permitido em CTA: ${url.hostname}`)
-    }
-    return isAllowed
-  } catch {
-    return false
-  }
-}
+// isAllowedCTAHref removido — função centralizada em src/lib/cta.ts (TASK-5)
 
 // Singleton — use em módulos server-side
 // Para client components, acesse process.env.NEXT_PUBLIC_* diretamente

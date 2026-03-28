@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Container } from '@/components/ui/Container'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 
 const stats = [
   { target: 50, suffix: '+', label: 'Projetos entregues', sub: 'de todo tipo e tamanho' },
@@ -74,7 +77,7 @@ export function StatsSection() {
     <section
       ref={ref}
       data-testid="section-stats"
-      aria-label="Números da SystemForge"
+      aria-label={messages.sections.stats.ariaLabel}
       className="w-full bg-card border-y border-border py-4 md:py-0"
     >
       <Container>

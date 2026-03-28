@@ -1,62 +1,58 @@
 /**
  * scripts/generate-search-index.ts
- * Gera public/search-index.json a partir dos artigos compilados pelo Velite.
- * Usado pelo Fuse.js no client para busca (module-7).
- * Uso: npx ts-node scripts/generate-search-index.ts
+ * Gera public/search-index.json a partir dos artigos do locale ativo.
+ *
+ * Lê `content/{NEXT_PUBLIC_LOCALE}/blog/*.mdx` e gera o index filtrado
+ * para o build ativo. Como cada build usa OUT_DIR diferente (dist-br/, dist-it/, dist-en/),
+ * os arquivos ficam isolados automaticamente.
+ *
+ * Uso:
+ *   NEXT_PUBLIC_LOCALE=pt-BR npx tsx scripts/generate-search-index.ts
  *
  * Output: public/search-index.json
+ *
+ * Segurança: NEXT_PUBLIC_LOCALE é validado via allowlist em generateSearchIndex()
+ * antes de ser interpolado em paths de filesystem (path traversal prevention).
  */
 import fs from 'fs/promises'
 import path from 'path'
+import type { SupportedLocale } from '../config/types'
+import { generateSearchIndex } from '../src/lib/search'
 
-interface SearchIndexEntry {
-  slug: string
-  title: string
-  description: string
-  tags: string[]
-  date: string
-  relatedService?: string
-}
+const ALLOWED_LOCALES: readonly SupportedLocale[] = ['pt-BR', 'it-IT', 'en'] as const
 
-async function generateSearchIndex(): Promise<void> {
-  const veliteOutputPath = path.join(process.cwd(), '.velite', 'blog.json')
+async function run(): Promise<void> {
+  const rawLocale = process.env.NEXT_PUBLIC_LOCALE
 
-  // Verificar se Velite foi executado
-  try {
-    await fs.access(veliteOutputPath)
-  } catch {
-    console.log('[generate-search-index] .velite/blog.json não encontrado.')
-    console.log('[generate-search-index] Execute `npx velite build` primeiro.')
-    // Gerar arquivo vazio para não bloquear o build
-    await fs.mkdir('public', { recursive: true })
-    await fs.writeFile('public/search-index.json', JSON.stringify([]))
-    console.log('[generate-search-index] Gerado public/search-index.json vazio.')
-    process.exit(0)
+  if (!rawLocale) {
+    console.error(
+      '[generate-search-index] ERRO: NEXT_PUBLIC_LOCALE não definida.\n' +
+        '  Use: NEXT_PUBLIC_LOCALE=pt-BR npx tsx scripts/generate-search-index.ts',
+    )
+    process.exit(1)
   }
 
-  const rawData = await fs.readFile(veliteOutputPath, 'utf-8')
-  const articles = JSON.parse(rawData) as Array<{
-    slug: string
-    title: string
-    description?: string
-    tags?: string[]
-    date: string
-    relatedService?: string
-  }>
+  if (!ALLOWED_LOCALES.includes(rawLocale as SupportedLocale)) {
+    console.error(
+      `[generate-search-index] ERRO: NEXT_PUBLIC_LOCALE="${rawLocale}" inválida.\n` +
+        `  Valores permitidos: ${ALLOWED_LOCALES.join(', ')}`,
+    )
+    process.exit(1)
+  }
 
-  const index: SearchIndexEntry[] = articles.map(article => ({
-    slug: article.slug,
-    title: article.title,
-    description: article.description ?? '',
-    tags: article.tags ?? [],
-    date: article.date,
-    relatedService: article.relatedService,
-  }))
+  const locale = rawLocale as SupportedLocale
 
-  await fs.mkdir('public', { recursive: true })
-  await fs.writeFile('public/search-index.json', JSON.stringify(index, null, 2))
+  const index = generateSearchIndex(locale)
 
-  console.log(`[generate-search-index] ✓ ${index.length} artigos indexados em public/search-index.json`)
+  await fs.mkdir(path.join(process.cwd(), 'public'), { recursive: true })
+  await fs.writeFile(
+    path.join(process.cwd(), 'public', 'search-index.json'),
+    JSON.stringify(index, null, 2),
+  )
+
+  console.log(
+    `[generate-search-index] ✓ ${index.length} artigos indexados em public/search-index.json (locale: ${locale})`,
+  )
 }
 
-generateSearchIndex()
+run()

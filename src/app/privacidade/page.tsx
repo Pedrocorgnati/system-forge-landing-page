@@ -1,17 +1,21 @@
 import type { Metadata } from 'next'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
-import { SITE, ROUTES } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 export const metadata: Metadata = {
-  title: 'Política de Privacidade',
-  description: `Política de Privacidade da ${SITE.name}. Saiba como coletamos, usamos e protegemos seus dados.`,
-  alternates: { canonical: '/privacidade' },
+  title: messages.breadcrumb.privacy,
+  description: `${messages.breadcrumb.privacy} — ${config.siteName}`,
+  alternates: { canonical: config.routes.privacy },
 }
 
 const breadcrumbs = [
-  { label: 'Início', href: ROUTES.home },
-  { label: 'Política de Privacidade', href: ROUTES.privacidade },
+  { label: messages.breadcrumb.home, href: config.routes.home },
+  { label: messages.breadcrumb.privacy, href: config.routes.privacy },
 ]
 
 export default function PrivacidadePage() {
@@ -28,7 +32,7 @@ export default function PrivacidadePage() {
 
             <h2>1. Quem somos</h2>
             <p>
-              A <strong>{SITE.name}</strong> ({SITE.domain}) é uma software house especializada em
+              A <strong>{config.siteName}</strong> ({config.domain}) é uma software house especializada em
               desenvolvimento de software sob medida. Pedro Corgnati é o responsável pelo
               tratamento de dados pessoais neste site.
             </p>
@@ -69,7 +73,7 @@ export default function PrivacidadePage() {
             </ul>
             <p>
               Para exercer seus direitos, entre em contato:{' '}
-              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+              <a href={`mailto:${config.email}`}>{config.email}</a>
             </p>
 
             <h2>6. Cookies</h2>
@@ -82,7 +86,7 @@ export default function PrivacidadePage() {
             <h2>7. Contato</h2>
             <p>
               Dúvidas sobre esta política? Entre em contato:{' '}
-              <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+              <a href={`mailto:${config.email}`}>{config.email}</a>
             </p>
           </div>
         </div>

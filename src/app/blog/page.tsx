@@ -3,19 +3,23 @@ import { blog as allArticles } from '@/.velite'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { BlogListPage } from '@/components/blog/BlogListPage'
-import { SITE, ROUTES } from '@/lib/constants'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 import type { ArticleFrontmatter } from '@/lib/types'
 
 export const metadata: Metadata = {
-  title: 'Blog',
-  description: `Artigos sobre desenvolvimento de software, tecnologia e estratégias de produto. Blog da ${SITE.name}.`,
-  alternates: { canonical: '/blog' },
+  title: messages.breadcrumb.blog,
+  description: `${messages.breadcrumb.blog} — ${config.siteName}`,
+  alternates: { canonical: config.routes.blog },
 }
 
 const breadcrumbs = [
-  { label: 'Início', href: ROUTES.home },
-  { label: 'Blog', href: ROUTES.blog },
+  { label: messages.breadcrumb.home, href: config.routes.home },
+  { label: messages.breadcrumb.blog, href: config.routes.blog },
 ]
 
 export default function BlogPage() {

@@ -45,16 +45,16 @@ export function ServicePage({ config, relatedArticles }: ServicePageProps) {
       {/* Seção 1: Hero */}
       <Section id={`servico-${config.category}`}>
         <Container>
-          <div className="flex flex-col gap-6 max-w-3xl py-12 md:py-20">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary w-fit uppercase tracking-wide">
+          <div data-testid="service-hero" className="flex flex-col gap-6 max-w-3xl py-12 md:py-20">
+            <span data-testid="service-hero-badge" className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary w-fit uppercase tracking-wide">
               {config.category}
             </span>
 
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
+            <h1 data-testid="service-hero-title" className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
               {config.title}
             </h1>
 
-            <p className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
+            <p data-testid="service-hero-description" className="text-lg text-muted-foreground leading-relaxed whitespace-pre-line">
               {config.longDescription}
             </p>
 
@@ -83,7 +83,7 @@ export function ServicePage({ config, relatedArticles }: ServicePageProps) {
       {/* Seção 4: CTA secundário */}
       <Section id={`cta-${config.category}`}>
         <Container>
-          <div className="flex flex-col items-center gap-6 text-center py-8 md:py-12">
+          <div data-testid="service-bottom-cta" className="flex flex-col items-center gap-6 text-center py-8 md:py-12">
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
               Pronto para começar?
             </h2>

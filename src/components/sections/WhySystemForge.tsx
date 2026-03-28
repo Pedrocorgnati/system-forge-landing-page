@@ -5,52 +5,66 @@ import { FileText, SearchCheck, Blocks, Zap, ShieldCheck, Headphones } from 'luc
 import type { LucideIcon } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { cn } from '@/lib/utils'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 
-const reasons: { Icon: LucideIcon; title: string; description: string }[] = [
-  {
-    Icon: FileText,
-    title: 'Documentação primeiro',
-    description:
-      'Todo projeto começa com documentação completa — PRD, wireframes e especificações antes de escrever uma linha de código.',
-  },
-  {
-    Icon: SearchCheck,
-    title: 'Transparência total',
-    description:
-      'Acesso em tempo real ao código, repositório, tarefas e relatórios de progresso durante todo o desenvolvimento.',
-  },
-  {
-    Icon: Blocks,
-    title: 'Arquitetura sólida',
-    description:
-      'Código limpo, testado e documentado. Entregamos sistemas que sua equipe consegue manter e evoluir.',
-  },
-  {
-    Icon: Zap,
-    title: 'Entrega rápida',
-    description:
-      'Sprints curtos com entregas incrementais. Você vê resultados reais em semanas, não meses.',
-  },
-  {
-    Icon: ShieldCheck,
-    title: 'Código é seu',
-    description:
-      'Zero lock-in. Todo o código-fonte, infraestrutura e dados ficam com você. Sem dependências indesejadas.',
-  },
-  {
-    Icon: Headphones,
-    title: 'Suporte pós-entrega',
-    description:
-      'Não sumimos após o deploy. Acompanhamos o lançamento e oferecemos suporte técnico dedicado.',
-  },
-]
+const config = getSiteConfig()
+const messages = loadMessages()
+const locale = config.locale
 
-const metrics = [
-  { target: 50, suffix: '+', label: 'Projetos entregues' },
-  { target: 100, suffix: '%', label: 'Satisfação dos clientes' },
-  { target: 5, suffix: '', label: 'Anos de experiência' },
-  { target: 2, suffix: 'h', label: 'Tempo de resposta' },
-]
+type ReasonItem = { Icon: LucideIcon; title: string; description: string }
+
+const REASONS: Record<string, ReasonItem[]> = {
+  'pt-BR': [
+    { Icon: FileText, title: 'Documentação primeiro', description: 'Todo projeto começa com documentação completa — PRD, wireframes e especificações antes de escrever uma linha de código.' },
+    { Icon: SearchCheck, title: 'Transparência total', description: 'Acesso em tempo real ao código, repositório, tarefas e relatórios de progresso durante todo o desenvolvimento.' },
+    { Icon: Blocks, title: 'Arquitetura sólida', description: 'Código limpo, testado e documentado. Entregamos sistemas que sua equipe consegue manter e evoluir.' },
+    { Icon: Zap, title: 'Entrega rápida', description: 'Sprints curtos com entregas incrementais. Você vê resultados reais em semanas, não meses.' },
+    { Icon: ShieldCheck, title: 'Código é seu', description: 'Zero lock-in. Todo o código-fonte, infraestrutura e dados ficam com você. Sem dependências indesejadas.' },
+    { Icon: Headphones, title: 'Suporte pós-entrega', description: 'Não sumimos após o deploy. Acompanhamos o lançamento e oferecemos suporte técnico dedicado.' },
+  ],
+  'it-IT': [
+    { Icon: FileText, title: 'Documentazione Prima', description: 'Ogni progetto inizia con documentazione completa — PRD, wireframe e specifiche prima di scrivere una riga di codice.' },
+    { Icon: SearchCheck, title: 'Trasparenza Totale', description: 'Accesso in tempo reale al codice, repository, attività e report di avanzamento durante tutto lo sviluppo.' },
+    { Icon: Blocks, title: 'Architettura Solida', description: 'Codice pulito, testato e documentato. Consegniamo sistemi che il tuo team può mantenere e far evolvere.' },
+    { Icon: Zap, title: 'Consegna Rapida', description: 'Sprint brevi con deliverable incrementali. Vedi risultati reali in settimane, non mesi.' },
+    { Icon: ShieldCheck, title: 'Il Codice è Tuo', description: 'Zero lock-in. Tutto il codice sorgente, l\'infrastruttura e i dati rimangono tuoi. Nessuna dipendenza indesiderata.' },
+    { Icon: Headphones, title: 'Supporto Post-Consegna', description: 'Non spariremo dopo il deploy. Seguiamo il lancio e offriamo supporto tecnico dedicato.' },
+  ],
+  'en': [
+    { Icon: FileText, title: 'Documentation First', description: 'Every project starts with complete documentation — PRD, wireframes, and specs before writing a single line of code.' },
+    { Icon: SearchCheck, title: 'Total Transparency', description: 'Real-time access to code, repository, tasks, and progress reports throughout the entire development process.' },
+    { Icon: Blocks, title: 'Solid Architecture', description: 'Clean, tested, documented code. We deliver systems your team can maintain and evolve.' },
+    { Icon: Zap, title: 'Fast Delivery', description: 'Short sprints with incremental deliverables. You see real results in weeks, not months.' },
+    { Icon: ShieldCheck, title: 'Code is Yours', description: 'Zero lock-in. All source code, infrastructure and data stays with you. No unwanted dependencies.' },
+    { Icon: Headphones, title: 'Post-Delivery Support', description: 'We don\'t disappear after deploy. We follow the launch and offer dedicated technical support.' },
+  ],
+}
+
+const reasons: ReasonItem[] = REASONS[locale] ?? REASONS['pt-BR']
+
+const METRICS: Record<string, { target: number; suffix: string; label: string }[]> = {
+  'pt-BR': [
+    { target: 50, suffix: '+', label: 'Projetos entregues' },
+    { target: 100, suffix: '%', label: 'Satisfação dos clientes' },
+    { target: 5, suffix: '', label: 'Anos de experiência' },
+    { target: 2, suffix: 'h', label: 'Tempo de resposta' },
+  ],
+  'it-IT': [
+    { target: 50, suffix: '+', label: 'Progetti consegnati' },
+    { target: 100, suffix: '%', label: 'Soddisfazione clienti' },
+    { target: 5, suffix: '', label: 'Anni di esperienza' },
+    { target: 2, suffix: 'h', label: 'Tempo di risposta' },
+  ],
+  'en': [
+    { target: 50, suffix: '+', label: 'Projects delivered' },
+    { target: 100, suffix: '%', label: 'Client satisfaction' },
+    { target: 5, suffix: '', label: 'Years of experience' },
+    { target: 2, suffix: 'h', label: 'Response time' },
+  ],
+}
+
+const metrics = METRICS[locale] ?? METRICS['pt-BR']
 
 const pipelineSteps = ['PRD', 'WIRE', 'DEV']
 
@@ -166,7 +180,7 @@ export function WhySystemForge() {
     <section
       ref={sectionRef}
       data-testid="section-why"
-      aria-label="Por que escolher a SystemForge"
+      aria-label={messages.sections.why.ariaLabel}
       className="relative w-full overflow-hidden bg-background py-20 md:py-28"
     >
       {/* Separador superior */}
@@ -195,15 +209,20 @@ export function WhySystemForge() {
               <div className="flex items-center gap-2">
                 <div className="h-px w-8 bg-primary" aria-hidden="true" />
                 <span className="text-sm font-semibold text-primary uppercase tracking-widest">
-                  Por que a SystemForge
+                  {locale === 'it-IT' ? 'Perché SystemForge'
+                    : locale === 'en' ? 'Why SystemForge'
+                    : 'Por que a SystemForge'}
                 </span>
               </div>
               <h2 className="text-[32px] sm:text-[40px] font-semibold text-foreground leading-tight">
-                Não somos mais uma{' '}
-                <span className="text-muted-foreground">agência de software</span>
+                {locale === 'it-IT' ? <>Non siamo una semplice <span className="text-muted-foreground">agenzia software</span></>
+                  : locale === 'en' ? <>We&apos;re Not Just Another <span className="text-muted-foreground">Software Agency</span></>
+                  : <>Não somos mais uma{' '}<span className="text-muted-foreground">agência de software</span></>}
               </h2>
               <p className="text-base text-muted-foreground leading-relaxed max-w-xl">
-                Processo claro, documentação rigorosa e comprometimento real com o sucesso do seu projeto.
+                {locale === 'it-IT' ? 'Processo chiaro, documentazione rigorosa e impegno reale nel successo del tuo progetto.'
+                  : locale === 'en' ? 'Clear process, rigorous documentation and genuine commitment to the success of your project.'
+                  : 'Processo claro, documentação rigorosa e comprometimento real com o sucesso do seu projeto.'}
               </p>
             </div>
 

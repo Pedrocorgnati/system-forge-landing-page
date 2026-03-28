@@ -1,0 +1,143 @@
+---
+title: "Software para petshops: agendamento e prontuário"
+slug: "software-petshops-agendamento-prontuario"
+date: "2024-10-29"
+description: "Requisitos de sistema para petshop: agenda de banho e tosa, prontuário veterinário, vacinas, lembretes automáticos e programa de fidelidade."
+tags: ["petshop", "software veterinario", "agendamento", "gestao setorial", "fidelizacao"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Requisitos de sistema para petshop: agenda de banho e tosa, prontuário veterinário, vacinas, lembretes automáticos e programa de fidelidade."
+---
+
+O petshop é um negócio com um fluxo operacional que sistemas genéricos de agendamento e gestão simplesmente ignoram. Um salão de beleza agenda pessoas. Um petshop agenda pets — e pets têm raça, porte, temperamento e necessidades específicas que afetam diretamente o tempo de serviço, a capacidade da agenda e a abordagem do tosador. Um Golden Retriever de 30kg demora três vezes mais no banho e tosa do que um Pinscher de 3kg. Um cachorro ansioso ou agressivo precisa de horário isolado. Isso não é capricho operacional — é a diferença entre uma agenda que funciona e uma que gera caos.
+
+Além do agendamento especializado, um petshop completo (ou pet-clínica) precisa de prontuário veterinário, controle de vacinas, lembretes automáticos para tutores e um programa de fidelidade que incentive a recorrência. Este artigo mapeia os requisitos técnicos e funcionais de cada uma dessas dimensões.
+
+## Agenda de Banho e Tosa: Duração, Conflitos e Capacidade
+
+O diferencial mais importante de um sistema de agendamento para petshop em relação a qualquer ferramenta genérica é o cálculo dinâmico de duração do serviço. A duração não é fixa por tipo de serviço — ela é função de múltiplos atributos do pet.
+
+Os fatores que afetam a duração do banho e tosa:
+
+| Fator | Impacto na duração |
+|-------|--------------------|
+| Porte (pequeno, médio, grande, gigante) | Multiplicador base (30min a 3h) |
+| Raça (pelagem lisa, média, longa, dupla camada) | +20% a +100% para pelagens longas |
+| Estado da pelagem (emaranhada, suada, muito suja) | +30% a +60% para casos extremos |
+| Temperamento (calmo, agitado, agressivo) | +0% a +50% para animais difíceis |
+| Tipo de serviço (só banho, banho+tosa, tosa higiênica) | Componentes aditivos |
+
+O sistema deve permitir que cada estabelecimento configure sua própria tabela de duração, já que a velocidade dos profissionais e o equipamento disponível variam.
+
+Com as durações calculadas, a agenda precisa gerenciar:
+
+**Capacidade por profissional**: cada tosador/banhista tem uma agenda própria. Dois agendamentos simultâneos para o mesmo profissional precisam ser detectados e bloqueados.
+
+**Capacidade de secagem**: banheiros com secadores têm capacidade física. Um pet no secador durante 40 minutos ocupa o equipamento mesmo que o profissional esteja livre para receber o próximo.
+
+**Conflitos de agenda**: além do profissional, o sistema deve verificar disponibilidade do espaço físico (box de banho) se a capacidade for limitante.
+
+**Agendamento online para tutores**: um portal ou WhatsApp bot onde o tutor pode ver os horários disponíveis e agendar sem ligar para o estabelecimento, respeitando todas as restrições de capacidade.
+
+**Lista de espera**: para horários cheios, o sistema deve oferecer cadastro em lista de espera com notificação automática se abrir vaga por cancelamento.
+
+```javascript
+// Exemplo de cálculo de duração dinâmica
+function calcularDuracao(pet, servico, config) {
+  const duracaoBase = config.duracaoBase[pet.porte][servico.tipo]; // em minutos
+
+  const fatorRaca = config.fatorRaca[pet.raca] ?? 1.0;
+  const fatorTemperamento = config.fatorTemperamento[pet.temperamento] ?? 1.0;
+  const fatorPelagem = pet.pelagemEmbaranhada ? 1.4 : 1.0;
+
+  const duracaoCalculada = Math.ceil(
+    duracaoBase * fatorRaca * fatorTemperamento * fatorPelagem
+  );
+
+  // Arredonda para o próximo slot (geralmente 30 min)
+  const slotMinutos = 30;
+  return Math.ceil(duracaoCalculada / slotMinutos) * slotMinutos;
+}
+```
+
+## Prontuário do Pet: Histórico Médico e Vacinas
+
+Para petshops que possuem médico veterinário (seja para consultas, vacinação ou internação), o prontuário do animal é tão importante quanto o histórico de serviços. E para petshops sem veterinário, o registro das vacinas ainda é essencial — tutores frequentemente pedem comprovante na hora de agendar serviços.
+
+O prontuário do pet deve incluir:
+
+**Dados cadastrais do animal**: nome, espécie, raça, data de nascimento, sexo, peso atual, cor e marcações. Microchip quando disponível.
+
+**Histórico de peso**: gráfico de evolução de peso ao longo das visitas, útil para identificar ganho ou perda relevante.
+
+**Vacinas e vermifugações**: registro de cada vacina com data de aplicação, lote, fabricante, veterinário responsável e data de reforço. O sistema deve gerar alertas automáticos para tutores quando o reforço estiver próximo.
+
+**Histórico de consultas e procedimentos**: anotações clínicas em ordem cronológica com data e responsável.
+
+**Alergias e condições especiais**: campo de destaque visível em todas as telas do pet para informações críticas — alergia a determinado medicamento, condição cardíaca que contraindicada determinado procedimento, histórico de crise convulsiva.
+
+**Exames e laudos**: upload de arquivos de exames laboratoriais, radiografias e laudos externos com data e referência do laboratório.
+
+Para conformidade com o CFMV (Conselho Federal de Medicina Veterinária), o prontuário veterinário digital deve seguir princípios similares ao prontuário humano — imutabilidade, identificação do responsável e rastreabilidade de alterações.
+
+## Lembretes Automáticos: WhatsApp e Email por Gatilho
+
+A retenção de clientes em petshops é fortemente correlacionada com a frequência de lembretes relevantes. Um tutor que recebe uma mensagem personalizada lembrando que o reforço da vacina antirrábica do seu pet vence em 15 dias tem muito mais probabilidade de agendar do que aquele que precisa lembrar sozinho.
+
+Os gatilhos de comunicação automática mais importantes:
+
+**Lembrete de agendamento**: 24h antes do horário agendado, com confirmação interativa (responder "1" para confirmar ou "2" para cancelar).
+
+**Reforço de vacina**: calculado com base na data de aplicação + intervalo do tipo de vacina, enviado com 30 dias e 7 dias de antecedência.
+
+**Retorno pós-serviço**: 7 dias após o banho e tosa, mensagem perguntando como ficou e sugerindo agendamento do próximo.
+
+**Aniversário do pet**: mensagem de parabéns no aniversário do animal com oferta especial (desconto no banho, brinquedo de brinde).
+
+**Inatividade**: cliente que não agenda há 60 dias recebe mensagem personalizada com incentivo para retornar.
+
+A implementação de lembretes por WhatsApp requer a API oficial do WhatsApp Business (Meta), que exige aprovação de templates de mensagem pela Meta antes do uso. Templates não aprovados resultam em bloqueio da conta. Para email, plataformas como SendGrid, Postmark ou Amazon SES oferecem deliverability confiável.
+
+A arquitetura recomendada usa uma fila de mensagens (RabbitMQ, Redis Queue ou SQS) com workers que processam os envios de forma assíncrona, evitando que o volume de lembretes impacte o desempenho do sistema principal.
+
+## Programa de Fidelidade: Pontos, Cashback ou Pacotes
+
+Petshops têm uma vantagem enorme para fidelização: o serviço é recorrente por natureza. Um pet que precisa de banho a cada 30 dias é uma visita garantida todo mês. O desafio é garantir que essa recorrência aconteça com o seu petshop, não com o concorrente.
+
+As três abordagens mais eficazes de fidelização para petshops:
+
+**Pontos por serviço**: cada R$ gasto acumula pontos que podem ser trocados por descontos, serviços gratuitos ou produtos. Simples de entender pelo tutor, mas exige regras claras sobre expiração e resgate.
+
+**Cashback progressivo**: a cada X serviços de banho e tosa, o próximo é gratuito ou com desconto. "No 10º banho, ganhe 50% de desconto" é uma mecânica simples e de alto impacto visual — o tutor consegue acompanhar seu progresso facilmente.
+
+**Pacotes mensais/trimestrais**: o tutor paga antecipadamente por um pacote de serviços (ex: 4 banhos por mês por R$ 120, com desconto em relação ao preço avulso). Garante previsibilidade de caixa para o petshop e cria inércia de fidelização — o tutor já pagou, então vai usar.
+
+No sistema, o programa de fidelidade precisa:
+
+- Saldo de pontos ou créditos em tempo real visível para o atendente na tela do cliente
+- Histórico de acúmulo e resgate com data e serviço referenciado
+- Regras configuráveis pelo admin (multiplicadores em dias específicos, pontos extras para serviços premium)
+- Relatório de passivo de pontos — quanto o estabelecimento deve em pontos acumulados não resgatados
+
+```
+Exemplo de regra de pacote:
+- Pacote Ouro: 4 banhos/mês para porte pequeno → R$ 100/mês (vs R$ 35 avulso)
+- Pacote Prata: 2 banhos/mês para porte médio → R$ 120/mês (vs R$ 70 avulso)
+- Válido por 30 dias corridos da ativação
+- Saldo não utilizado não acumula para o mês seguinte
+- Cancelamento com reembolso proporcional até 5 dias após ativação
+```
+
+O sistema deve controlar o consumo do pacote em tempo real e bloquear agendamentos quando o limite mensal for atingido, sem depender de controle manual pelo atendente.
+
+## Conclusão
+
+Um petshop eficiente em 2024 não opera mais com agenda em papel e lembretes no WhatsApp pessoal do dono. A concorrência aumentou, o custo de aquisição de cliente subiu e a retenção virou o principal driver de crescimento do negócio.
+
+Um sistema especializado não é um diferencial competitivo — é a infraestrutura básica para operar com eficiência. A diferença entre um sistema genérico e um sistema pensado para petshops aparece na prática: na agenda que realmente respeita a capacidade dos profissionais, nos lembretes que chegam na hora certa para o tutor certo, no prontuário que o veterinário confia.
+
+A SystemForge desenvolve sistemas de gestão setorial com foco nos processos específicos de cada vertical. Se você tem um petshop ou uma rede e está avaliando modernizar a gestão, vamos conversar sobre o que faz sentido para o seu modelo de operação.

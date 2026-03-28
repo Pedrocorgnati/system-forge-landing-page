@@ -5,6 +5,9 @@ import { BlogPreviewCards } from '@/components/blog/BlogPreviewCards'
 import { ROUTES } from '@/lib/constants'
 import { blog as allArticles } from '@/.velite'
 import type { ArticleFrontmatter } from '@/lib/types'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 
 function getLatestArticles(count: number): ArticleFrontmatter[] {
   return [...allArticles]
@@ -29,7 +32,7 @@ export function BlogPreview() {
     return (
       <section
         data-testid="section-blog"
-        aria-label="Blog"
+        aria-label={messages.sections.blog.ariaLabel}
         className="section-blog w-full bg-surface py-16 md:py-20"
       >
         <Container>
@@ -38,10 +41,9 @@ export function BlogPreview() {
               ✍️
             </div>
             <div className="text-center flex flex-col gap-2">
-              <h3 className="font-semibold text-foreground">Artigos chegando em breve</h3>
+              <h3 className="font-semibold text-foreground">{messages.sections.blogPreview.emptyTitle}</h3>
               <p className="text-sm text-muted-foreground max-w-xs">
-                Estamos preparando conteúdo de qualidade sobre desenvolvimento de software,
-                IA e estratégias de produto.
+                {messages.sections.blogPreview.emptyDescription}
               </p>
             </div>
           </div>
@@ -73,7 +75,7 @@ export function BlogPreview() {
               data-testid="blog-view-all-link"
               className="group shrink-0 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md"
             >
-              Ver todos os artigos
+              {messages.cta.viewAllArticles}
               <ArrowRight className="w-4 h-4 transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
             </Link>
           </div>

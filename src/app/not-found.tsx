@@ -1,43 +1,38 @@
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 import Link from 'next/link'
-import { Container } from '@/components/ui/Container'
-import { ROUTES } from '@/lib/constants'
+import { Home, MessageCircle } from 'lucide-react'
 
 export default function NotFound() {
+  const config = getSiteConfig()
+  const messages = loadMessages()
+  const m = messages.notFound
+
   return (
-    <section data-testid="page-not-found" className="flex-1 flex items-center justify-center py-20">
-      <Container>
-        <div className="flex flex-col items-center gap-6 text-center max-w-lg mx-auto">
-          <div
-            className="w-24 h-24 rounded-full bg-accent flex items-center justify-center text-4xl"
-            aria-hidden="true"
+    <main data-testid="notfound-page" className="min-h-[70vh] flex items-center justify-center px-4">
+      <div className="text-center max-w-md">
+        <p data-testid="notfound-error-code" className="text-8xl font-bold text-primary/20">{m.code}</p>
+        <h1 data-testid="notfound-heading" className="mt-4 text-3xl font-bold text-foreground">{m.title}</h1>
+        <p className="mt-3 text-lg text-foreground/60">{m.description}</p>
+        <div className="mt-8 flex gap-4 justify-center flex-col sm:flex-row">
+          <Link
+            href={config.routes.home}
+            data-testid="notfound-home-link"
+            className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[44px]"
           >
-            🔍
-          </div>
-          <div className="flex flex-col gap-3">
-            <h1 className="text-6xl font-bold text-primary">404</h1>
-            <h2 className="text-2xl font-semibold text-foreground">Página não encontrada</h2>
-            <p className="text-muted-foreground leading-relaxed">
-              A página que você está procurando não existe ou foi movida.
-            </p>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Link
-              href={ROUTES.home}
-              data-testid="not-found-home-link"
-              className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl bg-primary text-primary-foreground font-medium hover:bg-primary-hover transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] min-h-[44px]"
-            >
-              Voltar ao início
-            </Link>
-            <Link
-              href={ROUTES.contato}
-              data-testid="not-found-contact-link"
-              className="inline-flex items-center justify-center px-6 py-2.5 rounded-xl border border-border text-foreground font-medium hover:bg-muted transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] min-h-[44px]"
-            >
-              Falar conosco
-            </Link>
-          </div>
+            <Home className="w-4 h-4" />
+            {m.homeButton}
+          </Link>
+          <Link
+            href={config.routes.contact}
+            data-testid="notfound-contact-link"
+            className="inline-flex items-center justify-center gap-2 h-11 px-6 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent transition-colors focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 min-h-[44px]"
+          >
+            <MessageCircle className="w-4 h-4" />
+            {m.contactButton}
+          </Link>
         </div>
-      </Container>
-    </section>
+      </div>
+    </main>
   )
 }

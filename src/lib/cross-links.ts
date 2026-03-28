@@ -8,23 +8,32 @@
  * os artigos MDX devem incluir no frontmatter:
  *
  *   relatedService: ServiceCategory  (ex: "saas", "aplicativo-mobile")
+ *   locale: SupportedLocale          (ex: "pt-BR", "it-IT", "en")
  *
- * Sem esse campo, o artigo não aparecerá como "Artigo Relacionado"
- * nas páginas de serviço e o CTA contextual do artigo não será gerado.
+ * Campos opcionais para controle de visibilidade entre locales:
+ *   hreflang_pair: 'universal'       (artigo aparece em todos os builds)
+ *   exclusive: true                  (artigo apenas no seu locale)
  *
  * Ver: module-7-blog-pipeline/TASK-1.md (ST003) para a estrutura de frontmatter.
  *
- * // Contrato cross-rock: module-7 deve setar relatedService no frontmatter
+ * // Contrato cross-rock: module-7 deve setar relatedService e locale no frontmatter
  */
 import { ServiceCategory } from '@/lib/types'
 import type { ArticleFrontmatter, PortfolioProject } from '@/lib/types'
+import type { SupportedLocale } from '@config/types'
+import { getActiveLocale } from '@/lib/i18n'
 
 /**
- * Retorna os artigos relacionados a um serviço específico.
- * Filtra por `article.relatedService === service` e limita a 3 resultados.
+ * Retorna os artigos relacionados a um serviço específico, filtrados por locale.
+ *
+ * Regras de filtro:
+ * - `article.relatedService === service` (filtro por categoria)
+ * - `article.locale === locale` OU `article.hreflang_pair === 'universal'`
+ * - Exclui artigos com `exclusive === true` cujo `article.locale !== locale`
  *
  * @param service - ServiceCategory do serviço
  * @param articles - Array completo de ArticleFrontmatter do Velite
+ * @param locale - Locale ativo do build. Default: getActiveLocale()
  * @returns Array de até 3 ArticleFrontmatter relacionados
  *
  * Usado por:
@@ -34,17 +43,38 @@ import type { ArticleFrontmatter, PortfolioProject } from '@/lib/types'
 export function getRelatedArticles(
   service: ServiceCategory,
   articles: ArticleFrontmatter[],
+  locale: SupportedLocale = getActiveLocale(),
 ): ArticleFrontmatter[] {
-  return articles.filter((a) => a.relatedService === service).slice(0, 3)
+  return articles
+    .filter((a) => {
+      // Filtro por serviço relacionado
+      if (a.relatedService !== service) return false
+
+      // Artigos com hreflang_pair aparecem em múltiplos locales
+      if (a.hreflang_pair && a.hreflang_pair.length > 0) return true
+
+      // Artigos exclusivos de outro locale são excluídos
+      if (a.exclusive === true && a.locale !== locale) return false
+
+      // Artigos sem locale definido aparecem em todos os builds (backwards compat)
+      if (!a.locale) return true
+
+      return a.locale === locale
+    })
+    .slice(0, 3)
 }
 
 /**
- * Retorna os projetos do portfólio relacionados a um serviço específico.
- * Filtra por `project.categories.includes(service)`.
+ * Retorna os projetos do portfólio relacionados a um serviço específico, filtrados por locale.
+ *
+ * Regras de filtro:
+ * - `project.categories.includes(service)` (filtro por categoria)
+ * - `project.locale === locale` OU `!project.locale` (sem locale = aparece em todos os builds)
  *
  * @param service - ServiceCategory do serviço
  * @param projects - Array completo de PortfolioProject
- * @returns Array de PortfolioProject relacionados (sem limite)
+ * @param locale - Locale ativo do build. Default: getActiveLocale()
+ * @returns Array de PortfolioProject relacionados
  *
  * Usado por:
  * - module-6: app/servicos/[slug]/page.tsx (RelatedProjects na ServicePage)
@@ -52,6 +82,12 @@ export function getRelatedArticles(
 export function getRelatedProjects(
   service: ServiceCategory,
   projects: PortfolioProject[],
+  locale: SupportedLocale = getActiveLocale(),
 ): PortfolioProject[] {
-  return projects.filter((p) => p.categories.includes(service))
+  return projects.filter(
+    (p) =>
+      p.categories.includes(service) &&
+      // Projetos sem locale definido são neutros — aparecem em todos os builds
+      (!p.locale || p.locale === locale),
+  )
 }

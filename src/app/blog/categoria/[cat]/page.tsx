@@ -12,8 +12,13 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
-import { BLOG_ITEMS_PER_PAGE, SITE } from '@/lib/constants/site'
+import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
 import type { ArticleFrontmatter } from '@/lib/types'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 interface PageProps {
   params: Promise<{ cat: string }>
@@ -28,8 +33,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { cat } = await params
   const decoded = decodeURIComponent(cat)
   return generatePageMetadata({
-    title: `${decoded} — Blog SystemForge`,
-    description: `Artigos sobre ${decoded} no blog da SystemForge.`,
+    title: `${decoded} — Blog ${config.siteName}`,
+    description: `Artigos sobre ${decoded} no blog da ${config.siteName}.`,
     path: ROUTES.BLOG_CATEGORY(cat),
   })
 }
@@ -62,20 +67,20 @@ export default async function BlogCategoryPage({ params }: PageProps) {
     .map(([tag]) => tag)
 
   const breadcrumbs = [
-    { label: 'Blog', href: ROUTES.BLOG },
+    { label: messages.breadcrumb.blog, href: ROUTES.BLOG },
     { label: decoded, href: '' },
   ]
 
   const categorySchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: `${decoded} — Blog SystemForge`,
-    description: `Artigos sobre ${decoded} no blog da SystemForge.`,
-    url: `${SITE.url}${ROUTES.BLOG_CATEGORY(cat)}`,
+    name: `${decoded} — Blog ${config.siteName}`,
+    description: `Artigos sobre ${decoded} no blog da ${config.siteName}.`,
+    url: `${config.url}${ROUTES.BLOG_CATEGORY(cat)}`,
     publisher: {
       '@type': 'Organization',
-      name: SITE.name,
-      url: SITE.url,
+      name: config.siteName,
+      url: config.url,
     },
   }
 
@@ -93,7 +98,7 @@ export default async function BlogCategoryPage({ params }: PageProps) {
             </h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
               {sorted.length === 0
-                ? `Nenhum artigo encontrado nesta categoria.`
+                ? messages.empty.blog
                 : `${sorted.length} ${sorted.length === 1 ? 'artigo' : 'artigos'} nesta categoria.`}
             </p>
           </div>

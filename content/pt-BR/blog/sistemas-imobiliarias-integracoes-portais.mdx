@@ -1,0 +1,141 @@
+---
+title: "Sistemas para imobiliárias: integração com portais"
+slug: "sistemas-imobiliarias-integracoes-portais"
+date: "2024-11-26"
+description: "Requisitos de CRM imobiliário: gestão de imóveis, integração com ZAP Imóveis/OLX/VivaReal, contratos digitais e comissões de corretores."
+tags: ["imobiliaria", "crm imobiliario", "zap imoveis", "gestao setorial", "integracao portais"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Requisitos de CRM imobiliário: gestão de imóveis, integração com ZAP Imóveis/OLX/VivaReal, contratos digitais e comissões de corretores."
+---
+
+Uma imobiliária sem integração com os portais de anúncios perde listagens toda semana. Não por falta de imóveis — mas porque a atualização manual de anúncios em ZAP Imóveis, OLX, VivaReal e no próprio site é um trabalho que nenhuma equipe mantém com consistência. Um imóvel vendido continua anunciado por dias, gerando leads de qualidade zero. Um novo imóvel cadastrado demora uma semana para aparecer nos portais porque o coordenador de anúncios estava de férias. Um preço atualizado no sistema interno não reflete nos portais até alguém lembrar de atualizar manualmente.
+
+O CRM imobiliário moderno não é apenas uma agenda de leads e uma planilha de imóveis. É a fonte única da verdade para o portfólio, com sincronização automática para todos os canais, gestão documental de contratos, assinatura eletrônica e cálculo automático de comissões. Este artigo detalha os requisitos técnicos de cada um desses pilares.
+
+## Integração com ZAP Imóveis, OLX e VivaReal via API
+
+Os três maiores portais imobiliários do Brasil (ZAP Imóveis, VivaReal e OLX Imóveis) fazem parte do mesmo grupo econômico (OLX Group / Grupo ZAP) mas mantêm APIs e sistemas de publicação distintos. A integração com eles segue dois modelos principais:
+
+**Modelo XML Feed**: o sistema da imobiliária gera um arquivo XML padronizado com todos os imóveis disponíveis. O portal "puxa" esse XML em intervalos regulares (geralmente a cada 2-4 horas) e atualiza as listagens. É o modelo mais simples de implementar e o mais comum para imobiliárias de médio porte.
+
+**Modelo API REST**: integração direta via API para criar, atualizar e remover anúncios em tempo real. Requer credenciais de parceiro junto ao portal e oferece sincronização mais ágil.
+
+O padrão XML do mercado imobiliário brasileiro é o **GesimXML** (ou variações proprietárias de cada portal), baseado em um schema que inclui:
+
+```xml
+<Imovel>
+  <CodigoImovel>IMV-2024-001</CodigoImovel>
+  <TipoImovel>Apartamento</TipoImovel>
+  <SubTipoImovel>Padrão</SubTipoImovel>
+  <Cidade>São Paulo</Cidade>
+  <Bairro>Pinheiros</Bairro>
+  <UF>SP</UF>
+  <CEP>05422-000</CEP>
+  <TipoTransacao>Venda</TipoTransacao>
+  <PrecoVenda>850000.00</PrecoVenda>
+  <PrecoCondominio>1200.00</PrecoCondominio>
+  <PrecoIPTU>350.00</PrecoIPTU>
+  <AreaUtil>78</AreaUtil>
+  <AreaTotal>92</AreaTotal>
+  <QtdDormitorios>2</QtdDormitorios>
+  <QtdSuites>1</QtdSuites>
+  <QtdVagas>1</QtdVagas>
+  <Descricao><![CDATA[Apartamento bem localizado...]]></Descricao>
+  <Fotos>
+    <Foto Ordem="1">https://cdn.imobiliaria.com.br/fotos/imv001-1.jpg</Foto>
+    <Foto Ordem="2">https://cdn.imobiliaria.com.br/fotos/imv001-2.jpg</Foto>
+  </Fotos>
+  <Status>Disponível</Status>
+</Imovel>
+```
+
+A arquitetura de sincronização ideal envolve:
+
+1. **Banco de imóveis como fonte de verdade**: qualquer alteração (preço, status, fotos) é feita uma única vez no sistema da imobiliária.
+2. **Geração automática do XML feed**: job que regenera o arquivo XML a cada atualização ou em intervalos configuráveis.
+3. **Webhook de status**: quando um portal notifica que um anúncio foi desativado por política (foto inadequada, preço fora de mercado), o sistema interno recebe a notificação e alerta o responsável.
+4. **Log de sincronização**: histórico de quando cada imóvel foi enviado a cada portal, com status de confirmação ou erro.
+
+Para portais menores ou sites próprios da imobiliária, a integração via API REST é mais adequada. O sistema interno expõe um endpoint que o site consome diretamente:
+
+```
+GET /api/imoveis?tipo=apartamento&bairro=pinheiros&preco_max=900000
+GET /api/imoveis/{codigo}
+GET /api/imoveis/{codigo}/fotos
+```
+
+## Gestão de Imóveis: Fotos, Plantas e Documentos
+
+A qualidade das fotos é o principal fator de conversão em anúncios imobiliários — mais do que preço ou localização no posicionamento dos portais. O sistema precisa de uma gestão robusta de mídia.
+
+**Upload e otimização automática**: fotos enviadas pelo corretor devem ser redimensionadas, convertidas para WebP e armazenadas em CDN com URLs permanentes. O sistema não deve aceitar fotos abaixo de uma resolução mínima (ex: 1280×720px).
+
+**Ordenação e seleção de capa**: o corretor deve poder definir a ordem das fotos e selecionar a imagem de capa. A foto de capa é o thumbnail nos resultados de busca dos portais — tem impacto direto no CTR do anúncio.
+
+**Plantas baixas e vídeos**: além de fotos, o sistema deve suportar upload de plantas baixas (PDF ou imagem), vídeos de tour virtual e links de tour 360° (Matterport, Google Street View).
+
+**Documentos do imóvel**: escritura, matrícula atualizada, habite-se, IPTU, laudo de vistoria. Cada documento com data de validade e alertas de vencimento para documentos periódicos.
+
+**Histórico de fotos**: quando o imóvel é reformado ou tem fotos atualizadas, o histórico anterior deve ser preservado (com flag de "arquivado"), não deletado — útil para contestações sobre estado do imóvel.
+
+| Tipo de mídia | Formatos aceitos | Tamanho máximo | Armazenamento |
+|---------------|-----------------|----------------|---------------|
+| Fotos | JPG, PNG, HEIC | 20MB | CDN (S3 + CloudFront) |
+| Plantas | PDF, JPG | 50MB | S3 com acesso controlado |
+| Vídeos | MP4 | 500MB | S3 ou link externo (YouTube) |
+| Documentos | PDF | 20MB | S3 com acesso restrito |
+
+## Contratos Digitais com Assinatura Eletrônica
+
+A assinatura eletrônica de contratos imobiliários tornou-se juridicamente válida no Brasil com a Lei 14.063/2020, que equiparou contratos com assinatura eletrônica a documentos físicos para a maioria das transações civis — incluindo compra e venda e locação de imóveis (com exceções para contratos que exigem registro em cartório com fé pública).
+
+Para a imobiliária, a digitalização do processo de contrato elimina o vai-e-vem de documentos físicos, reduz o tempo de fechamento de 15 dias para 24-48 horas e cria um arquivo auditável de todas as assinaturas.
+
+O fluxo de contrato digital integrado ao CRM:
+
+1. **Geração do contrato**: seleção do template (locação residencial, compra e venda, autorização de venda), preenchimento automático com dados do imóvel, partes envolvidas e condições negociadas.
+2. **Revisão interna**: gestor aprova a versão do contrato antes de enviar para assinatura.
+3. **Envio para assinatura**: link seguro enviado para todas as partes (locatário, locador, fiador, testemunhas) por email e WhatsApp.
+4. **Assinatura eletrônica**: cada parte assina com certificado digital ICP-Brasil (assinatura qualificada) ou por autenticação com CPF + selfie + biometria (assinatura avançada, válida para locação por determinação legal).
+5. **Registro e armazenamento**: documento final assinado por todas as partes, com carimbo de tempo ICP-Brasil, armazenado vinculado ao imóvel e às partes no CRM.
+6. **Notificações**: alertas automáticos para assinaturas pendentes e confirmação quando todas as partes assinaram.
+
+As plataformas de assinatura eletrônica mais usadas no mercado brasileiro com API para integração são ClickSign, DocuSign e D4Sign. A D4Sign tem maior uso em imobiliárias por ter suporte a certificados ICP-Brasil A1/A3 e preços mais acessíveis para o volume típico do setor.
+
+## Comissões e Repasses: Cálculo Automático por Negócio
+
+O cálculo de comissões em imobiliárias é uma fonte recorrente de conflitos quando feito manualmente. Quem angariou o imóvel, quem trouxe o comprador, como é dividida a comissão em casos de co-corretagem — cada regra precisa estar no sistema para que o repasse seja transparente e rastreável.
+
+As regras de comissão variam por imobiliária, mas os padrões mais comuns são:
+
+**Comissão por transação**: percentual sobre o valor da transação (5% a 8% para venda, 1 mês de aluguel para locação). O sistema calcula automaticamente ao fechar o negócio.
+
+**Divisão por papel**:
+- Corretor angariador (quem captou o imóvel): 30-40% da comissão total
+- Corretor vendedor (quem trouxe o comprador): 30-40% da comissão total
+- Imobiliária: 20-40% da comissão total
+
+**Co-corretagem**: quando duas imobiliárias participam da transação, a comissão é dividida entre elas conforme acordo prévio. O sistema deve suportar negócios com múltiplas imobiliárias envolvidas.
+
+**Comissão parcelada**: em vendas financiadas, a comissão pode ser recebida em partes (na assinatura do contrato, no registro e na entrega das chaves). O sistema deve controlar os valores a receber em cada etapa.
+
+O módulo financeiro de comissões deve incluir:
+
+- Dashboard por corretor com comissões realizadas, a receber e projetadas
+- Relatório mensal de produção individual e por equipe
+- Nota de comissão (documento para o corretor autônomo emitir RPA ou NF de autônomo)
+- Integração com folha de pagamento ou sistema contábil para os corretores CLT
+- Histórico completo de cada negócio com todas as partes e percentuais aplicados
+
+## Conclusão
+
+O CRM imobiliário não é apenas uma agenda de contatos e uma lista de imóveis. É a infraestrutura operacional que determina a velocidade de fechamento, a qualidade dos anúncios nos portais, a agilidade na documentação e a transparência nas comissões.
+
+Imobiliárias que ainda operam com planilha + WhatsApp + Google Drive pagam um custo invisível alto: leads perdidos por anúncio desatualizado, contratos atrasados por documento físico extraviado, corretores insatisfeitos por comissão calculada manualmente de forma opaca.
+
+A SystemForge desenvolve CRMs imobiliários com integração nativa aos principais portais, gestão documental completa e módulo financeiro de comissões parametrizável. Se você está reformulando o sistema da sua imobiliária ou construindo uma solução para o setor, vamos conversar sobre o escopo ideal para o seu modelo de negócio.

@@ -24,12 +24,12 @@ export function RelatedArticles({ articles, serviceName }: RelatedArticlesProps)
     <Section id="artigos-relacionados">
       <Container>
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
+          <h2 data-testid="related-articles-heading" className="text-2xl sm:text-3xl font-bold text-foreground">
             Artigos Relacionados
           </h2>
 
           {articles.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
+            <div data-testid="related-articles-empty" className="text-center py-8 text-muted-foreground">
               <p>Em breve: artigos especializados sobre {serviceName}.</p>
               <p className="mt-2">
                 <Link
@@ -42,12 +42,14 @@ export function RelatedArticles({ articles, serviceName }: RelatedArticlesProps)
             </div>
           ) : (
             <div
+              data-testid="related-articles-grid"
               role="list"
               className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
             >
               {articles.map((article) => (
                 <div
                   key={article.slug}
+                  data-testid={`related-article-${article.slug}`}
                   role="listitem"
                   className="flex flex-col gap-3 p-5 rounded-xl border border-border bg-card hover:border-primary/40 hover:shadow-md transition-all duration-200"
                 >

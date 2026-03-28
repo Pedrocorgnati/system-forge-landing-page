@@ -79,6 +79,7 @@ export function CTAContextual({ relatedService }: CTAContextualProps) {
 
   return (
     <section
+      data-testid="blog-cta-contextual"
       aria-labelledby="cta-contextual-heading"
       className="my-10 p-6 sm:p-8 rounded-2xl bg-accent/30 border border-border"
     >

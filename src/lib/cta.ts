@@ -1,13 +1,12 @@
 import { ConversionAction, type CTAConfig } from './types'
-import { SITE } from './constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 
-// Validação de href de CTA — permite apenas URLs externas seguras
 export function isAllowedCTAHref(href: string): boolean {
   try {
     const url = new URL(href)
     return ['https:', 'http:'].includes(url.protocol)
   } catch {
-    // Links relativos (anchors, etc.) também são permitidos
     return href.startsWith('/') || href.startsWith('#') || href.startsWith('wa.me')
   }
 }
@@ -20,36 +19,55 @@ export function buildWhatsAppUrl(phone: string, message?: string): string {
   return base
 }
 
+/**
+ * Builds locale-aware default CTAs.
+ */
 export function buildDefaultCTAs(context?: string): CTAConfig[] {
-  const waMessage = context
-    ? `Olá! Vi seu site e tenho interesse em ${context}.`
-    : 'Olá! Vi o site da SystemForge e gostaria de saber mais sobre os serviços.'
+  const config = getSiteConfig()
+  const m = loadMessages()
+
+  const locale = config.locale
+  let waMessage: string
+  if (locale === 'it-IT') {
+    waMessage = context
+      ? `Ciao! Ho visto il vostro sito e sono interessato a ${context}.`
+      : 'Ciao! Ho visto il sito di SystemForge e vorrei saperne di più sui vostri servizi.'
+  } else if (locale === 'en') {
+    waMessage = context
+      ? `Hi! I saw your website and I'm interested in ${context}.`
+      : "Hi! I saw SystemForge's website and would like to know more about your services."
+  } else {
+    waMessage = context
+      ? `Olá! Vi seu site e tenho interesse em ${context}.`
+      : 'Olá! Vi o site da SystemForge e gostaria de saber mais sobre os serviços.'
+  }
 
   return [
     {
       action: ConversionAction.WHATSAPP,
-      label: 'Falar no WhatsApp',
-      href: buildWhatsAppUrl(SITE.whatsapp, waMessage),
+      label: m.cta.whatsapp,
+      href: buildWhatsAppUrl(config.whatsapp, waMessage),
       variant: 'primary',
       icon: '💬',
     },
     {
       action: ConversionAction.CALENDLY,
-      label: 'Agendar reunião',
-      href: SITE.calendly,
+      label: m.cta.calendly,
+      href: config.calendly,
       variant: 'secondary',
       icon: '📅',
     },
     {
       action: ConversionAction.BUDGET_ENGINE,
-      label: 'Calcular orçamento grátis →',
-      href: SITE.budgetEngine,
+      label: m.cta.budget,
+      href: config.budgetEngine,
       variant: 'ghost',
     },
   ]
 }
 
 export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
+  const config = getSiteConfig()
   const message = context
     ? `Olá! Tenho interesse em ${context}.`
     : 'Olá! Vi o site da SystemForge e gostaria de saber mais.'
@@ -57,18 +75,19 @@ export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
   return {
     action: ConversionAction.WHATSAPP,
     label,
-    href: buildWhatsAppUrl(SITE.whatsapp, message),
+    href: buildWhatsAppUrl(config.whatsapp, message),
     variant: 'primary',
     icon: '💬',
   }
 }
 
 export function buildBudgetCTA(label: string, context?: string): CTAConfig {
+  const config = getSiteConfig()
   const suffix = context ? `?context=${encodeURIComponent(context)}` : ''
   return {
     action: ConversionAction.BUDGET_ENGINE,
     label,
-    href: `${SITE.budgetEngine}${suffix}`,
+    href: `${config.budgetEngine}${suffix}`,
     variant: 'secondary',
   }
 }

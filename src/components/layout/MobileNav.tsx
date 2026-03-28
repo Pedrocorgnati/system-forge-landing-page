@@ -3,8 +3,12 @@
 import { useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { X } from 'lucide-react'
-import { NAV_LINKS } from '@/lib/constants'
+import { getSiteConfig } from '@config'
+import { loadMessages } from '@config/content'
 import { cn } from '@/lib/utils'
+
+const config = getSiteConfig()
+const messages = loadMessages()
 
 interface MobileNavProps {
   isOpen: boolean
@@ -12,10 +16,15 @@ interface MobileNavProps {
   triggerRef: React.RefObject<HTMLButtonElement | null>
 }
 
+const locale = config.locale
+const DRAWER_LABEL = locale === 'it-IT' ? 'Menu di navigazione'
+  : locale === 'en' ? 'Navigation menu'
+  : 'Menu de navegação'
+const DRAWER_TITLE = 'Menu'
+
 export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
   const firstLinkRef = useRef<HTMLAnchorElement>(null)
 
-  // Focus no primeiro link ao abrir
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -28,7 +37,6 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
     }
   }, [isOpen])
 
-  // Fechar com ESC
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape' && isOpen) {
@@ -58,13 +66,13 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
       <div
         role="dialog"
         aria-modal="true"
-        aria-label="Menu de navegação"
+        aria-label={DRAWER_LABEL}
         data-testid="mobile-nav-drawer"
         className="fixed inset-y-0 left-0 z-50 w-[280px] bg-background shadow-xl animate-slide-in-right"
       >
         {/* Header do drawer */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-border">
-          <span className="text-xl font-bold text-primary">Menu</span>
+          <span className="text-xl font-bold text-primary">{DRAWER_TITLE}</span>
           <button
             data-testid="mobile-nav-close-button"
             onClick={() => {
@@ -76,7 +84,7 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
               'text-foreground hover:bg-accent transition-colors',
               'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
             )}
-            aria-label="Fechar menu"
+            aria-label={messages.accessibility.closeMenu}
           >
             <X className="w-5 h-5" />
           </button>
@@ -85,7 +93,7 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
         {/* Links */}
         <nav>
           <ul className="py-2">
-            {NAV_LINKS.map((link, index) => (
+            {config.navigation.map((link, index) => (
               <li key={link.href}>
                 <Link
                   ref={index === 0 ? firstLinkRef : undefined}
