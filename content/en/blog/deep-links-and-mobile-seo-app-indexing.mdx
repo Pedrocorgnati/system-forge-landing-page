@@ -1,0 +1,181 @@
+---
+title: "Deep Links and Mobile SEO: App Indexing Guide"
+slug: "deep-links-and-mobile-seo-app-indexing"
+date: "2024-08-26"
+description: "Deep links in React Native — Universal Links (iOS), App Links (Android), Google indexing, and strategies to appear in mobile search results."
+tags: ["deep links", "universal links", "app links", "mobile seo", "react navigation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Deep links in React Native — Universal Links (iOS), App Links (Android), Google indexing, and strategies to appear in mobile search results.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'deep-links-app-indexing-seo-mobile'
+  - locale: 'it-IT'
+    slug: 'deep-links-indicizzazione-app-seo-mobile'
+  - locale: 'en'
+    slug: 'deep-links-and-mobile-seo-app-indexing'
+---
+
+There's an artificial divide between the web world and the app world. A user receives a link via WhatsApp, taps it on their phone — and the browser opens, loading a less functional version of the product while the installed app sits two icons away. That friction costs engagement and conversions.
+
+Deep links fix this. They connect web URLs directly to specific screens in the app, creating a seamless experience across both contexts. And when configured correctly, they also open the app to search engine indexing — what Google calls App Indexing.
+
+## Universal Links on iOS: Configuration and apple-app-site-association
+
+Universal Links are Apple's implementation for verified deep links. When a user taps a link from your domain on an iOS device with the app installed, iOS opens the app directly — no browser, no confirmation popup.
+
+The verification mechanism works like this: you host a JSON file on your domain, and Apple verifies that file during app installation to confirm you own the domain.
+
+The `apple-app-site-association` file (no extension) must be hosted at `https://yourdomain.com/.well-known/apple-app-site-association`:
+
+```json
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.yourcompany.yourapp",
+        "paths": [
+          "/products/*",
+          "/orders/*",
+          "/user/profile",
+          "NOT /admin/*"
+        ]
+      }
+    ]
+  }
+}
+```
+
+The `appID` is the concatenation of the Apple Team ID (found in the Developer Portal) with the app's Bundle ID. The `paths` define which URLs open the app — the `NOT` prefix excludes specific patterns.
+
+This file must be served with `Content-Type: application/json` and without redirects. Apple makes a direct request to the domain during app installation — if there's a redirect or the file takes time to respond, verification silently fails.
+
+In Expo's `app.json`, enable Associated Domains:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "associatedDomains": [
+        "applinks:yourdomain.com",
+        "applinks:www.yourdomain.com"
+      ]
+    }
+  }
+}
+```
+
+## App Links on Android: assetlinks.json and Intent Filters
+
+The Android equivalent is App Links, verified via Digital Asset Links. The `assetlinks.json` file lives at `https://yourdomain.com/.well-known/assetlinks.json`:
+
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.yourcompany.yourapp",
+      "sha256_cert_fingerprints": [
+        "AB:CD:EF:12:34:56:..."
+      ]
+    }
+  }
+]
+```
+
+The SHA-256 fingerprint is obtained from the production keystore:
+
+```bash
+keytool -list -v -keystore release.keystore -alias release-key
+```
+
+In `app.json`, Intent Filters are configured automatically by Expo for listed URLs, but in bare workflow projects you need to add them manually in `AndroidManifest.xml`:
+
+```xml
+<intent-filter android:autoVerify="true">
+  <action android:name="android.intent.action.VIEW" />
+  <category android:name="android.intent.category.DEFAULT" />
+  <category android:name="android.intent.category.BROWSABLE" />
+  <data android:scheme="https"
+        android:host="yourdomain.com"
+        android:pathPrefix="/products" />
+</intent-filter>
+```
+
+The `android:autoVerify="true"` attribute enables automatic verification — without it, Android shows a chooser asking whether the user wants to open in the app or browser.
+
+## React Navigation: Configuring Linking
+
+With the verification files on the server and native configurations ready, the next step is teaching React Navigation to map URLs to screens:
+
+```typescript
+import { NavigationContainer } from '@react-navigation/native';
+import { LinkingOptions } from '@react-navigation/native';
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [
+    'https://yourdomain.com',
+    'https://www.yourdomain.com',
+    'myapp://', // custom scheme for fallback
+  ],
+  config: {
+    screens: {
+      Home: '',
+      ProductDetail: 'products/:productId',
+      OrderTracking: 'orders/:orderId/track',
+      UserProfile: 'user/profile',
+      NotFound: '*',
+    },
+  },
+};
+
+export default function App() {
+  return (
+    <NavigationContainer linking={linking}>
+      {/* ... */}
+    </NavigationContainer>
+  );
+}
+```
+
+React Navigation automatically handles opening via deep link — both when launching the app from a link and when receiving the link with the app already open. In the second case, it navigates to the correct screen without restarting navigation.
+
+| Link Type | iOS | Android | Requires Verification |
+|---|---|---|---|
+| Custom scheme (`myapp://`) | Works | Works | No |
+| Universal Links / App Links | Works | Works | Yes (file on domain) |
+| Branch.io / Firebase Dynamic Links | Works | Works | SDK configuration |
+
+Custom schemes work without verification, but have an important limitation: if the app isn't installed, the link fails completely — the browser can't open `myapp://`. Universal Links and App Links have automatic fallback to the website when the app isn't installed.
+
+## Google Indexing: App Indexing and Search Console
+
+When your web pages and the corresponding app screens are connected via deep links, Google can index the app's content and show results that open directly in it. This is especially valuable for e-commerce, news, and content apps.
+
+To enable indexing, each web page needs to include the app association meta tags. Example for a product page:
+
+```html
+<!-- iOS -->
+<meta name="apple-itunes-app" content="app-id=123456789, app-argument=https://yourdomain.com/products/specialty-coffee">
+
+<!-- Android -->
+<link rel="alternate" href="android-app://com.yourcompany.yourapp/https/yourdomain.com/products/specialty-coffee">
+```
+
+In Google Search Console, the "App links" section shows which URLs have been associated and if there are any verification errors. The indexing process is not immediate — Googlebot needs to crawl the pages and validate the associations, which can take weeks.
+
+For apps with dynamic content (like products that change frequently), the website's sitemap remains the foundation of indexing. The difference is that on mobile devices, Google results can show a direct link to the app screen instead of the website.
+
+A complementary strategy is using Firebase App Indexing to index content that has no web equivalent — like configuration screens or app-exclusive features. This indexing uses the user's own application history (personal content indexing), not Google's public index.
+
+## Conclusion
+
+Well-configured deep links make the app a natural extension of the web rather than an isolated island. Users arrive from Google, shared links, notifications — and go directly to relevant content, friction-free. The configuration involves some technical steps, especially the verification part on Apple and Google servers, but the result is a significantly better user experience and an organic acquisition surface that most apps ignore.
+
+At SystemForge, we implement deep links as part of the initial setup of any app — not as an add-on feature. If you're building or refactoring an app and want to ensure the linking layer is correct from the start, our team is available to help.

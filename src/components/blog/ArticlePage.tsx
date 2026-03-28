@@ -1,5 +1,6 @@
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Container } from '@/components/ui/Container'
+import { MDXContent } from '@/components/blog/MDXContent'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { CTAContextual } from '@/components/blog/CTAContextual'
 import { SidebarCTA } from '@/components/blog/SidebarCTA'
@@ -123,8 +124,9 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
                 prose-blockquote:border-primary/50 prose-blockquote:text-muted-foreground
                 prose-strong:text-foreground
                 prose-img:rounded-lg"
-              dangerouslySetInnerHTML={{ __html: article.content }}
-            />
+            >
+              <MDXContent code={article.content} />
+            </div>
 
             {/* 4. CTAContextual */}
             <CTAContextual relatedService={article.relatedService} />

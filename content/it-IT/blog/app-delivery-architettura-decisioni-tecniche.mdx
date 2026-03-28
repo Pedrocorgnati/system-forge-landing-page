@@ -1,0 +1,236 @@
+---
+title: "App di delivery: architettura e decisioni tecniche"
+slug: "app-delivery-architettura-decisioni-tecniche"
+date: "2024-11-04"
+description: "Decisioni tecniche per app di delivery — tracking real-time con WebSocket, geolocalizzazione in background, notifiche di stato e gestione degli ordini."
+tags: ["app delivery", "tracking real-time", "geolocalizzazione", "websockets", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Decisioni tecniche per app di delivery — tracking real-time con WebSocket, geolocalizzazione in background, notifiche di stato e gestione degli ordini.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'app-de-entrega-arquitetura-decisoes-tecnicas'
+  - locale: 'it-IT'
+    slug: 'app-delivery-architettura-decisioni-tecniche'
+  - locale: 'en'
+    slug: 'delivery-app-architecture-technical-decisions'
+---
+
+Le app di delivery sembrano semplici dall'esterno: il cliente fa l'ordine, vede il fattorino sulla mappa, riceve la notifica quando è arrivato. Questa apparente semplicità nasconde un'architettura tecnica più impegnativa della maggior parte delle app consumer. La geolocalizzazione in background consuma batteria e richiede permessi speciali. Il tracking in tempo reale richiede un livello di comunicazione persistente con il server. Lo stato di un ordine cambia continuamente e deve riflettersi in modo coerente in tre app diverse — cliente, fattorino e ristorante o negozio.
+
+Ognuna di queste decisioni tecniche ha dei trade-off. Comprenderli prima di iniziare a costruire è ciò che separa un MVP che va in produzione da uno bloccato dal rilavorazione.
+
+## Geolocalizzazione in Background: Configurazione e Batteria
+
+Tracciare la posizione del fattorino in tempo reale mentre l'app è in background è uno dei requisiti più delicati di un'app di delivery. Sia iOS che Android hanno restrizioni rigorose sull'accesso alla posizione quando l'app non è in foreground — e per buone ragioni: è una risorsa che drena la batteria e solleva questioni di privacy.
+
+Su iOS, l'accesso alla posizione in background richiede:
+1. Il permesso `NSLocationAlwaysAndWhenInUseUsageDescription` nell'`Info.plist`
+2. Abilitare il Background Mode "Location updates" in Xcode
+3. Usare `startUpdatingLocation` (non `requestLocation`) per aggiornamenti continui
+
+Su Android, oltre al permesso `ACCESS_BACKGROUND_LOCATION`, a partire da Android 10 l'utente deve concedere esplicitamente l'accesso "in qualsiasi momento" — e il sistema richiede che l'app spieghi perché è necessario prima di portare l'utente alle impostazioni.
+
+Con Expo Location:
+
+```typescript
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+
+const LOCATION_TASK = 'background-location-task';
+
+// Define the task that runs in background
+TaskManager.defineTask(LOCATION_TASK, async ({ data, error }) => {
+  if (error) {
+    console.error('Background location error:', error);
+    return;
+  }
+
+  if (data) {
+    const { locations } = data as { locations: Location.LocationObject[] };
+    const location = locations[locations.length - 1];
+
+    // Send to server
+    await updateDeliveryLocation({
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
+      accuracy: location.coords.accuracy,
+      timestamp: location.timestamp,
+    });
+  }
+});
+
+async function startBackgroundTracking() {
+  const { status } = await Location.requestBackgroundPermissionsAsync();
+
+  if (status !== 'granted') {
+    // Notify the delivery driver that tracking needs the permission
+    return;
+  }
+
+  await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+    accuracy: Location.Accuracy.Balanced, // don't use High — drains battery
+    timeInterval: 5000,           // update every 5 seconds
+    distanceInterval: 10,         // or every 10 meters of movement
+    deferredUpdatesInterval: 3000,
+    showsBackgroundLocationIndicator: true, // blue bar on iOS
+    foregroundService: {          // Android: keeps process alive
+      notificationTitle: 'Delivering order #4521',
+      notificationBody: 'Your tracking is active',
+    },
+  });
+}
+```
+
+La scelta di `Accuracy.Balanced` invece di `High` è intenzionale. L'alta precisione usa il GPS continuo e consuma il 30-40% di batteria in più. Per la maggior parte dei casi di delivery, la precisione di 50-100m è sufficiente per mostrare il fattorino sulla mappa del cliente.
+
+## Tracking Real-Time con WebSocket
+
+HTTP request-response non è adatto per il tracking in tempo reale. Il polling (una richiesta ogni N secondi) funziona, ma è inefficiente — la maggior parte delle richieste restituisce "nessuna novità". I WebSocket mantengono una connessione persistente e bidirezionale, inviando dati solo quando ci sono cambiamenti.
+
+L'architettura tipica di tracking:
+1. L'app del fattorino invia la posizione al server ogni 5-10 secondi via HTTP POST
+2. Il server aggiorna la posizione nel database e pubblica sul canale WebSocket dell'ordine
+3. L'app del cliente, connessa allo stesso canale, riceve l'aggiornamento e aggiorna il marcatore sulla mappa
+
+```typescript
+// hooks/useDeliveryTracking.ts
+import { useEffect, useRef, useState } from 'react';
+
+interface DeliveryLocation {
+  lat: number;
+  lng: number;
+  updatedAt: number;
+}
+
+export function useDeliveryTracking(orderId: string) {
+  const [location, setLocation] = useState<DeliveryLocation | null>(null);
+  const [connected, setConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket(
+      `wss://api.yourapp.com/tracking/${orderId}?token=${getToken()}`
+    );
+
+    ws.onopen = () => setConnected(true);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'location_update') {
+        setLocation({
+          lat: data.lat,
+          lng: data.lng,
+          updatedAt: data.timestamp,
+        });
+      }
+    };
+
+    ws.onclose = () => {
+      setConnected(false);
+      // Automatic reconnection with exponential backoff
+      setTimeout(() => {
+        // reconnect
+      }, 3000);
+    };
+
+    wsRef.current = ws;
+
+    return () => ws.close();
+  }, [orderId]);
+
+  return { location, connected };
+}
+```
+
+Per scala maggiore, usa Socket.io (che ha riconnessione automatica e room) o servizi come Ably, Pusher o AWS API Gateway WebSockets. Gestire l'infrastruttura WebSocket per migliaia di connessioni simultanee è complesso — i servizi gestiti risolvono questo problema.
+
+## Stato degli Ordini: State Machine vs Redux
+
+Un ordine di delivery passa attraverso più stati: in attesa di conferma, confermato dal ristorante, in preparazione, uscito per la consegna, arrivato a destinazione. Ogni transizione ha regole di business — un ordine "in preparazione" non può andare direttamente a "annullato" senza passare per un flusso di annullamento, ad esempio.
+
+Modellare questo come una state machine esplicita rende visibili le transizioni valide e impossibili quelle non valide:
+
+```typescript
+// Using XState for order state machine
+import { createMachine, assign } from 'xstate';
+
+type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready_for_pickup'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'cancelled';
+
+const orderMachine = createMachine({
+  id: 'order',
+  initial: 'pending',
+  states: {
+    pending: {
+      on: {
+        CONFIRM: 'confirmed',
+        CANCEL: 'cancelled',
+      },
+    },
+    confirmed: {
+      on: {
+        START_PREPARING: 'preparing',
+        CANCEL: 'cancelled',
+      },
+    },
+    preparing: {
+      on: {
+        READY: 'ready_for_pickup',
+      },
+    },
+    ready_for_pickup: {
+      on: {
+        PICKED_UP: 'out_for_delivery',
+      },
+    },
+    out_for_delivery: {
+      on: {
+        DELIVERED: 'delivered',
+      },
+    },
+    delivered: { type: 'final' },
+    cancelled: { type: 'final' },
+  },
+});
+```
+
+| Approccio | Vantaggio | Svantaggio |
+|---|---|---|
+| State machine (XState) | Transizioni esplicite, bug impossibili per design | Curva di apprendimento iniziale |
+| Redux con actions | Familiare, ecosistema maturo | Transizioni non valide sono possibili nel codice |
+| Zustand semplice | Minimo boilerplate | Nessuna garanzia di transizione |
+| Stato nel server (polling) | Semplice nel client | Latenza, costo delle richieste |
+
+Per le app di delivery, la state machine è l'approccio più difensivo. Le transizioni di stato degli ordini hanno implicazioni finanziarie (rimborsi, pagamenti al fattorino) — non è accettabile che lo stato diventi incoerente a causa di un bug nella gestione dello stato.
+
+## Notifiche di Stato: Ogni Transizione Conta
+
+Ogni cambio di stato dell'ordine è un'opportunità di comunicazione che riduce l'ansia del cliente e aumenta la fiducia nel prodotto. Gli ordini che arrivano senza notifiche intermedie generano chiamate al supporto. Gli ordini con notifiche chiare ad ogni transizione generano recensioni positive.
+
+Le notifiche di stato devono essere:
+- **Specifiche:** "Il tuo ordine #4521 è uscito per la consegna con Marco" è meglio di "Ordine in arrivo"
+- **Azionabili:** quando rilevante, includi un deep link alla schermata di tracking
+- **Tempestive:** la notifica deve arrivare in secondi dopo la transizione, non in minuti
+- **Non eccessive:** non notificare stati intermedi del backend che non sono rilevanti per l'utente
+
+Per l'app del fattorino, le notifiche hanno un ruolo ancora più critico: nuovo ordine disponibile, il cliente ha chiamato, ordine annullato. Queste notifiche devono arrivare con alta priorità e attivare l'app anche quando è in background.
+
+Sul server, il flusso è: cambio di stato dell'ordine → evento nel message broker (RabbitMQ, SQS, Kafka) → servizio di notifiche → FCM/APNs → dispositivo. Questo disaccoppiamento garantisce che un guasto nel servizio di notifiche non influenzi l'elaborazione degli ordini.
+
+## Conclusione
+
+Le app di delivery sono tecnicamente impegnative perché combinano tre problemi distinti: posizione in tempo reale (hardware e permessi), comunicazione bidirezionale persistente (WebSocket e infrastruttura) e logica di business con stati critici (state machine e coerenza). Trattare ciascuno di questi problemi con la serietà che meritano è ciò che differenzia un'app di delivery affidabile da una che funziona nella demo e si rompe in produzione.
+
+In SystemForge, le app con requisiti tecnici complessi come delivery, logistica e tracking vengono pianificate con la giusta architettura fin dall'inizio — perché refactoring del livello di geolocalizzazione o migrazione da polling a WebSocket dopo il lancio costa molto di più che progettare correttamente fin dall'inizio. Se stai costruendo un'app di delivery o qualsiasi prodotto che dipende dal tracking in tempo reale, il nostro team ha l'esperienza tecnica per aiutarti a prendere le decisioni giuste.

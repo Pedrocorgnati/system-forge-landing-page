@@ -1,0 +1,236 @@
+---
+title: "Delivery App Architecture: Technical Decisions That Matter"
+slug: "delivery-app-architecture-technical-decisions"
+date: "2024-11-04"
+description: "Technical decisions for delivery apps — real-time tracking with WebSockets, background geolocation, order status notifications, and state management."
+tags: ["delivery app", "real-time tracking", "geolocation", "websockets", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: Technical decisions for delivery apps — real-time tracking with WebSockets, background geolocation, order status notifications, and state management.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'app-de-entrega-arquitetura-decisoes-tecnicas'
+  - locale: 'it-IT'
+    slug: 'app-delivery-architettura-decisioni-tecniche'
+  - locale: 'en'
+    slug: 'delivery-app-architecture-technical-decisions'
+---
+
+Delivery apps look simple from the outside: the customer places the order, watches the driver on the map, gets notified when it arrives. That apparent simplicity hides a technical architecture that's more demanding than most consumer apps. Background geolocation drains battery and requires special permissions. Real-time tracking requires a persistent communication layer with the server. Order state changes constantly and needs to be reflected consistently across three different apps — customer, driver, and restaurant or store.
+
+Each of these technical decisions has trade-offs. Understanding them before you start building is what separates an MVP that ships from one that gets stuck in rework.
+
+## Background Geolocation: Configuration and Battery Life
+
+Tracking the driver's position in real time while the app is in the background is one of the most sensitive requirements of a delivery app. Both iOS and Android have strict restrictions on location access when the app isn't in the foreground — and for good reasons: it drains battery and raises privacy concerns.
+
+On iOS, background location access requires:
+1. The `NSLocationAlwaysAndWhenInUseUsageDescription` permission in `Info.plist`
+2. Enabling the "Location updates" Background Mode in Xcode
+3. Using `startUpdatingLocation` (not `requestLocation`) for continuous updates
+
+On Android, in addition to the `ACCESS_BACKGROUND_LOCATION` permission, starting with Android 10 the user must explicitly grant "all the time" access — and the system requires the app to explain why before directing the user to settings.
+
+With Expo Location:
+
+```typescript
+import * as Location from 'expo-location';
+import * as TaskManager from 'expo-task-manager';
+
+const LOCATION_TASK = 'background-location-task';
+
+// Define the task that runs in background
+TaskManager.defineTask(LOCATION_TASK, async ({ data, error }) => {
+  if (error) {
+    console.error('Background location error:', error);
+    return;
+  }
+
+  if (data) {
+    const { locations } = data as { locations: Location.LocationObject[] };
+    const location = locations[locations.length - 1];
+
+    // Send to server
+    await updateDeliveryLocation({
+      lat: location.coords.latitude,
+      lng: location.coords.longitude,
+      accuracy: location.coords.accuracy,
+      timestamp: location.timestamp,
+    });
+  }
+});
+
+async function startBackgroundTracking() {
+  const { status } = await Location.requestBackgroundPermissionsAsync();
+
+  if (status !== 'granted') {
+    // Notify the driver that tracking needs the permission
+    return;
+  }
+
+  await Location.startLocationUpdatesAsync(LOCATION_TASK, {
+    accuracy: Location.Accuracy.Balanced, // don't use High — drains battery
+    timeInterval: 5000,           // update every 5 seconds
+    distanceInterval: 10,         // or every 10 meters of movement
+    deferredUpdatesInterval: 3000,
+    showsBackgroundLocationIndicator: true, // blue bar on iOS
+    foregroundService: {          // Android: keeps process alive
+      notificationTitle: 'Delivering order #4521',
+      notificationBody: 'Your tracking is active',
+    },
+  });
+}
+```
+
+The choice of `Accuracy.Balanced` over `High` is intentional. High accuracy uses continuous GPS and consumes 30-40% more battery. For most delivery use cases, 50-100m precision is sufficient to show the driver on the customer's map.
+
+## Real-Time Tracking with WebSockets
+
+HTTP request-response is not suitable for real-time tracking. Polling (one request every N seconds) works, but it's inefficient — most requests return "no updates." WebSockets maintain a persistent, bidirectional connection, sending data only when there are changes.
+
+The typical tracking architecture:
+1. Driver app sends position to the server every 5-10 seconds via HTTP POST
+2. Server updates the position in the database and publishes to the order's WebSocket channel
+3. Customer app, connected to the same channel, receives the update and moves the map marker
+
+```typescript
+// hooks/useDeliveryTracking.ts
+import { useEffect, useRef, useState } from 'react';
+
+interface DeliveryLocation {
+  lat: number;
+  lng: number;
+  updatedAt: number;
+}
+
+export function useDeliveryTracking(orderId: string) {
+  const [location, setLocation] = useState<DeliveryLocation | null>(null);
+  const [connected, setConnected] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+
+  useEffect(() => {
+    const ws = new WebSocket(
+      `wss://api.yourapp.com/tracking/${orderId}?token=${getToken()}`
+    );
+
+    ws.onopen = () => setConnected(true);
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+
+      if (data.type === 'location_update') {
+        setLocation({
+          lat: data.lat,
+          lng: data.lng,
+          updatedAt: data.timestamp,
+        });
+      }
+    };
+
+    ws.onclose = () => {
+      setConnected(false);
+      // Automatic reconnection with exponential backoff
+      setTimeout(() => {
+        // reconnect
+      }, 3000);
+    };
+
+    wsRef.current = ws;
+
+    return () => ws.close();
+  }, [orderId]);
+
+  return { location, connected };
+}
+```
+
+For larger scale, use Socket.io (which has automatic reconnection and rooms) or managed services like Ably, Pusher, or AWS API Gateway WebSockets. Managing WebSocket infrastructure for thousands of simultaneous connections is complex — managed services handle this for you.
+
+## Order State: State Machine vs Redux
+
+A delivery order goes through multiple states: waiting for confirmation, confirmed by the restaurant, being prepared, out for delivery, arrived at destination. Each transition has business rules — an "in preparation" order can't jump directly to "cancelled" without going through a cancellation flow, for example.
+
+Modeling this as an explicit state machine makes valid transitions visible and invalid ones impossible:
+
+```typescript
+// Using XState for order state machine
+import { createMachine, assign } from 'xstate';
+
+type OrderStatus =
+  | 'pending'
+  | 'confirmed'
+  | 'preparing'
+  | 'ready_for_pickup'
+  | 'out_for_delivery'
+  | 'delivered'
+  | 'cancelled';
+
+const orderMachine = createMachine({
+  id: 'order',
+  initial: 'pending',
+  states: {
+    pending: {
+      on: {
+        CONFIRM: 'confirmed',
+        CANCEL: 'cancelled',
+      },
+    },
+    confirmed: {
+      on: {
+        START_PREPARING: 'preparing',
+        CANCEL: 'cancelled',
+      },
+    },
+    preparing: {
+      on: {
+        READY: 'ready_for_pickup',
+      },
+    },
+    ready_for_pickup: {
+      on: {
+        PICKED_UP: 'out_for_delivery',
+      },
+    },
+    out_for_delivery: {
+      on: {
+        DELIVERED: 'delivered',
+      },
+    },
+    delivered: { type: 'final' },
+    cancelled: { type: 'final' },
+  },
+});
+```
+
+| Approach | Advantage | Disadvantage |
+|---|---|---|
+| State machine (XState) | Explicit transitions, bugs impossible by design | Initial learning curve |
+| Redux with actions | Familiar, mature ecosystem | Invalid transitions possible in code |
+| Simple Zustand | Minimal boilerplate | No transition guarantees |
+| Server-side state (polling) | Simple on client | Latency, request cost |
+
+For delivery apps, the state machine is the most defensive approach. Order state transitions have financial implications (refunds, driver payments) — it's not acceptable for state to become inconsistent due to a state management bug.
+
+## Status Notifications: Every Transition Matters
+
+Every order state change is a communication opportunity that reduces customer anxiety and increases trust in the product. Orders that arrive without intermediate notifications generate support calls. Orders with clear notifications at every transition generate positive reviews.
+
+Status notifications should be:
+- **Specific:** "Your order #4521 is out for delivery with John" is better than "Order on its way"
+- **Actionable:** when relevant, include a deep link to the tracking screen
+- **Timely:** the notification should arrive within seconds of the transition, not minutes
+- **Not excessive:** don't notify backend intermediate states that aren't relevant to the user
+
+For the driver app, notifications play an even more critical role: new order available, customer called, order cancelled. These notifications must arrive with high priority and wake the app even when it's in the background.
+
+On the server, the flow is: order state change → event in message broker (RabbitMQ, SQS, Kafka) → notification service → FCM/APNs → device. This decoupling ensures that a notification service failure doesn't affect order processing.
+
+## Conclusion
+
+Delivery apps are technically demanding because they combine three distinct problems: real-time location (hardware and permissions), persistent bidirectional communication (WebSockets and infrastructure), and business logic with critical states (state machine and consistency). Treating each of these problems with the seriousness they deserve is what differentiates a reliable delivery app from one that works in the demo and breaks in production.
+
+At SystemForge, apps with complex technical requirements like delivery, logistics, and tracking are planned with the correct architecture from the start — because refactoring the geolocation layer or migrating from polling to WebSockets after launch is far more expensive than getting it right upfront. If you're building a delivery app or any product that depends on real-time tracking, our team has the technical experience to help you make the right decisions.

@@ -1,0 +1,165 @@
+---
+title: "Dati real-time in dashboard: WebSockets, SSE o polling"
+slug: "dati-real-time-dashboard-websockets-sse"
+date: "2024-08-28"
+description: "Quando usare WebSockets, Server-Sent Events o polling per aggiornamenti in tempo reale nelle dashboard — trade-off di complessità, scala e costi."
+tags: ["real-time", "websockets", "sse", "dashboard", "polling"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Quando usare WebSockets, Server-Sent Events o polling per aggiornamenti in tempo reale nelle dashboard — trade-off di complessità, scala e costi.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'real-time-data-dashboards-websockets-sse'
+  - locale: 'it-IT'
+    slug: 'dati-real-time-dashboard-websockets-sse'
+  - locale: 'en'
+    slug: 'real-time-dashboards-websockets-sse-polling'
+---
+
+Immagina una dashboard operativa logistica che mostra lo stato delle consegne in tempo reale. Un manager sta monitorando l'operazione e vede che tutti i percorsi sono nei tempi. In realtà, quattro percorsi sono in ritardo da 12 minuti — ma la dashboard si aggiorna solo ogni 15 minuti. Non interviene perché non vede il problema. Le consegne si ritardano. Il cliente si lamenta.
+
+Dati statici in dashboard operative non sono semplicemente scomodi — causano decisioni sbagliate basate su informazioni obsolete. La domanda non è se implementare il real-time, ma quale meccanismo usare per ogni scenario.
+
+## Polling: Semplice ma Costoso in Scala
+
+Il polling è l'approccio più semplice: il client effettua una richiesta HTTP ogni N secondi chiedendo "ci sono novità?". Tutta l'infrastruttura esistente funziona senza modifiche — load balancer, cache, autenticazione.
+
+```typescript
+// hooks/usePolling.ts
+import { useEffect, useRef, useCallback } from 'react';
+
+interface UsePollingOptions {
+  interval: number; // ms
+  enabled?: boolean;
+}
+
+export function usePolling(
+  fetchFn: () => Promise<void>,
+  { interval, enabled = true }: UsePollingOptions
+) {
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const fetchRef = useRef(fetchFn);
+  fetchRef.current = fetchFn;
+
+  const schedule = useCallback(() => {
+    timeoutRef.current = setTimeout(async () => {
+      if (enabled) {
+        await fetchRef.current();
+        schedule(); // ripianifica solo dopo la risposta, evita overlap
+      }
+    }, interval);
+  }, [interval, enabled]);
+
+  useEffect(() => {
+    if (enabled) {
+      schedule();
+    }
+    return () => clearTimeout(timeoutRef.current);
+  }, [enabled, schedule]);
+}
+
+// Uso:
+usePolling(async () => {
+  const data = await fetchDashboardMetrics();
+  setMetrics(data);
+}, { interval: 30_000, enabled: isVisible }); // 30s, solo quando il tab è attivo
+```
+
+Il problema del polling emerge in scala. Con 500 utenti simultanei e polling ogni 30 secondi, si generano ~17 richieste al secondo costanti verso il backend — indipendentemente dalla presenza di nuovi dati. Con 5.000 utenti, sono ~167 req/s di "polling vuoto" che consumano risorse senza produrre valore.
+
+Il **polling intelligente** mitiga questo: exponential backoff quando non ci sono nuovi dati, polling disabilitato quando il tab non è visibile (via `Page Visibility API`), e cache lato client per evitare re-render inutili.
+
+**Usa il polling quando:** intervalli di aggiornamento di 30s+ sono accettabili, il numero di client simultanei è ridotto (< 500), l'infrastruttura non supporta connessioni persistenti, o sei in ambiente serverless dove le connessioni lunghe non sono praticabili.
+
+## Server-Sent Events: Unidirezionale e Leggero
+
+SSE (Server-Sent Events) è un protocollo HTTP in cui il server mantiene una connessione aperta e invia eventi al client quando ci sono novità. Il client riceve soltanto — non invia dati sulla stessa connessione.
+
+Per le dashboard, SSE è spesso la scelta migliore: la comunicazione è quasi sempre unidirezionale (server → client), il protocollo è semplice, la riconnessione automatica è integrata nel browser, e funziona su HTTP/2 senza modifiche infrastrutturali.
+
+```typescript
+// app/api/metrics/stream/route.ts (Next.js App Router)
+export async function GET(request: Request) {
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    async start(controller) {
+      const sendEvent = (event: string, data: unknown) => {
+        const payload = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
+        controller.enqueue(encoder.encode(payload));
+      };
+
+      // Invia snapshot iniziale
+      const initial = await fetchCurrentMetrics();
+      sendEvent('snapshot', initial);
+
+      // Sottoscrive le modifiche nel DB (es: Postgres LISTEN/NOTIFY)
+      const subscription = db.metrics.subscribe(async (change) => {
+        sendEvent('update', change);
+      });
+
+      // Heartbeat per mantenere la connessione attiva attraverso i proxy
+      const heartbeat = setInterval(() => {
+        controller.enqueue(encoder.encode(': heartbeat\n\n'));
+      }, 30_000);
+
+      request.signal.addEventListener('abort', () => {
+        subscription.unsubscribe();
+        clearInterval(heartbeat);
+        controller.close();
+      });
+    }
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    }
+  });
+}
+```
+
+**Limitazione SSE:** ogni connessione mantiene un socket aperto sul server. Su piattaforme serverless (Vercel Edge Functions, Cloudflare Workers), esistono restrizioni di tempo di esecuzione. Per scala maggiore, è necessario un server dedicato o un servizio gestito (Ably, Pusher, Supabase Realtime).
+
+**Usa SSE quando:** gli aggiornamenti sono solo server → client, hai bisogno di bassa latenza (< 1s), l'ambiente supporta connessioni HTTP lunghe, e il numero di connessioni simultanee rientra nella capacità del server.
+
+## WebSockets: Bidirezionale per Dashboard Collaborative
+
+I WebSocket stabiliscono una connessione TCP bidirezionale persistente. Il client può inviare dati al server e riceverne tramite la stessa connessione, con latenza minima.
+
+Per la maggior parte delle dashboard di visualizzazione, i WebSocket sono over-engineering — SSE o polling sono sufficienti. I WebSocket hanno senso quando la dashboard ha elementi collaborativi: più utenti che modificano filtri condivisi, cursori in tempo reale, commenti su celle di dati, o notifiche che un altro utente ha appena esportato il report che stai visualizzando.
+
+| Criterio | Polling | SSE | WebSockets |
+|----------|---------|-----|------------|
+| Direzione | Req/Res | Server → Client | Bidirezionale |
+| Latenza | Alta (= intervallo) | Bassa (< 1s) | Molto bassa (< 100ms) |
+| Complessità infra | Nessuna | Bassa | Media-alta |
+| Serverless compatibile | Sì | Limitato | No |
+| Riconnessione automatica | Manuale | Nativa | Manuale |
+| Scala (client simultanei) | Alta | Media | Bassa senza infra aggiuntiva |
+| Ideale per | Report, ETA lunghi | Monitoring, alert | Collaborazione, trading |
+
+## Scelta per Frequenza di Aggiornamento e Numero di Client
+
+La decisione pratica combina due assi: **frequenza di aggiornamento necessaria** e **numero atteso di client simultanei**.
+
+- **Aggiornamento ogni 5+ minuti + qualsiasi scala:** polling con cache lato client. Semplice, resiliente, funziona su qualsiasi infra.
+- **Aggiornamento ogni 5-60s + fino a 2.000 client:** SSE con server dedicato o Supabase Realtime.
+- **Aggiornamento < 5s + fino a 500 client:** SSE o WebSocket in base alla necessità di comunicazione bidirezionale.
+- **Aggiornamento < 1s + scala maggiore:** servizio gestito WebSocket (Ably, Pusher) o architettura con Redis pub/sub + WebSocket server separato.
+
+Un'ottimizzazione spesso trascurata: **aggiornare solo i componenti che sono cambiati**, non l'intera dashboard. Se è cambiato solo il KPI "ordini in corso", ri-renderizzare i 12 grafici della dashboard è uno spreco. Il modello di eventi `snapshot + update` descritto nell'esempio SSE risolve questo — l'update contiene solo il delta, e il client fa il merge.
+
+## Conclusione
+
+Il real-time nelle dashboard è uno spettro, non una decisione binaria. Il polling ben implementato con visibilità del tab e exponential backoff risolve la maggior parte dei casi di dashboard executive e di reporting. SSE è il punto di equilibrio per dashboard operative con dati che cambiano frequentemente. I WebSocket restano riservati per dashboard veramente collaborative o di trading dove ogni secondo conta.
+
+L'errore più costoso è implementare WebSocket "perché è moderno" in un contesto dove polling a 30 secondi sarebbe perfettamente adeguato — la complessità infrastrutturale aggiuntiva raramente si giustifica.
+
+In SystemForge, la strategia real-time viene definita durante il design tecnico del sistema, insieme all'architettura backend e alle decisioni di scala.

@@ -1,0 +1,133 @@
+---
+title: "LLM in produzione: sfide e soluzioni reali"
+slug: "llm-in-produzione-sfide-e-soluzioni"
+date: "2024-07-18"
+description: "Le sfide di usare LLM in produzione — latenza, costo per token, allucinazioni, rate limiting e strategie di cache e fallback per applicazioni affidabili."
+tags: ["llm", "ia produzione", "openai", "costo ia", "prompt engineering"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Le sfide di usare LLM in produzione — latenza, costo per token, allucinazioni, rate limiting e strategie di cache e fallback per applicazioni affidabili.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'custo-ia-em-producao-como-evitar-surpresas'
+  - locale: 'it-IT'
+    slug: 'llm-in-produzione-sfide-e-soluzioni'
+  - locale: 'en'
+    slug: 'llms-in-production-challenges-and-solutions'
+---
+
+Usare un LLM nel playground di OpenAI è semplice. Si digita un prompt, si ottiene una risposta e si rimane impressionati. Usare quello stesso LLM in produzione, servendo migliaia di utenti reali, con SLA definito, costi sotto controllo e tolleranza zero per risposte assurde — quello è un altro universo.
+
+I problemi emergono presto. La prima richiesta funziona bene. La centesima anche. Alla millesima, ci si accorge che il p95 di latenza è a 12 secondi, il costo mensile ha già superato il budget e il modello ha risposto con dati inventati a un cliente importante. Questo articolo riguarda come gestire questi problemi in modo sistematico.
+
+## Latenza: p50, p95 e Strategie di Streaming
+
+L'errore più comune di chi inizia con gli LLM in produzione è misurare solo il tempo medio di risposta. Il p50 può essere accettabile — diciamo 3 secondi — mentre il p95 è a 18 secondi, rendendo l'esperienza del 5% degli utenti completamente inaccettabile.
+
+La latenza negli LLM ha due componenti principali: **time to first token (TTFT)** e **tokens per second (TPS)**. Per risposte lunghe, il TTFT è ciò che l'utente percepisce per primo. Se non si usa lo streaming, l'utente fissa uno schermo vuoto finché il modello non termina di generare tutto.
+
+Lo streaming è obbligatorio per qualsiasi interfaccia conversazionale:
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI();
+
+async function streamResponse(prompt: string) {
+  const stream = await client.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) process.stdout.write(delta);
+  }
+}
+```
+
+Oltre allo streaming, considera le seguenti strategie per ridurre la latenza:
+
+- **Prompt più brevi:** ogni token nel prompt viene elaborato dal modello. Rimuovi il contesto non necessario.
+- **Modelli più piccoli per compiti semplici:** GPT-4o mini o Claude Haiku sono 5-10x più veloci per classificazione, smistamento e riepiloghi brevi.
+- **Prefill di cache:** OpenAI e Anthropic offrono prompt caching. Se i primi token del system prompt sono sempre gli stessi, si paga meno e si riceve una risposta più veloce.
+- **Richieste parallele:** per pipeline che consentono parallelismo, avviare più richieste simultanee invece di sequenziali.
+
+## Costo per Token: Come Controllare Senza Degradare la Qualità
+
+Il costo degli LLM in produzione cresce in modo non lineare con l'uso. Un sistema che costa €200/mese con 1.000 utenti può costare €8.000/mese con 10.000 utenti se non si hanno controlli in atto.
+
+La prima leva è la **selezione del modello per attività**. Non ogni compito richiede GPT-4o. Una pipeline ben progettata usa modelli più piccoli per i passaggi intermedi e il modello più capace solo dove la qualità è critica.
+
+| Attività | Modello consigliato | Costo relativo |
+|--------|-------------------|---------------|
+| Classificazione di intenzioni | GPT-4o mini / Haiku | 1x |
+| Sintesi di documenti | GPT-4o mini | 1x |
+| Generazione di risposta finale | GPT-4o / Claude Sonnet | 10-20x |
+| Analisi legale / medica | Claude Opus / GPT-4o | 30-50x |
+
+La seconda leva è il **controllo del contesto**. La finestra di contesto viene addebitata in token. Se si passa l'intera cronologia di una conversazione di 50 turni in ogni richiesta, si pagano token che probabilmente non aggiungono nulla. Implementare un troncamento intelligente: mantenere gli ultimi N turni e un riassunto dei precedenti.
+
+La terza leva è il **rate limiting per utente**. Definire limiti giornalieri o mensili per account. Gli utenti che cercano di usare il sistema come sostituto di un'API gratuita illimitata devono trovare limiti chiari.
+
+## Allucinazioni: Rilevamento e Mitigazione in Produzione
+
+L'allucinazione è il nome tecnico quando un LLM inventa informazioni con sicurezza. In un sistema di intrattenimento, potrebbe essere accettabile. In un sistema che risponde a domande su contratti, normative o dati dei clienti, è un rischio reale.
+
+La mitigazione inizia nell'architettura. Se il modello può rispondere solo sulla base di documenti che hai fornito (tramite RAG), lo spazio per l'allucinazione è minore. Puoi istruire il modello a rispondere "non ho trovato queste informazioni nel database" invece di inventare.
+
+Per il rilevamento in tempo reale, un approccio comune è la **self-consistency**: fare la stessa domanda al modello con temperatura leggermente diversa e confrontare le risposte. Divergenze significative segnalano bassa confidenza.
+
+Un altro approccio è usare un secondo LLM come valutatore:
+
+```python
+def check_for_hallucination(question: str, answer: str, source_docs: list[str]) -> bool:
+    context = "\n".join(source_docs)
+    check_prompt = f"""
+    Dato il contesto sottostante, la risposta fornita è fattualmente supportata dal contesto?
+    Rispondi solo con SÌ o NO.
+
+    Contesto: {context}
+    Domanda: {question}
+    Risposta: {answer}
+    """
+    result = llm.complete(check_prompt)
+    return "NO" in result.upper()
+```
+
+Questo schema aggiunge latenza e costo, ma per casi ad alto rischio (salute, legale, finanziario) è giustificabile.
+
+## Cache Semantica: Risparmiare su Query Simili
+
+La cache tradizionale funziona con chiavi esatte: la stessa stringa di input restituisce lo stesso risultato in cache. Negli LLM, questo raramente aiuta, perché gli utenti raramente fanno domande identiche.
+
+La cache semantica risolve questo: invece di confrontare stringhe, si confrontano embedding. Se la domanda "qual è l'orario di apertura?" e "siete aperti il sabato?" hanno embedding sufficientemente vicini, la seconda domanda può riutilizzare la risposta della prima.
+
+Strumenti come **GPTCache** e **Langchain's semantic cache** implementano questo con Redis o Faiss come backend. La configurazione di base:
+
+```python
+from langchain.globals import set_llm_cache
+from langchain_community.cache import RedisSemanticCache
+from langchain_openai import OpenAIEmbeddings
+
+set_llm_cache(
+    RedisSemanticCache(
+        redis_url="redis://localhost:6379",
+        embedding=OpenAIEmbeddings(),
+        score_threshold=0.95,  # similarità minima per cache hit
+    )
+)
+```
+
+Con una cache semantica ben configurata, è possibile ridurre le chiamate API del 20-40% in sistemi di assistenza clienti con basi di domande frequenti.
+
+## Conclusione
+
+Portare gli LLM in produzione in modo affidabile è un lavoro di ingegneria, non di prompt. Latenza, costo, allucinazioni e cache sono solo alcuni dei vettori che richiedono attenzione continua. I sistemi che ignorano questi aspetti all'inizio pagano il prezzo quando scalano.
+
+In **SystemForge**, integriamo LLM in sistemi aziendali con le salvaguardie necessarie affinché l'IA sia un asset, non un rischio. Se stai pianificando di portare l'IA in produzione, contattaci prima di iniziare a costruire. Gli errori architetturali nei sistemi di IA sono molto più costosi da correggere dopo il lancio.

@@ -1,0 +1,136 @@
+---
+title: "B2B vs B2C Marketplace: Differences That Actually Matter"
+slug: "marketplace-b2b-vs-b2c-differences"
+date: "2024-09-12"
+description: "How product, UX, and technical architecture differ between B2B and B2C marketplaces — pricing, purchase approvals, credit limits, and ERP integration."
+tags: ["b2b marketplace", "b2c marketplace", "b2b e-commerce", "b2b ux", "marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How product, UX, and technical architecture differ between B2B and B2C marketplaces — pricing, purchase approvals, credit limits, and ERP integration.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'marketplace-b2b-vs-b2c-diferencas'
+  - locale: 'it-IT'
+    slug: 'marketplace-b2b-vs-b2c-differenze'
+  - locale: 'en'
+    slug: 'marketplace-b2b-vs-b2c-differences'
+---
+
+At first glance, a B2B and a B2C marketplace seem to do the same thing: connect buyers and sellers. In practice, they're such different products that sharing the same codebase between the two usually creates more problems than it saves time. The audience, purchase flow, pricing model, payment methods, and integration requirements are structurally different — and understanding these differences before architecting the system is what separates projects that scale from those that get stuck in rework cycles.
+
+A B2C marketplace serves individual consumers. The purchase decision is personal, often impulsive, and the primary criteria is usually price and experience. A B2B marketplace serves businesses. The purchase decision involves multiple people, approval workflows, pre-allocated budgets, and technical criteria that go far beyond price.
+
+## B2B Purchase Flow: Approvals and Multiple Buyers
+
+In B2C, the purchase flow is linear: search → product → cart → checkout → payment. Done in minutes. In B2B, this flow can span days and involve multiple people with distinct roles.
+
+A realistic B2B flow looks like this:
+
+**Operational buyer** finds the product and creates a "purchase request" (not an order yet). This request goes to an approval queue.
+
+**Approver** (manager, finance director, depending on the amount) receives a notification, reviews the request, and approves, rejects, or requests changes.
+
+**After approval**, the request converts into a purchase order. The operational buyer finalizes it with delivery details and payment method (net terms, wire transfer, check).
+
+**A receipt** is automatically generated and sent to the finance department's email.
+
+This flow requires the data model to support multiple users per buyer account, with distinct roles and permissions:
+
+```typescript
+// B2B account model with multiple users
+interface BuyerAccount {
+  id: string;
+  companyName: string;
+  taxId: string;
+  creditLimit?: number;  // Negotiated credit limit
+  users: BuyerUser[];
+  approvalRules: ApprovalRule[];
+}
+
+interface BuyerUser {
+  id: string;
+  accountId: string;
+  role: 'operator' | 'approver' | 'admin' | 'finance';
+  purchaseLimit?: number;  // Max amount they can approve solo
+}
+
+interface ApprovalRule {
+  minAmount: number;
+  maxAmount: number;
+  requiredApprovers: number;
+  approverRoles: string[];
+}
+```
+
+This structure allows you to define rules like "purchases over $5,000 need 2 approvers, at least one from finance." Implementing this in the B2B MVP is not optional — it's the core of the product.
+
+## Customer-Specific Pricing in B2B
+
+In B2C marketplaces, everyone sees the same price. In B2B, this almost never happens. High-volume customers negotiate special prices, distributors have their own price tables, and strategic accounts may have exclusive terms.
+
+The B2B pricing system needs to support multiple tiers:
+
+| Tier | Description | Example |
+|------|-------------|---------|
+| Base price | Standard price, publicly visible | $100.00 |
+| Group table | Price per customer segment | Distributors: $85.00 |
+| Account price | Individually negotiated price | Client X: $78.00 |
+| Volume discount | Discount by order quantity | 10+ units: -8% |
+| Period discount | Campaign or temporary promotion | -5% in October |
+
+The resolution logic must follow a clear hierarchy: account price → volume discount → group table → base price. The most specific price takes precedence.
+
+## ERP Integration and Invoicing
+
+This is the part that most differentiates B2B development from B2C technically. Buying companies typically need marketplace orders to automatically reflect in their ERP — for inventory control, accounts payable, or fiscal auditing.
+
+The most common integrations are with:
+
+- **SAP Business One / S/4HANA:** multinationals and large enterprises
+- **NetSuite / Microsoft Dynamics 365:** mid-market companies
+- **QuickBooks / Xero:** SMBs needing streamlined invoicing
+- **Spreadsheets + invoicing APIs:** clients without ERP who still need invoices
+
+```typescript
+// Invoice generation after order confirmation
+async function issueInvoice(order: Order): Promise<string> {
+  const response = await invoiceService.post('/invoices', {
+    description: `Marketplace purchase - Order #${order.id}`,
+    amount: order.totalAmount,
+    buyer: {
+      taxId: order.buyer.taxId,
+      name: order.buyer.companyName,
+      email: order.buyer.billingEmail,
+      address: order.buyer.address,
+    }
+  });
+
+  return response.data.id; // Invoice ID for tracking
+}
+```
+
+ERP integration is often a "deal breaker" in B2B sales: if the marketplace doesn't integrate with the buyer's ERP, the company's IT department blocks the purchase. Mapping required integrations before development saves months of negotiation.
+
+## B2B vs B2C UX: Functionality Over Aesthetics
+
+The temptation in B2B projects is to replicate the polished visual experience of major B2C platforms like Amazon. That's a priority mistake. B2B users prefer efficiency over aesthetics — they use the platform as a work tool, often daily, and they value:
+
+**Advanced search with technical filters:** product reference number, supplier's internal code, technical specifications (dimensions, materials, standards). A procurement manager doesn't want to browse categories — they want to type "M8x40 stainless steel bolt 304" and find it immediately.
+
+**History and quick reorder:** most B2B orders are repeats. "Repeat last order" and "save frequent shopping lists" are worth more than any UI animation.
+
+**Data export:** orders in CSV/XML, invoices in PDF, spend reports by period and category. This data needs to reach the buyer's ERP.
+
+**Account dashboard:** available credit, orders in progress, pending approvals, financial history. B2B buyers need full visibility into account status.
+
+The practical rule: invest in the recurring purchase flow before any aesthetic improvement. The user who buys every month needs to do it in under 5 minutes.
+
+## Conclusion
+
+The decision between building a B2B or B2C marketplace defines not just the product, but the technical architecture, data model, required integrations, and the team profile that will maintain the platform. Building for the wrong audience is an expensive mistake.
+
+SystemForge supports these decisions with structured documentation before any code — identifying critical flows, mapping required integrations, and generating User Stories that cover the B2B scenarios typically forgotten until an important client requests them.

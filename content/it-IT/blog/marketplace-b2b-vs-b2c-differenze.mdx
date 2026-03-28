@@ -1,0 +1,139 @@
+---
+title: "Marketplace B2B vs B2C: le differenze che contano"
+slug: "marketplace-b2b-vs-b2c-differenze"
+date: "2024-09-12"
+description: "Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — prezzi, approvazione acquisti, credito e integrazione con ERP."
+tags: ["marketplace b2b", "marketplace b2c", "e-commerce b2b", "ux b2b", "marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come prodotto, UX e architettura tecnica differiscono tra marketplace B2B e B2C — prezzi, approvazione acquisti, credito e integrazione con ERP.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'marketplace-b2b-vs-b2c-diferencas'
+  - locale: 'it-IT'
+    slug: 'marketplace-b2b-vs-b2c-differenze'
+  - locale: 'en'
+    slug: 'marketplace-b2b-vs-b2c-differences'
+---
+
+A prima vista, un marketplace B2B e uno B2C sembrano fare la stessa cosa: mettere in contatto chi vende con chi compra. In pratica, sono prodotti così diversi che condividere la stessa base di codice tra i due di solito crea più problemi che risparmi di tempo. Il pubblico, il flusso di acquisto, la determinazione dei prezzi, i metodi di pagamento e i requisiti di integrazione sono strutturalmente diversi — e capire queste differenze prima di progettare il sistema è ciò che separa i progetti che scalano da quelli che rimangono bloccati in cicli di rielaborazione.
+
+Un marketplace B2C serve consumatori finali. La decisione di acquisto è individuale, spesso impulsiva, e il criterio principale è solitamente il prezzo e l'esperienza. Un marketplace B2B serve aziende. La decisione di acquisto coinvolge più persone, processi di approvazione, budget precedentemente allocato e criteri tecnici che vanno ben oltre il prezzo.
+
+## Flusso di Acquisto B2B: Approvazioni e Più Acquirenti
+
+Nel B2C, il flusso di acquisto è lineare: ricerca → prodotto → carrello → checkout → pagamento. In pochi minuti. Nel B2B, questo flusso può estendersi per giorni e coinvolgere più persone con ruoli distinti.
+
+Un flusso B2B realistico funziona così:
+
+**Acquirente operativo** trova il prodotto e crea una "richiesta di acquisto" (non ancora un ordine). Questa richiesta va a una coda di approvazione.
+
+**Approvatore** (manager, responsabile finanziario o direttore, a seconda del valore) riceve la notifica, esamina la richiesta e approva, rifiuta o richiede modifiche.
+
+**Dopo l'approvazione**, la richiesta si converte in ordine di acquisto. L'acquirente operativo lo finalizza con i dati di consegna e la modalità di pagamento (fattura, bonifico, rimessa diretta).
+
+**La ricevuta** viene generata automaticamente (fattura elettronica in molti casi) e inviata all'indirizzo e-mail del dipartimento fiscale.
+
+Questo flusso richiede che il modello dati supporti più utenti per account acquirente, con ruoli e permessi distinti:
+
+```typescript
+// Modello di account B2B con più utenti
+interface BuyerAccount {
+  id: string;
+  companyName: string;
+  vatNumber: string;
+  creditLimit?: number;  // Limite di credito negoziato
+  users: BuyerUser[];
+  approvalRules: ApprovalRule[];
+}
+
+interface BuyerUser {
+  id: string;
+  accountId: string;
+  role: 'operator' | 'approver' | 'admin' | 'finance';
+  purchaseLimit?: number;  // Importo massimo che può approvare da solo
+}
+
+interface ApprovalRule {
+  minAmount: number;
+  maxAmount: number;
+  requiredApprovers: number;
+  approverRoles: string[];
+}
+```
+
+Questa struttura consente di definire regole come "gli acquisti superiori a €2.000 richiedono 2 approvatori, di cui almeno uno del dipartimento finanziario". Implementare questo nell'MVP B2B non è opzionale — è il cuore del prodotto.
+
+## Prezzi Differenziati per Cliente nel B2B
+
+Nei marketplace B2C, tutti vedono lo stesso prezzo. Nel B2B, questo non accade quasi mai. I clienti con volumi elevati negoziano prezzi speciali, i distributori hanno proprie tabelle e i clienti strategici possono avere condizioni esclusive.
+
+Il sistema di determinazione dei prezzi B2B deve supportare più livelli:
+
+| Livello | Descrizione | Esempio |
+|---------|-------------|---------|
+| Prezzo base | Prezzo standard, pubblicamente visibile | €100,00 |
+| Tabella di gruppo | Prezzo per segmento di cliente | Distributori: €85,00 |
+| Prezzo per account | Prezzo negoziato individualmente | Cliente X: €78,00 |
+| Sconto per volume | Sconto per quantità nell'ordine | 10+ unità: -8% |
+| Sconto per periodo | Campagna o promozione temporanea | -5% in ottobre |
+
+La logica di risoluzione deve seguire una gerarchia chiara: prezzo per account → sconto per volume → tabella di gruppo → prezzo base. Il prezzo più specifico ha la precedenza.
+
+## Integrazione con ERP e Fatturazione Elettronica
+
+Questa è la parte che distingue maggiormente lo sviluppo B2B dal B2C dal punto di vista tecnico. Le aziende acquirenti solitamente necessitano che gli ordini del marketplace si riflettano automaticamente nel loro ERP — sia per il controllo dell'inventario, sia per la contabilità fornitori o l'audit fiscale.
+
+Le integrazioni più comuni sono con:
+
+- **SAP Business One / S/4HANA:** multinazionali e grandi imprese
+- **Microsoft Dynamics 365:** aziende di medie e grandi dimensioni
+- **Odoo / Sage:** PMI con budget contenuto
+- **Xero / QuickBooks:** piccole imprese che necessitano di fatturazione elettronica
+
+Dal lato della fatturazione, l'emissione della fattura elettronica è obbligatoria in molti mercati europei (sistema SDI in Italia). Le opzioni più utilizzate sono:
+
+```typescript
+// Emissione fattura elettronica dopo conferma ordine
+async function emittiInvoice(order: Order): Promise<string> {
+  const response = await invoiceService.post('/invoices', {
+    invoiceType: 'TD01',  // Fattura ordinaria
+    description: `Acquisto marketplace - Ordine #${order.id}`,
+    amount: order.totalAmount,
+    buyer: {
+      vatNumber: order.buyer.vatNumber,
+      name: order.buyer.companyName,
+      email: order.buyer.fiscalEmail,
+      address: order.buyer.address,
+    }
+  });
+
+  return response.data.id; // ID fattura per tracciamento
+}
+```
+
+L'integrazione con l'ERP è spesso un requisito "deal breaker" nelle vendite B2B: se il marketplace non si integra con l'ERP dell'acquirente, il dipartimento IT dell'azienda blocca l'acquisto. Mappare le integrazioni necessarie prima dello sviluppo evita mesi di negoziazione.
+
+## UX B2B vs B2C: Funzionalità prima dell'Estetica
+
+La tentazione nei progetti B2B è replicare l'esperienza visiva curata dei grandi B2C come Amazon. Questo è un errore di priorità. Gli utenti B2B preferiscono l'efficienza all'estetica — usano la piattaforma come strumento di lavoro, spesso quotidianamente, e valorizzano:
+
+**Ricerca avanzata con filtri tecnici:** numero di riferimento del prodotto, codice interno del fornitore, specifiche tecniche (dimensioni, materiali, normative). Un responsabile acquisti non vuole navigare tra le categorie — vuole digitare "vite M8x40 acciaio inox 304" e trovarla immediatamente.
+
+**Cronologia e riordino rapido:** la maggior parte degli ordini B2B sono ripetizioni. "Ripeti ultimo ordine" e "salva lista acquisti frequenti" valgono più di qualsiasi animazione UI.
+
+**Esportazione dati:** ordini in CSV/XML, fatture in PDF, report di spesa per periodo e categoria. Questi dati devono finire nell'ERP dell'acquirente.
+
+**Dashboard account:** credito disponibile, ordini in corso, approvazioni in sospeso, cronologia finanziaria. L'acquirente B2B ha bisogno di pieno controllo sullo stato dell'account.
+
+La regola pratica è: investi nel flusso di acquisto ricorrente prima di qualsiasi miglioramento estetico. L'utente che compra ogni mese deve riuscire a farlo in meno di 5 minuti.
+
+## Conclusione
+
+La decisione tra costruire un marketplace B2B o B2C definisce non solo il prodotto, ma l'architettura tecnica, il modello dati, le integrazioni necessarie e il profilo del team che manterrà la piattaforma. Costruire per il pubblico sbagliato è un errore costoso.
+
+SystemForge supporta queste decisioni con documentazione strutturata prima del codice — identificando i flussi critici, mappando le integrazioni necessarie e generando le User Story che coprono gli scenari B2B spesso dimenticati fino a quando un cliente importante non li richiede.

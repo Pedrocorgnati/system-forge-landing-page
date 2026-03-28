@@ -1,0 +1,162 @@
+---
+title: "AI Agents: What They Are and When to Use Them"
+slug: "ai-agents-what-they-are-and-when-to-use"
+date: "2024-08-15"
+description: "What AI agents are, how they differ from simple chatbots, when they make sense, and the operational risks of agentic systems in production."
+tags: ["ai agents", "langchain", "llm autonomy", "tool use", "llm"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: What AI agents are, how they differ from simple chatbots, when they make sense, and the operational risks of agentic systems in production.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'agentes-de-ia-o-que-sao-e-como-aplicar'
+  - locale: 'it-IT'
+    slug: 'agenti-ia-cosa-sono-e-come-applicare'
+  - locale: 'en'
+    slug: 'ai-agents-what-they-are-and-when-to-use'
+---
+
+There's a lot of hype around "AI agents." Every week a new framework appears promising that you'll build an autonomous agent that solves any problem. In practice, most implementations called "agents" are chatbots with RAG and a couple of extra functions. And that's not necessarily bad — sometimes that's exactly what you need.
+
+But when a real AI agent makes sense, it can automate workflows that previously required hundreds of human hours per month. The difference lies in understanding what makes a system genuinely agentic — and the risks that come with it.
+
+## What Makes a System Agentic
+
+A traditional chatbot follows a flow: receives input, processes it, returns output. Each interaction is independent. An agent is different in three dimensions:
+
+**Planning:** the agent decomposes an objective into subtasks. Given the goal "do a competitive analysis of company X," the agent plans which searches to run, which data to collect, how to structure the report — before executing any step.
+
+**Tool use:** the agent has access to functions that perform actions in the real world — web search, code execution, file reading, API calls, sending emails.
+
+**Memory and loop:** the agent maintains state between steps. The result of one action informs the next. It keeps executing until it reaches the objective or hits a blocker.
+
+The practical distinction: a chatbot answers questions. An agent executes tasks.
+
+## Tool Use: How Agents Interact with the Real World
+
+Tool use is the mechanism that gives the agent the ability to act beyond generating text. OpenAI calls it "function calling"; Anthropic calls it "tool use." The concept is the same: you define functions with a name, description, and expected parameters, and the model decides when and how to call each one.
+
+```python
+import json
+from openai import OpenAI
+
+client = OpenAI()
+
+# Define available tools
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_price",
+            "description": "Gets the current price of a product from the inventory system",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_code": {
+                        "type": "string",
+                        "description": "Product SKU code"
+                    }
+                },
+                "required": ["product_code"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_order",
+            "description": "Creates a new order in the system",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_code": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "customer_id": {"type": "string"}
+                },
+                "required": ["product_code", "quantity", "customer_id"]
+            }
+        }
+    }
+]
+
+def execute_tool(name: str, args: dict) -> str:
+    if name == "get_product_price":
+        # This would call the real system
+        return json.dumps({"price": 149.90, "stock": 23})
+    elif name == "create_order":
+        return json.dumps({"order_id": "ORD-001234", "status": "confirmed"})
+
+# Agent loop
+messages = [{"role": "user", "content": "Create an order for 2 units of product SKU-789 for customer C-001"}]
+
+while True:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=tools,
+    )
+
+    msg = response.choices[0].message
+    messages.append(msg)
+
+    if msg.tool_calls:
+        for call in msg.tool_calls:
+            result = execute_tool(call.function.name, json.loads(call.function.arguments))
+            messages.append({
+                "role": "tool",
+                "tool_call_id": call.id,
+                "content": result
+            })
+    else:
+        print(msg.content)
+        break
+```
+
+The model decides when to call each tool based on the conversation. This enables multi-step flows where the agent gathers information before executing actions.
+
+## ReAct and Chain-of-Thought: Structured Reasoning
+
+ReAct (Reasoning + Acting) is a prompting pattern that instructs the model to explicitly alternate between reasoning and action. Instead of simply calling tools, the model "thinks out loud" before each step:
+
+```
+Thought: The user wants to create an order. First I need to check the price and stock.
+Action: get_product_price(product_code="SKU-789")
+Observation: {"price": 149.90, "stock": 23}
+
+Thought: The product is available. Now I can create the order.
+Action: create_order(product_code="SKU-789", quantity=2, customer_id="C-001")
+Observation: {"order_id": "ORD-001234", "status": "confirmed"}
+
+Thought: The order was created successfully. I can inform the user.
+Final answer: Order ORD-001234 created successfully. 2 units of product SKU-789...
+```
+
+This explicit reasoning has two advantages: the model makes fewer mistakes by breaking problems into smaller steps, and you have traceability of what the agent was "thinking" when it made each decision.
+
+## Risks: When Agents Make Wrong Decisions
+
+Autonomous agents amplify both successes and failures. An agent with access to email, a database, and an order system can process 1,000 transactions per hour without human intervention — and can also send 1,000 emails with incorrect information or create 1,000 incorrect orders.
+
+The main production risks:
+
+| Risk | Description | Mitigation |
+|------|-------------|------------|
+| Prompt injection | Malicious inputs that hijack the agent's behavior | Validate and sanitize all external inputs |
+| Irreversible actions | Deleting data, sending communications, charging amounts | Require human confirmation for irreversible actions |
+| Infinite loop | Agent enters a cycle of actions without progressing | Iteration limit and timeout per task |
+| Excessive permission scope | Agent has access to more than it needs | Principle of least privilege for tools |
+| Uncontrolled cost | Agent makes hundreds of LLM calls for a simple task | Cost limit per session |
+
+The most important rule: **don't give an agent access to actions you wouldn't be comfortable seeing executed automatically 1,000 times in a row**.
+
+For critical systems, the "human-in-the-loop" pattern — where the agent plans the actions and a human approves them before execution — balances automation with control.
+
+## Conclusion
+
+AI agents represent a real shift in process automation. Tasks that require multiple steps, intermediate decisions, and interaction with external systems are the natural territory of agents. But building reliable agents requires discipline: well-defined tools, structured reasoning, and explicit safeguards.
+
+The hype around autonomous agents often ignores the operational risks. At **SystemForge**, we build agentic systems with robust guardrails — automation you can supervise and trust. If you have repetitive processes that could be automated with AI, reach out to assess whether and how agents can help.

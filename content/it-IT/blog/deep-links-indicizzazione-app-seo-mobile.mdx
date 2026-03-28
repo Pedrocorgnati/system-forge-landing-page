@@ -1,0 +1,181 @@
+---
+title: "Deep link e SEO mobile: indicizzazione delle app"
+slug: "deep-links-indicizzazione-app-seo-mobile"
+date: "2024-08-26"
+description: "Deep link in React Native — Universal Links (iOS), App Links (Android), indicizzazione Google e strategie per apparire nei risultati di ricerca mobile."
+tags: ["deep links", "universal links", "app links", "seo mobile", "react navigation"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Deep link in React Native — Universal Links (iOS), App Links (Android), indicizzazione Google e strategie per apparire nei risultati di ricerca mobile.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'deep-links-app-indexing-seo-mobile'
+  - locale: 'it-IT'
+    slug: 'deep-links-indicizzazione-app-seo-mobile'
+  - locale: 'en'
+    slug: 'deep-links-and-mobile-seo-app-indexing'
+---
+
+Esiste una divisione artificiale tra il mondo web e il mondo delle app. Un utente riceve un link via WhatsApp, lo tocca sul cellulare — e si apre il browser, che carica una versione meno funzionale del prodotto mentre l'app è installata a due icone di distanza. Questa frizione costa engagement e conversioni.
+
+I deep link risolvono questo. Collegano gli URL del web direttamente a schermate specifiche dell'app, creando un'esperienza continua tra i due contesti. E quando configurati correttamente, aprono anche l'app all'indicizzazione da parte dei motori di ricerca — quello che Google chiama App Indexing.
+
+## Universal Links su iOS: Configurazione e apple-app-site-association
+
+Gli Universal Links sono l'implementazione Apple per i deep link verificati. Quando un utente tocca un link del tuo dominio su un dispositivo iOS con l'app installata, iOS apre l'app direttamente — senza passare dal browser, senza mostrare un popup di conferma.
+
+Il meccanismo di verifica funziona così: ospiti un file JSON sul tuo dominio, e Apple verifica quel file durante l'installazione dell'app per confermare che sei il proprietario del dominio.
+
+Il file `apple-app-site-association` (senza estensione) deve essere ospitato su `https://tuodominio.com/.well-known/apple-app-site-association`:
+
+```json
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAMID.com.tuaazienda.tuaapp",
+        "paths": [
+          "/prodotti/*",
+          "/ordini/*",
+          "/utente/profilo",
+          "NOT /admin/*"
+        ]
+      }
+    ]
+  }
+}
+```
+
+L'`appID` è la concatenazione del Team ID di Apple (trovato nel Developer Portal) con il Bundle ID dell'app. I `paths` definiscono quali URL aprono l'app — il prefisso `NOT` esclude pattern specifici.
+
+Questo file deve essere servito con `Content-Type: application/json` e senza reindirizzamenti. Apple effettua una richiesta diretta al dominio durante l'installazione dell'app — se c'è un redirect o il file impiega tempo a rispondere, la verifica fallisce silenziosamente.
+
+In `app.json` di Expo, abilita gli Associated Domains:
+
+```json
+{
+  "expo": {
+    "ios": {
+      "associatedDomains": [
+        "applinks:tuodominio.com",
+        "applinks:www.tuodominio.com"
+      ]
+    }
+  }
+}
+```
+
+## App Links su Android: assetlinks.json e Intent Filters
+
+L'equivalente Android sono gli App Links, verificati tramite Digital Asset Links. Il file `assetlinks.json` va in `https://tuodominio.com/.well-known/assetlinks.json`:
+
+```json
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.tuaazienda.tuaapp",
+      "sha256_cert_fingerprints": [
+        "AB:CD:EF:12:34:56:..."
+      ]
+    }
+  }
+]
+```
+
+Il fingerprint SHA-256 si ottiene dal keystore di produzione:
+
+```bash
+keytool -list -v -keystore release.keystore -alias release-key
+```
+
+In `app.json`, gli Intent Filters sono configurati automaticamente da Expo per gli URL elencati, ma nei progetti bare workflow è necessario aggiungerli manualmente in `AndroidManifest.xml`:
+
+```xml
+<intent-filter android:autoVerify="true">
+  <action android:name="android.intent.action.VIEW" />
+  <category android:name="android.intent.category.DEFAULT" />
+  <category android:name="android.intent.category.BROWSABLE" />
+  <data android:scheme="https"
+        android:host="tuodominio.com"
+        android:pathPrefix="/prodotti" />
+</intent-filter>
+```
+
+L'attributo `android:autoVerify="true"` è ciò che attiva la verifica automatica — senza di esso, Android mostra un selettore che chiede all'utente se vuole aprire nell'app o nel browser.
+
+## React Navigation: Configurazione del Linking
+
+Con i file di verifica sul server e le configurazioni native pronte, il passo successivo è insegnare a React Navigation come mappare gli URL alle schermate:
+
+```typescript
+import { NavigationContainer } from '@react-navigation/native';
+import { LinkingOptions } from '@react-navigation/native';
+
+const linking: LinkingOptions<RootStackParamList> = {
+  prefixes: [
+    'https://tuodominio.com',
+    'https://www.tuodominio.com',
+    'miaapp://', // schema personalizzato per fallback
+  ],
+  config: {
+    screens: {
+      Home: '',
+      ProductDetail: 'prodotti/:productId',
+      OrderTracking: 'ordini/:orderId/tracciare',
+      UserProfile: 'utente/profilo',
+      NotFound: '*',
+    },
+  },
+};
+
+export default function App() {
+  return (
+    <NavigationContainer linking={linking}>
+      {/* ... */}
+    </NavigationContainer>
+  );
+}
+```
+
+React Navigation gestisce automaticamente l'apertura tramite deep link — sia all'apertura dell'app da un link, sia alla ricezione del link con l'app già aperta. Nel secondo caso, naviga verso la schermata corretta senza riavviare la navigazione.
+
+| Tipo di link | iOS | Android | Richiede verifica |
+|---|---|---|---|
+| Schema personalizzato (`miaapp://`) | Funziona | Funziona | No |
+| Universal Links / App Links | Funziona | Funziona | Sì (file sul dominio) |
+| Branch.io / Firebase Dynamic Links | Funziona | Funziona | Configurazione nell'SDK |
+
+Gli schemi personalizzati funzionano senza verifica, ma hanno un limite importante: se l'app non è installata, il link fallisce completamente — il browser non riesce ad aprire `miaapp://`. Universal Links e App Links hanno un fallback automatico al sito quando l'app non è installata.
+
+## Indicizzazione da parte di Google: App Indexing e Search Console
+
+Quando le tue pagine web e le schermate corrispondenti dell'app sono collegate tramite deep link, Google può indicizzare il contenuto dell'app e mostrare risultati che si aprono direttamente nell'app. Questo è particolarmente prezioso per app di e-commerce, notizie e contenuti.
+
+Per abilitare l'indicizzazione, ogni pagina web deve includere i meta tag di associazione con l'app. Esempio per una pagina prodotto:
+
+```html
+<!-- iOS -->
+<meta name="apple-itunes-app" content="app-id=123456789, app-argument=https://tuodominio.com/prodotti/caffe-speciale">
+
+<!-- Android -->
+<link rel="alternate" href="android-app://com.tuaazienda.tuaapp/https/tuodominio.com/prodotti/caffe-speciale">
+```
+
+In Google Search Console, la sezione "Link app" mostra quali URL sono stati associati e se ci sono errori di verifica. Il processo di indicizzazione non è immediato — il Googlebot deve scansionare le pagine e validare le associazioni, il che può richiedere settimane.
+
+Per app con contenuti dinamici (come prodotti che cambiano frequentemente), la sitemap del sito web rimane la base dell'indicizzazione. La differenza è che, su dispositivi mobili, i risultati di Google possono mostrare un link diretto alla schermata dell'app invece che al sito.
+
+Una strategia complementare è usare Firebase App Indexing per indicizzare contenuti che non hanno un equivalente sul web — come schermate di configurazione o funzionalità esclusive dell'app. Questa indicizzazione usa la cronologia dell'applicazione dell'utente stesso (personal content indexing), non l'indice pubblico di Google.
+
+## Conclusione
+
+I deep link ben configurati rendono l'app un'estensione naturale del web invece di un'isola isolata. Gli utenti arrivano da Google, da link condivisi, da notifiche — e vanno direttamente al contenuto rilevante, senza frizioni. La configurazione ha alcune fasi tecniche, specialmente nella parte di verifica sui server Apple e Google, ma il risultato è un'esperienza utente significativamente migliore e una superficie di acquisizione organica che la maggior parte delle app ignora.
+
+In SystemForge, implementiamo i deep link come parte del setup iniziale di qualsiasi app — non come feature aggiuntiva. Se stai costruendo o refactoring un'app e vuoi garantire che il layer di linking sia corretto dall'inizio, il nostro team è disponibile per aiutarti.

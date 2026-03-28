@@ -1,0 +1,144 @@
+---
+title: "LangChain vs LlamaIndex: quando usare ciascuno"
+slug: "langchain-vs-llamaindex-quando-usare"
+date: "2024-08-22"
+description: "Confronto pratico tra LangChain e LlamaIndex: quando ciascun framework è la scelta giusta per sistemi di IA in produzione."
+tags: ["langchain", "llamaindex", "framework ia", "llm", "python"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Confronto pratico tra LangChain e LlamaIndex — quando ciascun framework è la scelta giusta per sistemi di IA in produzione.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'langchain-vs-llamaindex-quando-usar'
+  - locale: 'it-IT'
+    slug: 'langchain-vs-llamaindex-quando-usare'
+  - locale: 'en'
+    slug: 'langchain-vs-llamaindex-when-to-use'
+---
+
+## Due Framework, Scopi Diversi
+
+LangChain e LlamaIndex sono i due framework di IA più popolari nell'ecosistema Python — e spesso vengono trattati come sostituti l'uno dell'altro. In pratica, risolvono problemi diversi e funzionano meglio insieme che in competizione.
+
+LangChain è nato per l'orchestrazione di pipeline LLM: chains, agents, tools, memoria e integrazione con decine di servizi. LlamaIndex è nato per l'indicizzazione e il recupero di documenti — il RAG (Retrieval-Augmented Generation) è la sua specialità centrale.
+
+Capire questa differenza fondamentale risparmia settimane di tentativi ed errori.
+
+## LangChain: Orchestrazione di Flussi con LLM
+
+LangChain eccelle quando è necessario coordinare più step, strumenti e modelli in un flusso di lavoro complesso.
+
+**Quando LangChain brilla:**
+
+```python
+from langchain.agents import create_react_agent, AgentExecutor
+from langchain.tools import DuckDuckGoSearchRun, PythonREPLTool
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+tools = [DuckDuckGoSearchRun(), PythonREPLTool()]
+
+agent = create_react_agent(llm, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+result = executor.invoke({"input": "Cerca il prezzo attuale di Bitcoin e calcola quanto avrei oggi se avessi investito €1000 nel 2020"})
+```
+
+In questo esempio, l'agent decide autonomamente quando cercare sul web e quando eseguire codice Python. LangChain gestisce il loop ragionamento-azione-osservazione (ReAct) automaticamente.
+
+**Punti di forza di LangChain:**
+- Agent con accesso a strumenti esterni (web, database, API)
+- Chain complesse con più LLM concatenati
+- Memoria di conversazione (buffer, summary, entity)
+- Integrazione con 300+ provider (OpenAI, Anthropic, HuggingFace, ecc.)
+- LCEL (LangChain Expression Language) per pipeline dichiarative
+
+**Limitazioni:**
+- Astrazione pesante — difficile da debuggare quando qualcosa va storto
+- La documentazione non sempre segue la velocità dei cambiamenti della libreria
+- Overhead per casi semplici (un RAG di base non necessita di LangChain)
+
+## LlamaIndex: Recupero di Informazioni Strutturate
+
+LlamaIndex è stato costruito per un problema specifico: come far rispondere un LLM a domande su una base documentale in modo preciso e controllato.
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter
+
+# Caricare e indicizzare documenti
+documents = SimpleDirectoryReader("contratti/").load_data()
+parser = SentenceSplitter(chunk_size=512, chunk_overlap=64)
+nodes = parser.get_nodes_from_documents(documents)
+
+index = VectorStoreIndex(nodes)
+query_engine = index.as_query_engine(similarity_top_k=5)
+
+response = query_engine.query("Quali sono le clausole di rescissione del contratto con l'Azienda X?")
+print(response)
+print(response.source_nodes)  # Mostra i passaggi che hanno generato la risposta
+```
+
+LlamaIndex gestisce automaticamente: chunking, embedding, archiviazione vettoriale, recupero per similarità e sintesi della risposta.
+
+**Punti di forza di LlamaIndex:**
+- RAG con controllo granulare di chunking e retrieval
+- Tracciabilità delle fonti (source nodes)
+- Supporto nativo a strutture complesse (tabelle, PDF, HTML)
+- Sub-question decomposition per domande complesse
+- Integrazioni con vector store (Pinecone, Weaviate, pgvector, Chroma)
+
+**Limitazioni:**
+- Meno flessibile per pipeline che vanno oltre il RAG
+- Gli agent sono meno maturi rispetto a quelli di LangChain
+- Ecosistema più ristretto di integrazioni con strumenti esterni
+
+## Matrice di Decisione
+
+| Caso d'uso | LangChain | LlamaIndex | Entrambi |
+|------------|-----------|------------|----------|
+| Chatbot con documenti interni | — | ✓ | — |
+| Agent con accesso a internet | ✓ | — | — |
+| Pipeline RAG con controllo chunking | — | ✓ | — |
+| Workflow multi-step con API esterne | ✓ | — | — |
+| Sintesi di più documenti | — | ✓ | — |
+| Agent che ricerca e consulta base documentale | — | — | ✓ |
+| Analisi di contratti e documenti legali | — | ✓ | — |
+| Automazione di processi interni | ✓ | — | — |
+
+## Usare LangChain e LlamaIndex Insieme
+
+La combinazione più potente è usare LlamaIndex per l'indicizzazione e il recupero, e LangChain per l'orchestrazione dell'agent:
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from langchain_community.retrievers import LlamaIndexRetriever
+from langchain.agents import create_react_agent
+
+# LlamaIndex gestisce il RAG
+documents = SimpleDirectoryReader("base-conoscenza/").load_data()
+index = VectorStoreIndex.from_documents(documents)
+retriever = LlamaIndexRetriever(index=index, query_kwargs={"similarity_top_k": 5})
+
+# LangChain gestisce l'orchestrazione dell'agent
+from langchain.tools import Tool
+knowledge_base_tool = Tool(
+    name="base_conoscenza_aziendale",
+    func=lambda q: retriever.get_relevant_documents(q),
+    description="Cerca nella base di conoscenza interna dell'azienda"
+)
+
+# Agent con accesso alla base + internet
+tools = [knowledge_base_tool, DuckDuckGoSearchRun()]
+agent = create_react_agent(llm, tools, prompt)
+```
+
+## Conclusione
+
+**Scegli LangChain** quando il tuo sistema ha bisogno di agent che prendono decisioni e usano strumenti diversi. **Scegli LlamaIndex** quando il problema principale è far rispondere un LLM a domande su documenti con precisione e tracciabilità. **Usa entrambi** quando hai bisogno di agent che consultano anche una base documentale strutturata.
+
+SystemForge ha esperienza con entrambi i framework in progetti di automazione con IA. Se vuoi capire quale approccio ha più senso per il tuo caso, contatta il nostro team.

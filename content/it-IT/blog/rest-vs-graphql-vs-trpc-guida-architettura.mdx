@@ -1,0 +1,156 @@
+---
+title: "REST vs GraphQL vs tRPC: guida all'architettura API"
+slug: "rest-vs-graphql-vs-trpc-guida-architettura"
+date: "2024-07-12"
+description: "Come scegliere tra REST, GraphQL e tRPC per la tua API — confronto di complessità, performance, type-safety e casi d'uso ideali per ogni approccio."
+tags: ["rest api", "graphql", "trpc", "architettura api", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come scegliere tra REST, GraphQL e tRPC per la tua API — confronto di complessità, performance, type-safety e casi d'uso ideali.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rest-vs-graphql-vs-trpc-quando-usar'
+  - locale: 'it-IT'
+    slug: 'rest-vs-graphql-vs-trpc-guida-architettura'
+  - locale: 'en'
+    slug: 'rest-vs-graphql-vs-trpc-architecture-guide'
+---
+
+La scelta del protocollo di comunicazione di un'API non è un dettaglio tecnico — è una decisione architetturale che determinerà come lavora il tuo team per i prossimi anni. REST, GraphQL e tRPC rappresentano filosofie diverse su come client e server devono comunicare. Scegliere male significa refactoring costosi, inconsistenze di contratto tra team e un backlog pieno di "migrare endpoint legacy".
+
+Questa guida offre un confronto onesto dei tre approcci: dove ciascuno eccelle, dove fallisce e come prendere la decisione giusta per il tuo progetto.
+
+## REST: Lo Standard che Funziona per il 90% dei Casi
+
+REST (Representational State Transfer) è il protocollo dominante nell'industria per buone ragioni: è semplice da capire, ha tooling maturo in qualsiasi linguaggio e ogni sviluppatore assunto lo conosce già.
+
+Il modello mentale di REST è elegante: le risorse sono sostantivi, i verbi HTTP rappresentano azioni. `GET /users/123` recupera un utente. `POST /orders` crea un ordine. `DELETE /sessions/abc` fa il logout. Questa semplicità rende le API REST leggibili anche senza documentazione.
+
+**Dove REST eccelle:**
+
+- API pubbliche consumate da partner esterni che non controlli
+- Sistemi con caching aggressivo — le richieste GET sono cacheable nativamente via HTTP
+- Progetti con team piccoli dove l'overhead di GraphQL/tRPC non si giustifica
+- Integrazioni con ERP, banche e sistemi legacy che già espongono REST
+- Microservizi che devono essere accessibili da più linguaggi
+
+**Dove REST genera attrito:**
+
+- App mobile che necessitano di dati molto specifici (overfetching/underfetching)
+- Dashboard con visualizzazioni complesse che aggregano decine di entità
+- Sviluppo parallelo in cui il frontend è bloccato in attesa di nuovi endpoint
+
+Il problema classico di REST è il "N+1 di endpoint": per renderizzare una schermata ordine, fai `GET /order/123`, poi `GET /user/456`, poi `GET /product/789` per ogni articolo. Questo comporta più round-trip di rete e codice di orchestrazione nel frontend che dovrebbe essere responsabilità del backend.
+
+## GraphQL: Quando il Client Deve Controllare i Dati
+
+GraphQL è nato in Facebook nel 2012 per risolvere esattamente questo problema: team mobile che necessitavano di dati molto specifici, in formati molto diversi, senza sovraccaricare un'API monolitica.
+
+La proposta è invertire il controllo: invece che il backend definisca la forma dei dati, il client dichiara esattamente ciò di cui ha bisogno.
+
+```graphql
+query GetOrderDetails($id: ID!) {
+  order(id: $id) {
+    id
+    status
+    total
+    items {
+      quantity
+      product {
+        name
+        price
+        imageUrl
+      }
+    }
+    customer {
+      name
+      email
+    }
+  }
+}
+```
+
+In una singola richiesta, recuperi l'ordine, gli articoli, i prodotti e il cliente. Zero round-trip aggiuntivi. Zero campi inutili nella risposta.
+
+**Dove GraphQL è la scelta giusta:**
+
+- App con più client (web, iOS, Android) con necessità di dati diverse
+- Prodotti con dati altamente relazionali in cui il client definisce il grafo di navigazione
+- Team grandi dove frontend e backend lavorano in modo disaccoppiato
+- Piattaforme che espongono API a terze parti per costruire applicazioni (GitHub, Shopify, Twitter usano GraphQL)
+
+**Costi reali di GraphQL:**
+
+- Curva di apprendimento significativa per team abituati a REST
+- Il caching HTTP nativo non funziona — devi implementare il caching a livello applicativo (Apollo Client, urql)
+- Query N+1 nel database se non implementi DataLoader
+- L'introspezione esposta può rivelare lo schema in produzione se non viene disabilitata
+
+## tRPC: Type-safety End-to-End senza Overhead
+
+tRPC è l'approccio più recente e più specifico per contesto. Funziona esclusivamente in progetti TypeScript dove frontend e backend condividono lo stesso repository (monorepo) o sono serviti dalla stessa base di codice, come Next.js.
+
+La proposta è radicale: eliminare completamente il layer di serializzazione/deserializzazione e i contratti API. Chiami funzioni del server come se fossero funzioni locali, con type-safety completa.
+
+```typescript
+// Sul server (pages/api/trpc/[trpc].ts o app/api/trpc/[trpc]/route.ts)
+export const appRouter = router({
+  getOrder: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return db.order.findUnique({ where: { id: input.id } });
+    }),
+});
+
+// Sul client — completamente type-safe, senza codice manuale
+const { data } = trpc.getOrder.useQuery({ id: "123" });
+// data è tipizzato automaticamente come il tipo di ritorno della funzione server
+```
+
+Se modifichi il tipo di ritorno della procedure sul server, TypeScript segnala l'errore in tutti i punti del frontend che consumano quella procedure. Zero contratti non aggiornati. Zero runtime errors per schema mismatch.
+
+**Dove tRPC è imbattibile:**
+
+- Next.js full-stack (App Router o Pages Router)
+- Startup e prodotti in cui la velocità di iterazione è critica
+- Team piccoli che vogliono la massima DX senza overhead di configurazione
+- Progetti interni in cui controlli il 100% dei consumer dell'API
+
+**Limitazioni importanti:**
+
+- Funziona solo con TypeScript — Python, Go, iOS nativo sono esclusi
+- Non è un'API pubblica — non può essere condivisa con partner esterni
+- Vendor lock-in lieve: migrare verso REST/GraphQL in seguito richiede riscrittura
+
+## Matrice di Decisione per Tipo di Progetto
+
+| Criterio | REST | GraphQL | tRPC |
+|---|---|---|---|
+| API pubblica / partner esterni | Eccellente | Buono | Non raccomandato |
+| Client multipli (web + mobile) | Medio | Eccellente | Medio |
+| Monorepo TypeScript full-stack | Buono | Buono | Eccellente |
+| Team con esperienza limitata | Eccellente | Scarso | Buono |
+| Caching HTTP nativo | Eccellente | Scarso | Medio |
+| Type-safety end-to-end | Medio | Buono | Eccellente |
+| Integrazioni con sistemi legacy | Eccellente | Medio | Scarso |
+| Performance su mobile con dati complessi | Medio | Eccellente | Buono |
+| Complessità di setup | Bassa | Alta | Bassa |
+| Ecosistema e tooling | Maturo | Maturo | Giovane |
+
+La decisione è raramente binaria. Molte architetture mature usano REST per API pubbliche, tRPC per la comunicazione interna tra servizi TypeScript e GraphQL per il BFF (Backend for Frontend) consumato dall'app mobile.
+
+## Conclusione
+
+Non esiste un protocollo universalmente superiore — esiste il protocollo giusto per il contesto giusto.
+
+Scegli **REST** quando hai bisogno di un'API consumibile da qualsiasi client, in qualsiasi linguaggio, con tooling maturo e HTTP caching. È la scelta sicura per la maggior parte dei progetti.
+
+Scegli **GraphQL** quando hai più client con esigenze di dati divergenti, un team dedicato allo schema e dati altamente relazionali. L'investimento nell'apprendimento si ripaga in flessibilità.
+
+Scegli **tRPC** quando stai costruendo un prodotto Next.js full-stack con TypeScript e vuoi la migliore developer experience possibile. La type-safety end-to-end elimina un'intera classe di bug.
+
+In SystemForge, ogni progetto inizia con una decisione architetturale documentata — protocollo API, strategia di autenticazione, policy di versioning. Il risultato è un sistema che il prossimo sviluppatore riesce a comprendere e far evolvere senza decifrare codice legacy.

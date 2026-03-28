@@ -1,0 +1,156 @@
+---
+title: "REST vs GraphQL vs tRPC: Architecture Guide"
+slug: "rest-vs-graphql-vs-trpc-architecture-guide"
+date: "2024-07-12"
+description: "How to choose between REST, GraphQL, and tRPC for your API — comparing complexity, performance, type-safety, and ideal use cases for each approach."
+tags: ["rest api", "graphql", "trpc", "api architecture", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to choose between REST, GraphQL, and tRPC for your API — comparing complexity, performance, type-safety, and ideal use cases.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rest-vs-graphql-vs-trpc-quando-usar'
+  - locale: 'it-IT'
+    slug: 'rest-vs-graphql-vs-trpc-guida-architettura'
+  - locale: 'en'
+    slug: 'rest-vs-graphql-vs-trpc-architecture-guide'
+---
+
+Choosing an API communication protocol isn't a technical detail — it's an architectural decision that will shape how your team works for years. REST, GraphQL, and tRPC represent different philosophies about how clients and servers should communicate. Choosing wrong means costly refactors, contract inconsistencies between teams, and a backlog full of "migrate legacy endpoints."
+
+This guide offers an honest comparison of all three approaches: where each one shines, where each one fails, and how to make the right decision for your project.
+
+## REST: The Standard That Works for 90% of Cases
+
+REST (Representational State Transfer) is the dominant industry protocol for good reasons: it's simple to understand, has mature tooling in any language, and every hired developer already knows it.
+
+REST's mental model is elegant: resources are nouns, HTTP verbs represent actions. `GET /users/123` fetches a user. `POST /orders` creates an order. `DELETE /sessions/abc` logs out. This simplicity makes REST APIs readable even without documentation.
+
+**Where REST excels:**
+
+- Public APIs consumed by external partners you don't control
+- Systems with aggressive caching — GET requests are natively cacheable via HTTP
+- Projects with small teams where GraphQL/tRPC overhead isn't worth it
+- Integrations with ERPs, banks, and legacy systems already exposing REST
+- Microservices that need to be accessible from multiple languages
+
+**Where REST creates friction:**
+
+- Mobile apps needing very specific data (overfetching/underfetching)
+- Dashboards with complex visualizations aggregating dozens of entities
+- Parallel development where frontend is blocked waiting for new endpoints
+
+REST's classic problem is the "N+1 endpoints" issue: to render an order screen, you make `GET /order/123`, then `GET /user/456`, then `GET /product/789` for each item. This results in multiple network round-trips and orchestration code in the frontend that should be the backend's responsibility.
+
+## GraphQL: When the Client Needs to Control the Data
+
+GraphQL emerged at Facebook in 2012 to solve exactly this problem: mobile teams needing very specific data, in very different formats, without overloading a monolithic API.
+
+The proposal is to invert control: instead of the backend defining data shape, the client declares exactly what it needs.
+
+```graphql
+query GetOrderDetails($id: ID!) {
+  order(id: $id) {
+    id
+    status
+    total
+    items {
+      quantity
+      product {
+        name
+        price
+        imageUrl
+      }
+    }
+    customer {
+      name
+      email
+    }
+  }
+}
+```
+
+In a single request, you fetch the order, items, products, and customer. Zero extra round-trips. Zero unnecessary fields in the response.
+
+**Where GraphQL is the right choice:**
+
+- Apps with multiple clients (web, iOS, Android) with different data needs
+- Products with highly relational data where the client defines the navigation graph
+- Large teams where frontend and backend work in a decoupled manner
+- Platforms exposing APIs for third parties to build applications (GitHub, Shopify, Twitter use GraphQL)
+
+**Real costs of GraphQL:**
+
+- Significant learning curve for teams accustomed to REST
+- Native HTTP caching doesn't work — you need to implement caching at the application layer (Apollo Client, urql)
+- N+1 database queries if you don't implement DataLoader
+- Exposed introspection can leak schema in production if not disabled
+
+## tRPC: End-to-End Type-Safety Without Overhead
+
+tRPC is the newest and most context-specific approach. It works exclusively in TypeScript projects where frontend and backend share the same repository (monorepo) or are served by the same codebase, like Next.js.
+
+The proposal is radical: completely eliminate the serialization/deserialization layer and API contracts. You call server functions as if they were local functions, with full type-safety.
+
+```typescript
+// On the server (pages/api/trpc/[trpc].ts or app/api/trpc/[trpc]/route.ts)
+export const appRouter = router({
+  getOrder: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ input }) => {
+      return db.order.findUnique({ where: { id: input.id } });
+    }),
+});
+
+// On the client — fully type-safe, no manual code
+const { data } = trpc.getOrder.useQuery({ id: "123" });
+// data is automatically typed as the return type of the server function
+```
+
+If you change the return type of the procedure on the server, TypeScript will report errors everywhere in the frontend that consumes that procedure. Zero stale contracts. Zero runtime errors from schema mismatch.
+
+**Where tRPC is unbeatable:**
+
+- Next.js full-stack (App Router or Pages Router)
+- Startups and products where iteration speed is critical
+- Small teams wanting maximum DX without configuration overhead
+- Internal projects where you control 100% of the API consumers
+
+**Important limitations:**
+
+- Works only with TypeScript — Python, Go, native iOS are excluded
+- Not a public API — can't be shared with external partners
+- Mild vendor lock-in: migrating to REST/GraphQL later requires rewriting
+
+## Decision Matrix by Project Type
+
+| Criterion | REST | GraphQL | tRPC |
+|---|---|---|---|
+| Public API / external partners | Excellent | Good | Not recommended |
+| Multiple clients (web + mobile) | Medium | Excellent | Medium |
+| TypeScript full-stack monorepo | Good | Good | Excellent |
+| Team with limited experience | Excellent | Poor | Good |
+| Native HTTP caching | Excellent | Poor | Medium |
+| End-to-end type-safety | Medium | Good | Excellent |
+| Legacy system integrations | Excellent | Medium | Poor |
+| Mobile performance with complex data | Medium | Excellent | Good |
+| Setup complexity | Low | High | Low |
+| Ecosystem and tooling | Mature | Mature | Young |
+
+The decision is rarely binary. Many mature architectures use REST for public APIs, tRPC for internal TypeScript service communication, and GraphQL for the BFF (Backend for Frontend) consumed by the mobile app.
+
+## Conclusion
+
+There is no universally superior protocol — there's the right protocol for the right context.
+
+Choose **REST** when you need an API consumable by any client, in any language, with mature tooling and HTTP caching. It's the safe choice for most projects.
+
+Choose **GraphQL** when you have multiple clients with divergent data needs, a dedicated schema team, and highly relational data. The learning investment pays off in flexibility.
+
+Choose **tRPC** when you're building a full-stack Next.js product with TypeScript and want the best possible developer experience. End-to-end type-safety eliminates an entire class of bugs.
+
+At SystemForge, each project starts with a documented architectural decision — API protocol, authentication strategy, versioning policy. The result is a system the next developer can understand and evolve without deciphering legacy code.

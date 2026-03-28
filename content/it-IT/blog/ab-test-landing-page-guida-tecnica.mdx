@@ -1,0 +1,164 @@
+---
+title: "A/B test su landing page: guida tecnica"
+slug: "ab-test-landing-page-guida-tecnica"
+date: "2024-10-11"
+description: "Come configurare e avviare A/B test su landing page con Vercel Edge Middleware e strumenti self-hosted — senza impatto sul SEO."
+tags: ["ab test", "landing page", "cro", "vercel", "split testing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Come configurare e avviare A/B test su landing page con Vercel Edge Middleware e strumenti self-hosted — senza impatto sul SEO.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ab-test-landing-pages-guia-tecnico'
+  - locale: 'it-IT'
+    slug: 'ab-test-landing-page-guida-tecnica'
+  - locale: 'en'
+    slug: 'ab-test-landing-pages-technical-guide'
+---
+
+Un A/B test mal eseguito peggiora il SEO e distorce l'analisi. Non è un'esagerazione: esiste un modo specifico di implementare lo split testing che Google rileva e può penalizzare come cloaking (mostrare contenuti diversi al bot rispetto all'utente). E c'è un modo di dichiarare un vincitore prima che il campione sia sufficientemente grande, che porta a decisioni basate sul rumore statistico, non sui dati.
+
+La maggior parte dei tutorial sugli A/B test affronta il lato marketing: cosa testare, come formulare ipotesi, come interpretare i risultati. Pochi entrano nell'implementazione tecnica — dove avvengono gli errori. Questo articolo copre la corretta implementazione degli A/B test su landing page moderne, con focus su Next.js e Vercel, ma con principi applicabili a qualsiasi stack statico.
+
+## Flicker Effect: Come Evitare il Flash di Contenuto
+
+Il flicker effect (chiamato anche FOOC — Flash of Original Content) è il fenomeno visivo in cui l'utente vede brevemente la versione originale della pagina prima di essere reindirizzato alla variante. Accade quando lo split test viene implementato lato client (JavaScript che viene eseguito nel browser dopo il caricamento iniziale).
+
+Google raccomanda esplicitamente di evitare A/B test con flicker: oltre a degradare l'esperienza utente, il bot di Google può indicizzare la variante che non è quella canonica, creando confusione di contenuto.
+
+La soluzione è implementare lo split sul server o sull'edge — prima che qualsiasi HTML venga inviato al browser. Con Vercel Edge Middleware, questo è semplice:
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const EXPERIMENT_COOKIE = 'ab-lp-headline'
+const VARIANTS = ['control', 'variant-a', 'variant-b']
+
+export function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone()
+
+  // Applica il test solo sulla landing page specifica
+  if (url.pathname !== '/landing-page-servizio') {
+    return NextResponse.next()
+  }
+
+  // Controlla se l'utente ha già una variante assegnata
+  let variant = request.cookies.get(EXPERIMENT_COOKIE)?.value
+
+  // Se non ce l'ha, ne assegna una casualmente
+  if (!variant || !VARIANTS.includes(variant)) {
+    variant = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
+  }
+
+  // Riscrive l'URL internamente per la route della variante
+  // L'utente vede /landing-page-servizio, ma viene servita /landing-page-servizio/[variant]
+  url.pathname = `/landing-page-servizio/${variant}`
+
+  const response = NextResponse.rewrite(url)
+
+  // Persiste la variante per 30 giorni
+  response.cookies.set(EXPERIMENT_COOKIE, variant, {
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'strict',
+  })
+
+  return response
+}
+
+export const config = {
+  matcher: '/landing-page-servizio',
+}
+```
+
+Con questa implementazione, l'utente riceve direttamente l'HTML della variante corretta — zero flicker, zero JavaScript lato client per lo split, e il bot di Google riceve sempre la variante "control" (che mantiene il tag canonico corretto).
+
+## A/B Test con Vercel Edge Middleware
+
+La struttura delle cartelle per supportare il middleware sopra:
+
+```
+app/
+  landing-page-servizio/
+    control/
+      page.tsx    # Versione originale
+    variant-a/
+      page.tsx    # Headline alternativa
+    variant-b/
+      page.tsx    # CTA alternativo
+```
+
+Ogni variante deve avere lo stesso tag canonico che punta all'URL canonico principale:
+
+```tsx
+// app/landing-page-servizio/variant-a/page.tsx
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: 'https://tuosito.com/landing-page-servizio',
+  },
+}
+```
+
+Questo garantisce che Google non indicizzi mai gli URL delle varianti — solo l'URL canonico.
+
+Per tracciare quale variante l'utente sta visualizzando e correlarla con le conversioni, invia il nome della variante come proprietà a Google Analytics 4:
+
+```typescript
+// In ogni componente variante, al mount
+useEffect(() => {
+  window.gtag('event', 'ab_test_exposure', {
+    experiment_id: 'lp-headline-test-2024-10',
+    variant_id: 'variant-a',
+  })
+}, [])
+```
+
+## Calcolo della Dimensione del Campione
+
+Prima di avviare il test, calcola la dimensione del campione necessaria per rilevare l'effetto minimo rilevante per il tuo business.
+
+| Tasso di Conversione Attuale | MDE (Effetto Minimo Rilevabile) | Campione per Variante |
+|---|---|---|
+| 2% | 20% relativo (→ 2,4%) | ~20.000 visitatori |
+| 2% | 50% relativo (→ 3,0%) | ~6.400 visitatori |
+| 5% | 20% relativo (→ 6,0%) | ~8.000 visitatori |
+| 5% | 50% relativo (→ 7,5%) | ~2.600 visitatori |
+| 10% | 20% relativo (→ 12%) | ~3.800 visitatori |
+
+*Calcolato per 95% di confidenza e 80% di potere statistico con due varianti.*
+
+Il MDE (Effetto Minimo Rilevabile) è il miglioramento più piccolo che sarebbe rilevante per te. Se la tua conversione attuale è del 2% e un miglioramento dello 0,1% non giustificherebbe lo sforzo di implementare la variante vincente, il tuo MDE reale è maggiore — e hai bisogno di un campione più piccolo.
+
+Se il tuo sito non ha traffico sufficiente per completare un A/B test in tempi ragionevoli (meno di 4-6 settimane), considera:
+
+1. Testare cambiamenti più grandi (headline completamente diverse, non variazioni sottili)
+2. Usare test multivariati invece di A/B per testare più elementi contemporaneamente
+3. Usare analisi qualitative (session recordings, interviste utenti) invece di A/B test
+
+## Interpretare i Risultati: Quando Dichiarare il Vincitore
+
+L'errore più comune è il "peaking" — controllare i risultati durante il test e interromperlo non appena una variante sembra vincente. Questo gonfia artificialmente il tasso di falsi positivi.
+
+La regola corretta: definisci prima di avviare il test quale sarà la durata (non il numero di conversioni come criterio di interruzione) e rispettala indipendentemente da cosa mostrano i dati intermedi.
+
+Per interpretare il risultato finale, verifica:
+
+1. **P-value < 0,05:** La probabilità che il risultato sia casuale è inferiore al 5%. Questo è il minimo per dichiarare la significatività.
+2. **Intervallo di confidenza che non include lo zero:** L'intervallo di confidenza del lift deve essere interamente positivo o interamente negativo.
+3. **Due settimane complete:** Indipendentemente dal volume, la durata minima garantisce l'eliminazione del bias dei giorni della settimana.
+4. **Segmentazione coerente:** Verifica che la distribuzione del traffico tra le varianti sia stata realmente 50/50 durante il test. Le distorsioni nella distribuzione invalidano il test.
+
+Se la variante B ha vinto con p=0,047 ma l'intervallo di confidenza è [+0,1%, +8,3%], il risultato è statisticamente significativo ma l'effetto reale potrebbe essere così piccolo come 0,1% — il che potrebbe non giustificare il cambio. Contestualizza il risultato con l'impatto sul business, non solo con la significatività statistica.
+
+## Conclusione
+
+L'A/B test fatto correttamente è uno degli strumenti più potenti per migliorare la conversione. Fatto scorrettamente — con flicker, senza adeguata significatività statistica, o con un'implementazione che influenza il SEO — è una fonte di decisioni sbagliate.
+
+L'implementazione con Vercel Edge Middleware risolve i problemi tecnici in modo strutturale: senza flicker, senza impatto sul SEO, con tracciamento corretto delle varianti. In [SystemForge](/), costruiamo landing page con questa architettura di sperimentazione già pronta — in modo che il tuo team di marketing possa eseguire test senza aver bisogno di uno sviluppatore per ogni iterazione.

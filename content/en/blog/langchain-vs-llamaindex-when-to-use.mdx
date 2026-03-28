@@ -1,0 +1,144 @@
+---
+title: "LangChain vs LlamaIndex: When to Use Each One"
+slug: "langchain-vs-llamaindex-when-to-use"
+date: "2024-08-22"
+description: "A practical comparison between LangChain and LlamaIndex: when each framework is the right choice for production AI systems."
+tags: ["langchain", "llamaindex", "ai framework", "llm", "python"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: A practical comparison between LangChain and LlamaIndex — when each framework is the right choice for AI systems in production.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'langchain-vs-llamaindex-quando-usar'
+  - locale: 'it-IT'
+    slug: 'langchain-vs-llamaindex-quando-usare'
+  - locale: 'en'
+    slug: 'langchain-vs-llamaindex-when-to-use'
+---
+
+## Two Frameworks, Different Purposes
+
+LangChain and LlamaIndex are the two most popular AI frameworks in the Python ecosystem — and they're frequently treated as drop-in replacements for each other. In practice, they solve different problems and work better together than in competition.
+
+LangChain was built for LLM pipeline orchestration: chains, agents, tools, memory, and integration with dozens of services. LlamaIndex was built for document indexing and retrieval — RAG (Retrieval-Augmented Generation) is its core specialty.
+
+Understanding this fundamental difference saves weeks of trial and error.
+
+## LangChain: Orchestrating LLM Workflows
+
+LangChain shines when you need to coordinate multiple steps, tools, and models in a complex workflow.
+
+**When LangChain excels:**
+
+```python
+from langchain.agents import create_react_agent, AgentExecutor
+from langchain.tools import DuckDuckGoSearchRun, PythonREPLTool
+from langchain_openai import ChatOpenAI
+
+llm = ChatOpenAI(model="gpt-4o", temperature=0)
+tools = [DuckDuckGoSearchRun(), PythonREPLTool()]
+
+agent = create_react_agent(llm, tools, prompt)
+executor = AgentExecutor(agent=agent, tools=tools, verbose=True)
+
+result = executor.invoke({"input": "Search for the current Bitcoin price and calculate how much I'd have today if I had invested $1000 in 2020"})
+```
+
+In this example, the agent autonomously decides when to search the web and when to execute Python code. LangChain manages the reasoning-action-observation loop (ReAct) automatically.
+
+**LangChain strengths:**
+- Agents with access to external tools (web, databases, APIs)
+- Complex chains with multiple chained LLMs
+- Conversation memory (buffer, summary, entity)
+- Integration with 300+ providers (OpenAI, Anthropic, HuggingFace, etc.)
+- LCEL (LangChain Expression Language) for declarative pipelines
+
+**Limitations:**
+- Heavy abstraction — hard to debug when something goes wrong
+- Docs don't always keep up with the library's pace of change
+- Overhead for simple use cases (basic RAG doesn't need LangChain)
+
+## LlamaIndex: Structured Information Retrieval
+
+LlamaIndex was built for a specific problem: how to make an LLM answer questions about a document base accurately and in a controlled manner.
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from llama_index.core.node_parser import SentenceSplitter
+
+# Load and index documents
+documents = SimpleDirectoryReader("contracts/").load_data()
+parser = SentenceSplitter(chunk_size=512, chunk_overlap=64)
+nodes = parser.get_nodes_from_documents(documents)
+
+index = VectorStoreIndex(nodes)
+query_engine = index.as_query_engine(similarity_top_k=5)
+
+response = query_engine.query("What are the termination clauses in the contract with Company X?")
+print(response)
+print(response.source_nodes)  # Shows the passages that generated the answer
+```
+
+LlamaIndex automatically handles: chunking, embedding, vector storage, similarity retrieval, and response synthesis.
+
+**LlamaIndex strengths:**
+- RAG with granular control over chunking and retrieval
+- Source traceability (source nodes)
+- Native support for complex structures (tables, PDFs, HTML)
+- Sub-question decomposition for complex queries
+- Integrations with vector stores (Pinecone, Weaviate, pgvector, Chroma)
+
+**Limitations:**
+- Less flexible for pipelines that go beyond RAG
+- Agents are less mature than LangChain's
+- Smaller ecosystem of integrations with external tools
+
+## Decision Matrix
+
+| Use Case | LangChain | LlamaIndex | Both |
+|----------|-----------|------------|------|
+| Chatbot over internal documents | — | ✓ | — |
+| Agent with internet access | ✓ | — | — |
+| RAG pipeline with chunking control | — | ✓ | — |
+| Multi-step workflow with external APIs | ✓ | — | — |
+| Synthesis of multiple documents | — | ✓ | — |
+| Agent that researches then queries a doc base | — | — | ✓ |
+| Contract and legal document analysis | — | ✓ | — |
+| Internal process automation | ✓ | — | — |
+
+## Using LangChain and LlamaIndex Together
+
+The most powerful combination is using LlamaIndex for indexing and retrieval, and LangChain for agent orchestration:
+
+```python
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
+from langchain_community.retrievers import LlamaIndexRetriever
+from langchain.agents import create_react_agent
+
+# LlamaIndex handles RAG
+documents = SimpleDirectoryReader("knowledge-base/").load_data()
+index = VectorStoreIndex.from_documents(documents)
+retriever = LlamaIndexRetriever(index=index, query_kwargs={"similarity_top_k": 5})
+
+# LangChain handles agent orchestration
+from langchain.tools import Tool
+knowledge_base_tool = Tool(
+    name="company_knowledge_base",
+    func=lambda q: retriever.get_relevant_documents(q),
+    description="Search the company's internal knowledge base"
+)
+
+# Agent with access to knowledge base + internet
+tools = [knowledge_base_tool, DuckDuckGoSearchRun()]
+agent = create_react_agent(llm, tools, prompt)
+```
+
+## Conclusion
+
+**Choose LangChain** when your system needs agents that make decisions and use diverse tools. **Choose LlamaIndex** when your main problem is making an LLM answer questions about documents with accuracy and traceability. **Use both** when you need agents that also query a structured document base.
+
+SystemForge has hands-on experience with both frameworks in AI automation projects. If you want to understand which approach makes more sense for your use case, reach out to our team.

@@ -1,0 +1,176 @@
+---
+title: "API Gateway: When Is It Worth Implementing?"
+slug: "api-gateway-when-is-it-worth-implementing"
+date: "2024-10-18"
+description: "What an API gateway does well — centralized auth, rate limiting, logging, routing — and when it adds unnecessary complexity to your architecture."
+tags: ["api gateway", "kong", "aws api gateway", "microservices", "architecture"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: What an API gateway does well — centralized auth, rate limiting, logging, routing — and when it adds unnecessary complexity to your architecture.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'api-gateway-quando-vale-a-pena'
+  - locale: 'it-IT'
+    slug: 'api-gateway-quando-vale-la-pena'
+  - locale: 'en'
+    slug: 'api-gateway-when-is-it-worth-implementing'
+---
+
+The API gateway pitch is seductive: "centralize authentication, rate limiting, logging, request transformation, and routing in a single layer. Your services are freed from these cross-cutting concerns." For microservices architectures with dozens of services, that makes sense. For a Next.js monolith with three developers, it's pure overengineering.
+
+The problem with API gateways isn't that they're bad — it's that they're frequently adopted before the project is large enough to justify the complexity. This guide explains what an API gateway does well, when the complexity pays off, and when you should solve the problem in a simpler way.
+
+## What an API Gateway Does Well
+
+An API gateway is an intelligent reverse proxy that sits between clients and your backend services. It intercepts all requests and can execute logic before and after forwarding to the destination service.
+
+**Core capabilities:**
+
+**Centralized authentication and authorization:** Instead of each microservice validating JWTs or API keys, the gateway validates once and forwards the request with the user's claims already decoded. Internal services trust the gateway and don't need to implement authentication individually.
+
+**Per-route and per-client rate limiting:** Configure different limits for different endpoints without touching service code. `/api/reports` has a limit of 10 req/min. `/api/health` has no limit. Free tier clients get 1,000 req/day. Enterprise clients get 100,000 req/day.
+
+**Centralized logging and observability:** Every request passes through the gateway, so you have a single point to capture latency, status codes, source IPs, and payloads (when needed). Without a gateway, you need to instrument each service individually.
+
+**Routing and load balancing:** Route `/api/v1/orders` to the orders service, `/api/v1/products` to the products service. Run blue/green deployments or canary releases by controlling traffic percentage per version.
+
+**Request/response transformation:** Rename fields, convert formats, add headers. Useful for adapting legacy APIs without rewriting them.
+
+## Kong vs AWS API Gateway vs Traefik: Comparison
+
+| Criterion | Kong | AWS API Gateway | Traefik |
+|---|---|---|---|
+| Type | Self-hosted or cloud | Managed (AWS) | Self-hosted |
+| Configuration | Admin API / YAML | AWS Console / Terraform | YAML / Docker labels |
+| Plugins | 100+ plugins (auth, rate limit, logging) | Native AWS integrations | Extensible middlewares |
+| Performance | High (Nginx-based) | High (AWS-managed) | High (Go) |
+| Cost | Free (OSS) / paid (Enterprise) | Pay-per-request (~$3.50/million) | Free |
+| Learning curve | Medium-high | Medium | Low-medium |
+| Best for | Multi-cloud microservices | AWS-native apps (Lambda, ECS) | Kubernetes / Docker Swarm |
+
+**Kong** is the open-source leader in features. With the deck plugin for GitOps and support for multiple authentication plugins (JWT, OAuth2, LDAP, mTLS), it's the choice for teams that need full control without cloud vendor lock-in.
+
+**AWS API Gateway** makes sense when you're already in the AWS ecosystem — it integrates natively with Lambda, Cognito for authentication, CloudWatch for logs, and IAM for authorization. The pay-per-request billing model can get expensive at high volume, but below ~10 million requests/month the cost is reasonable.
+
+**Traefik** shines in Kubernetes and Docker environments. Automatic configuration via container labels eliminates a lot of manual work. For teams already using Kubernetes who want an ingress controller with gateway capabilities, Traefik is the natural choice.
+
+## When It Adds Unnecessary Complexity
+
+This is the part API gateway tutorials usually skip. An API gateway adds:
+
+**An extra network hop on every request.** Additional latency of 5-15ms per request. Small, but real, and it accumulates in APIs with many calls in series.
+
+**A new system to operate.** Kong needs PostgreSQL or Cassandra for state. AWS API Gateway has its own configuration model. Traefik needs ingress configuration. You need to monitor gateway health, deploy changes to it, debug problems in it.
+
+**A new failure point.** If the gateway goes down, the entire API becomes unavailable. You need high availability in the gateway itself — which in Kubernetes means multiple pods, PodDisruptionBudget, well-configured readiness probes.
+
+**Duplicated configuration.** You configure authentication in the gateway AND need internal services to trust the identities propagated by the gateway. Any auth policy change needs to be synchronized.
+
+**When an API gateway probably isn't worth it:**
+
+- Monolith or application with 2-3 services
+- Team with fewer than 5 developers
+- Less than 1 million requests/month
+- No multiple clients consuming the API (mobile + web + partners)
+- Startup in product validation phase
+
+For these cases, middleware in your own HTTP server (Express middleware, Next.js middleware) does everything you need without the operational complexity.
+
+## Implementing Rate Limiting and Auth in the Gateway
+
+If you've decided an API gateway makes sense, here's how to configure the most common features in Kong:
+
+```yaml
+# kong.yaml — declarative configuration (deck)
+_format_version: "3.0"
+
+services:
+  - name: orders-service
+    url: http://orders-service:3001
+    routes:
+      - name: orders-api
+        paths:
+          - /api/v1/orders
+        methods:
+          - GET
+          - POST
+          - PATCH
+    plugins:
+      # JWT authentication
+      - name: jwt
+        config:
+          key_claim_name: sub
+          claims_to_verify:
+            - exp
+            - nbf
+
+      # Per-consumer rate limiting
+      - name: rate-limiting
+        config:
+          minute: 100
+          hour: 2000
+          policy: redis
+          redis_host: redis
+          redis_port: 6379
+
+      # Structured logging
+      - name: file-log
+        config:
+          path: /var/log/kong/access.log
+          reopen: true
+
+  - name: public-api
+    url: http://public-service:3002
+    routes:
+      - name: public-routes
+        paths:
+          - /api/public
+    plugins:
+      # More permissive rate limiting for public endpoints
+      - name: rate-limiting
+        config:
+          minute: 30
+          policy: ip
+```
+
+For AWS API Gateway with a Lambda authorizer:
+
+```typescript
+// Lambda authorizer: validates JWT and returns IAM policy
+export const handler = async (event: APIGatewayAuthorizerEvent) => {
+  const token = event.authorizationToken?.replace("Bearer ", "");
+
+  try {
+    const payload = await verifyJWT(token);
+    return {
+      principalId: payload.sub,
+      policyDocument: {
+        Version: "2012-10-17",
+        Statement: [{
+          Action: "execute-api:Invoke",
+          Effect: "Allow",
+          Resource: event.methodArn,
+        }],
+      },
+      context: {
+        userId: payload.sub,
+        role: payload.role,
+      },
+    };
+  } catch {
+    throw new Error("Unauthorized");
+  }
+};
+```
+
+## Conclusion
+
+An API gateway is a powerful tool for the right problem: multiple services, multiple clients, cross-cutting policies you want to manage in one place without touching each service.
+
+For most growing projects, the smart path is to start without a gateway (middleware in the HTTP server), define clean interfaces between services, and add the gateway when the real complexity justifies it — not when you imagine you'll need it in the future.
+
+The decision to adopt an API gateway is exactly the kind of architectural choice that should be documented before development begins, with clear criteria for when to revisit. At SystemForge, decisions like this are part of the project's HLD and ADR — recorded with context, alternatives considered, and re-evaluation criteria. If you're designing an API architecture, we can help make these decisions based on your real context.

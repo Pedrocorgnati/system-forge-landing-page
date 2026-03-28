@@ -1,0 +1,133 @@
+---
+title: "LLMs in Production: Challenges and Real Solutions"
+slug: "llms-in-production-challenges-and-solutions"
+date: "2024-07-18"
+description: "The real challenges of running LLMs in production — latency, token cost, hallucinations, rate limiting, and cache and fallback strategies for reliable applications."
+tags: ["llm", "ai production", "openai", "ai cost", "prompt engineering"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: The real challenges of running LLMs in production — latency, token cost, hallucinations, rate limiting, and cache and fallback strategies for reliable applications.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'custo-ia-em-producao-como-evitar-surpresas'
+  - locale: 'it-IT'
+    slug: 'llm-in-produzione-sfide-e-soluzioni'
+  - locale: 'en'
+    slug: 'llms-in-production-challenges-and-solutions'
+---
+
+Using an LLM in OpenAI's playground is easy. You type a prompt, get a response, and feel impressed. Using that same LLM in production — serving thousands of real users, with defined SLAs, controlled costs, and zero tolerance for nonsensical responses — that's an entirely different world.
+
+Problems surface early. The first request works fine. The hundredth too. By the thousandth, you realize the p95 latency is at 12 seconds, monthly costs have already blown the budget, and the model just fabricated data for an important client. This article is about addressing these problems systematically.
+
+## Latency: p50, p95, and Streaming Strategies
+
+The most common mistake when starting with LLMs in production is measuring only the average response time. The p50 may be acceptable — say, 3 seconds — while the p95 sits at 18 seconds, making the experience for 5% of users completely unacceptable.
+
+LLM latency has two main components: **time to first token (TTFT)** and **tokens per second (TPS)**. For long responses, TTFT is what the user feels first. If you don't use streaming, the user stares at a blank screen until the model finishes generating everything.
+
+Streaming is mandatory for any conversational interface:
+
+```typescript
+import OpenAI from "openai";
+
+const client = new OpenAI();
+
+async function streamResponse(prompt: string) {
+  const stream = await client.chat.completions.create({
+    model: "gpt-4o",
+    messages: [{ role: "user", content: prompt }],
+    stream: true,
+  });
+
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) process.stdout.write(delta);
+  }
+}
+```
+
+Beyond streaming, consider these strategies to reduce latency:
+
+- **Shorter prompts:** every token in the prompt is processed by the model. Remove unnecessary context.
+- **Smaller models for simple tasks:** GPT-4o mini or Claude Haiku are 5-10x faster for classification, triage, and short summaries.
+- **Prompt cache prefill:** OpenAI and Anthropic offer prompt caching. If the first tokens of your system prompt are always the same, you pay less and get faster responses.
+- **Parallel requests:** for pipelines that allow parallelism, fire multiple simultaneous requests instead of sequential ones.
+
+## Token Cost: Controlling Spend Without Degrading Quality
+
+LLM production costs grow non-linearly with usage. A system costing $200/month with 1,000 users can cost $8,000/month with 10,000 users if you have no controls in place.
+
+The first lever is **model selection by task**. Not every task needs GPT-4o. A well-designed pipeline uses smaller models for intermediate steps and the most capable model only where quality is critical.
+
+| Task | Recommended Model | Relative Cost |
+|--------|-------------------|---------------|
+| Intent classification | GPT-4o mini / Haiku | 1x |
+| Document summarization | GPT-4o mini | 1x |
+| Final response generation | GPT-4o / Claude Sonnet | 10-20x |
+| Legal / medical analysis | Claude Opus / GPT-4o | 30-50x |
+
+The second lever is **context control**. The context window is billed in tokens. If you're passing the full history of a 50-turn conversation in every request, you're paying for tokens that likely add nothing. Implement smart truncation: keep the last N turns and a summary of the earlier ones.
+
+The third lever is **per-user rate limiting**. Set daily or monthly limits per account. Users trying to use the system as a replacement for an unlimited free API should hit clear limits.
+
+## Hallucinations: Detection and Mitigation in Production
+
+Hallucination is the technical term for when an LLM confidently invents information. In an entertainment system, that may be acceptable. In a system that answers questions about contracts, regulations, or customer data, it's a real risk.
+
+Mitigation starts in the architecture. If the model can only respond based on documents you've provided (via RAG), the space for hallucination is smaller. You can instruct the model to say "I didn't find this information in the database" instead of making something up.
+
+For real-time detection, a common approach is **self-consistency**: ask the model the same question with slightly different temperatures and compare responses. Large divergences signal low confidence.
+
+Another approach is using a second LLM as an evaluator:
+
+```python
+def check_for_hallucination(question: str, answer: str, source_docs: list[str]) -> bool:
+    context = "\n".join(source_docs)
+    check_prompt = f"""
+    Given the context below, is the provided answer factually supported by the context?
+    Answer only with YES or NO.
+
+    Context: {context}
+    Question: {question}
+    Answer: {answer}
+    """
+    result = llm.complete(check_prompt)
+    return "NO" in result.upper()
+```
+
+This pattern adds latency and cost, but for high-risk cases (healthcare, legal, financial) it's justified.
+
+## Semantic Cache: Saving on Similar Queries
+
+Traditional caching works with exact keys: the same input string returns the same cached result. With LLMs, this rarely helps because users rarely ask identical questions.
+
+Semantic cache solves this: instead of comparing strings, you compare embeddings. If "what are your business hours?" and "are you open on Saturdays?" have sufficiently close embeddings, the second question can reuse the answer from the first.
+
+Tools like **GPTCache** and **Langchain's semantic cache** implement this with Redis or Faiss as the backend. The basic setup:
+
+```python
+from langchain.globals import set_llm_cache
+from langchain_community.cache import RedisSemanticCache
+from langchain_openai import OpenAIEmbeddings
+
+set_llm_cache(
+    RedisSemanticCache(
+        redis_url="redis://localhost:6379",
+        embedding=OpenAIEmbeddings(),
+        score_threshold=0.95,  # minimum similarity for cache hit
+    )
+)
+```
+
+With a well-configured semantic cache, it's possible to reduce API calls by 20-40% in customer service systems with frequently asked question bases.
+
+## Conclusion
+
+Getting LLMs reliably into production is an engineering problem, not a prompting problem. Latency, cost, hallucinations, and cache are just some of the vectors that need ongoing attention. Systems that ignore these aspects early pay the price when they scale.
+
+At **SystemForge**, we integrate LLMs into enterprise systems with the safeguards needed for AI to be an asset, not a liability. If you're planning to take AI to production, talk to us before you start building. Architectural mistakes in AI systems are far more expensive to fix post-launch.

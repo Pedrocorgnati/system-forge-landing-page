@@ -1,0 +1,162 @@
+---
+title: "Agenti di IA: cosa sono e quando applicarli"
+slug: "agenti-ia-cosa-sono-e-come-applicare"
+date: "2024-08-15"
+description: "Cosa sono gli agenti di IA, come si distinguono dai chatbot semplici, quando ha senso usarli e i rischi dei sistemi agentici in produzione."
+tags: ["agenti ia", "ai agents", "langchain", "autonomia ia", "llm"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: Cosa sono gli agenti di IA, come si distinguono dai chatbot semplici, quando ha senso usarli e i rischi dei sistemi agentici in produzione.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'agentes-de-ia-o-que-sao-e-como-aplicar'
+  - locale: 'it-IT'
+    slug: 'agenti-ia-cosa-sono-e-come-applicare'
+  - locale: 'en'
+    slug: 'ai-agents-what-they-are-and-when-to-use'
+---
+
+C'è molto hype intorno agli "agenti di IA". Ogni settimana emerge un nuovo framework che promette di costruire un agente autonomo in grado di risolvere qualsiasi problema. In pratica, la maggior parte delle implementazioni chiamate "agenti" sono chatbot con RAG e qualche funzione extra. E questo non è necessariamente un male — a volte è esattamente ciò di cui si ha bisogno.
+
+Ma quando un agente di IA reale ha senso, può automatizzare flussi di lavoro che prima richiedevano centinaia di ore umane al mese. La differenza sta nel capire cosa rende un sistema genuinamente agentico — e i rischi che questo comporta.
+
+## Cosa Rende un Sistema Agentico
+
+Un chatbot tradizionale segue un flusso: riceve input, elabora, restituisce output. Ogni interazione è indipendente. Un agente è diverso in tre dimensioni:
+
+**Pianificazione:** l'agente decompone un obiettivo in sotto-attività. Dato l'obiettivo "fai un'analisi competitiva dell'azienda X", l'agente pianifica quali ricerche fare, quali dati raccogliere, come strutturare il report — prima di eseguire qualsiasi passo.
+
+**Uso di strumenti:** l'agente ha accesso a funzioni che eseguono azioni nel mondo reale — ricerca web, esecuzione di codice, lettura di file, chiamate ad API, invio di e-mail.
+
+**Memoria e ciclo:** l'agente mantiene lo stato tra i passi. Il risultato di un'azione informa la successiva. Continua ad eseguire finché non raggiunge l'obiettivo o incontra un blocco.
+
+La distinzione pratica: un chatbot risponde a domande. Un agente esegue compiti.
+
+## Tool Use: Come gli Agenti Interagiscono con il Mondo Reale
+
+Il tool use (uso di strumenti) è il meccanismo che dà all'agente la capacità di agire oltre la generazione di testo. OpenAI lo chiama "function calling"; Anthropic lo chiama "tool use". Il concetto è lo stesso: si definiscono funzioni con nome, descrizione e parametri attesi, e il modello decide quando e come chiamare ciascuna.
+
+```python
+import json
+from openai import OpenAI
+
+client = OpenAI()
+
+# Definire gli strumenti disponibili
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "get_product_price",
+            "description": "Gets the current price of a product from the inventory system",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_code": {
+                        "type": "string",
+                        "description": "Product SKU code"
+                    }
+                },
+                "required": ["product_code"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "create_order",
+            "description": "Creates a new order in the system",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "product_code": {"type": "string"},
+                    "quantity": {"type": "integer"},
+                    "customer_id": {"type": "string"}
+                },
+                "required": ["product_code", "quantity", "customer_id"]
+            }
+        }
+    }
+]
+
+def execute_tool(name: str, args: dict) -> str:
+    if name == "get_product_price":
+        # Here it would call the real system
+        return json.dumps({"price": 149.90, "stock": 23})
+    elif name == "create_order":
+        return json.dumps({"order_id": "ORD-001234", "status": "confirmed"})
+
+# Agent loop
+messages = [{"role": "user", "content": "Create an order for 2 units of product SKU-789 for customer C-001"}]
+
+while True:
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=messages,
+        tools=tools,
+    )
+
+    msg = response.choices[0].message
+    messages.append(msg)
+
+    if msg.tool_calls:
+        for call in msg.tool_calls:
+            result = execute_tool(call.function.name, json.loads(call.function.arguments))
+            messages.append({
+                "role": "tool",
+                "tool_call_id": call.id,
+                "content": result
+            })
+    else:
+        print(msg.content)
+        break
+```
+
+Il modello decide quando chiamare ogni strumento in base alla conversazione. Questo consente flussi multi-step in cui l'agente raccoglie informazioni prima di eseguire azioni.
+
+## ReAct e Chain-of-Thought: Ragionamento Strutturato
+
+ReAct (Reasoning + Acting) è un pattern di prompting che istruisce il modello ad alternare esplicitamente tra ragionamento e azione. Invece di chiamare semplicemente gli strumenti, il modello "pensa ad alta voce" prima di ogni passo:
+
+```
+Pensiero: L'utente vuole creare un ordine. Prima devo verificare il prezzo e lo stock del prodotto.
+Azione: get_product_price(product_code="SKU-789")
+Osservazione: {"price": 149.90, "stock": 23}
+
+Pensiero: Il prodotto è disponibile. Ora posso creare l'ordine.
+Azione: create_order(product_code="SKU-789", quantity=2, customer_id="C-001")
+Osservazione: {"order_id": "ORD-001234", "status": "confirmed"}
+
+Pensiero: L'ordine è stato creato con successo. Posso informare l'utente.
+Risposta finale: Ordine ORD-001234 creato con successo. 2 unità del prodotto SKU-789...
+```
+
+Questo ragionamento esplicito ha due vantaggi: il modello commette meno errori suddividendo i problemi in passi più piccoli, e si ha la tracciabilità di cosa l'agente "stava pensando" quando ha preso ogni decisione.
+
+## Rischi: Quando gli Agenti Prendono Decisioni Sbagliate
+
+Gli agenti autonomi amplificano sia i successi che gli errori. Un agente con accesso a e-mail, database e sistema ordini può elaborare 1.000 transazioni all'ora senza intervento umano — e può anche inviare 1.000 e-mail con informazioni errate o creare 1.000 ordini non dovuti.
+
+I principali rischi in produzione:
+
+| Rischio | Descrizione | Mitigazione |
+|---------|-------------|-------------|
+| Prompt injection | Input malevoli che dirottano il comportamento dell'agente | Validare e sanitizzare tutti gli input esterni |
+| Azioni irreversibili | Eliminare dati, inviare comunicazioni, addebitare importi | Richiedere conferma umana per azioni irreversibili |
+| Loop infinito | L'agente entra in un ciclo di azioni senza progredire | Limite di iterazioni e timeout per attività |
+| Scope di permessi eccessivo | L'agente ha accesso a più di quanto necessario | Principio del minimo privilegio per gli strumenti |
+| Costi incontrollati | L'agente fa centinaia di chiamate LLM per un'attività semplice | Limite di costo per sessione |
+
+La regola più importante: **non dare a un agente accesso ad azioni che non si sarebbe disposti a vedere eseguite automaticamente 1.000 volte di fila**.
+
+Per sistemi critici, il pattern "human-in-the-loop" — dove l'agente pianifica le azioni e un umano le approva prima dell'esecuzione — bilancia automazione e controllo.
+
+## Conclusione
+
+Gli agenti di IA rappresentano un cambiamento reale nell'automazione dei processi. Le attività che richiedono più passi, decisioni intermedie e interazione con sistemi esterni sono il territorio naturale degli agenti. Ma costruire agenti affidabili richiede disciplina: strumenti ben definiti, ragionamento strutturato e salvaguardie esplicite.
+
+L'hype intorno agli agenti autonomi spesso ignora i rischi operativi. In **SystemForge**, costruiamo sistemi agentici con guardrail robusti — automazione che riesci a supervisionare e di cui puoi fidarti. Se hai processi ripetitivi che potrebbero essere automatizzati con l'IA, contattaci per valutare se e come gli agenti possono aiutare.

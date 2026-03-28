@@ -1,0 +1,164 @@
+---
+title: "A/B Testing Landing Pages: Technical Guide"
+slug: "ab-test-landing-pages-technical-guide"
+date: "2024-10-11"
+description: "How to configure and run A/B tests on landing pages with Vercel Edge Middleware and self-hosted tools — without hurting SEO."
+tags: ["ab test", "landing page", "cro", "vercel", "split testing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: How to configure and run A/B tests on landing pages with Vercel Edge Middleware and self-hosted tools — without hurting SEO.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ab-test-landing-pages-guia-tecnico'
+  - locale: 'it-IT'
+    slug: 'ab-test-landing-page-guida-tecnica'
+  - locale: 'en'
+    slug: 'ab-test-landing-pages-technical-guide'
+---
+
+A poorly implemented A/B test hurts SEO and corrupts your analysis. That's not hyperbole — there's a specific way to implement split testing that Google detects and can penalize as cloaking (serving different content to the bot than to the user). And there's a way to declare a winner before the sample is large enough, which leads to decisions based on statistical noise, not real data.
+
+Most A/B testing tutorials cover the marketing side: what to test, how to formulate hypotheses, how to interpret results. Few dive into the technical implementation — which is exactly where the mistakes happen. This article covers the correct implementation of A/B tests on modern landing pages, with a focus on Next.js and Vercel, but with principles that apply to any static stack.
+
+## Flicker Effect: How to Avoid the Flash of Original Content
+
+The flicker effect (also called FOOC — Flash of Original Content) is the visual phenomenon where the user briefly sees the original version of the page before being redirected to the variant. It happens when the split test is implemented client-side (JavaScript running in the browser after the initial load).
+
+Google explicitly recommends against A/B tests with flicker: besides degrading the user experience, Google's crawler may index the non-canonical variant, creating content confusion.
+
+The solution is to implement the split on the server or at the edge — before any HTML is sent to the browser. With Vercel Edge Middleware, this is straightforward:
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const EXPERIMENT_COOKIE = 'ab-lp-headline'
+const VARIANTS = ['control', 'variant-a', 'variant-b']
+
+export function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone()
+
+  // Only apply the test to the specific landing page
+  if (url.pathname !== '/service-landing-page') {
+    return NextResponse.next()
+  }
+
+  // Check if the user already has a variant assigned
+  let variant = request.cookies.get(EXPERIMENT_COOKIE)?.value
+
+  // If not, assign one randomly
+  if (!variant || !VARIANTS.includes(variant)) {
+    variant = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
+  }
+
+  // Internally rewrite the URL to the variant route
+  // User sees /service-landing-page, but gets /service-landing-page/[variant]
+  url.pathname = `/service-landing-page/${variant}`
+
+  const response = NextResponse.rewrite(url)
+
+  // Persist the variant for 30 days
+  response.cookies.set(EXPERIMENT_COOKIE, variant, {
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'strict',
+  })
+
+  return response
+}
+
+export const config = {
+  matcher: '/service-landing-page',
+}
+```
+
+With this implementation, users receive the correct variant's HTML directly — zero flicker, zero client-side JavaScript for the split, and Google's crawler always gets the "control" variant (which maintains the correct canonical tag).
+
+## A/B Test with Vercel Edge Middleware
+
+The folder structure to support the middleware above:
+
+```
+app/
+  service-landing-page/
+    control/
+      page.tsx    # Original version
+    variant-a/
+      page.tsx    # Alternative headline
+    variant-b/
+      page.tsx    # Alternative CTA
+```
+
+Each variant must have the same canonical tag pointing to the main canonical URL:
+
+```tsx
+// app/service-landing-page/variant-a/page.tsx
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: 'https://yoursite.com/service-landing-page',
+  },
+}
+```
+
+This ensures Google never indexes the variant URLs — only the canonical URL.
+
+To track which variant the user is seeing and correlate it with conversions, send the variant name as a property to Google Analytics 4:
+
+```typescript
+// In each variant component, on mount
+useEffect(() => {
+  window.gtag('event', 'ab_test_exposure', {
+    experiment_id: 'lp-headline-test-2024-10',
+    variant_id: 'variant-a',
+  })
+}, [])
+```
+
+## Calculating Required Sample Size
+
+Before starting the test, calculate the sample size needed to detect the minimum effect that's relevant to your business.
+
+| Current Conversion Rate | MDE (Minimum Detectable Effect) | Sample per Variant |
+|---|---|---|
+| 2% | 20% relative (→ 2.4%) | ~20,000 visitors |
+| 2% | 50% relative (→ 3.0%) | ~6,400 visitors |
+| 5% | 20% relative (→ 6.0%) | ~8,000 visitors |
+| 5% | 50% relative (→ 7.5%) | ~2,600 visitors |
+| 10% | 20% relative (→ 12%) | ~3,800 visitors |
+
+*Calculated for 95% confidence and 80% statistical power with two variants.*
+
+The MDE (Minimum Detectable Effect) is the smallest improvement that would be actionable for you. If your current conversion is 2% and a 0.1% improvement wouldn't justify the effort of shipping the winning variant, your real MDE is higher — and you need a smaller sample.
+
+If your site doesn't have enough traffic to complete an A/B test in a reasonable time (less than 4-6 weeks), consider:
+
+1. Testing bigger changes (completely different headlines, not subtle variations)
+2. Using multivariate tests instead of A/B to test multiple elements simultaneously
+3. Using qualitative analysis (session recordings, user interviews) instead of A/B tests
+
+## Interpreting Results: When to Declare a Winner
+
+The most common mistake is "peeking" — checking results during the test and stopping it as soon as one variant appears to be winning. This artificially inflates the false positive rate.
+
+The correct rule: define the test duration before you start (not conversions as the stopping criterion) and stick to it regardless of what the intermediate data shows.
+
+To interpret the final result, check:
+
+1. **P-value < 0.05:** The probability that the result is random is less than 5%. This is the minimum to declare significance.
+2. **Confidence interval doesn't include zero:** The confidence interval for the lift should be entirely positive or entirely negative.
+3. **Two complete weeks:** Regardless of volume, the minimum duration ensures elimination of day-of-week bias.
+4. **Consistent segmentation:** Verify that traffic distribution between variants was truly 50/50 throughout the test. Distribution skews invalidate the test.
+
+If variant B won with p=0.047 but the confidence interval is [+0.1%, +8.3%], the result is statistically significant but the actual effect could be as small as 0.1% — which may not justify shipping the change. Contextualize the result with business impact, not just statistical significance.
+
+## Conclusion
+
+A/B testing done correctly is one of the most powerful conversion improvement tools available. Done incorrectly — with flicker, without adequate statistical significance, or with an implementation that impacts SEO — it becomes a source of bad decisions.
+
+The implementation with Vercel Edge Middleware solves the technical problems structurally: no flicker, no SEO impact, with correct variant tracking built in. At [SystemForge](/), we build landing pages with this experimentation architecture already in place — so your marketing team can run tests without needing a developer for every iteration.
