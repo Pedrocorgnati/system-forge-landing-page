@@ -43,13 +43,20 @@ const filterTabs = [
   ServiceCategory.DASHBOARD,
 ]
 
-export function PortfolioGallery() {
+interface PortfolioGalleryProps {
+  hideHeader?: boolean
+  showAll?: boolean
+}
+
+export function PortfolioGallery({ hideHeader = false, showAll = false }: PortfolioGalleryProps) {
   const [activeFilter, setActiveFilter] = useState<string>('all')
 
   const filtered =
     activeFilter === 'all'
       ? portfolioProjects
       : portfolioProjects.filter((p) => p.categories.includes(activeFilter as ServiceCategory))
+
+  const visible = showAll ? filtered : filtered.slice(0, 9)
 
   return (
     <section
@@ -60,28 +67,30 @@ export function PortfolioGallery() {
     >
       <Container>
         <div className="flex flex-col gap-8">
-          {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-            <div className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-primary uppercase tracking-wide">
-                {locale === 'it-IT' ? 'Portfolio' : locale === 'en' ? 'Portfolio' : 'Portfólio'}
-              </span>
-              <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-                {locale === 'it-IT' ? 'Progetti che abbiamo consegnato' : locale === 'en' ? 'Projects we have delivered' : 'Projetos que entregamos'}
-              </h2>
-              <p className="text-muted-foreground">
-                {portfolioProjects.length} {locale === 'it-IT' ? 'progetti e in crescita.' : locale === 'en' ? 'projects and counting.' : 'projetos e contando.'}
-              </p>
+          {/* Header — oculto na página /portfolio que já tem h1 próprio */}
+          {!hideHeader && (
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+              <div className="flex flex-col gap-2">
+                <span className="text-sm font-semibold text-primary uppercase tracking-wide">
+                  {locale === 'it-IT' ? 'Portfolio' : locale === 'en' ? 'Portfolio' : 'Portfólio'}
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
+                  {locale === 'it-IT' ? 'Progetti che abbiamo consegnato' : locale === 'en' ? 'Projects we have delivered' : 'Projetos que entregamos'}
+                </h2>
+                <p className="text-muted-foreground">
+                  {portfolioProjects.length} {locale === 'it-IT' ? 'progetti e in crescita.' : locale === 'en' ? 'projects and counting.' : 'projetos e contando.'}
+                </p>
+              </div>
+              <Link
+                href={config.routes.portfolio}
+                data-testid="portfolio-view-all-link"
+                className="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md"
+              >
+                {messages.cta.portfolio}
+                <ArrowRight className="w-4 h-4" aria-hidden="true" />
+              </Link>
             </div>
-            <Link
-              href={config.routes.portfolio}
-              data-testid="portfolio-view-all-link"
-              className="shrink-0 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md"
-            >
-              {messages.cta.portfolio}
-              <ArrowRight className="w-4 h-4" aria-hidden="true" />
-            </Link>
-          </div>
+          )}
 
           {/* Filters */}
           <div
@@ -113,14 +122,14 @@ export function PortfolioGallery() {
           </div>
 
           {/* Grid */}
-          {filtered.length > 0 ? (
+          {visible.length > 0 ? (
             <div
               id="portfolio-filter-panel"
               role="tabpanel"
               aria-label={locale === 'it-IT' ? 'Progetti filtrati' : locale === 'en' ? 'Filtered projects' : 'Projetos filtrados'}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             >
-              {filtered.slice(0, 9).map((project) => (
+              {visible.map((project) => (
                 <PortfolioCard key={project.slug} project={project} />
               ))}
             </div>

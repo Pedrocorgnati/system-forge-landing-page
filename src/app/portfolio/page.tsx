@@ -35,7 +35,7 @@ export default function PortfolioPage() {
             </p>
           </div>
         </Container>
-        <PortfolioGallery />
+        <PortfolioGallery hideHeader showAll />
       </div>
       <CTASection />
     </>
