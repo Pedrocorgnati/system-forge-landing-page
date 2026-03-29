@@ -33,7 +33,7 @@ jobs:
     name: Deploy BR (forjadesistemas.com.br)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout (scripts only)
@@ -80,15 +80,27 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
           SFTP_USER: ${{ secrets.SFTP_BR_USER }}
-          SSHPASS: ${{ secrets.SFTP_BR_PASS }}
+          SFTP_PASS: ${{ secrets.SFTP_BR_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          lftp -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                   open sftp://$SFTP_USER@$SFTP_HOST; \
-                   mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
-                   quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          BATCH=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            remote="${dir/#out/$SFTP_PATH}"
+            echo "-mkdir $remote"
+          done >> "$BATCH"
+          find out -type f | sort | while IFS= read -r file; do
+            remote="${file/#out/$SFTP_PATH}"
+            echo "put $file $remote"
+          done >> "$BATCH"
+          echo "quit" >> "$BATCH"
+          echo "=== SFTP batch (first 10 lines) ===" && head -10 "$BATCH"
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -b "$BATCH" \
+            "$SFTP_USER@$SFTP_HOST"
 
       - name: Purge Cloudflare cache (BR)
         if: success()
@@ -116,7 +128,7 @@ jobs:
     name: Deploy IT (systemforge.it)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout (scripts only)
@@ -163,15 +175,26 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_IT_HOST }}
           SFTP_USER: ${{ secrets.SFTP_IT_USER }}
-          SSHPASS: ${{ secrets.SFTP_IT_PASS }}
+          SFTP_PASS: ${{ secrets.SFTP_IT_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_IT_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          lftp -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                   open sftp://$SFTP_USER@$SFTP_HOST; \
-                   mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
-                   quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          BATCH=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            remote="${dir/#out/$SFTP_PATH}"
+            echo "-mkdir $remote"
+          done >> "$BATCH"
+          find out -type f | sort | while IFS= read -r file; do
+            remote="${file/#out/$SFTP_PATH}"
+            echo "put $file $remote"
+          done >> "$BATCH"
+          echo "quit" >> "$BATCH"
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -b "$BATCH" \
+            "$SFTP_USER@$SFTP_HOST"
 
       - name: Purge Cloudflare cache (IT)
         if: success()
@@ -199,7 +222,7 @@ jobs:
     name: Deploy EN (systemforgesoftware.com)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
 
     steps:
       - name: Checkout (scripts only)
@@ -246,15 +269,26 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_EN_HOST }}
           SFTP_USER: ${{ secrets.SFTP_EN_USER }}
-          SSHPASS: ${{ secrets.SFTP_EN_PASS }}
+          SFTP_PASS: ${{ secrets.SFTP_EN_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_EN_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          lftp -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                   open sftp://$SFTP_USER@$SFTP_HOST; \
-                   mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
-                   quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          BATCH=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            remote="${dir/#out/$SFTP_PATH}"
+            echo "-mkdir $remote"
+          done >> "$BATCH"
+          find out -type f | sort | while IFS= read -r file; do
+            remote="${file/#out/$SFTP_PATH}"
+            echo "put $file $remote"
+          done >> "$BATCH"
+          echo "quit" >> "$BATCH"
+          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -b "$BATCH" \
+            "$SFTP_USER@$SFTP_HOST"
 
       - name: Purge Cloudflare cache (EN)
         if: success()
