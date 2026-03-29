@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { blog as allArticles } from '@/.velite'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
@@ -6,16 +5,17 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
+import { generatePageMetadata } from '@/lib/seo'
+import type { ArticleFrontmatter } from '@/lib/types'
 
 const config = getSiteConfig()
 const messages = loadMessages()
-import type { ArticleFrontmatter } from '@/lib/types'
 
-export const metadata: Metadata = {
+export const metadata = generatePageMetadata({
   title: messages.breadcrumb.blog,
   description: `${messages.breadcrumb.blog} — ${config.siteName}`,
-  alternates: { canonical: config.routes.blog },
-}
+  path: config.routes.blog,
+})
 
 const breadcrumbs = [
   { label: messages.breadcrumb.home, href: config.routes.home },
@@ -47,8 +47,7 @@ export default function BlogPage() {
           <div className="flex flex-col gap-3 max-w-2xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">Blog</h1>
             <p className="text-lg text-muted-foreground leading-relaxed">
-              Conteúdo sobre desenvolvimento de software, arquitetura, IA e estratégias
-              para crescimento de produtos digitais.
+              {messages.blog.pageDescription}
             </p>
           </div>
 
