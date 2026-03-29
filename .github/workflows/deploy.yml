@@ -80,22 +80,42 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
           SFTP_USER: ${{ secrets.SFTP_BR_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_BR_PASS }}
           SSHPASS: ${{ secrets.SFTP_BR_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          # lftp mirror with 5 parallel SFTP connections (~5x faster than sequential sftp)
-          # -u user,pass prevents GetPass() prompt in non-TTY CI environment
-          # sftp:connect-program with sshpass handles SSH-level password auth
-          lftp -u "$SFTP_USER,$SFTP_PASS" \
-            -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                set net:max-retries 3; \
-                set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_USER@$SFTP_HOST; \
-                mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
-                quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          TARGET="$SFTP_USER@$SFTP_HOST"
+          # Step 1: create all remote directories (single connection, fast)
+          BATCH_DIRS=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            echo "-mkdir ${dir/#out/$SFTP_PATH}"
+          done >> "$BATCH_DIRS"
+          echo "quit" >> "$BATCH_DIRS"
+          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
+          # Step 2: upload files in 5 parallel sftp sessions (~5x faster)
+          mapfile -t ALL_FILES < <(find out -type f | sort)
+          TOTAL=${#ALL_FILES[@]}
+          PARALLEL=5
+          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
+          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
+          PIDS=()
+          for i in $(seq 0 $((PARALLEL - 1))); do
+            BATCH=$(mktemp)
+            START=$((i * CHUNK))
+            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
+              echo "put $file ${file/#out/$SFTP_PATH}"
+            done >> "$BATCH"
+            echo "quit" >> "$BATCH"
+            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for pid in "${PIDS[@]}"; do
+            wait "$pid" || FAILED=1
+          done
+          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
 
       - name: Purge Cloudflare cache (BR)
         if: success()
@@ -170,19 +190,40 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_IT_HOST }}
           SFTP_USER: ${{ secrets.SFTP_IT_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_IT_PASS }}
           SSHPASS: ${{ secrets.SFTP_IT_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_IT_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          lftp -u "$SFTP_USER,$SFTP_PASS" \
-            -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                set net:max-retries 3; \
-                set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_USER@$SFTP_HOST; \
-                mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
-                quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          TARGET="$SFTP_USER@$SFTP_HOST"
+          BATCH_DIRS=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            echo "-mkdir ${dir/#out/$SFTP_PATH}"
+          done >> "$BATCH_DIRS"
+          echo "quit" >> "$BATCH_DIRS"
+          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
+          mapfile -t ALL_FILES < <(find out -type f | sort)
+          TOTAL=${#ALL_FILES[@]}
+          PARALLEL=5
+          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
+          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
+          PIDS=()
+          for i in $(seq 0 $((PARALLEL - 1))); do
+            BATCH=$(mktemp)
+            START=$((i * CHUNK))
+            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
+              echo "put $file ${file/#out/$SFTP_PATH}"
+            done >> "$BATCH"
+            echo "quit" >> "$BATCH"
+            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for pid in "${PIDS[@]}"; do
+            wait "$pid" || FAILED=1
+          done
+          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
 
       - name: Purge Cloudflare cache (IT)
         if: success()
@@ -257,19 +298,40 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_EN_HOST }}
           SFTP_USER: ${{ secrets.SFTP_EN_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_EN_PASS }}
           SSHPASS: ${{ secrets.SFTP_EN_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_EN_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y lftp sshpass > /dev/null 2>&1
-          lftp -u "$SFTP_USER,$SFTP_PASS" \
-            -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
-                set net:max-retries 3; \
-                set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_USER@$SFTP_HOST; \
-                mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
-                quit"
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          TARGET="$SFTP_USER@$SFTP_HOST"
+          BATCH_DIRS=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            echo "-mkdir ${dir/#out/$SFTP_PATH}"
+          done >> "$BATCH_DIRS"
+          echo "quit" >> "$BATCH_DIRS"
+          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
+          mapfile -t ALL_FILES < <(find out -type f | sort)
+          TOTAL=${#ALL_FILES[@]}
+          PARALLEL=5
+          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
+          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
+          PIDS=()
+          for i in $(seq 0 $((PARALLEL - 1))); do
+            BATCH=$(mktemp)
+            START=$((i * CHUNK))
+            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
+              echo "put $file ${file/#out/$SFTP_PATH}"
+            done >> "$BATCH"
+            echo "quit" >> "$BATCH"
+            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for pid in "${PIDS[@]}"; do
+            wait "$pid" || FAILED=1
+          done
+          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
 
       - name: Purge Cloudflare cache (EN)
         if: success()
