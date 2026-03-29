@@ -85,12 +85,6 @@ jobs:
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
           sudo apt-get install -y sshpass > /dev/null 2>&1
-          # Test connectivity first
-          echo "quit" | sshpass -e sftp -P "$SFTP_PORT" \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            -o PreferredAuthentications=password \
-            "$SFTP_USER@$SFTP_HOST" && echo "✅ SFTP connection OK"
           BATCH=$(mktemp)
           find out -type d | sort | while IFS= read -r dir; do
             remote="${dir/#out/$SFTP_PATH}"
@@ -105,9 +99,7 @@ jobs:
           sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            -o PreferredAuthentications=password \
-            -b "$BATCH" \
-            "$SFTP_USER@$SFTP_HOST"
+            "$SFTP_USER@$SFTP_HOST" < "$BATCH"
 
       - name: Purge Cloudflare cache (BR)
         if: success()
@@ -200,9 +192,7 @@ jobs:
           sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            -o PreferredAuthentications=password \
-            -b "$BATCH" \
-            "$SFTP_USER@$SFTP_HOST"
+            "$SFTP_USER@$SFTP_HOST" < "$BATCH"
 
       - name: Purge Cloudflare cache (IT)
         if: success()
@@ -295,9 +285,7 @@ jobs:
           sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
-            -o PreferredAuthentications=password \
-            -b "$BATCH" \
-            "$SFTP_USER@$SFTP_HOST"
+            "$SFTP_USER@$SFTP_HOST" < "$BATCH"
 
       - name: Purge Cloudflare cache (EN)
         if: success()
