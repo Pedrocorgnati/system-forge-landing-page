@@ -30,18 +30,6 @@ function _str(slug: string): { name: string; description: string } | undefined {
 
 const _portfolioProjectsRaw: PortfolioProject[] = [
   {
-    slug: 'servizi-per-casa',
-    name: 'ServiziPerCasa',
-    description: 'Plataforma marketplace italiana conectando proprietários de imóveis a profissionais de serviços domésticos. Inclui listagens com busca e filtros, agendamento, pagamentos via Stripe e dashboard analítico com Chart.js — projetado para agilizar todo o fluxo de serviços domésticos, da descoberta ao pagamento.',
-    categories: [ServiceCategory.MARKETPLACE],
-    technologies: [TechTag.NEXTJS, TechTag.TYPESCRIPT, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS],
-    countries: [DeliveryCountry.ITALIA],
-    status: ProjectStatus.PRODUCAO,
-    videoUrl: '/video/servizipercasa.mp4',
-    filters: ['fullstack'],
-    featured: true,
-  },
-  {
     slug: 'piemontech',
     name: 'Piemontech',
     description: 'Plataforma B2B full-stack para estúdio de tecnologia italiano atendendo PMEs. Combina site institucional, construtor de landing pages com checkout Stripe, diagnóstico empresarial com IA, motor de prospecção B2B e sistema de afiliados — ecossistema comercial completo com painel admin e provisionamento automatizado.',
@@ -131,6 +119,18 @@ const _portfolioProjectsRaw: PortfolioProject[] = [
     status: ProjectStatus.PRODUCAO,
     videoUrl: '/video/quack-coin-landing-page.mp4',
     filters: ['website', 'crypto'],
+  },
+  {
+    slug: 'servizi-per-casa',
+    name: 'ServiziPerCasa',
+    description: 'Plataforma marketplace italiana conectando proprietários de imóveis a profissionais de serviços domésticos. Inclui listagens com busca e filtros, agendamento, pagamentos via Stripe e dashboard analítico com Chart.js — projetado para agilizar todo o fluxo de serviços domésticos, da descoberta ao pagamento.',
+    categories: [ServiceCategory.MARKETPLACE],
+    technologies: [TechTag.NEXTJS, TechTag.TYPESCRIPT, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS],
+    countries: [DeliveryCountry.ITALIA],
+    status: ProjectStatus.PRODUCAO,
+    videoUrl: '/video/servizipercasa.mp4',
+    filters: ['fullstack'],
+    featured: true,
   },
   {
     slug: 'c4ts',
