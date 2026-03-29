@@ -83,7 +83,7 @@ jobs:
           username: ${{ secrets.SFTP_BR_USER }}
           password: ${{ secrets.SFTP_BR_PASS }}
           port: ${{ secrets.SFTP_BR_PORT }}
-          protocol: ftps
+          protocol: sftp
           local-dir: out/
           server-dir: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
           dangerous-clean-slate: true
@@ -168,7 +168,7 @@ jobs:
           username: ${{ secrets.SFTP_IT_USER }}
           password: ${{ secrets.SFTP_IT_PASS }}
           port: ${{ secrets.SFTP_IT_PORT }}
-          protocol: ftps
+          protocol: sftp
           local-dir: out/
           server-dir: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
           dangerous-clean-slate: true
@@ -253,7 +253,7 @@ jobs:
           username: ${{ secrets.SFTP_EN_USER }}
           password: ${{ secrets.SFTP_EN_PASS }}
           port: ${{ secrets.SFTP_EN_PORT }}
-          protocol: ftps
+          protocol: sftp
           local-dir: out/
           server-dir: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
           dangerous-clean-slate: true
