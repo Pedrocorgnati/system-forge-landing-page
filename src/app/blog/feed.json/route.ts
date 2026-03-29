@@ -9,7 +9,8 @@
 import { blog as allArticles } from '@/.velite'
 import { getSiteConfig } from '@config'
 
-export const revalidate = 3600 // Revalidate every hour
+// output: 'export' — static site, não há revalidação em runtime.
+// Cache HTTP controlado via Cache-Control header na resposta GET.
 
 export async function GET() {
   const config = getSiteConfig()

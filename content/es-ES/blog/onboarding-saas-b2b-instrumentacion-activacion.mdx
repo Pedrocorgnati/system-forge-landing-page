@@ -1,0 +1,86 @@
+---
+title: "Onboarding en SaaS B2B: instrumentación y activación"
+slug: "onboarding-saas-b2b-instrumentacion-activacion"
+date: "2024-11-06"
+description: "Cómo instrumentar el onboarding de SaaS B2B para medir activación por rol, identificar drop-offs y activar intervenciones humanas en el momento adecuado."
+tags: ["onboarding saas", "b2b", "product analytics", "activacion", "instrumentacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo instrumentar el onboarding de SaaS B2B para medir activación por rol, identificar drop-offs y activar intervenciones humanas en el momento adecuado.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'onboarding-saas-b2b-instrumentacao-ativacao'
+  - locale: 'it-IT'
+    slug: 'onboarding-saas-b2b-strumentazione-attivazione'
+  - locale: 'en'
+    slug: 'saas-b2b-onboarding-instrumentation-activation'
+---
+
+En SaaS B2C, la activación es relativamente simple de definir: un usuario individual completa un conjunto de acciones y "activa". En SaaS B2B, la cuenta que compró es una empresa, pero los usuarios son múltiples personas con roles diferentes. Un admin que configura la cuenta no usa el producto de la misma forma que un analista que genera informes diariamente o un operador que registra datos en campo.
+
+Esto crea un problema de instrumentación: activación de la cuenta vs activación del usuario vs activación por rol. Una cuenta puede tener el admin activado y todos los analistas inactivos — lo que es tan problemático como ninguna activación, porque los tomadores de decisión (analistas) no están usando el producto y en el próximo ciclo de renovación no defenderán la herramienta.
+
+## Definiendo Activación por Rol: Admin, Operador y Analista
+
+El primer paso es definir qué significa "activado" para cada rol, con eventos específicos y medibles:
+
+**Admin:** ha configurado al menos un espacio de trabajo, ha invitado a al menos 2 miembros del equipo y ha completado la integración de datos principal. Si el admin no hace esto en los primeros 3 días, la cuenta probablemente no se activará nunca.
+
+**Operador:** ha creado al menos 5 registros de su tipo principal (pedidos, tareas, incidencias) y ha usado la app móvil al menos una vez si el producto tiene versión mobile.
+
+**Analista:** ha generado al menos un informe, ha exportado datos o ha compartido un dashboard. La activación del analista confirma que el producto entrega valor de insights, no solo de registro de datos.
+
+## Eventos a Trackear en el Onboarding
+
+Con Mixpanel, Amplitude o PostHog, los eventos críticos del onboarding B2B son:
+
+```typescript
+// Invitación de miembros
+analytics.track('member_invited', {
+  account_id: account.id,
+  inviter_role: user.role,
+  invitee_email: email,
+  days_since_signup: daysSinceSignup(account.createdAt),
+});
+
+// Primera acción de valor
+analytics.track('first_value_action', {
+  account_id: account.id,
+  user_id: user.id,
+  user_role: user.role,
+  action_type: 'report_created', // o 'record_created', etc.
+  time_to_first_action_hours: hoursToFirstAction,
+});
+```
+
+El campo `days_since_signup` y `time_to_first_action_hours` son esenciales para identificar cuándo exactamente el drop-off ocurre.
+
+## Funnels de Activación: Dónde Identificar los Drop-offs
+
+Un funnel de activación B2B bien instrumentado tiene 5-7 pasos. El ejemplo para un SaaS de gestión de proyectos:
+
+1. Registro completado
+2. Perfil de empresa configurado (nombre, sector, tamaño)
+3. Primer proyecto creado
+4. Primer miembro del equipo invitado
+5. Primera tarea asignada a un miembro
+6. Primer comentario en una tarea
+7. Primer informe generado
+
+El análisis de cohortes muestra qué porcentaje de usuarios que llegaron al paso 3 llegaron al paso 4, al 5, etc. Los steps con mayor drop-off son las prioridades de mejora de UX.
+
+## Intervenciones Humanas: Cuándo y Cómo
+
+No todas las cuentas necesitan intervención humana. La segmentación por valor potencial determina la intensidad del onboarding:
+
+**Cuentas enterprise (>50 asientos o >500 €/mes):** CSM (Customer Success Manager) dedicado que hace una llamada de onboarding en las primeras 48 horas. Check-in a los 7 días. Seguimiento mensual.
+
+**Cuentas mid-market (10-50 asientos):** email automático con vídeo de onboarding personalizado por sector. Alerta al equipo de CS si la activación no ocurre en 5 días.
+
+**Cuentas self-serve (<10 asientos):** onboarding completamente automatizado. Intervención humana solo si el usuario inicia un chat o si el health score cae a cero después de 7 días.
+
+La instrumentación correcta hace posible esta segmentación automática: el sistema sabe qué cuentas no activaron, en qué paso se detuvo y qué rol necesita intervención — sin que nadie tenga que revisar manualmente.

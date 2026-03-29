@@ -1,0 +1,62 @@
+---
+title: "Cómo prevenir fraudes en marketplace"
+slug: "prevenir-fraudes-marketplace"
+date: "2024-09-26"
+description: "Estrategias y herramientas para prevenir fraudes en marketplaces: chargebacks, cuentas falsas, triangulación y bypass de KYC — con técnicas de detección."
+tags: ["fraud prevention", "marketplace", "chargeback", "seguridad", "antifraude"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Estrategias y herramientas para prevenir fraudes en marketplaces: chargebacks, cuentas falsas, triangulación y bypass de KYC — con técnicas de detección."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'prevenir-fraudes-marketplace'
+  - locale: 'it-IT'
+    slug: 'come-prevenire-frodi-marketplace'
+  - locale: 'en'
+    slug: 'how-to-prevent-marketplace-fraud'
+---
+
+El fraude en marketplace erosiona el margen y la reputación de formas que a menudo no aparecen en los dashboards hasta que el daño ya está hecho. Un chargeback no es solo la pérdida del importe de la venta — es la pérdida del producto (que ya fue enviado), la tasa de chargeback cobrada por la pasarela, el coste operativo de disputar o aceptar, y el impacto en la puntuación de la cuenta de merchant. Cuando este índice supera el 1%, las pasarelas empiezan a cobrar comisiones adicionales. Por encima del 2%, el riesgo es el cierre de la cuenta.
+
+Los marketplaces son especialmente vulnerables porque la superficie de ataque es mayor: hay el lado del comprador, el lado del vendedor y la propia plataforma. Los defraudadores sofisticados atacan los tres simultáneamente.
+
+## Tipos de Fraude Más Comunes en Marketplaces
+
+**Fraude del comprador con chargeback:** el comprador realiza una compra con tarjeta robada o disputa la transacción alegando que el producto no llegó (friendly fraud). El marketplace pierde el importe, las tarifas de chargeback y el inventario.
+
+**Cuentas falsas de vendedor:** actores fraudulentos crean cuentas de vendedor, publican productos populares a precios atractivos, cobran sin enviar (o envían productos defectuosos), y desaparecen antes de que los compradores disputen.
+
+**Triangulación:** el fraude más sofisticado. El defraudador actúa como intermediario: publica productos en el marketplace a bajo precio, cuando recibe un pedido lo compra en otro sitio con tarjeta robada indicando la dirección del comprador, y se queda con el margen. El comprador recibe el producto (sin saber que fue comprado con tarjeta robada), y el verdadero merchant disputa el chargeback.
+
+**Manipulación de reseñas y puntuaciones:** vendedores que inflan artificialmente su puntuación con pedidos propios o de personas conocidas, o que dejan reseñas negativas en competidores.
+
+## KYC y Verificación de Vendedores
+
+El KYC (Know Your Customer) para vendedores es la primera línea de defensa. Antes de que un vendedor pueda publicar productos y recibir pagos, debe pasar por un proceso de verificación:
+
+- Verificación de identidad (DNI/NIE para personas físicas, CIF para empresas)
+- Verificación bancaria (IBAN del titular debe coincidir con el nombre del vendedor)
+- Verificación de dirección
+- Para vendedores con volumen alto: documentación fiscal adicional y declaración de origen de productos
+
+La regulación europea de pagos (PSD2 y las reglas de Stripe Connect / MangoPay para marketplaces) ya impone requisitos KYC específicos para vendedores que reciben pagos. Cumplirlos es obligatorio, no opcional.
+
+## Detección en Tiempo Real: Señales de Fraude
+
+La detección de fraude eficaz usa señales combinadas, no reglas aisladas:
+
+**Señales del comprador:** múltiples pedidos desde la misma IP con diferentes cuentas, uso de tarjeta con país de emisión diferente al país de entrega, pedidos de alto valor en cuentas nuevas, cambio de dirección de entrega justo antes del pago.
+
+**Señales del vendedor:** subida masiva de listados en las primeras 24 horas, precios significativamente por debajo del mercado, cuentas bancarias que cambian frecuentemente, concentración de reseñas positivas en un período corto.
+
+Servicios como Stripe Radar, Signifyd o Kount ofrecen modelos de machine learning preentrenados que evalúan estas señales automáticamente. Para marketplaces en crecimiento, integrar uno de estos servicios en el flujo de checkout es más eficiente que construir reglas propias.
+
+## Política de Fondos en Reserva
+
+Una de las protecciones más efectivas para el marketplace es el hold period: los fondos de ventas de vendedores nuevos se retienen entre 7 y 14 días antes de ser liquidados. Esto da tiempo para que los compradores informen problemas y para que el sistema de fraude identifique patrones sospechosos.
+
+MangoPay y Stripe Connect, las principales plataformas para split de pagos en Europa, permiten configurar estos holds como parte de la política de payouts.

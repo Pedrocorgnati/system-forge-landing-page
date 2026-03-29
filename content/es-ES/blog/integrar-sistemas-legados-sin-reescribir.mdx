@@ -1,0 +1,130 @@
+---
+title: "Integrar sistemas legados sin reescribir todo"
+slug: "integrar-sistemas-legados-sin-reescribir"
+date: "2024-10-11"
+description: "Estrategias para integrar sistemas legados con aplicaciones modernas sin una reescritura completa — patrón Strangler Fig, APIs de fachada y migración gradual."
+tags: ["sistemas legados", "migracion", "strangler fig", "api gateway", "modernizacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Estrategias para integrar sistemas legados con aplicaciones modernas sin una reescritura completa — patrón Strangler Fig, APIs de fachada y migración gradual."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integrar-sistemas-legados-sem-reescrever'
+  - locale: 'it-IT'
+    slug: 'integrare-sistemi-legacy-senza-riscrivere'
+  - locale: 'en'
+    slug: 'integrating-legacy-systems-without-rewriting'
+---
+
+En España hay miles de empresas con sistemas de gestión que llevan 10, 15 o 20 años en producción. Sistemas que nadie quiere tocar porque "si funciona, no lo toques" pero que tampoco evolucionan. El problema aparece cuando el negocio crece y necesita capacidades que el sistema legado no puede ofrecer: API para integraciones, mobile, analytics moderno, experiencia de usuario actualizada.
+
+La reescritura completa es la opción más arriesgada. Lo que parece una solución definitiva es con frecuencia un proyecto de 18 meses que se alarga a 3 años, cuesta el doble de lo estimado y en el medio el sistema original sigue en producción con todo el mantenimiento que eso implica.
+
+Las estrategias de integración incremental son más seguras y permiten modernizar sin parar el negocio.
+
+## Patrón Strangler Fig: Modernización Incremental
+
+El patrón Strangler Fig (higuera estranguladora) describe la modernización gradual: el sistema nuevo envuelve al legado, asumiendo funcionalidades una a una hasta que el legado puede retirarse.
+
+El proceso:
+1. Pones un proxy (API Gateway, reverse proxy) delante del sistema legado
+2. Empiezas a migrar funcionalidades específicas al sistema nuevo
+3. El proxy enruta cada request al sistema correcto (legado o nuevo) según la URL/funcionalidad
+4. Gradualmente, más y más tráfico va al sistema nuevo
+5. Cuando el legado ya no recibe tráfico, puedes retirarlo
+
+```
+Antes:  Cliente → Sistema Legado (toda la funcionalidad)
+
+Durante: Cliente → Proxy/API Gateway
+                    ├── /api/users → Sistema Nuevo
+                    ├── /api/orders → Sistema Nuevo
+                    └── /api/legacy/* → Sistema Legado (resto)
+
+Después: Cliente → Sistema Nuevo (toda la funcionalidad)
+```
+
+## API de Fachada: Exponer lo Legado como API REST
+
+Muchos sistemas legados no tienen API REST — tienen interfaces de usuario web (a veces con tecnologías de los 2000s) o acceso directo a base de datos. La API de fachada es una capa que expone el sistema legado como si fuera una API moderna.
+
+Opciones según el tipo de sistema legado:
+
+**Sistema con base de datos SQL accesible:**
+```typescript
+// Fachada que expone datos del sistema legado via API REST
+import { pool } from './legacy-db-connection' // Conexión a la BBDD del sistema legado
+
+export async function getClientesLegacy(): Promise<Cliente[]> {
+  const result = await pool.query(`
+    SELECT cli_cod as id, cli_nom as nombre, cli_nif as nif, cli_email as email
+    FROM T_CLIENTES
+    WHERE cli_activo = 1
+    ORDER BY cli_nom
+  `)
+  return result.rows.map(mapearClienteLegacy)
+}
+```
+
+**Sistema con interfaz web que se puede automatizar:**
+Para sistemas que solo tienen interfaz de usuario web y no exponen datos directamente, Playwright puede automatizar la extracción de datos (web scraping del sistema propio):
+
+```typescript
+import { chromium } from 'playwright'
+
+async function extraerFacturasLegacy(fechaDesde: string): Promise<Factura[]> {
+  const browser = await chromium.launch()
+  const page = await browser.newPage()
+
+  // Login en el sistema legado
+  await page.goto('http://sistema-legado.empresa.local/login')
+  await page.fill('#usuario', process.env.LEGACY_USER)
+  await page.fill('#password', process.env.LEGACY_PASS)
+  await page.click('#btn-login')
+
+  // Navegar al listado de facturas y extraer datos
+  await page.goto(`http://sistema-legado.empresa.local/facturas?desde=${fechaDesde}`)
+  const facturas = await page.evaluate(() => {
+    // Extraer datos de la tabla HTML
+    return Array.from(document.querySelectorAll('tr.factura')).map(row => ({
+      numero: row.querySelector('.numero')?.textContent,
+      cliente: row.querySelector('.cliente')?.textContent,
+      importe: row.querySelector('.importe')?.textContent,
+    }))
+  })
+
+  await browser.close()
+  return facturas
+}
+```
+
+Esta técnica ("RPA light") es frágil ante cambios en la UI del sistema legado, pero puede ser la única opción cuando no hay otra forma de acceder a los datos.
+
+## Sincronización de Datos: Estrategias
+
+Para sistemas que necesitan datos tanto del legado como del nuevo sistema durante la transición:
+
+**Event Sourcing de migración:** Cuando algo cambia en el legado, publicas un evento en una cola de mensajes. El sistema nuevo consume esos eventos y actualiza su propia base de datos.
+
+**Sincronización batch nocturna:** Para datos que no cambian con mucha frecuencia (catálogo de productos, maestro de clientes), una sincronización nocturna puede ser suficiente. El legado es la fuente de verdad durante la transición.
+
+**Doble escritura temporal:** Durante la migración, cada operación se escribe en ambos sistemas. Cuando el nuevo sistema tiene todos los datos históricos, se desactiva el legado.
+
+## Cuándo Reescribir Sí Tiene Sentido
+
+La reescritura completa está justificada cuando:
+- El sistema legado tiene deuda técnica tan severa que la integración incremental es más costosa que la reescritura
+- La tecnología del legado es tan obsoleta que no tiene integración posible (software de 20 años sin base de datos accesible, sin posibilidad de automatización UI)
+- El equipo que lo construyó no existe y no hay documentación ni código fuente
+
+En esos casos, la reescritura es inevitable — pero debe hacerse con el patrón Strangler Fig de todas formas: construyendo el nuevo en paralelo, migrando funcionalidad a funcionalidad, no haciendo un "big bang" donde el día X se apaga el legado y se enciende el nuevo.
+
+## Conclusión
+
+La modernización de sistemas legados es un proyecto de largo plazo que requiere paciencia y una estrategia clara. Las empresas españolas con sistemas de 10-20 años tienen más opciones de lo que piensan — la reescritura completa raramente es la primera opción correcta.
+
+¿Tienes sistemas legados que necesitas modernizar o integrar con aplicaciones nuevas? [Contacta con SystemForge](https://systemforge.es/contacto).

@@ -4,6 +4,7 @@ import { JsonLdBlogPosting } from '@/components/seo/JsonLdBlogPosting'
 import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { ArticlePage } from '@/components/blog/ArticlePage'
 import { generatePageMetadata } from '@/lib/seo'
+import type { Metadata } from 'next'
 import { getRelatedArticles } from '@/lib/cross-links'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
 import { SITE } from '@/lib/constants'
@@ -25,7 +26,7 @@ export function generateStaticParams() {
   return articles.map(article => ({ slug: article.slug }))
 }
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params
   const article = articles.find(a => a.slug === slug)
   if (!article) return {}

@@ -12,12 +12,16 @@ import { CookieBanner } from '@/components/ui/CookieBanner'
 import { Analytics } from '@/components/analytics/Analytics'
 import { getSiteConfig, LOCALE_URLS, SUPPORTED_LOCALES } from '@config'
 import { loadMessages } from '@config/content'
+import { WebVitalsReporter } from '@/components/performance/WebVitalsReporter'
 
 const inter = Inter({
   subsets: ['latin', 'latin-ext'],
   display: 'swap',
 })
 
+// Chamadas em nível de módulo — intencionais para output: 'export'.
+// No static export, este módulo é avaliado uma vez por processo de build (não por request).
+// Em caso de migração para SSR, mover para dentro do componente ou envolver em React.cache().
 const config = getSiteConfig()
 const messages = loadMessages()
 
@@ -135,6 +139,7 @@ export default function RootLayout({
           <Analytics />
           <JsonLdOrganization siteConfig={config} />
           <JsonLdLocalBusiness siteConfig={config} />
+          <WebVitalsReporter />
         </ThemeProvider>
       </body>
     </html>

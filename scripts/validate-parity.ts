@@ -9,7 +9,7 @@
 import path from 'path'
 import fs from 'fs'
 
-const LOCALES = ['pt-BR', 'it-IT', 'en'] as const
+const LOCALES = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 const errors: string[] = []
 
 function loadJson<T>(locale: string, type: string): T {
@@ -54,7 +54,7 @@ const portfolios = Object.fromEntries(
 )
 
 const ptPortfolioIds = portfolios['pt-BR'].map(p => p.id).sort()
-for (const locale of ['it-IT', 'en'] as const) {
+for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
   const localeIds = portfolios[locale].map(p => p.id).sort()
   if (JSON.stringify(ptPortfolioIds) !== JSON.stringify(localeIds)) {
     const missing = ptPortfolioIds.filter(id => !localeIds.includes(id))
@@ -65,7 +65,7 @@ for (const locale of ['it-IT', 'en'] as const) {
 
 // Check invariant fields
 for (const ptProj of portfolios['pt-BR']) {
-  for (const locale of ['it-IT', 'en'] as const) {
+  for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
     const localeProj = portfolios[locale].find(p => p.id === ptProj.id)
     if (!localeProj) continue
 
@@ -87,7 +87,7 @@ for (const ptProj of portfolios['pt-BR']) {
   }
 }
 
-console.log(`  Portfolio: ${portfolios['pt-BR'].length} projects × 3 locales`)
+console.log(`  Portfolio: ${portfolios['pt-BR'].length} projects × 4 locales`)
 console.log(`  IDs: ${errors.filter(e => e.includes('Portfolio ID')).length === 0 ? '✓ parity' : '✗ mismatch'}`)
 console.log(`  Invariants: ${errors.filter(e => e.includes('Portfolio') && !e.includes('ID')).length === 0 ? '✓ consistent' : '✗ divergent'}`)
 
@@ -100,7 +100,7 @@ const testimonials = Object.fromEntries(
 )
 
 const ptTestIds = testimonials['pt-BR'].map(t => t.id).sort()
-for (const locale of ['it-IT', 'en'] as const) {
+for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
   const localeIds = testimonials[locale].map(t => t.id).sort()
   if (JSON.stringify(ptTestIds) !== JSON.stringify(localeIds)) {
     errors.push(`Testimonial ID mismatch pt-BR vs ${locale}`)
@@ -109,7 +109,7 @@ for (const locale of ['it-IT', 'en'] as const) {
 
 // Check invariant fields (author, company)
 for (const ptTest of testimonials['pt-BR']) {
-  for (const locale of ['it-IT', 'en'] as const) {
+  for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
     const localeTest = testimonials[locale].find(t => t.id === ptTest.id)
     if (!localeTest) continue
     if (ptTest.author !== localeTest.author) {
@@ -121,7 +121,7 @@ for (const ptTest of testimonials['pt-BR']) {
   }
 }
 
-console.log(`  Testimonials: ${testimonials['pt-BR'].length} entries × 3 locales`)
+console.log(`  Testimonials: ${testimonials['pt-BR'].length} entries × 4 locales`)
 console.log(`  IDs: ${errors.filter(e => e.includes('Testimonial ID')).length === 0 ? '✓ parity' : '✗ mismatch'}`)
 console.log(`  Invariants: ${errors.filter(e => e.includes('Testimonial') && !e.includes('ID')).length === 0 ? '✓ consistent' : '✗ divergent'}`)
 
@@ -134,14 +134,14 @@ const services = Object.fromEntries(
 )
 
 const ptServiceIds = services['pt-BR'].map(s => s.id).sort()
-for (const locale of ['it-IT', 'en'] as const) {
+for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
   const localeIds = services[locale].map(s => s.id).sort()
   if (JSON.stringify(ptServiceIds) !== JSON.stringify(localeIds)) {
     errors.push(`Service ID mismatch pt-BR vs ${locale}`)
   }
 }
 
-console.log(`  Services: ${services['pt-BR'].length} categories × 3 locales`)
+console.log(`  Services: ${services['pt-BR'].length} categories × 4 locales`)
 console.log(`  IDs: ${errors.filter(e => e.includes('Service ID')).length === 0 ? '✓ parity' : '✗ mismatch'}`)
 
 // ─── Summary ─────────────────────────────────────────────────────────────────

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Container } from '@/components/ui/Container'
 import { MDXContent } from '@/components/blog/MDXContent'
@@ -73,8 +74,6 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
                 <OptimizedImage
                   src={article.coverImage || '/images/blog/default-cover.png'}
                   alt={article.title}
-                  width={0}
-                  height={0}
                   fill
                   className="object-cover"
                 />
@@ -83,13 +82,13 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
               {/* Tags */}
               <div className="flex flex-wrap gap-2 mb-4">
                 {article.tags.slice(0, 3).map(tag => (
-                  <a
+                  <Link
                     key={tag}
                     href={ROUTES.BLOG_TAG(tag)}
                     className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 transition-colors"
                   >
                     {tag}
-                  </a>
+                  </Link>
                 ))}
               </div>
 
@@ -140,9 +139,9 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
                 </div>
               ) : (
                 <p className="text-muted-foreground">
-                  <a href={ROUTES.BLOG} className="text-primary hover:underline">
+                  <Link href={ROUTES.BLOG} className="text-primary hover:underline">
                     {m.blog.viewMoreArticles}
-                  </a>
+                  </Link>
                 </p>
               )}
             </section>

@@ -1,0 +1,137 @@
+---
+title: "LangChain vs LlamaIndex: cuándo usar cada uno"
+slug: "langchain-vs-llamaindex-cuando-usar"
+date: "2024-10-05"
+description: "Comparativa práctica entre LangChain y LlamaIndex para construir aplicaciones con LLMs — RAG, agentes, pipelines y cuándo cada framework tiene ventaja."
+tags: ["langchain", "llamaindex", "rag", "llm framework", "ia desarrollo"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Comparativa práctica entre LangChain y LlamaIndex para construir aplicaciones con LLMs — RAG, agentes, pipelines y cuándo cada framework tiene ventaja."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'langchain-vs-llamaindex-quando-usar'
+  - locale: 'it-IT'
+    slug: 'langchain-vs-llamaindex-quando-usare'
+  - locale: 'en'
+    slug: 'langchain-vs-llamaindex-when-to-use'
+---
+
+LangChain y LlamaIndex son los dos frameworks más populares para construir aplicaciones con LLMs. Los dos pueden hacer RAG, los dos tienen soporte para agentes, los dos funcionan con OpenAI, Anthropic y modelos open-source. Entonces, ¿cuál elegir?
+
+La respuesta tiene que ver con el caso de uso principal y con el nivel de control que quieres sobre el pipeline.
+
+## LlamaIndex: Especialista en Datos
+
+LlamaIndex (anteriormente GPT Index) nació con un enfoque claro: hacer que los LLMs sean capaces de responder sobre **tus datos**. Indexación, retrieval, y generación sobre bases de conocimiento es donde LlamaIndex brilla.
+
+**Fortalezas de LlamaIndex:**
+- Conectores para decenas de fuentes de datos: PDFs, Word, Excel, Notion, Confluence, bases de datos SQL, APIs
+- Índices vectoriales con múltiples opciones de storage (Pinecone, Weaviate, Chroma, MongoDB Atlas)
+- Pipelines de ingestion configurables (chunking strategies, embedding models, metadata extraction)
+- Query engines especializados: síntesis de múltiples documentos, comparación, resumen
+
+**Ejemplo de RAG básico con LlamaIndex:**
+
+```typescript
+import { VectorStoreIndex, SimpleDirectoryReader } from 'llamaindex'
+
+async function construirRAGSistema() {
+  // Cargar documentos
+  const documentos = await new SimpleDirectoryReader().loadData('./documentacion')
+
+  // Construir índice vectorial
+  const index = await VectorStoreIndex.fromDocuments(documentos)
+
+  // Motor de consulta
+  const queryEngine = index.asQueryEngine({
+    similarityTopK: 5, // Recuperar los 5 fragmentos más relevantes
+  })
+
+  return queryEngine
+}
+
+// Uso
+const engine = await construirRAGSistema()
+const respuesta = await engine.query({
+  query: '¿Cuál es la política de devoluciones para productos defectuosos?'
+})
+console.log(respuesta.response)
+```
+
+## LangChain: El Framework General
+
+LangChain tiene una ambición más amplia: ser el framework para cualquier aplicación con LLMs. Chains complejas, agentes con herramientas, pipelines multi-paso, integración con servicios externos.
+
+**Fortalezas de LangChain:**
+- Abstracción de múltiples LLMs (OpenAI, Anthropic, Gemini, Ollama) con interfaz unificada
+- Memoria de conversación con múltiples backends
+- Agentes con herramientas externas (búsqueda web, calculadora, código Python)
+- LCEL (LangChain Expression Language) para construir chains declarativamente
+- LangSmith para observabilidad y debugging de chains en producción
+
+**Ejemplo de chain con LangChain:**
+
+```typescript
+import { ChatOpenAI } from '@langchain/openai'
+import { ChatPromptTemplate } from '@langchain/core/prompts'
+import { StringOutputParser } from '@langchain/core/output_parsers'
+
+const modelo = new ChatOpenAI({ model: 'gpt-4o', temperature: 0 })
+
+const prompt = ChatPromptTemplate.fromMessages([
+  ['system', 'Eres un asistente experto en fiscalidad española. Responde siempre en español.'],
+  ['human', '{pregunta}'],
+])
+
+const chain = prompt.pipe(modelo).pipe(new StringOutputParser())
+
+const respuesta = await chain.invoke({
+  pregunta: '¿Qué gastos puede deducirse un autónomo en España?'
+})
+```
+
+## La Diferencia Real en Producción
+
+**LlamaIndex es mejor cuando:**
+- Construyes una aplicación que principalmente responde preguntas sobre tu documentación o datos empresariales
+- Necesitas indexar y consultar múltiples tipos de documentos
+- El retrieval sofisticado (re-ranking, síntesis de múltiples fuentes) es importante para la calidad
+
+**LangChain es mejor cuando:**
+- Construyes agentes que necesitan acceso a múltiples herramientas externas
+- Necesitas chains complejas con múltiples pasos de procesamiento
+- La observabilidad del pipeline (LangSmith) es importante para tu caso de uso
+- Estás construyendo un prototipo que necesita conectar múltiples LLMs y servicios
+
+**Ambos o ninguno:**
+Para aplicaciones simples — un chatbot básico, extracción de datos estructurados, clasificación de texto — los SDKs directos de OpenAI/Anthropic son más simples y más predecibles que cualquier framework. Los frameworks añaden abstracción y con ella, complejidad de debugging.
+
+## Stack Recomendado para el Contexto Español
+
+Para una PYME española que quiere construir una aplicación de Q&A sobre documentación interna:
+
+```
+LlamaIndex + pgvector (PostgreSQL) + OpenAI GPT-4o
+```
+
+Para una startup que quiere un agente de IA con acceso a múltiples sistemas (CRM, ERP, calendario):
+
+```
+LangChain + LangSmith (observabilidad) + OpenAI + tools personalizadas
+```
+
+Para procesamiento batch de documentos (facturas, contratos, formularios) con extracción de datos estructurados:
+
+```
+SDK directo de OpenAI con structured_outputs + Zod (sin framework intermedio)
+```
+
+## Conclusión
+
+LlamaIndex para aplicaciones centradas en datos y documentos. LangChain para agentes complejos y pipelines multi-herramienta. SDKs directos para casos simples donde un framework añade complejidad sin beneficio claro.
+
+¿Estás construyendo una aplicación con IA y necesitas ayuda con la arquitectura? [Contacta con SystemForge](https://systemforge.es/contacto).

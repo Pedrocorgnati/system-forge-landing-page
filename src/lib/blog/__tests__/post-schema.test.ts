@@ -37,10 +37,7 @@ describe('PostFrontmatterSchema', () => {
   // Caso 2: Frontmatter sem coverImage (campo opcional)
   // -------------------------------------------------------------------------
   it('aceita frontmatter sem coverImage (campo opcional)', () => {
-    const data = { ...validBase }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    delete (data as any).coverImage
-    const result = PostFrontmatterSchema.safeParse(data)
+    const result = PostFrontmatterSchema.safeParse(validBase)
     expect(result.success).toBe(true)
   })
 

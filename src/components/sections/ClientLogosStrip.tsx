@@ -1,4 +1,6 @@
-'use client'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 const projects = [
   { name: 'ServiziPerCasa', video: '/video/servizipercasa.mp4' },
@@ -17,7 +19,7 @@ export function ClientLogosStrip() {
   return (
     <div
       data-testid="section-logos"
-      aria-label="Clientes atendidos pela SystemForge"
+      aria-label={m.sections.clients.ariaLabel}
       className="w-full bg-surface border-y border-border py-8 overflow-hidden"
     >
       <p className="text-center text-xs text-muted-foreground uppercase tracking-widest font-medium mb-6">

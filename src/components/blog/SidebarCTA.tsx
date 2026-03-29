@@ -21,9 +21,9 @@ export function SidebarCTA({ relatedService }: SidebarCTAProps) {
   const blogCTA = m.blog.cta
 
   const serviceNamesMap = blogCTA.serviceNames as Record<string, string>
-  const serviceName = relatedService
-    ? (serviceNamesMap[relatedService] ?? serviceNamesMap.default)
-    : serviceNamesMap.default
+  const serviceName = (relatedService
+    ? (serviceNamesMap[relatedService] ?? serviceNamesMap['default'])
+    : serviceNamesMap['default']) ?? ''
 
   const whatsappLabel = m.cta.whatsapp
   const whatsappCTA = buildWhatsAppCTA(whatsappLabel, `sidebar-cta-${relatedService ?? 'default'}`)

@@ -108,10 +108,20 @@
       "ariaLabel": "Apresentação principal"
     },
     "portfolio": {
-      "ariaLabel": "Portfólio de projetos"
+      "ariaLabel": "Portfólio de projetos",
+      "filterAriaLabel": "Filtrar projetos por categoria",
+      "label": "Portfólio",
+      "title": "Projetos que entregamos",
+      "countSuffix": "projetos e contando.",
+      "filterAll": "Todos"
     },
     "blog": {
-      "ariaLabel": "Artigos recentes do blog"
+      "ariaLabel": "Artigos recentes do blog",
+      "paginationAriaLabel": "Paginação",
+      "categoryFilterAriaLabel": "Filtrar por categoria"
+    },
+    "clients": {
+      "ariaLabel": "Clientes atendidos pela SystemForge"
     },
     "contact": {
       "ariaLabel": "Formulário de contato"
@@ -133,7 +143,12 @@
       "eyebrow": "Próximo passo",
       "headline": "Pronto para transformar sua ideia em software?",
       "description": "Fale com a gente agora. Sem enrolação — analisamos seu projeto e apresentamos uma proposta em até 24 horas.",
-      "trustSignals": ["Orçamento gratuito", "Resposta em até 2h", "Contrato claro", "Código seu, sem lock-in"]
+      "trustSignals": [
+        "Orçamento gratuito",
+        "Resposta em até 2h",
+        "Contrato claro",
+        "Código seu, sem lock-in"
+      ]
     },
     "why": {
       "ariaLabel": "Por que escolher a SystemForge"
@@ -165,7 +180,12 @@
       "badge": "Em breve",
       "title": "Conselheiro de IA",
       "description": "Descreva seu projeto e receba em segundos uma análise completa com recomendações de tecnologia, estimativa de investimento e roadmap sugerido.",
-      "benefits": ["Análise de viabilidade técnica em segundos", "Recomendações de stack personalizadas", "Estimativa de investimento realista", "Roadmap sugerido com milestones"],
+      "benefits": [
+        "Análise de viabilidade técnica em segundos",
+        "Recomendações de stack personalizadas",
+        "Estimativa de investimento realista",
+        "Roadmap sugerido com milestones"
+      ],
       "comingSoonTitle": "Ferramenta em desenvolvimento",
       "comingSoonDescription": "O Conselheiro de IA estará disponível em breve. Enquanto isso, fale diretamente com nossa equipe para uma análise personalizada.",
       "backToHome": "Voltar para home",
@@ -177,7 +197,11 @@
       "title": "Nossos serviços",
       "description": "Do MVP ao produto escalável — soluções de software sob medida para cada etapa do seu negócio. Trabalhamos com as stacks mais modernas do mercado.",
       "backToAll": "Todos os serviços",
-      "relatedTitle": "Serviços relacionados"
+      "relatedTitle": "Serviços relacionados",
+      "benefitsTitle": "Benefícios",
+      "processTitle": "Como funciona",
+      "useCasesTitle": "Para quem é",
+      "faqTitle": "Perguntas frequentes"
     },
     "portfolio": {
       "title": "Portfólio completo",
@@ -228,19 +252,58 @@
       "defaultTitle": "Transforme sua ideia em software",
       "defaultSubtitle": "A SystemForge constrói produtos digitais do zero até o lançamento.",
       "services": {
-        "saas": { "title": "Precisa de Desenvolvimento SaaS?", "subtitle": "A SystemForge constrói plataformas SaaS escaláveis do zero até o deploy." },
-        "aplicativo-mobile": { "title": "Precisa de um Aplicativo Mobile?", "subtitle": "Desenvolvemos apps iOS e Android com React Native ou Flutter." },
-        "marketplace": { "title": "Quer criar um Marketplace?", "subtitle": "Entregamos plataformas de marketplace B2B e B2C completas." },
-        "automacao-com-ia": { "title": "Quer Automatizar com IA?", "subtitle": "Implementamos soluções de IA e automação para empresas de todos os tamanhos." },
-        "bots-automacoes": { "title": "Precisa de Bots e Automações?", "subtitle": "Desenvolvemos bots e automações personalizadas para o seu negócio." },
-        "landing-page": { "title": "Precisa de uma Landing Page?", "subtitle": "Criamos landing pages de alta conversão com SEO e performance." },
-        "e-commerce": { "title": "Quer criar seu E-commerce?", "subtitle": "Desenvolvemos lojas virtuais completas, do catálogo ao checkout." },
-        "dashboard-b2b": { "title": "Precisa de um Dashboard B2B?", "subtitle": "Construímos dashboards analíticos e painéis de gestão sob medida." },
-        "api-integracoes": { "title": "Precisa de API e Integrações?", "subtitle": "Desenvolvemos APIs robustas e integramos com qualquer sistema." },
-        "desktop": { "title": "Precisa de Software Desktop?", "subtitle": "Desenvolvemos aplicativos desktop multiplataforma com Electron ou Tauri." },
-        "gestao-setorial": { "title": "Precisa de Software de Gestão Setorial?", "subtitle": "Desenvolvemos sistemas de gestão personalizados para o seu setor." },
-        "erp": { "title": "Precisa de um ERP?", "subtitle": "Desenvolvemos sistemas ERP personalizados para o seu negócio." },
-        "consultoria": { "title": "Precisa de Consultoria?", "subtitle": "Oferecemos consultoria técnica especializada para seu projeto." }
+        "saas": {
+          "title": "Precisa de Desenvolvimento SaaS?",
+          "subtitle": "A SystemForge constrói plataformas SaaS escaláveis do zero até o deploy."
+        },
+        "aplicativo-mobile": {
+          "title": "Precisa de um Aplicativo Mobile?",
+          "subtitle": "Desenvolvemos apps iOS e Android com React Native ou Flutter."
+        },
+        "marketplace": {
+          "title": "Quer criar um Marketplace?",
+          "subtitle": "Entregamos plataformas de marketplace B2B e B2C completas."
+        },
+        "automacao-com-ia": {
+          "title": "Quer Automatizar com IA?",
+          "subtitle": "Implementamos soluções de IA e automação para empresas de todos os tamanhos."
+        },
+        "bots-automacoes": {
+          "title": "Precisa de Bots e Automações?",
+          "subtitle": "Desenvolvemos bots e automações personalizadas para o seu negócio."
+        },
+        "landing-page": {
+          "title": "Precisa de uma Landing Page?",
+          "subtitle": "Criamos landing pages de alta conversão com SEO e performance."
+        },
+        "e-commerce": {
+          "title": "Quer criar seu E-commerce?",
+          "subtitle": "Desenvolvemos lojas virtuais completas, do catálogo ao checkout."
+        },
+        "dashboard-b2b": {
+          "title": "Precisa de um Dashboard B2B?",
+          "subtitle": "Construímos dashboards analíticos e painéis de gestão sob medida."
+        },
+        "api-integracoes": {
+          "title": "Precisa de API e Integrações?",
+          "subtitle": "Desenvolvemos APIs robustas e integramos com qualquer sistema."
+        },
+        "desktop": {
+          "title": "Precisa de Software Desktop?",
+          "subtitle": "Desenvolvemos aplicativos desktop multiplataforma com Electron ou Tauri."
+        },
+        "gestao-setorial": {
+          "title": "Precisa de Software de Gestão Setorial?",
+          "subtitle": "Desenvolvemos sistemas de gestão personalizados para o seu setor."
+        },
+        "erp": {
+          "title": "Precisa de um ERP?",
+          "subtitle": "Desenvolvemos sistemas ERP personalizados para o seu negócio."
+        },
+        "consultoria": {
+          "title": "Precisa de Consultoria?",
+          "subtitle": "Oferecemos consultoria técnica especializada para seu projeto."
+        }
       },
       "serviceNames": {
         "saas": "Desenvolvimento SaaS",

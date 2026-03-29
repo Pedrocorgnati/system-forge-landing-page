@@ -1,0 +1,84 @@
+---
+title: "Metodología ágil: Scrum vs Kanban en la práctica"
+slug: "metodologia-agil-scrum-vs-kanban-proyectos-software"
+date: "2024-07-24"
+description: "Cómo aplicar Scrum y Kanban en proyectos de software reales — ceremonias, herramientas, cuándo funciona mejor cada método y cómo adaptar para equipos pequeños."
+tags: ["metodologia agil", "scrum", "kanban", "gestion de proyectos", "desarrollo software"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo aplicar Scrum y Kanban en proyectos de software reales — ceremonias, herramientas, cuándo funciona mejor cada método y cómo adaptar para equipos pequeños.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'metodologia-agil-scrum-vs-kanban-projetos-software'
+  - locale: 'it-IT'
+    slug: 'scrum-vs-kanban-metodologie-agili-software'
+  - locale: 'en'
+    slug: 'scrum-vs-kanban-agile-software-projects'
+---
+
+## Ágil No es Ausencia de Planificación
+
+Uno de los mayores malentendidos sobre las metodologías ágiles es creer que "ser ágil" significa no planificar, no documentar y cambiar de dirección en cualquier momento. Esa interpretación resulta en equipos sin previsibilidad, backlogs que crecen eternamente y clientes insatisfechos por la falta de organización.
+
+Scrum y Kanban son frameworks estructurados con reglas claras. Fueron creados precisamente para aportar previsibilidad y flujo eficiente a entornos complejos — y funcionan mejor cuando se aplican correctamente, no cuando sirven de excusa para improvisar.
+
+## Scrum: Sprints, Ceremonias y Roles
+
+Scrum organiza el trabajo en ciclos fijos llamados sprints, generalmente de dos semanas. Al final de cada sprint, el equipo entrega un incremento potencialmente publicable del producto.
+
+### Los tres roles de Scrum
+
+**Product Owner** es responsable del backlog del producto. Prioriza las historias de usuario, define el valor de cada feature y toma decisiones sobre qué entra y qué sale de cada sprint. No es el jefe técnico — es el representante del cliente dentro del equipo.
+
+**Scrum Master** facilita el proceso. Elimina impedimentos, protege al equipo de interrupciones externas y asegura que las ceremonias se realicen correctamente. En equipos pequeños, este rol lo suele asumir alguien del propio equipo de desarrollo.
+
+**Equipo de Desarrollo** son las personas que construyen el producto. En Scrum, el equipo es cross-funcional: incluye desarrollo frontend, backend, diseño y QA. La responsabilidad de cada sprint es del equipo, no de individuos.
+
+### Las cuatro ceremonias
+
+**Sprint Planning** (al inicio del sprint): el equipo selecciona las historias del backlog que se compromete a completar en las dos semanas. La estimación se hace en puntos de historia, no en horas.
+
+**Daily Standup** (cada día, máximo 15 minutos): cada persona responde tres preguntas: qué hice ayer, qué haré hoy, qué me está bloqueando. No es una reunión de status — es una sincronización para detectar impedimentos temprano.
+
+**Sprint Review** (al final del sprint): el equipo demuestra lo construido al Product Owner y stakeholders. No es una presentación de PowerPoint — es una demo del software funcionando.
+
+**Sprint Retrospective** (después de la review): el equipo reflexiona sobre el proceso, no sobre el producto. ¿Qué funcionó bien? ¿Qué mejoraríamos? ¿Qué experimenteremos en el próximo sprint?
+
+## Kanban: Flujo Continuo sin Sprints
+
+Kanban no organiza el trabajo en ciclos fijos. En su lugar, mantiene un flujo continuo donde las tareas avanzan por columnas que representan estados del proceso: Por hacer → En progreso → En revisión → Hecho.
+
+La regla fundamental de Kanban es el límite de trabajo en progreso (WIP limit). Cada columna tiene un número máximo de tarjetas simultáneas. Cuando una columna llega a su límite, nadie puede añadir más tarjetas hasta que alguna avance a la siguiente columna.
+
+Este límite parece restrictivo, pero es exactamente lo que aporta el valor: fuerza al equipo a terminar lo que está empezado antes de empezar cosas nuevas. Reduce el multitasking, hace visible los cuellos de botella y mejora el tiempo de entrega de cada tarea.
+
+## Cuándo Usar Cada Uno
+
+**Scrum funciona mejor cuando:**
+- El producto está en desarrollo activo con features nuevas que requieren planificación
+- El equipo necesita ritmo y previsibilidad para reportar avances a stakeholders
+- El trabajo puede dividirse en historias de usuario con criterios de aceptación claros
+- Hay un Product Owner disponible para priorizar el backlog regularmente
+
+**Kanban funciona mejor cuando:**
+- El equipo hace mantenimiento, bugs y mejoras continuas sin un backlog de features predefinido
+- Las tareas llegan de forma impredecible (soporte, incidencias de producción)
+- El equipo es pequeño (2-3 personas) y las ceremonias de Scrum generan overhead excesivo
+- El trabajo no puede dividirse en sprints de dos semanas (proyectos con dependencias externas largas)
+
+## Herramientas: Jira, Linear y Trello
+
+Para Scrum, **Jira** es el estándar en empresas medianas y grandes. Soporta sprints, puntos de historia, burndown charts y epics. La curva de aprendizaje es empinada y la configuración inicial requiere tiempo.
+
+**Linear** ha ganado terreno entre startups y equipos de producto que quieren la estructura de Scrum sin la burocracia de Jira. La interfaz es significativamente más rápida y el flujo de trabajo más intuitivo.
+
+Para Kanban simple, **Trello** sigue siendo una opción válida para equipos pequeños. Para Kanban con métricas (lead time, throughput), **Linear** y **Jira** también cubren bien el caso.
+
+## Adaptar para Equipos Pequeños
+
+Los frameworks ágiles fueron diseñados para equipos de 5-9 personas. En equipos de 2-3 personas, la adherencia estricta a todas las ceremonias genera más overhead que valor.
+
+La adaptación pragmática para equipos pequeños: mantener el sprint (aunque sea de una semana), hacer un standup diario de 5 minutos, y combinar Review y Retrospective en una sesión de 30 minutos al final del sprint. El backlog priorizado sigue siendo esencial — es lo único que garantiza que el equipo trabaja en lo más importante en cada momento.

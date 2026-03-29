@@ -92,7 +92,7 @@ describe('ContentLoader', () => {
       const { loadContent } = await import('../content-loader')
       loadContent('messages', 'it-IT')
 
-      const calledPath = String(mockedFs.existsSync.mock.calls[0][0])
+      const calledPath = String(mockedFs.existsSync.mock.calls[0]![0])
       expect(calledPath).toContain('it-IT')
       expect(calledPath).toContain('messages.json')
       expect(calledPath).toContain('pages')

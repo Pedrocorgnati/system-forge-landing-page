@@ -1,0 +1,116 @@
+---
+title: "Documentación de software: la práctica que separa a los profesionales"
+slug: "documentacion-de-software-practica-profesional"
+date: "2024-10-25"
+description: "Por qué la documentación de software es una inversión y no un gasto — qué documentar, cuándo y cómo hacer que el equipo la mantenga actualizada."
+tags: ["documentacion software", "readme", "api docs", "arquitectura", "equipo tecnico"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Por qué la documentación de software es una inversión y no un gasto — qué documentar, cuándo y cómo hacer que el equipo la mantenga actualizada."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'documentacao-de-software-pratica-que-separa-amadores'
+  - locale: 'it-IT'
+    slug: 'documentazione-software-pratica-professionisti'
+  - locale: 'en'
+    slug: 'software-documentation-best-practices'
+---
+
+"El código es la documentación" es la frase que usan los developers que nunca han tenido que depurar un sistema sin contexto a las 2 de la madrugada. El código dice *qué* hace el sistema. La documentación dice *por qué* hace lo que hace, *cómo* está estructurado y *qué* decisiones se tomaron y por qué se tomaron así y no de otra forma.
+
+La falta de documentación tiene un coste real: tiempo de onboarding de nuevos developers multiplicado por tres, bugs que se repiten porque nadie sabe por qué la solución anterior no funcionó, decisiones de arquitectura que se revierten porque nadie recuerda por qué se tomaron.
+
+## Los 4 Tipos de Documentación que Realmente Importan
+
+No toda documentación tiene el mismo valor. Prioriza estos cuatro:
+
+### 1. README: La Puerta de Entrada
+
+El README es lo primero que ve un developer nuevo. Debe responder en menos de 5 minutos:
+- ¿Qué hace este proyecto?
+- ¿Cómo lo ejecuto localmente?
+- ¿Cómo está estructurado el código?
+- ¿Cuáles son las decisiones arquitectónicas clave?
+
+Un README que no permite a un developer experimentado tener el proyecto corriendo localmente en 30 minutos está incompleto.
+
+### 2. Decisiones de Arquitectura (ADRs)
+
+Los Architecture Decision Records documentan las decisiones importantes: por qué se eligió PostgreSQL sobre MongoDB, por qué se usa una arquitectura de monolito en vez de microservicios, por qué se implementó autenticación propia en vez de usar un servicio externo.
+
+El formato es simple:
+```markdown
+# ADR-001: PostgreSQL como base de datos principal
+
+## Fecha: 2025-01-15
+
+## Estado: Aceptado
+
+## Contexto
+Necesitamos una base de datos para el sistema de facturación con requisitos de
+consistencia transaccional estricta y soporte para queries complejas con JOINs.
+
+## Decisión
+Usaremos PostgreSQL con Prisma como ORM.
+
+## Consecuencias
++ Soporte nativo de transacciones ACID
++ Excelente soporte de herramientas en el ecosistema Node.js
+- Mayor complejidad de escalado horizontal vs NoSQL para casos de alta concurrencia
+```
+
+### 3. Documentación de API
+
+Para APIs externas o APIs consumidas por múltiples clientes, la documentación debe ser generada automáticamente o mantenerse como código (OpenAPI/Swagger). La documentación manual que vive en un Google Doc se desactualiza garantizadamente.
+
+Con Next.js y TypeScript, `zod-to-openapi` permite generar documentación de API directamente desde los schemas de validación:
+
+```typescript
+import { extendZodWithOpenApi } from 'zod-to-openapi'
+import { z } from 'zod'
+
+extendZodWithOpenApi(z)
+
+const ProductoSchema = z.object({
+  id: z.string().openapi({ example: 'prod_123' }),
+  nombre: z.string().openapi({ example: 'Zapatilla Blanca' }),
+  precio: z.number().openapi({ example: 89.99, description: 'Precio en euros' }),
+})
+```
+
+### 4. Runbooks para Operaciones
+
+Los runbooks documentan cómo realizar tareas operacionales: cómo hacer un deploy, cómo hacer rollback, qué hacer cuando hay una alerta específica, cómo escalar la base de datos. Sin runbooks, cada incidencia es una aventura de exploración.
+
+## El Problema de la Documentación Desactualizada
+
+La documentación desactualizada es peor que ninguna documentación — genera confianza en información falsa. La solución no es escribir más documentación, sino hacerla parte del proceso de desarrollo:
+
+**Documentation as Code:** La documentación vive en el mismo repositorio que el código. Los PR que cambian comportamiento deben incluir actualización de la documentación relevante.
+
+**Docs-in-tests:** Algunos tipos de documentación pueden ser tests que se ejecutan automáticamente. Los ejemplos de código en la documentación se pueden validar en CI/CD.
+
+**Revisión en PR:** Incluir "¿actualizaste la documentación relevante?" como punto del checklist de code review.
+
+## La Resistencia del Equipo
+
+"No tenemos tiempo para documentar" es una frase que suena razonable a corto plazo y es destructiva a medio plazo. La documentación no es tiempo perdido — es tiempo diferido. Cada hora que no documentas la recuperas multiplicada en preguntas repetidas, onboardings lentos y bugs recurrentes.
+
+La clave para que el equipo documente: hacerlo parte del "definition of done" de cada tarea, no una tarea separada que siempre se pospone.
+
+## Herramientas para Documentación en Equipos Españoles
+
+- **Notion:** El más adoptado en startups españolas. Colaborativo, versátil, pero sin versionado con el código.
+- **GitBook:** Documentación versionada con Git. Buena opción para documentación de API pública.
+- **Confluence:** Estándar en empresas medianas y grandes. Integración con Jira.
+- **Archivos Markdown en el repo:** Lo más simple y lo que garantiza que la documentación viaja con el código. Para teams pequeños, difícilmente superable.
+
+## Conclusión
+
+La documentación de software es la diferencia entre un sistema que puede ser mantenido por cualquier developer competente y un sistema que solo puede ser mantenido por quien lo construyó. Para empresas en España que contratan o heredan código de otras empresas, la calidad de la documentación es un indicador directo del coste de mantenimiento futuro.
+
+¿Tienes un proyecto con documentación pobre o inexistente y necesitas ponerte al día? [Contacta con SystemForge](https://systemforge.es/contacto).

@@ -1,0 +1,96 @@
+---
+title: "Versionado de API: sin romper clientes existentes"
+slug: "versionado-api-sin-romper-clientes"
+date: "2024-09-06"
+description: "Estrategias de versionado de API — URL versioning, header versioning y sunset headers — con política de deprecación que no genera churn de clientes."
+tags: ["versionado api", "breaking changes", "api design", "deprecacion", "rest api"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Estrategias de versionado de API — URL versioning, header versioning y sunset headers — con política de deprecación que no genera churn de clientes.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'versionamento-api-sem-quebrar-clientes'
+  - locale: 'it-IT'
+    slug: 'versionamento-api-senza-rompere-client'
+  - locale: 'en'
+    slug: 'api-versioning-without-breaking-clients'
+---
+
+El día en que necesites renombrar un campo, eliminar un endpoint o cambiar el formato de una respuesta, descubrirás si tu API tiene versionado o no. Sin versionado, cada breaking change obliga a todos los clientes a actualizar al mismo tiempo — lo que en la práctica significa o congelas la API para siempre, o rompes las integraciones de partners sin previo aviso y pierdes su confianza.
+
+El versionado de API no es burocracia — es la diferencia entre una API que puede evolucionar y una API que se convierte en legacy inmutable a los 18 meses.
+
+## URL Versioning (/v1/, /v2/): Simple y Explícito
+
+El versionado en URL es el enfoque más habitual y el más fácil de entender para los consumidores de la API:
+
+```
+GET /api/v1/users
+GET /api/v2/users  ← nueva versión con cambios breaking
+```
+
+Las ventajas son la claridad total (siempre sabes qué versión estás usando), la facilidad para hacer routing en el API Gateway, y la compatibilidad con caching HTTP (las URLs son diferentes por versión).
+
+Las desventajas son la proliferación de código: mantener v1 y v2 en paralelo significa gestionar dos conjuntos de handlers, validaciones y transformaciones. Y los clientes que no migran activamente seguirán en v1 indefinidamente.
+
+En Next.js con App Router:
+```
+app/api/v1/users/route.ts
+app/api/v2/users/route.ts
+```
+
+O con un sistema de middleware que redirige basándose en el prefijo de versión.
+
+## Header Versioning: Más Limpio pero Menos Visible
+
+```
+GET /api/users
+Accept-Version: v2
+```
+
+El versionado por header mantiene las URLs limpias y es preferido por puristas de REST. El problema es que los headers son invisibles en los logs de acceso básicos, en los bookmarks, en la documentación de ejemplos de curl, y en las herramientas que cachean por URL. Para APIs públicas o con muchos consumidores, la claridad del URL versioning suele valer más que la limpieza de los headers.
+
+## Semver para APIs: Qué es Breaking Change
+
+No todos los cambios requieren una nueva versión mayor. La distinción crucial es entre cambios compatibles hacia atrás (non-breaking) y cambios incompatibles (breaking).
+
+**Non-breaking (no requieren nueva versión):**
+- Añadir un nuevo endpoint
+- Añadir un campo opcional a una respuesta existente
+- Añadir un parámetro opcional a un endpoint existente
+- Reducir restricciones de validación
+
+**Breaking changes (requieren nueva versión mayor):**
+- Eliminar o renombrar un endpoint
+- Eliminar o renombrar un campo de respuesta
+- Cambiar el tipo de un campo (string → number, por ejemplo)
+- Añadir validaciones obligatorias a campos existentes
+- Cambiar el comportamiento de error
+
+## Sunset Headers: Comunicar la Deprecación
+
+Cuando una versión va a ser eliminada, el tiempo de aviso debe ser suficiente para que los clientes migren. La buena práctica es:
+
+1. Anunciar la deprecación con al menos 6 meses de antelación
+2. Incluir el header `Sunset` en todas las respuestas de la versión deprecada:
+
+```
+Sunset: Sat, 01 Jan 2026 00:00:00 GMT
+Deprecation: Tue, 01 Jan 2025 00:00:00 GMT
+Link: <https://api.tusitio.com/v2>; rel="successor-version"
+```
+
+3. Enviar emails de aviso a los API key holders que siguen usando la versión antigua
+4. Monitorear el tráfico a la versión deprecada para identificar clientes que no han migrado
+
+Un `Sunset` header en producción sin un sistema de monitoreo que identifique quién sigue usando la versión antigua es un anuncio de deprecación que no llega a quien lo necesita.
+
+## La Política de Soporte: Cuánto Tiempo Mantener Versiones
+
+El estándar en la industria para APIs públicas es soportar la versión anterior durante 12-24 meses después del lanzamiento de la nueva versión. Para APIs internas (consumidas por tus propios frontends), 3-6 meses suele ser suficiente.
+
+La política debe estar documentada en la página de documentación de la API y enviada a todos los consumidores cuando se lanza una nueva versión mayor.

@@ -1,0 +1,141 @@
+---
+title: "Distribución de apps desktop: firma de código"
+slug: "distribucion-apps-desktop-firma-de-codigo"
+date: "2024-11-22"
+description: "Cómo firmar y distribuir apps desktop en Windows y macOS — certificados de firma de código, notarización de Apple y canales de distribución para empresas."
+tags: ["firma de codigo", "distribucion app desktop", "electron", "windows", "macos"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo firmar y distribuir apps desktop en Windows y macOS — certificados de firma de código, notarización de Apple y canales de distribución para empresas."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'distribuicao-app-desktop-assinatura-codigo'
+  - locale: 'it-IT'
+    slug: 'distribuzione-app-desktop-firma-codice'
+  - locale: 'en'
+    slug: 'distributing-desktop-apps-code-signing'
+---
+
+Distribuir una app desktop sin firma de código en 2025 significa que cada usuario verá una advertencia de seguridad al instalarla — en Windows, el temido SmartScreen ("Windows protegió tu PC"); en macOS, el bloqueo de Gatekeeper. Para una app empresarial distribuida a los empleados de una empresa española, o para una app de pago distribuida en tiendas, esto es inaceptable.
+
+La firma de código resuelve dos problemas: la advertencia de seguridad del sistema operativo y la verificación de que el instalador no ha sido modificado desde que lo publicaste (integridad del binario).
+
+## Firma de Código en Windows
+
+Para Windows, necesitas un certificado de firma de código de una Autoridad de Certificación de confianza (DigiCert, Sectigo, GlobalSign). Existen dos tipos:
+
+**OV (Organization Validation):** El emisor verifica que la empresa existe. El instalador no muestra el SmartScreen en la mayoría de los casos, pero SmartScreen Reputation puede seguir apareciendo en apps nuevas con pocas descargas.
+
+**EV (Extended Validation):** Verificación más rigurosa, requiere token de hardware físico (USB). El SmartScreen se omite completamente desde el primer install. Es el estándar para apps empresariales.
+
+Precio aproximado: OV ~100-200€/año, EV ~300-500€/año.
+
+En `electron-builder`, la firma se configura automáticamente si las variables de entorno están correctamente configuradas:
+
+```bash
+# Variables de entorno para CI/CD (GitHub Actions, etc.)
+WIN_CSC_LINK=./certificate.p12
+WIN_CSC_KEY_PASSWORD=password
+```
+
+```json
+// package.json
+{
+  "build": {
+    "win": {
+      "certificateFile": "certificate.p12",
+      "certificatePassword": "${WIN_CSC_KEY_PASSWORD}",
+      "signingHashAlgorithms": ["sha256"]
+    }
+  }
+}
+```
+
+## Notarización en macOS
+
+Apple requiere que las apps distribuidas fuera del Mac App Store sean notarizadas — un proceso donde Apple escanea el binario en busca de malware y lo marca como seguro. Sin notarización, macOS bloquea la app completamente en sistemas modernos.
+
+Requisitos: Apple Developer Program (99€/año), hardened runtime activado, sin librerías obsoletas o inseguras.
+
+Con `electron-builder`, el proceso está integrado:
+
+```json
+{
+  "build": {
+    "mac": {
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.inherit.plist"
+    },
+    "afterSign": "scripts/notarize.js"
+  }
+}
+```
+
+El script de notarización usa `@electron/notarize`:
+
+```javascript
+// scripts/notarize.js
+const { notarize } = require('@electron/notarize')
+
+module.exports = async (context) => {
+  if (context.electronPlatformName !== 'darwin') return
+
+  await notarize({
+    tool: 'notarytool',
+    appPath: context.appOutDir + `/${context.packager.appInfo.productFilename}.app`,
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_APP_SPECIFIC_PASSWORD,
+    teamId: process.env.APPLE_TEAM_ID,
+  })
+}
+```
+
+El proceso de notarización tarda entre 1 y 10 minutos. Para CI/CD, es parte del pipeline de release, no del de PR.
+
+## Canales de Distribución para Empresas Españolas
+
+**GitHub Releases:** La opción más simple para distribución directa. Las versiones firmadas se publican como assets del release. Compatible con auto-update de `electron-updater`. Adecuado para B2B donde los clientes descargan directamente.
+
+**MSIX y Microsoft Store:** Para distribución corporativa a través de Intune o SCCM (sistemas de gestión de dispositivos comunes en empresas españolas), el formato MSIX de Windows 10/11 tiene ventajas en gestión y actualización silenciosa.
+
+**MDM (Mobile Device Management):** Las empresas españolas con flotas de equipos gestionados (Jamf para Mac, Intune para Windows) pueden distribuir la app internamente sin pasar por stores. La firma sigue siendo necesaria para bypasear las advertencias del SO.
+
+**Mac App Store:** Para distribución masiva en macOS. Requiere certificado de distribución Mac App Store (incluido en Apple Developer Program), más restricciones de Sandbox que pueden limitar funcionalidades de la app.
+
+## Automatización del Release con GitHub Actions
+
+```yaml
+# .github/workflows/release.yml
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  build:
+    runs-on: macos-latest # Para firmar tanto Windows como macOS
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+      - run: npm ci
+      - name: Build y firmar
+        env:
+          WIN_CSC_LINK: ${{ secrets.WIN_CERTIFICATE }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CERT_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: npm run build -- --publish always
+```
+
+## Conclusión
+
+La firma de código y la notarización son el peaje de entrada para una distribución profesional de apps desktop en España. Los costes son manejables (200-600€/año dependiendo de plataformas) y el proceso de automatización es trabajo de una vez.
+
+¿Estás construyendo una app desktop y necesitas ayuda con el pipeline de distribución y firma? [Contacta con SystemForge](https://systemforge.es/contacto).

@@ -6,6 +6,9 @@ import { ExternalLink } from 'lucide-react'
 import type { PortfolioProject } from '@/lib/types'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { cn } from '@/lib/utils'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 type FilterValue = 'all' | 'fullstack' | 'website' | 'mobile' | 'ai' | 'crypto' | 'sugestoes'
 
@@ -45,7 +48,7 @@ export function PortfolioFilteredList({ projects }: PortfolioFilteredListProps) 
         data-testid="portfolio-filter-group"
         className="overflow-x-auto flex gap-2 pb-2 -mx-4 px-4"
         role="group"
-        aria-label="Filtrar projetos por categoria"
+        aria-label={m.sections.portfolio.filterAriaLabel}
       >
         {filterTabs.map((tab) => (
           <button

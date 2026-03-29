@@ -1,0 +1,132 @@
+---
+title: "Deep links y SEO móvil: app indexing"
+slug: "deep-links-seo-movil-indexacion"
+date: "2024-10-08"
+description: "Cómo implementar deep links en apps React Native para mejorar el SEO móvil, la indexación de Google y la experiencia de navegación desde resultados de búsqueda."
+tags: ["deep links", "app indexing", "seo movil", "react native", "universal links"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar deep links en apps React Native para mejorar el SEO móvil, la indexación de Google y la experiencia de navegación desde resultados de búsqueda."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'deep-links-app-indexing-seo-mobile'
+  - locale: 'it-IT'
+    slug: 'deep-links-indicizzazione-app-seo-mobile'
+  - locale: 'en'
+    slug: 'deep-links-and-mobile-seo-app-indexing'
+---
+
+Un usuario busca en Google "comprar zapatillas Nike Air Max talla 42" desde su móvil. Tu app de e-commerce tiene ese producto. Sin deep links, Google muestra tu web — el usuario llega al navegador móvil, ve el producto, recuerda que tiene tu app instalada, la abre manualmente y busca de nuevo. Con deep links bien implementados, Google puede mostrar un resultado que abre directamente la pantalla del producto en tu app.
+
+Esta no es una funcionalidad menor — es la diferencia entre una app que es parte de tu canal de adquisición y una app que solo usan quienes ya son clientes.
+
+## Universal Links (iOS) y App Links (Android)
+
+Los sistemas para abrir apps desde URLs web son distintos en iOS y Android, pero el principio es el mismo: vincular un dominio web con una app instalada de forma que las URLs de ese dominio abran la app cuando está instalada, y el sitio web cuando no lo está.
+
+**iOS — Universal Links:**
+Requiere un archivo `apple-app-site-association` en el servidor web, sin extensión:
+
+```json
+// https://tudominio.es/.well-known/apple-app-site-association
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "EQUIPO_ID.com.tuempresa.tuapp",
+        "paths": [
+          "/productos/*",
+          "/categorias/*",
+          "/perfil/*"
+        ]
+      }
+    ]
+  }
+}
+```
+
+**Android — App Links:**
+Requiere un archivo `assetlinks.json` en el servidor:
+
+```json
+// https://tudominio.es/.well-known/assetlinks.json
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.tuempresa.tuapp",
+    "sha256_cert_fingerprints": ["SHA256_DE_TU_CERTIFICADO"]
+  }
+}]
+```
+
+## Implementación en React Native con Expo Router
+
+Expo Router gestiona los deep links de forma nativa — la estructura de carpetas del proyecto se mapea directamente a rutas que son navegables tanto internamente como desde URLs externas:
+
+```typescript
+// app/productos/[id].tsx — Esta ruta responde a:
+// tuapp://productos/123
+// https://tudominio.es/productos/123 (si hay Universal Links configurados)
+
+import { useLocalSearchParams } from 'expo-router'
+
+export default function ProductoScreen() {
+  const { id } = useLocalSearchParams()
+  return <ProductoDetalle productoId={id} />
+}
+```
+
+La configuración en `app.json`:
+
+```json
+{
+  "expo": {
+    "scheme": "tuapp",
+    "ios": {
+      "associatedDomains": ["applinks:tudominio.es"]
+    },
+    "android": {
+      "intentFilters": [{
+        "action": "VIEW",
+        "autoVerify": true,
+        "data": [{
+          "scheme": "https",
+          "host": "tudominio.es",
+          "pathPrefix": "/productos"
+        }]
+      }]
+    }
+  }
+}
+```
+
+## App Indexing para Google
+
+Firebase App Indexing (ahora parte de Firebase Dynamic Links) permite que el contenido de tu app sea indexado por Google — apareciendo en los resultados de búsqueda con un botón "Abrir en app".
+
+Para apps de e-commerce, marketplace o contenido, esto es especialmente valioso: los usuarios en España que buscan en Google desde su móvil con tu app instalada pueden ir directamente al contenido en la app.
+
+Los requisitos para la indexación:
+1. Deep links funcionales (Universal Links / App Links)
+2. Sitemap que incluya las URLs que quieres indexar
+3. Verificación de la propiedad en Google Search Console
+
+## Deferred Deep Links: El Caso de Marketing
+
+Los deferred deep links resuelven un problema específico: un usuario hace clic en un anuncio, no tiene la app instalada, la descarga, la instala... y aterriza en el home en vez de en el producto anunciado.
+
+Los deferred deep links preservan la URL de destino a través del proceso de instalación. Cuando la app se abre por primera vez, recupera la URL original y navega directamente a la pantalla correcta.
+
+Herramientas como Branch.io o Firebase Dynamic Links gestionan esto automáticamente y son especialmente útiles para campañas de performance marketing en España donde el ROAS depende de que el usuario llegue al contenido correcto.
+
+## Conclusión
+
+Los deep links son infraestructura — no se ven, pero son la diferencia entre una app que se integra en el ecosistema digital del usuario y una que vive en un silo. Para apps de e-commerce, marketplace o plataformas con contenido en España, la implementación correcta tiene impacto directo en adquisición y retención.
+
+¿Estás desarrollando una app y quieres implementar deep links correctamente? [Contacta con SystemForge](https://systemforge.es/contacto).

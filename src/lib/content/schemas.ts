@@ -104,7 +104,7 @@ export const PortfolioSchema = z.array(
 
 // ─── 4. TestimonialsSchema ────────────────────────────────────────────────────
 // Para content/{locale}/pages/testimonials.json
-// locale restrito aos 3 locales suportados
+// locale restrito aos 4 locales suportados
 export const TestimonialsSchema = z.array(
   z.object({
     id: z.string().min(1),
@@ -112,7 +112,7 @@ export const TestimonialsSchema = z.array(
     role: z.string().min(1),
     company: z.string().min(1),
     content: z.string().min(1),
-    locale: z.enum(['pt-BR', 'it-IT', 'en']),
+    locale: z.enum(['pt-BR', 'it-IT', 'en', 'es-ES']),
   })
 )
 

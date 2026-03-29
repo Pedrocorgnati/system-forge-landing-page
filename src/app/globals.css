@@ -1080,6 +1080,12 @@ body {
 .star-animate {
   animation: star-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
+/* RESOLVED: animation-delay via data-star-index em vez de inline style */
+.star-animate[data-star-index="0"] { animation-delay: 0ms; }
+.star-animate[data-star-index="1"] { animation-delay: 60ms; }
+.star-animate[data-star-index="2"] { animation-delay: 120ms; }
+.star-animate[data-star-index="3"] { animation-delay: 180ms; }
+.star-animate[data-star-index="4"] { animation-delay: 240ms; }
 
 @keyframes testimonial-grid-reveal {
   from { opacity: 0; transform: translateY(16px); }

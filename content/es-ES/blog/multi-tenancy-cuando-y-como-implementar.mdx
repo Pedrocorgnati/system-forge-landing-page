@@ -1,0 +1,61 @@
+---
+title: "Multi-tenancy en SaaS: cuándo y cómo implementar"
+slug: "multi-tenancy-cuando-y-como-implementar"
+date: "2024-07-24"
+description: "Los tres modelos de multi-tenancy (base de datos compartida, schema por tenant, base de datos por tenant) — cuándo usar cada uno y cómo migrar sin downtime."
+tags: ["multi-tenancy", "saas", "arquitectura", "postgresql", "aislamiento de datos"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Los tres modelos de multi-tenancy (base de datos compartida, schema por tenant, base de datos por tenant) — cuándo usar cada uno y cómo migrar sin downtime.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'multi-tenancy-quando-e-como-implementar'
+  - locale: 'it-IT'
+    slug: 'multi-tenancy-saas-quando-e-come-implementare'
+  - locale: 'en'
+    slug: 'multi-tenancy-in-saas-when-and-how'
+---
+
+Todo SaaS comienza con una pregunta técnica que parece simple pero define años de arquitectura: ¿cómo separar los datos de un cliente de los datos de otro? Esta es la esencia del multi-tenancy — la capacidad de un sistema de servir a múltiples "inquilinos" (tenants) con total aislamiento entre ellos, usando la misma infraestructura.
+
+Hacer esto mal tiene consecuencias serias: un bug de lógica puede filtrar datos de una empresa a otra, una query pesada de un cliente puede derribar el servicio para todos, y una migración mal ejecutada puede requerir horas de downtime. Hacerlo bien desde el principio es una de las decisiones de arquitectura más rentables que un founder técnico puede tomar.
+
+Existen tres modelos principales, cada uno con trade-offs claros de aislamiento, coste y complejidad operativa.
+
+## Base de Datos Compartida con tenant_id: Simple y Peligroso
+
+El modelo más común en MVPs es el más arriesgado en producción: todas las tablas de la base de datos están en un único schema, y cada fila tiene una columna `tenant_id` que identifica a qué organización pertenece.
+
+Las ventajas son claras: setup inmediato, sin complejidad operativa, migraciones simples. El problema es que el aislamiento es puramente de aplicación — si algún endpoint omite el filtro por `tenant_id`, los datos de un cliente son accesibles para otro. Y esto ocurre. En código de prisa, en refactorizaciones, en queries escritas por desarrolladores nuevos que no conocen todas las convenciones.
+
+Este modelo puede funcionar con una capa de Row Level Security (RLS) en PostgreSQL que aplique el filtro por tenant a nivel de base de datos, independientemente de la query de la aplicación. Pero incluso con RLS, una query de un tenant de alto volumen puede afectar la performance del resto.
+
+## Schema por Tenant: Buen Equilibrio
+
+El modelo de schema por tenant crea un schema separado en PostgreSQL para cada cliente. La tabla `users` del Tenant A está en `tenant_a.users`, la del Tenant B en `tenant_b.users`, y así sucesivamente.
+
+Las ventajas son significativas: aislamiento fuerte (una query mal escrita nunca puede filtrar datos de otro tenant por error), migraciones independientes por tenant (puedes migrar gradualmente sin afectar a todos), y algo de aislamiento de performance.
+
+El coste es operativo: cada nuevo cliente requiere crear un schema, ejecutar las migraciones en ese schema y configurar el connection pool correctamente. Con cientos de tenants, esto es perfectamente gestionable. Con miles, empieza a ser overhead.
+
+La implementación correcta usa una función que establece el schema de búsqueda (`search_path`) al inicio de cada solicitud: `SET search_path = tenant_slug, public`. Todo el código de la aplicación funciona como si hubiera una sola base de datos — el aislamiento es transparente.
+
+## Base de Datos por Tenant: Máximo Aislamiento
+
+El modelo de base de datos por tenant proporciona el aislamiento más fuerte: cada cliente tiene su propia instancia de base de datos. Un cliente no puede afectar la performance de otro, las backups son individuales y la migración de un cliente a otra región es trivial.
+
+El coste es también el más alto: cada cliente tiene su propio servidor de base de datos, lo que implica un coste de infraestructura mínimo por cliente que hace inviable el modelo para planes básicos de bajo precio. Este modelo tiene sentido para SaaS enterprise con contratos de varios miles de euros anuales, donde los clientes requieren garantías contractuales de aislamiento de datos.
+
+## Cuándo Migrar Entre Modelos
+
+La migración de base de datos compartida a schema por tenant es la más común y la más factible sin downtime: se crean los schemas, se migran los datos con un script que corre en background, y se activa el nuevo routing una vez validada la integridad.
+
+La migración de schema por tenant a base de datos por tenant es más compleja pero también factible de forma gradual: se migran los tenants de mayor valor primero, manteniendo el sistema anterior activo para el resto.
+
+Lo que es casi imposible sin downtime significativo es la migración inversa (de aislamiento fuerte a compartido), porque requiere consolidar datos que estaban físicamente separados en estructuras únicas con garantías de no colisión de IDs.
+
+La recomendación práctica: empieza con schema por tenant desde el primer día. Es más complejo que el modelo compartido, pero mucho menos que base de datos por tenant, y te da el aislamiento suficiente para crecer con seguridad hasta ingresos de varios cientos de miles de euros anuales.

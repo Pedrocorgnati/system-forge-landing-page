@@ -1,5 +1,3 @@
-'use client'
-
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -45,7 +43,7 @@ const clientNamesDoubled = [...clientNames, ...clientNames]
 
 export function HeroSection() {
   const ctas = buildDefaultCTAs()
-  const primaryCTA = ctas[0]
+  const primaryCTA = ctas[0]!
 
   return (
     <section

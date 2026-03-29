@@ -1,0 +1,90 @@
+---
+title: "App de reparto: arquitectura y decisiones técnicas"
+slug: "app-de-reparto-arquitectura-decisiones-tecnicas"
+date: "2024-11-04"
+description: "Decisiones técnicas para apps de delivery — rastreo en tiempo real con WebSockets, geolocalización en background, notificaciones de estado y gestión de pedidos."
+tags: ["app delivery", "rastreo tiempo real", "geolocalizacion", "websockets", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Decisiones técnicas para apps de delivery — rastreo en tiempo real con WebSockets, geolocalización en background, notificaciones de estado y gestión de pedidos."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'app-de-entrega-arquitetura-decisoes-tecnicas'
+  - locale: 'it-IT'
+    slug: 'app-delivery-architettura-decisioni-tecniche'
+  - locale: 'en'
+    slug: 'delivery-app-architecture-technical-decisions'
+---
+
+Las apps de reparto parecen simples desde fuera: el cliente hace el pedido, ve al repartidor en el mapa, recibe la notificación cuando llega. Esa simplicidad aparente esconde una arquitectura técnica más exigente que la mayoría de las apps de consumo.
+
+La geolocalización en background consume batería y requiere permisos especiales. El rastreo en tiempo real requiere una capa de comunicación persistente con el servidor. El estado de un pedido cambia constantemente y debe reflejarse de forma consistente en tres apps distintas — cliente, repartidor y restaurante o tienda.
+
+En España, el mercado de delivery ha explotado con plataformas como Glovo, Deliveroo, Just Eat y Uber Eats. Si estás construyendo una alternativa vertical — comida local, farmacia, supermercado — estas decisiones técnicas determinan si llegas a producción o te quedas atascado en retrabajo.
+
+## Geolocalización en Background: Configuración y Batería
+
+La geolocalización en background es el corazón técnico de un app de reparto. El repartidor debe enviar su posición continuamente mientras tiene una entrega activa — incluso con el teléfono en el bolsillo y la app en segundo plano.
+
+En React Native con Expo, la librería `expo-location` soporta background location, pero requiere configuración específica en app.json y permiso explícito del usuario:
+
+```json
+{
+  "expo": {
+    "plugins": [
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Necesitamos tu ubicación en todo momento para mostrar tu posición a los clientes durante las entregas."
+        }
+      ]
+    ]
+  }
+}
+```
+
+La frecuencia de actualización es el tradeoff más crítico. Actualizar cada segundo es óptimo para el usuario, pero drena la batería en 2-3 horas. La configuración equilibrada para repartos urbanos: distanceInterval de 10 metros o timeInterval de 5 segundos, el que ocurra primero.
+
+## WebSockets vs Polling para Rastreo en Tiempo Real
+
+El cliente que sigue al repartidor en el mapa necesita actualizaciones de posición con latencia baja. Hay dos opciones técnicas: polling (el cliente pregunta al servidor cada N segundos) y WebSockets (conexión persistente bidireccional).
+
+Para apps de reparto, los WebSockets son la elección correcta cuando el rastreo activo justifica mantener la conexión abierta. El polling funciona para funcionalidades de monitoreo de estado donde la latencia de 10-30 segundos es aceptable — por ejemplo, seguimiento del estado del pedido (preparando → listo → en camino).
+
+La arquitectura recomendada: WebSockets para la posición del repartidor (actualización en tiempo real), polling para los cambios de estado del pedido (menos frecuente, menor costo de infraestructura).
+
+## Estado del Pedido: Consistencia Entre Tres Apps
+
+Un pedido tiene múltiples partes interesadas simultáneas: el cliente que espera, el restaurante que prepara, el repartidor que viene. Cada cambio de estado debe propagarse a todos de forma consistente.
+
+El patrón recomendado es una máquina de estados en el backend con transiciones explícitas:
+
+```
+PENDIENTE → ACEPTADO → PREPARANDO → LISTO_PARA_RECOGER → EN_CAMINO → ENTREGADO
+                                                         ↓
+                                                    CANCELADO
+```
+
+Cada transición dispara eventos a través de WebSockets o push notifications. El backend es la fuente de verdad — las apps solo visualizan estado, no lo calculan.
+
+## Notificaciones Push: Momentos Críticos
+
+Las notificaciones push en una app de delivery deben ser pocas pero precisas. Los momentos críticos donde la notificación añade valor real:
+
+- **Pedido aceptado:** El restaurante confirmó el pedido
+- **Repartidor asignado:** Nombre y foto del repartidor
+- **Pedido recogido:** El repartidor ya tiene tu pedido
+- **Repartidor cerca:** A menos de 5 minutos de distancia
+- **Entregado:** Confirmación final
+
+En España, el uso de servicios como Firebase Cloud Messaging (FCM) para Android y APNs para iOS es estándar. La integración con `expo-notifications` simplifica el manejo cross-platform.
+
+## Conclusión
+
+Construir una app de reparto bien es construir tres apps coordinadas sobre una infraestructura de tiempo real. Las decisiones técnicas — frecuencia de geolocalización, protocolo de comunicación, modelo de estados — tienen impacto directo en la experiencia del usuario y en los costes operativos.
+
+¿Estás construyendo una app de delivery en España o LATAM? [Contacta con SystemForge](https://systemforge.es/contacto) — tenemos experiencia en las decisiones de arquitectura que determinan el éxito de este tipo de plataformas.

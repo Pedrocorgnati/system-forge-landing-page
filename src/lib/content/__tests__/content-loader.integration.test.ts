@@ -8,13 +8,13 @@
  * Pré-condição: arquivos em content/{locale}/pages/{type}.json devem existir
  *
  * Cobertura:
- *   - 3 locales × 10 tipos = 30 combinações (Cenário 1 — happy path real)
+ *   - 4 locales × 10 tipos = 40 combinações (Cenário 1 — happy path real)
  *   - Locale inexistente no disco (Cenário 2 — erro esperado)
  *   - Retorno nunca undefined — sempre objeto tipado ou exceção (Cenário 3)
  *
  * Diferença dos testes unitários:
  *   Unitários: mockam fs para isolar lógica
- *   Integração: exercitam a leitura real e validam que os 30 arquivos JSON
+ *   Integração: exercitam a leitura real e validam que os 40 arquivos JSON
  *               do content layer estão presentes e conformes ao schema Zod
  */
 
@@ -32,7 +32,7 @@ vi.mock('react', async (importOriginal) => {
   }
 })
 
-const LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en']
+const LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en', 'es-ES']
 
 const CONTENT_TYPES: ContentType[] = [
   'messages',
@@ -58,7 +58,7 @@ describe('ContentLoader — integração com disco real', () => {
   // -------------------------------------------------------------------------
   // Cenário 1: Happy path — todos os arquivos existem e são válidos
   // -------------------------------------------------------------------------
-  describe('Cenário 1: todos os 30 arquivos carregam e passam na validação Zod', () => {
+  describe('Cenário 1: todos os 40 arquivos carregam e passam na validação Zod', () => {
     for (const locale of LOCALES) {
       describe(`Locale: ${locale}`, () => {
         for (const type of CONTENT_TYPES) {

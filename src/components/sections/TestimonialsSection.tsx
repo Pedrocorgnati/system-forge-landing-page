@@ -11,17 +11,20 @@ import { TIMING } from '@/lib/constants/timing'
 
 const messages = loadMessages()
 
+// RESOLVED: StarRating array criado fora do componente para evitar alocação por render
+const STAR_INDICES = [0, 1, 2, 3, 4]
+
 function StarRating({ animate = false }: { animate?: boolean }) {
   return (
     <div className="flex gap-0.5" aria-label={messages.sections.testimonials.ratingLabel} role="img">
-      {Array.from({ length: 5 }).map((_, i) => (
+      {STAR_INDICES.map((i) => (
         <svg
           key={i}
+          data-star-index={animate ? i : undefined}
           className={cn(
             'w-4 h-4 text-warning fill-current',
             animate && 'star-animate',
           )}
-          style={animate ? { animationDelay: `${i * TIMING.STAR_ANIMATION_STEP}ms` } : undefined}
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
@@ -149,6 +152,7 @@ export function TestimonialsSection() {
   }
 
   const current = testimonials[active]
+  if (!current) return null
 
   return (
     <section

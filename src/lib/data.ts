@@ -1,6 +1,6 @@
 import { ServiceCategory, TechTag, ProjectStatus, DeliveryCountry } from './types'
 import type { Service, PortfolioProject, Testimonial, ServiceFilterGroup } from './types'
-import { loadServicesContent } from '@config/content'
+import { loadServicesContent, loadPortfolioDescriptions } from '@config/content'
 
 // ── Non-translatable service base config ──────────────────────────────────────
 // contentId maps to the id in content/{locale}/pages/services.json
@@ -27,7 +27,8 @@ const SERVICE_BASE: {
   { slug: 'desktop', contentId: 'desktop', icon: '🖥️', category: ServiceCategory.DESKTOP, techHints: ['Electron', 'SQLite'], deliveryRange: '8–14', filterGroup: 'produto' },
 ]
 
-// Build locale-aware services at module load time (locale is fixed per build)
+// Build locale-aware content at module load time (locale is fixed per build)
+const _portfolioDescriptions = loadPortfolioDescriptions()
 const _servicesContent = loadServicesContent()
 const _contentMap = new Map(_servicesContent.map(s => [s.id, s]))
 
@@ -37,17 +38,21 @@ export const services: Service[] = SERVICE_BASE.map(base => {
     slug: base.slug,
     name: content?.title ?? base.slug,
     description: content?.description ?? '',
-    longDescription: content?.description ?? '',
+    longDescription: content?.longDescription ?? content?.description ?? '',
     icon: base.icon,
     category: base.category,
     deliverables: content?.features ?? [],
     techHints: base.techHints,
     deliveryWeeks: base.deliveryRange,
     filterGroup: base.filterGroup,
+    benefits: content?.benefits,
+    process: content?.process,
+    useCases: content?.useCases,
+    faq: content?.faq,
   }
 })
 
-export const portfolioProjects: PortfolioProject[] = [
+const _portfolioProjectsRaw: PortfolioProject[] = [
   { slug: 'servizipercasa', name: 'ServiziPerCasa', title: 'ServiziPerCasa', description: 'Marketplace italiano conectando proprietários a profissionais de serviços domésticos. Booking, Stripe payments e dashboard analytics.', categories: [ServiceCategory.MARKETPLACE], techs: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], technologies: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], status: ProjectStatus.COMPLETED, featured: true, videoUrl: '/video/servizipercasa.mp4', countries: [DeliveryCountry.ITALIA] },
   { slug: 'piemontech', name: 'Piemontech', title: 'Piemontech', description: 'Plataforma B2B com landing page builder, diagnósticos IA, engine de prospecção e sistema de afiliados.', categories: [ServiceCategory.SAAS, ServiceCategory.AI], techs: [TechTag.NEXTJS, TechTag.CLAUDE_AI, TechTag.STRIPE, TechTag.PRISMA], technologies: [TechTag.NEXTJS, TechTag.CLAUDE_AI, TechTag.STRIPE, TechTag.PRISMA], status: ProjectStatus.COMPLETED, featured: true, videoUrl: '/video/piemontech.mp4', countries: [DeliveryCountry.ITALIA] },
   { slug: 'sistema-garantido', name: 'Sistema Garantido', title: 'Sistema Garantido', description: 'Gestão de garantias com 2FA, billing Stripe, Claude AI e lifecycle completo via Twilio.', categories: [ServiceCategory.SAAS, ServiceCategory.AI], techs: [TechTag.NEXTJS, TechTag.CLAUDE_AI, TechTag.TWILIO, TechTag.STRIPE, TechTag.PRISMA], technologies: [TechTag.NEXTJS, TechTag.CLAUDE_AI, TechTag.TWILIO, TechTag.STRIPE, TechTag.PRISMA], status: ProjectStatus.COMPLETED, featured: true, videoUrl: '/video/sistema-garantido.mp4', countries: [DeliveryCountry.BRASIL] },
@@ -76,6 +81,11 @@ export const portfolioProjects: PortfolioProject[] = [
   { slug: 'personal-website', name: 'Personal Website', title: 'Personal Website', description: 'Portfolio interativo de desenvolvedor com seções animadas, showcase de projetos e formulário de contato.', categories: [ServiceCategory.LANDING], techs: [TechTag.NEXTJS, TechTag.REACT], technologies: [TechTag.NEXTJS, TechTag.REACT], status: ProjectStatus.COMPLETED, videoUrl: '/video/Personal-Resume-Website.mp4' },
   { slug: 'cognuscraft', name: 'Cognuscraft', title: 'Cognuscraft', description: 'Landing page para empresa de IA, destacando missão e produtos flagship.', categories: [ServiceCategory.LANDING, ServiceCategory.AI], techs: [TechTag.HTML_CSS], technologies: [TechTag.HTML_CSS], status: ProjectStatus.COMPLETED, videoUrl: '/video/Cognuscraft.mp4' },
 ]
+
+export const portfolioProjects: PortfolioProject[] = _portfolioProjectsRaw.map(p => ({
+  ...p,
+  description: _portfolioDescriptions.get(p.slug) ?? p.description,
+}))
 
 export const testimonials: Testimonial[] = [
   {

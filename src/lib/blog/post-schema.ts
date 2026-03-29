@@ -1,6 +1,6 @@
 /**
  * src/lib/blog/post-schema.ts
- * Schema Zod para frontmatter de posts MDX do blog triple-market.
+ * Schema Zod para frontmatter de posts MDX do blog quad-market.
  *
  * Independente do runtime Velite — pode ser importado em scripts standalone
  * (validate-frontmatter.ts, hreflang-validator.ts) e em testes unitários.
@@ -17,7 +17,8 @@ import type { SupportedLocale as ConfigSupportedLocale } from '@config/types'
 export type { ConfigSupportedLocale as SupportedLocale }
 
 // Schema de locale — corresponde ao tipo SupportedLocale de @config/types.
-export const SupportedLocaleSchema = z.enum(['pt-BR', 'it-IT', 'en'])
+// SYNC: manter alinhado com config/types.ts SupportedLocale e velite.config.ts SUPPORTED_LOCALES
+export const SupportedLocaleSchema = z.enum(['pt-BR', 'it-IT', 'en', 'es-ES'])
 
 /** Schema de um par hreflang: locale de destino + slug do artigo correspondente. */
 export const hreflangPairSchema = z.object({
@@ -86,7 +87,7 @@ export const PostFrontmatterSchema = z
 
     // Self-reference proibida
     for (let i = 0; i < data.hreflang_pair.length; i++) {
-      if (data.hreflang_pair[i].locale === data.locale) {
+      if (data.hreflang_pair[i]!.locale === data.locale) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
           message: `hreflang_pair[${i}] self-reference proibida — locale "${data.locale}"`,
@@ -98,7 +99,7 @@ export const PostFrontmatterSchema = z
     // Locales duplicados em hreflang_pair proibidos
     const seen = new Set<string>()
     for (let i = 0; i < data.hreflang_pair.length; i++) {
-      const loc = data.hreflang_pair[i].locale
+      const loc = data.hreflang_pair[i]!.locale
       if (seen.has(loc)) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,

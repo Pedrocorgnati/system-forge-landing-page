@@ -1,0 +1,73 @@
+---
+title: "Software de contabilidad: facturación electrónica y SII"
+slug: "software-contabilidad-facturacion-electronica-sii"
+date: "2024-09-17"
+description: "Cómo construir software contable en España: TicketBAI, VeriFactu, SII (Suministro Inmediato de Información) y facturación electrónica obligatoria."
+tags: ["contabilidad", "facturacion electronica", "sii", "ticketbai", "verifactu"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo construir software contable en España: TicketBAI, VeriFactu, SII (Suministro Inmediato de Información) y facturación electrónica obligatoria."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'software-contabilidade-sped-nfe'
+  - locale: 'it-IT'
+    slug: 'software-contabilita-fatturazione-elettronica-sdi-iva'
+  - locale: 'en'
+    slug: 'accounting-software-einvoicing-vat-compliance'
+---
+
+El entorno fiscal español en 2025 está en plena transformación. La implantación progresiva de la facturación electrónica obligatoria (Ley Crea y Crece), el sistema TicketBAI en el País Vasco y Navarra, el SII (Suministro Inmediato de Información) para grandes empresas, y el sistema VeriFactu que la AEAT está desplegando cambian completamente los requisitos técnicos del software contable y de facturación.
+
+Desarrollar software que maneje obligaciones fiscales en España no es una cuestión de preferencia tecnológica — es una carrera constante contra la complejidad regulatoria.
+
+## Facturación Electrónica Obligatoria: Ley Crea y Crece
+
+La **Ley 18/2022 de Creación y Crecimiento de Empresas** (Ley Crea y Crece) establece la facturación electrónica obligatoria entre empresas (B2B) para autónomos y pymes. La implantación es gradual:
+- Empresas con facturación > 8M €/año: 2025
+- Resto de empresas y autónomos: 2026
+
+El formato obligatorio es **Facturae** (XML), el estándar del Estado español. La AEAT proporcionará una plataforma pública (FACeB2B extendida) pero también se podrán usar plataformas privadas certificadas.
+
+## VeriFactu: El Sistema Antifraude de la AEAT
+
+**VeriFactu** (Verificación de Factura) es el nuevo sistema de la AEAT que obliga a los programas de facturación a generar un registro de cada factura con hash encadenado (similar a blockchain) que la AEAT puede verificar para detectar manipulaciones retroactivas.
+
+Los requisitos técnicos para software VeriFactu:
+```
+Cada factura debe contener:
+- Hash SHA-256 de los campos del documento
+- Referencia al hash de la factura anterior (encadenamiento)
+- Envío del registro a la AEAT via API en tiempo real o periódico
+- Imposibilidad de modificar o eliminar registros ya enviados
+```
+
+El software que no cumpla VeriFactu tendrá un tratamiento fiscal desfavorable y los clientes preferirán alternativas certificadas.
+
+## TicketBAI: Facturación en el País Vasco y Navarra
+
+**TicketBAI** es el sistema foral implantado en los tres territorios históricos vascos (Álava, Guipúzcoa, Vizcaya) y en Navarra. Para empresas que operan en estos territorios, el software de facturación debe:
+
+- Generar el fichero TicketBAI (XML firmado digitalmente con certificado del contribuyente)
+- Enviar el fichero a la Hacienda Foral correspondiente en el momento de emisión
+- Incluir el código QR TicketBAI en la factura impresa
+- Encadenar los ficheros de forma que no sea posible eliminar facturas retroactivamente
+
+## SII: Suministro Inmediato de Información
+
+El **SII** es obligatorio para empresas con facturación > 6M €/año, grupos de IVA y empresas inscritas en REDEME. Obliga a informar a la AEAT de cada factura emitida o recibida en un plazo de 4 días hábiles desde su emisión/recepción.
+
+El SII exige enviar via webservice de la AEAT el detalle de cada factura: número, fecha, NIF del emisor/receptor, base imponible, tipo de IVA y cuota.
+
+## Estructura Técnica del Software de Facturación Compliant
+
+Un software de facturación español completo en 2025-2026 necesita:
+1. Motor de generación de facturas en formato Facturae (XML)
+2. Firma electrónica con certificado digital (importación de certificados FNMT A1/A3)
+3. Módulo VeriFactu con hash encadenado y API de la AEAT
+4. Módulo TicketBAI para operaciones en territorios forales
+5. Módulo SII para grandes empresas
+6. Gestión de libros registro de IVA (emitidas, recibidas, bienes de inversión)

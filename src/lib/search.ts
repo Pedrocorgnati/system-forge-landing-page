@@ -23,7 +23,7 @@ export interface SearchResult {
  * Defesa contra path traversal caso NEXT_PUBLIC_LOCALE chegue corrompida.
  * Defesa: THREAT-MODEL T-009 (open redirect / path traversal via env).
  */
-const ALLOWED_LOCALES: readonly SupportedLocale[] = ['pt-BR', 'it-IT', 'en'] as const
+const ALLOWED_LOCALES: readonly SupportedLocale[] = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 
 /**
  * Gera o search index filtrando apenas os artigos do locale informado.

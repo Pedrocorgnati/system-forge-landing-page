@@ -1,0 +1,124 @@
+---
+title: "Coste de IA en producción: cómo evitar sorpresas"
+slug: "coste-ia-en-produccion-como-evitar-sorpresas"
+date: "2024-10-31"
+description: "Cómo controlar el coste de LLMs en producción — estimación de tokens, caching, routing inteligente y alertas antes de que la factura te sorprenda."
+tags: ["coste ia", "llm tokens", "openai precios", "gpt-4 coste", "ia produccion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo controlar el coste de LLMs en producción — estimación de tokens, caching, routing inteligente y alertas antes de que la factura te sorprenda."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'custo-ia-em-producao-como-evitar-surpresas'
+  - locale: 'it-IT'
+    slug: 'costo-ia-in-produzione-come-evitare-sorprese'
+  - locale: 'en'
+    slug: 'ai-production-cost-how-to-avoid-surprises'
+---
+
+La factura de OpenAI a fin de mes puede ser una sorpresa muy desagradable. Hay startups que han recibido facturas de miles de euros sin haberlo anticipado — no por fraude ni por mal uso, sino simplemente porque el volumen creció más rápido de lo esperado y no había ningún mecanismo de control.
+
+El coste de IA en producción es controlable. Requiere anticipación, pero las herramientas están disponibles.
+
+## Entender el Modelo de Precios de los LLMs
+
+Los LLMs cobran por tokens — unidades de texto (aproximadamente 4 caracteres por token en inglés, algo más en español dado los caracteres especiales). El coste tiene dos componentes:
+
+- **Input tokens:** El texto que envías al modelo (prompt + contexto)
+- **Output tokens:** El texto que el modelo genera como respuesta
+
+Los output tokens son más caros que los input tokens (típicamente 3-4x más caros en GPT-4o). Para optimizar costes, la estrategia es clara: **minimizar los input tokens innecesarios y controlar la longitud máxima del output**.
+
+## Estimación de Costes Antes de Lanzar
+
+Antes de poner IA en producción, calcula el coste estimado con estas variables:
+
+1. **Volumen de requests diarios** (optimista, realista, pesimista)
+2. **Tokens de input promedio por request** (mide en staging con casos reales)
+3. **Tokens de output promedio por request** (idem)
+4. **Precio por 1M tokens del modelo elegido**
+
+Ejemplo real para un chatbot de atención al cliente en español:
+- 500 conversaciones/día × 2.000 tokens de input + 500 tokens de output = 1.250.000 tokens/día
+- GPT-4o: ~0,0025€ por 1K tokens de input, ~0,010€ por 1K de output
+- Coste diario estimado: ~4€ → ~120€/mes
+
+Para escenario pesimista (5x el tráfico): 600€/mes. Saberlo antes permite decidir si usar GPT-4o-mini (10x más barato con calidad suficiente para atención al cliente) o preparar presupuesto.
+
+## Las 4 Estrategias de Control de Costes
+
+### 1. Prompt Caching
+
+Anthropic y OpenAI ofrecen caching de prompts — si el mismo prefix de prompt (el system prompt y el contexto fijo) se repite en múltiples requests, se cobra a precio reducido a partir del segundo uso.
+
+Para un chatbot donde el system prompt y la documentación de la empresa son iguales para todos los usuarios, el caching puede reducir el coste un 50-80%.
+
+### 2. Routing por Complejidad
+
+No todas las queries necesitan GPT-4o. Un router que clasifica la complejidad de la consulta y la envía al modelo apropiado puede reducir costes drásticamente:
+
+```typescript
+async function routeQuery(query: string): Promise<string> {
+  const complexity = await classifyComplexity(query)
+
+  if (complexity === 'simple') {
+    return callModel('gpt-4o-mini', query) // 10x más barato
+  } else if (complexity === 'medium') {
+    return callModel('gpt-4o', query)
+  } else {
+    return callModel('gpt-4o', query, { streaming: true })
+  }
+}
+```
+
+### 3. Caching de Respuestas Frecuentes
+
+Para queries repetidas o muy similares, almacenar la respuesta en Redis/Upstash y devolverla directamente sin llamar al LLM:
+
+```typescript
+async function getResponseWithCache(query: string): Promise<string> {
+  const cacheKey = `llm:${hashQuery(query)}`
+  const cached = await redis.get(cacheKey)
+  if (cached) return cached
+
+  const response = await callLLM(query)
+  await redis.setex(cacheKey, 3600, response) // Cache 1 hora
+  return response
+}
+```
+
+Para preguntas frecuentes de FAQ, el cache hit rate puede ser >40%, lo que reduce el coste a la mitad.
+
+### 4. Límites y Alertas Proactivas
+
+Configurar alertas antes de llegar a límites, no después:
+
+- **OpenAI:** Configura usage alerts en el dashboard (ejemplo: alerta a 80% del presupuesto mensual)
+- **Límites hard:** Configura un límite máximo mensual que detiene las llamadas al API si se supera — mejor degradar la funcionalidad que recibir una factura de 10x el presupuesto
+- **Monitorización en la app:** Registra cada request con su coste estimado en tokens para identificar qué funcionalidades consumen más
+
+## Coste por Funcionalidad: Un Análisis que Pocos Hacen
+
+Una herramienta fundamental: desglosar el coste por funcionalidad, no solo el coste total. Si tu app tiene tres funcionalidades con IA y una de ellas representa el 70% del coste, ese es el punto de optimización prioritario.
+
+```typescript
+// Registrar coste por feature
+await analytics.track('llm_request', {
+  feature: 'resume_analizador', // o 'chat_support', 'email_generator'
+  input_tokens: usage.prompt_tokens,
+  output_tokens: usage.completion_tokens,
+  estimated_cost_eur: calculateCost(usage),
+})
+```
+
+Con este tracking, puedes ver semanalmente qué features consumen más y decidir qué optimizar primero.
+
+## Conclusión
+
+El coste de IA en producción no tiene que ser una sorpresa. Con estimaciones previas, routing inteligente, caching agresivo y alertas configuradas, es completamente predecible y controlable.
+
+¿Estás planificando una aplicación con IA y necesitas una estimación de costes realista? [Contacta con SystemForge](https://systemforge.es/contacto).

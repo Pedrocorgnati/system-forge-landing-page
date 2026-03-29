@@ -40,9 +40,9 @@ function detectLocaleFromBrowser(): SupportedLocale | null {
 
   // Fallback: match by primary subtag
   for (const browserLocale of browserLocales) {
-    const primary = browserLocale.split('-')[0].toLowerCase()
+    const primary = (browserLocale.split('-')[0] ?? '').toLowerCase()
     for (const [prefix, mapped] of LOCALE_MAP) {
-      if (prefix.split('-')[0].toLowerCase() === primary) {
+      if ((prefix.split('-')[0] ?? '').toLowerCase() === primary) {
         return mapped
       }
     }

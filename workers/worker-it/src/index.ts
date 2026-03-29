@@ -271,6 +271,7 @@ async function handleConfirm(
         audience_id: env.RESEND_AUDIENCE_ID_IT,
         unsubscribed: false,
       }),
+      signal: AbortSignal.timeout(10_000),
     });
   } catch (err) {
     console.error("Resend contacts error:", err);
@@ -344,6 +345,7 @@ async function handleUnsubscribe(
         "Content-Type": "application/json",
       },
       body: JSON.stringify({ audience_id: env.RESEND_AUDIENCE_ID_IT, unsubscribed: true }),
+      signal: AbortSignal.timeout(10_000),
     });
   } catch (err) {
     console.error("Resend PATCH error:", err);

@@ -1,0 +1,101 @@
+---
+title: "Autenticación biométrica en apps: Face ID y huella"
+slug: "autenticacion-biometrica-apps-moviles"
+date: "2024-08-12"
+description: "Cómo implementar autenticación biométrica en apps React Native — expo-local-authentication, fallback para PIN, almacenamiento seguro de tokens y UX de login."
+tags: ["biometria", "face id", "touch id", "react native", "seguridad mobile"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar autenticación biométrica en apps React Native — expo-local-authentication, fallback para PIN, almacenamiento seguro de tokens y UX de login."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'autenticacao-biometrica-apps-mobile'
+  - locale: 'it-IT'
+    slug: 'autenticazione-biometrica-app-mobile'
+  - locale: 'en'
+    slug: 'biometric-authentication-mobile-apps'
+---
+
+La biometría es la contraseña que el usuario nunca olvida, nunca pierde y nunca reutiliza en veinte sitios distintos. Face ID y Touch ID han eliminado el mayor punto de fricción en el login móvil: escribir una contraseña compleja en una pantalla de 6 pulgadas. El resultado práctico es simple — las apps con autenticación biométrica tienen tasas de apertura significativamente más altas y menor abandono en la pantalla de login.
+
+Pero implementar biometría correctamente va más allá de llamar a una API. Implica almacenamiento seguro de tokens, fallback robusto cuando la biometría no está disponible y un flujo de UX que no frustra al usuario en los casos extremos.
+
+## expo-local-authentication: Setup y Compatibilidad
+
+En React Native con Expo, `expo-local-authentication` es la librería estándar para biometría:
+
+```bash
+npx expo install expo-local-authentication
+```
+
+El flujo básico verifica disponibilidad, comprueba si hay biometría registrada y luego solicita autenticación:
+
+```typescript
+import * as LocalAuthentication from 'expo-local-authentication'
+
+export async function authenticateWithBiometrics(): Promise<boolean> {
+  // Verificar si el dispositivo soporta biometría
+  const hasHardware = await LocalAuthentication.hasHardwareAsync()
+  if (!hasHardware) return false
+
+  // Verificar si hay biometría registrada
+  const isEnrolled = await LocalAuthentication.isEnrolledAsync()
+  if (!isEnrolled) return false
+
+  // Solicitar autenticación
+  const result = await LocalAuthentication.authenticateAsync({
+    promptMessage: 'Confirma tu identidad',
+    fallbackLabel: 'Usar PIN',
+    cancelLabel: 'Cancelar',
+    disableDeviceFallback: false,
+  })
+
+  return result.success
+}
+```
+
+## Almacenamiento Seguro de Tokens
+
+El punto más crítico de la implementación: el token de sesión o el refresh token del usuario no puede almacenarse en AsyncStorage — es almacenamiento sin cifrar, accesible si el dispositivo está rooteado.
+
+La solución correcta es `expo-secure-store`, que usa el Keychain de iOS y el Keystore cifrado de Android:
+
+```typescript
+import * as SecureStore from 'expo-secure-store'
+
+// Guardar token después de login exitoso
+await SecureStore.setItemAsync('refresh_token', token, {
+  keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+})
+
+// Recuperar token para biometría
+const token = await SecureStore.getItemAsync('refresh_token')
+```
+
+La opción `WHEN_UNLOCKED_THIS_DEVICE_ONLY` garantiza que el token solo sea accesible cuando el dispositivo está desbloqueado y no se transfiere en backups de iCloud — importante para cumplir con los requisitos del RGPD en España.
+
+## Flujo de UX: Activación y Fallback
+
+El flujo correcto de biometría no es activarla por defecto — es solicitarla al usuario después del primer login exitoso con contraseña:
+
+1. El usuario hace login con email/contraseña
+2. La app detecta que el dispositivo soporta biometría y no está configurada aún
+3. Se muestra un prompt: "¿Quieres activar Face ID para entrar más rápido?"
+4. Si acepta, se guarda el refresh token en SecureStore con la biometría como gate
+5. En el siguiente inicio de la app, se solicita biometría directamente
+
+El fallback es obligatorio. Si la biometría falla (demasiados intentos, cambio de Face ID por cirugía, etc.), el usuario debe poder acceder con su contraseña sin perder la cuenta.
+
+## Seguridad y RGPD
+
+En España, el uso de datos biométricos está regulado como dato especialmente sensible bajo el RGPD y la LOPDGDD. La buena noticia: cuando la biometría se procesa completamente en el dispositivo (que es el caso con Face ID y Touch ID), no hay transferencia de datos biométricos a servidores — el sistema solo confirma que la autenticación fue exitosa. Esto simplifica significativamente el análisis de privacidad.
+
+## Conclusión
+
+La autenticación biométrica bien implementada reduce fricción en el login sin comprometer la seguridad. Los elementos clave: `expo-local-authentication` para la autenticación, `expo-secure-store` para los tokens, prompt post-primer-login y fallback robusto a contraseña.
+
+¿Quieres implementar biometría en tu app móvil con cumplimiento RGPD? [Contacta con SystemForge](https://systemforge.es/contacto).

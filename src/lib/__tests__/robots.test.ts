@@ -91,7 +91,7 @@ describe('robots()', () => {
     expect(rules).toBeDefined()
     expect(Array.isArray(rules)).toBe(true)
 
-    const mainRule = Array.isArray(rules) ? rules[0] : rules
+    const mainRule = Array.isArray(rules) ? rules[0]! : rules
     expect(mainRule.userAgent).toBe('*')
     expect(mainRule.allow).toBe('/')
     expect(mainRule.disallow).toContain('/api/')

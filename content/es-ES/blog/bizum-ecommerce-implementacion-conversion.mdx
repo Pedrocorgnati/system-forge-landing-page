@@ -1,0 +1,84 @@
+---
+title: "Bizum en e-commerce: implementación y conversión"
+slug: "bizum-ecommerce-implementacion-conversion"
+date: "2024-09-02"
+description: "Cómo implementar Bizum en e-commerce con confirmación automática via webhook y cómo los pagos instantáneos impactan las tasas de conversión en España."
+tags: ["bizum", "e-commerce", "pago", "redsys", "pasarela de pago"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo implementar Bizum en e-commerce con confirmación automática via webhook y cómo los pagos instantáneos impactan las tasas de conversión en España.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'pix-no-ecommerce-implementacao-conversao'
+  - locale: 'it-IT'
+    slug: 'pagamenti-istantanei-ecommerce-italia-satispay-sepa'
+  - locale: 'en'
+    slug: 'instant-payments-ecommerce-implementation-conversion'
+---
+
+Bizum se ha convertido en uno de los métodos de pago más usados en España, con más de 25 millones de usuarios y miles de millones de euros en transacciones anuales. En e-commerce, el impacto es directo: pago instantáneo, confirmación en segundos, sin riesgo de chargeback para el comerciante y con una experiencia de usuario que elimina la fricción del checkout tradicional. Para tiendas que no han implementado Bizum correctamente — o que aún no lo han implementado — hay conversión que se pierde cada día.
+
+Pero "añadir Bizum" va más allá de mostrar el logo en el checkout. Una implementación profesional implica integración con Redsys (el sistema de pagos de la banca española), webhook para confirmación automática, lógica de expiración con UX adecuada y tratamiento de casos extremos como pagos duplicados o cancelaciones.
+
+## Cómo Funciona Bizum en E-commerce
+
+A diferencia de los pagos con tarjeta, Bizum requiere que el comprador tenga la app de su banco instalada. El flujo es: el e-commerce redirige al usuario a la pasarela Redsys → el usuario confirma en la app de su banco → Redsys notifica al e-commerce vía webhook → la tienda confirma el pedido.
+
+El tiempo total desde que el usuario confirma hasta que el e-commerce recibe la notificación es de 2-10 segundos. Para el usuario, es inmediato.
+
+## Integración con Redsys: El Estándar Bancario Español
+
+Redsys es el sistema de procesamiento de pagos de la banca española y la pasarela obligatoria para implementar Bizum. Prácticamente todos los bancos españoles que ofrecen Bizum lo hacen a través de Redsys.
+
+La integración con Redsys para Bizum tiene dos variantes: redirección (el usuario es redirigido al portal Redsys para confirmar el pago) e iFrame (el formulario de pago se muestra dentro del e-commerce en un iframe seguro).
+
+Los parámetros básicos de una petición a Redsys incluyen: importe en céntimos, referencia del pedido, código de comercio, terminal, URL de notificación (webhook) y URL de retorno al completar el pago.
+
+## Webhook de Confirmación: Procesamiento Asíncrono
+
+El webhook es la notificación que Redsys envía a tu servidor cuando el pago se completa. Es el mecanismo crítico para confirmar pedidos automáticamente.
+
+```typescript
+// app/api/webhooks/redsys/route.ts
+import { NextRequest } from 'next/server';
+import { verifyRedsysSignature, parseRedsysNotification } from '@/lib/redsys';
+
+export async function POST(request: NextRequest) {
+  const body = await request.formData();
+
+  const merchantParameters = body.get('Ds_MerchantParameters') as string;
+  const signature = body.get('Ds_Signature') as string;
+
+  // Verificar firma HMAC del webhook
+  const isValid = verifyRedsysSignature(merchantParameters, signature);
+  if (!isValid) {
+    return new Response('Invalid signature', { status: 400 });
+  }
+
+  const notification = parseRedsysNotification(merchantParameters);
+
+  if (notification.responseCode === '0000') {
+    // Pago confirmado
+    await confirmOrder(notification.orderId);
+    await sendConfirmationEmail(notification.orderId);
+  }
+
+  return new Response('OK', { status: 200 });
+}
+```
+
+## Stripe como Alternativa: Soporte para Bizum vía Stripe Payment Links
+
+Si ya usas Stripe, la buena noticia es que Stripe soporta Bizum en España como método de pago en Stripe Checkout y Payment Links. La integración es más simple que Redsys directo, a cambio de las comisiones de Stripe (1,5% + 0,25 € para tarjetas europeas, más Bizum).
+
+Para tiendas con volumen alto (>200 transacciones/mes), la integración directa con Redsys suele tener mejor economía. Para tiendas pequeñas que ya usan Stripe para tarjetas, añadir Bizum a través de Stripe es la forma más rápida de implementación.
+
+## Impacto en Conversión
+
+Los datos del mercado español muestran que añadir Bizum como opción de pago mejora la tasa de conversión entre un 8% y un 15% en segmentos de 25-45 años. La mejora es mayor en categorías de ticket medio-bajo (hasta 200 €) donde el usuario prefiere la simplicidad de Bizum sobre introducir datos de tarjeta.
+
+La implementación incorrecta — Bizum que tarda en confirmar, checkout que no actualiza el estado en tiempo real, o falta de confirmación por email — puede anular este beneficio o incluso generar fricciones adicionales.

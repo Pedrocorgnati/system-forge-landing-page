@@ -42,7 +42,7 @@ const REASONS: Record<string, ReasonItem[]> = {
   ],
 }
 
-const reasons: ReasonItem[] = REASONS[locale] ?? REASONS['pt-BR']
+const reasons: ReasonItem[] = REASONS[locale] ?? REASONS['pt-BR']!
 
 const METRICS: Record<string, { target: number; suffix: string; label: string }[]> = {
   'pt-BR': [
@@ -65,7 +65,7 @@ const METRICS: Record<string, { target: number; suffix: string; label: string }[
   ],
 }
 
-const metrics = METRICS[locale] ?? METRICS['pt-BR']
+const metrics = (METRICS[locale] ?? METRICS['pt-BR'])!
 
 const pipelineSteps = ['PRD', 'WIRE', 'DEV']
 
@@ -136,6 +136,7 @@ export function WhySystemForge() {
     const metricsEl = el.querySelector('[data-testid="why-metrics"]')
     const counterObserver = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return
         if (entry.isIntersecting) {
           setCountersActive(true)
           counterObserver.disconnect()

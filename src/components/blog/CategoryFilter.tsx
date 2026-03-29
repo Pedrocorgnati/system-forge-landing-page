@@ -6,6 +6,9 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/constants/routes'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 interface CategoryFilterProps {
   categories: string[]
@@ -14,7 +17,7 @@ interface CategoryFilterProps {
 
 export function CategoryFilter({ categories, currentCategory }: CategoryFilterProps) {
   return (
-    <nav data-testid="blog-category-filter" aria-label="Filtrar por categoria">
+    <nav data-testid="blog-category-filter" aria-label={m.sections.blog.categoryFilterAriaLabel}>
       <ul className="overflow-x-auto flex flex-wrap gap-2 pb-2">
         {/* "Todos" link */}
         <li>

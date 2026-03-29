@@ -43,6 +43,7 @@ export function useIntersectionObserver({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return
         const intersecting = entry.isIntersecting
         setIsIntersecting(intersecting)
 

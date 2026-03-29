@@ -11,6 +11,7 @@ const DATE_LOCALE_MAP: Record<SupportedLocale, string> = {
   'pt-BR': 'pt-BR',
   'it-IT': 'it-IT',
   'en': 'en-US',
+  'es-ES': 'es-ES',
 }
 
 /**

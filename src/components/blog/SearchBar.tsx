@@ -43,9 +43,15 @@ export function SearchBar() {
   const showDropdown = inputValue.trim().length >= 2 && !isSearching && !isLoading
 
   return (
-    <div data-testid="blog-search" className="relative w-full max-w-md">
+    <form
+      data-testid="blog-search"
+      role="search"
+      onSubmit={e => e.preventDefault()}
+      className="relative w-full max-w-md"
+    >
       <input
         data-testid="blog-search-input"
+        id="blog-search-input"
         type="search"
         role="combobox"
         aria-haspopup="listbox"
@@ -125,6 +131,6 @@ export function SearchBar() {
           )}
         </div>
       )}
-    </div>
+    </form>
   )
 }

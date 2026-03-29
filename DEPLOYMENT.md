@@ -3,7 +3,7 @@
 
 ## O que é este projeto
 
-Landing page multi-mercado do **SystemForge / Forja de Sistemas** — um site Next.js estático (export) com 3 builds independentes por locale, cada um deployado em um domínio diferente via GitHub Actions + SFTP para Hostinger. Cloudflare fica na frente como CDN/proxy.
+Landing page multi-mercado do **SystemForge / Forja de Sistemas** — um site Next.js estático (export) com 4 builds independentes por locale, cada um deployado em um domínio diferente via GitHub Actions + SFTP para Hostinger. Cloudflare fica na frente como CDN/proxy.
 
 - Repositório GitHub: `Pedrocorgnati/system-forge-landing-page`
 - Workspace local: `output/workspace/system-forge-landing-page/`
@@ -13,29 +13,32 @@ Landing page multi-mercado do **SystemForge / Forja de Sistemas** — um site Ne
 - Cloudflare API Token: armazenado em `${{ secrets.CLOUDFLARE_API_TOKEN }}` (não commitado)
   - Permissões: Workers Scripts Edit, D1 Edit, Workers KV Edit, Zone Edit, DNS Edit, Cache Purge, Turnstile Edit
 
-## 3 Domínios / Locales
+## 4 Domínios / Locales
 
 | Locale | Domínio | Cloudflare Zone ID | Status DNS |
 |--------|---------|-------------------|------------|
 | pt-BR | forjadesistemas.com.br | `${{ secrets.CLOUDFLARE_ZONE_ID_BR }}` | NS apontados → aguardando propagação |
 | it-IT | systemforge.it | `${{ secrets.CLOUDFLARE_ZONE_ID_IT }}` | NS apontados → aguardando propagação |
-| en | systemforgesoftware.com | PENDENTE — zone não criada ainda | Zone só pode ser criada após as outras 2 ficarem `active` no Cloudflare |
+| en | systemforgesoftware.com | PENDENTE — zone não criada ainda | Zone só pode ser criada após as outras ficarem `active` no Cloudflare |
+| es-ES | systemforge.es | `bcc897b903d2aad8bd5b52e6c840e995` | Zone criada — NS pendente na GoDaddy |
 
 **Nameservers já configurados no Dynadot:**
 - `forjadesistemas.com.br` → `bingo.ns.cloudflare.com` + `ed.ns.cloudflare.com`
 - `systemforge.it` → `adam.ns.cloudflare.com` + `arely.ns.cloudflare.com`
-- `systemforgesoftware.com` → ainda não configurado (aguarda as outras 2 ficarem active)
+- `systemforgesoftware.com` → ainda não configurado (aguarda as outras ficarem active)
+- `systemforge.es` → `adam.ns.cloudflare.com` + `arely.ns.cloudflare.com` — **configurar NS na GoDaddy**
 
 ## Infraestrutura Cloudflare já provisionada
 
-### Cloudflare Workers (3 workers live)
-Todos os 3 workers estão deployados e respondendo em `corgnati-pedro.workers.dev`:
+### Cloudflare Workers (3 workers live + 1 pendente)
+Workers deployados e respondendo em `corgnati-pedro.workers.dev`:
 
 | Worker | URL | Locale | Compliance |
 |--------|-----|--------|-----------|
 | newsletter-br | `https://newsletter-br.corgnati-pedro.workers.dev` | pt-BR | LGPD (single opt-in) |
 | newsletter-it | `https://newsletter-it.corgnati-pedro.workers.dev` | it-IT | GDPR (double opt-in) |
 | newsletter-en | `https://newsletter-en.corgnati-pedro.workers.dev` | en | CAN-SPAM (single opt-in) |
+| newsletter-es | **PENDENTE** — criar em `workers/worker-es/` | es-ES | GDPR (double opt-in, como IT) |
 
 Endpoints disponíveis em cada worker: `GET /health`, `POST /subscribe`, `POST /unsubscribe`
 
@@ -58,11 +61,13 @@ Endpoints disponíveis em cada worker: `GET /health`, `POST /subscribe`, `POST /
   - `newsletter-br` → ID: armazenado em `${{ secrets.RESEND_AUDIENCE_ID_BR }}`
   - `newsletter-it` → ID: armazenado em `${{ secrets.RESEND_AUDIENCE_ID_IT }}`
   - `newsletter-en` → ID: armazenado em `${{ secrets.RESEND_AUDIENCE_ID_EN }}`
+  - `newsletter-es` → **PENDENTE** — criar audience quando worker-es for deployado
 - Secrets configurados em cada worker: `RESEND_API_KEY`, `RESEND_AUDIENCE_ID_BR/IT/EN`
 - Domínios de envio adicionados ao Resend:
   - `forjadesistemas.com.br` → ID: armazenado em `${{ secrets.RESEND_DOMAIN_ID_BR }}` | status: **pending** (aguarda propagação DNS)
   - `systemforge.it` → ID: armazenado em `${{ secrets.RESEND_DOMAIN_ID_IT }}` | status: **pending** (aguarda propagação DNS)
   - `systemforgesoftware.com` → ID: armazenado em `${{ secrets.RESEND_DOMAIN_ID_EN }}` | status: **pending** (DNS só pode ser criado após zone Cloudflare)
+  - `systemforge.es` → **PENDENTE** — adicionar ao Resend após zone Cloudflare criada
 - Registros DNS Resend (DKIM + SPF/MX) já criados no Cloudflare para BR e IT
 - Para verificar status: `curl -s https://api.resend.com/domains -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}"`
 
@@ -96,6 +101,7 @@ Configure em: Repositório → Settings → Secrets and variables → Actions �
 | `CLOUDFLARE_ZONE_ID_BR` | ID | Zone ID para forjadesistemas.com.br |
 | `CLOUDFLARE_ZONE_ID_IT` | ID | Zone ID para systemforge.it |
 | `CLOUDFLARE_ZONE_ID_EN` | ID | Zone ID para systemforgesoftware.com (pendente) |
+| `CLOUDFLARE_ZONE_ID_ES` | ID | Zone ID para systemforge.es (pendente — criar zone primeiro) |
 | `SFTP_BR_HOST` | String | Host SFTP Hostinger |
 | `SFTP_BR_USER` | String | Usuário SFTP Hostinger |
 | `SFTP_BR_PASS` | String | Senha SFTP Hostinger (32+ chars) |
@@ -111,21 +117,29 @@ Configure em: Repositório → Settings → Secrets and variables → Actions �
 | `SFTP_EN_PASS` | String | Senha SFTP Hostinger (EN) |
 | `SFTP_EN_PORT` | String | Porta SFTP Hostinger (EN) |
 | `SFTP_EN_PUBLIC_HTML` | String | Caminho `public_html` Hostinger (EN) |
+| `SFTP_ES_HOST` | String | Host SFTP Hostinger (ES) |
+| `SFTP_ES_USER` | String | Usuário SFTP Hostinger (ES) |
+| `SFTP_ES_PASS` | String | Senha SFTP Hostinger (ES) |
+| `SFTP_ES_PORT` | String | Porta SFTP Hostinger (ES) |
+| `SFTP_ES_PUBLIC_HTML` | String | Caminho `public_html` Hostinger (ES) |
 | `RESEND_API_KEY` | Token | API Key Resend (email) |
 | `RESEND_AUDIENCE_ID_BR` | ID | Audience ID Resend (PT-BR) |
 | `RESEND_AUDIENCE_ID_IT` | ID | Audience ID Resend (IT-IT) |
 | `RESEND_AUDIENCE_ID_EN` | ID | Audience ID Resend (EN) |
+| `RESEND_AUDIENCE_ID_ES` | ID | Audience ID Resend (ES) — pendente |
 | `RESEND_DOMAIN_ID_BR` | ID | Domain ID Resend (forjadesistemas.com.br) |
 | `RESEND_DOMAIN_ID_IT` | ID | Domain ID Resend (systemforge.it) |
 | `RESEND_DOMAIN_ID_EN` | ID | Domain ID Resend (systemforgesoftware.com) |
+| `RESEND_DOMAIN_ID_ES` | ID | Domain ID Resend (systemforge.es) — pendente |
 | `NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR` | URL | URL do Worker Cloudflare (PT-BR) |
 | `NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT` | URL | URL do Worker Cloudflare (IT) |
 | `NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN` | URL | URL do Worker Cloudflare (EN) |
+| `NEXT_PUBLIC_NEWSLETTER_WORKER_URL_ES` | URL | URL do Worker Cloudflare (ES) — pendente |
 | `NEWSLETTER_WORKER_URL_BR` | URL | URL do Worker Cloudflare (PT-BR, backend) |
 | `NEWSLETTER_WORKER_URL_IT` | URL | URL do Worker Cloudflare (IT, backend) |
 | `NEWSLETTER_WORKER_URL_EN` | URL | URL do Worker Cloudflare (EN, backend) |
+| `NEWSLETTER_WORKER_URL_ES` | URL | URL do Worker Cloudflare (ES, backend) — pendente |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | String | Número WhatsApp (público) |
-| `NEXT_PUBLIC_CALENDLY_URL` | URL | URL Calendly (público) |
 | `NEXT_PUBLIC_BUDGET_ENGINE_URL` | URL | URL Budget Engine (público) |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | Email | Email de contato (público) |
 | `NEXT_PUBLIC_SITE_URL` | URL | URL do site (público) |
@@ -134,6 +148,12 @@ Configure em: Repositório → Settings → Secrets and variables → Actions �
 | Secret | Motivo |
 |--------|--------|
 | `CLOUDFLARE_ZONE_ID_EN` | Zone de `systemforgesoftware.com` ainda não criada |
+| `CLOUDFLARE_ZONE_ID_ES` | Zone de `systemforge.es` ainda não criada |
+| `SFTP_ES_*` | Conta Hostinger ES ainda não configurada |
+| `NEXT_PUBLIC_NEWSLETTER_WORKER_URL_ES` | Worker newsletter-es ainda não deployado |
+| `NEWSLETTER_WORKER_URL_ES` | Worker newsletter-es ainda não deployado |
+| `RESEND_AUDIENCE_ID_ES` | Audience criada após worker-es estar live |
+| `RESEND_DOMAIN_ID_ES` | Domínio adicionado ao Resend após zone Cloudflare |
 | `NEXT_PUBLIC_GA4_MEASUREMENT_ID` | Precisa criar propriedade no Google Analytics 4 |
 | `LHCI_GITHUB_APP_TOKEN` | Opcional — Lighthouse CI upload de resultados |
 
@@ -232,7 +252,8 @@ cd workers/worker-br && echo "SECRET_KEY_BR" | CLOUDFLARE_API_TOKEN=cfat_6uzIHMX
 - O step de cache purge no GitHub Actions já tem `if [ -n "$ZONE_ID" ]` — pula silenciosamente se o Zone ID não existir
 - O worker-en tem `COMPANY_ADDRESS` setado com endereço de coworking NY (WeWork, 222 Broadway) — **atualizar com endereço real antes do lançamento** (obrigação legal CAN-SPAM)
 - O build do site NÃO inclui a newsletter worker URL no HTML (variável ausente = newsletter desativada silenciosamente via `isNewsletterConfigured()`)
-- Arquivos dos workers: `workers/worker-br/`, `workers/worker-it/`, `workers/worker-en/`
+- Arquivos dos workers: `workers/worker-br/`, `workers/worker-it/`, `workers/worker-en/`, `workers/worker-es/` (pendente — copiar de worker-it, GDPR)
+- `systemforge.es` adquirido no Dynadot em 2026-03-29 — 4º mercado (Espanha + LATAM)
 - wrangler.toml de cada worker já tem todos os IDs reais (KV, D1) preenchidos
 
 ---

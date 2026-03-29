@@ -1,0 +1,100 @@
+---
+title: "Sistemas para inmobiliarias: integración con portales"
+slug: "sistemas-inmobiliarias-integracoes-portales"
+date: "2024-11-26"
+description: "Requisitos de CRM inmobiliario: gestión de inmuebles, integración con Idealista/Fotocasa/Habitaclia, contratos digitales y comisiones de agentes."
+tags: ["inmobiliaria", "crm inmobiliario", "idealista", "gestion sectorial", "integracion portales"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Requisitos de CRM inmobiliario: gestión de inmuebles, integración con Idealista/Fotocasa/Habitaclia, contratos digitales y comisiones de agentes."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistemas-imobiliarias-integracoes-portais'
+  - locale: 'it-IT'
+    slug: 'sistema-immobiliare-integrazione-portali'
+  - locale: 'en'
+    slug: 'real-estate-software-portal-integrations'
+---
+
+Una inmobiliaria sin integración con los portales de anuncios pierde listados cada semana. No por falta de inmuebles — sino porque la actualización manual de anuncios en Idealista, Fotocasa, Habitaclia, Pisos.com y la web propia es un trabajo que ningún equipo mantiene con consistencia. Un inmueble vendido sigue anunciado durante días, generando leads de calidad cero. Un nuevo inmueble tarda una semana en aparecer en los portales porque el coordinador de anuncios estaba de vacaciones. Un precio actualizado en el sistema interno no se refleja en los portales hasta que alguien recuerda actualizarlo manualmente.
+
+El CRM inmobiliario moderno no es solo una agenda de leads y una hoja de cálculo de inmuebles. Es la fuente única de la verdad para el portafolio, con sincronización automática a todos los canales, gestión documental de contratos, firma electrónica y cálculo automático de comisiones.
+
+## Integración con Idealista, Fotocasa y Habitaclia via API
+
+Los tres grandes portales del mercado español tienen distintos mecanismos de integración:
+
+**Idealista Pro API:** para agencias con volumen, Idealista ofrece una API REST y un formato de intercambio XML. La sincronización es bidireccional: el CRM publica los cambios y recibe las estadísticas de visitas y contactos por anuncio.
+
+**Fotocasa:** acepta feeds XML actualizados periódicamente. Para actualizaciones en tiempo real, usa su API de integración con autenticación OAuth.
+
+**Habitaclia:** especialmente importante en el mercado catalán. Integración via API JSON con actualización periódica del inventario.
+
+El modelo de datos del inmueble que debe ser compatible con todos los portales incluye:
+
+```typescript
+interface Inmueble {
+  referencia: string;          // Referencia interna única
+  tipo: 'piso' | 'casa' | 'local' | 'garaje' | 'terreno' | 'oficina';
+  operacion: 'venta' | 'alquiler' | 'ambas';
+  precio: number;
+  precioAlquiler?: number;
+
+  // Ubicación
+  direccion: string;
+  codigoPostal: string;
+  municipio: string;
+  provincia: string;
+  coordenadas: { lat: number; lng: number };
+
+  // Características
+  metros: number;
+  habitaciones: number;
+  banos: number;
+  planta?: number;
+  ascensor?: boolean;
+  garaje?: boolean;
+  trastero?: boolean;
+  terraza?: boolean;
+  calefaccion?: string;
+  certificadoEnergetico: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'en-tramite';
+
+  // Media
+  fotos: string[];             // URLs de fotos en alta resolución
+  planos?: string[];
+  videoUrl?: string;
+  tourVirtual360Url?: string;
+
+  // Estado
+  estado: 'disponible' | 'reservado' | 'vendido' | 'alquilado' | 'no-disponible';
+  destacado: boolean;
+  publicadoEn: ('idealista' | 'fotocasa' | 'habitaclia' | 'pisos-com' | 'web-propia')[];
+}
+```
+
+## Motor de Sincronización: Publicación Automática
+
+El motor de sincronización debe procesar los cambios en el inventario y propagarlos a los portales configurados. La lógica clave:
+
+1. Cuando un inmueble pasa a estado "vendido" o "alquilado", se retira automáticamente de todos los portales
+2. Cuando se actualiza el precio, se actualiza en todos los portales activos
+3. Cuando se añaden nuevas fotos, se actualizan en los portales
+4. Los inmuebles nuevos se publican automáticamente en los portales marcados como activos
+
+La sincronización debe funcionar con reintentos automáticos en caso de error (portal no disponible temporalmente) y con logs de qué cambios se propagaron correctamente y cuáles fallaron.
+
+## Firma Electrónica en Contratos
+
+La firma electrónica de contratos inmobiliarios es técnicamente válida en España con el nivel de firma cualificada (Reglamento eIDAS). Plataformas como DocuSign, Signaturit (española) o Docuten permiten integrar la firma electrónica directamente en el flujo del CRM.
+
+El flujo integrado: el agente genera el contrato desde la plantilla del CRM con los datos del inmueble y las partes → envía a firma → las partes firman desde cualquier dispositivo → el contrato firmado se almacena automáticamente en el expediente del inmueble.
+
+## Cálculo Automático de Comisiones
+
+El módulo de comisiones es una de las funcionalidades más valoradas por los equipos comerciales. El sistema debe calcular automáticamente: la comisión total de la operación, el split entre el agente captador y el agente vendedor (si son distintos), y la participación de la inmobiliaria.
+
+Los splits más habituales en el mercado español: 50/50 entre captador y vendedor, 60/40 a favor del vendedor, o porcentajes fijos independientes para cada parte de la operación.

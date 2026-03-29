@@ -1,0 +1,79 @@
+---
+title: "Valoraciones y reviews en marketplace sin manipulación"
+slug: "valoraciones-reviews-marketplace-sin-manipulacion"
+date: "2024-10-10"
+description: "Cómo implementar un sistema de valoraciones fiable en marketplace: verificación de compra, moderación, respuesta del vendedor y algoritmo de ranking."
+tags: ["marketplace", "reviews", "valoracion", "moderacion", "confianza"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar un sistema de valoraciones fiable en marketplace: verificación de compra, moderación, respuesta del vendedor y algoritmo de ranking."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rating-reviews-marketplace-sem-manipulacao'
+  - locale: 'it-IT'
+    slug: 'rating-recensioni-marketplace-senza-manipolazione'
+  - locale: 'en'
+    slug: 'ratings-reviews-marketplace-without-manipulation'
+---
+
+Las valoraciones falsas son el cáncer silencioso de cualquier marketplace. No aparecen en el monitoreo técnico, no generan alertas de sistema y tardan tiempo en afectar las métricas de negocio — pero cuando el daño está hecho, la confianza que costó años construir se derrumba en semanas. Amazon perdió miles de millones en GMV en el segmento de electrónica cuando quedó en evidencia la manipulación de reviews por vendedores. Wallapop y otros marketplaces europeos invierten en moderación continua precisamente porque saben que la credibilidad del sistema de valoraciones es parte del producto.
+
+Construir un sistema de reviews fiable no es solo una cuestión técnica. Es una decisión de producto que define reglas claras sobre quién puede valorar, qué puede decirse, cómo se modera el contenido y cómo las valoraciones influyen en el posicionamiento de vendedores y productos.
+
+## Verificación de Compra: Solo Quien Compra Puede Valorar
+
+La regla más importante de cualquier sistema de reviews es también la más simple: solo los compradores verificados pueden dejar valoraciones. Sin esta restricción, cualquier competidor puede dejar valoraciones negativas, y cualquier vendedor puede crear cuentas para inflar su puntuación.
+
+La implementación: el trigger para poder dejar una valoración es la confirmación de entrega (el comprador marca el pedido como recibido, o el tracking confirma la entrega). Solo entonces se habilita el formulario de valoración, vinculado al `orderId` específico. Cada pedido genera un máximo de una valoración.
+
+```typescript
+// Verificar elegibilidad antes de permitir la valoración
+async function canLeaveReview(userId: string, orderId: string): Promise<boolean> {
+  const order = await db.orders.findFirst({
+    where: {
+      id: orderId,
+      buyerId: userId,
+      status: 'delivered', // solo pedidos entregados
+    },
+  });
+
+  if (!order) return false;
+
+  // Verificar que no haya valoración previa para este pedido
+  const existingReview = await db.reviews.findFirst({
+    where: { orderId, reviewerId: userId }
+  });
+
+  return !existingReview;
+}
+```
+
+## Moderación: Automática + Humana
+
+Las valoraciones pasan por dos capas antes de publicarse:
+
+**Moderación automática:** clasificador de texto que detecta spam, lenguaje inapropiado, información personal (emails, teléfonos), publicidad de competidores y contenido claramente falso. Las valoraciones marcadas como problemáticas van a la cola de revisión humana. Las valoraciones limpias se publican automáticamente.
+
+**Revisión humana:** para las marcadas por el clasificador automático y para las que reciben reportes de los usuarios. El moderador puede aprobar, editar o rechazar la valoración, con un mensaje explicativo al autor.
+
+## Respuesta del Vendedor: Derecho de Réplica
+
+Permitir a los vendedores responder a las valoraciones es esencial por dos razones: muestra a los compradores potenciales cómo gestiona el vendedor los problemas, y desincentiva las valoraciones injustas (el vendedor puede exponer el contexto completo).
+
+Las reglas para respuestas: máximo una respuesta por valoración, no se permite editar la valoración original después de que el vendedor responde, y la respuesta también pasa por moderación.
+
+## Algoritmo de Puntuación: Evitar la Trampa del Promedio Simple
+
+Una media aritmética simple de las valoraciones favorece a vendedores con pocas valoraciones extremas. Un vendedor con 2 valoraciones de 5 estrellas aparece igual de bien que uno con 500 valoraciones de 5 estrellas — aunque el primero tenga mucha menos evidencia.
+
+El algoritmo de Wilson Score Lower Bound resuelve esto: calcula el límite inferior del intervalo de confianza del 95% para la tasa de valoraciones positivas. Con pocas valoraciones, el intervalo es amplio y el lower bound es bajo. Con muchas valoraciones, el intervalo se estrecha y el lower bound converge a la media real.
+
+Esto hace que un vendedor con 500 valoraciones de 4,8 estrellas ranquee por encima de uno con 3 valoraciones de 5 estrellas — que es exactamente el comportamiento correcto.
+
+## Regulación Europea: DSA y Valoraciones
+
+El Digital Services Act (DSA) europeo establece que las plataformas deben ser transparentes sobre cómo funcionan sus sistemas de ranking y recomendación, incluyendo el sistema de valoraciones. Para marketplaces con presencia en la UE, esto implica documentar el algoritmo de puntuación y tener un proceso de apelación accesible para valoraciones rechazadas.

@@ -1,0 +1,87 @@
+---
+title: "Webhook vs polling: integraciones en tiempo real"
+slug: "webhook-vs-polling-integraciones-real-time"
+date: "2024-09-23"
+description: "Cuándo usar webhooks y cuándo usar polling en integraciones de sistema — arquitectura, resiliencia, retry y validación de firma con ejemplos."
+tags: ["webhook", "polling", "integracion", "real-time", "arquitectura"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cuándo usar webhooks y cuándo usar polling en integraciones de sistema — arquitectura, resiliencia, retry y validación de firma con ejemplos.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'webhook-vs-polling-integracoes-real-time'
+  - locale: 'it-IT'
+    slug: 'webhook-vs-polling-integrazioni-real-time'
+  - locale: 'en'
+    slug: 'webhook-vs-polling-real-time-integrations'
+---
+
+Toda integración entre sistemas enfrenta el mismo problema fundamental: ¿cómo sabe el sistema A cuando algo cambió en el sistema B? Hay dos respuestas a esa pregunta — polling y webhooks — y la elección entre ambas impacta directamente la latencia, el coste de infraestructura y la complejidad del código de manejo de errores.
+
+Polling es el equivalente digital de llamar al banco cada cinco minutos preguntando "¿ha entrado algún pago?". Los webhooks son lo contrario: el banco te llama cuando algo ocurre. La metáfora deja claro cuál es más eficiente, pero como toda metáfora, oculta los casos donde la versión menos elegante es la única opción viable.
+
+## Cómo Funcionan los Webhooks: Registro, Entrega y Retry
+
+Un webhook es una solicitud HTTP POST que el sistema B envía al sistema A cuando ocurre un evento relevante. El sistema A registra previamente una URL de destino (el endpoint de webhook).
+
+El ciclo de vida de un webhook:
+1. Sistema A registra la URL de webhook en Sistema B: `POST /webhooks { url: 'https://miapp.es/webhooks/pagos', events: ['payment.completed'] }`
+2. Cuando ocurre el evento en Sistema B, hace `POST https://miapp.es/webhooks/pagos` con el payload del evento
+3. Sistema A procesa el evento y responde con HTTP 200
+4. Si Sistema A no responde con 200, Sistema B reintenta con backoff exponencial
+
+El punto crítico es el paso 4: los sistemas robustos de webhook reintentan la entrega durante horas o días hasta recibir confirmación. Tu endpoint debe ser idempotente (procesar el mismo evento múltiples veces debe tener el mismo efecto que procesarlo una vez).
+
+## Cuándo Polling es la Única Opción
+
+Hay casos donde no tienes opción y debes usar polling:
+
+**El sistema externo no soporta webhooks:** muchos sistemas legacy, ERPs industriales y APIs antiguas no tienen capacidad de enviar webhooks. Si quieres integración en tiempo real con ellos, polling es la única opción.
+
+**Tu servicio está detrás de un firewall o NAT sin IP pública:** si tu entorno de desarrollo no tiene una URL pública que el sistema externo pueda alcanzar, no puedes recibir webhooks. Herramientas como ngrok solucionan esto en desarrollo, pero no en producción en entornos cerrados.
+
+**Necesitas control total del ritmo de consulta:** con polling puedes controlar exactamente cuándo y con qué frecuencia consultas el sistema externo, lo que puede ser importante para respetar rate limits estrictos.
+
+## Polling Eficiente: Long Polling y Conditional GET
+
+Si tienes que usar polling, hay técnicas para hacerlo eficiente:
+
+**Conditional GET con If-Modified-Since:** el cliente envía la fecha de la última consulta. El servidor responde con 304 Not Modified si no hay cambios, sin necesidad de transmitir datos:
+
+```typescript
+async function pollForChanges(lastChecked: Date) {
+  const response = await fetch('/api/data', {
+    headers: {
+      'If-Modified-Since': lastChecked.toUTCString()
+    }
+  });
+
+  if (response.status === 304) {
+    return null; // Sin cambios
+  }
+
+  return response.json();
+}
+```
+
+**Polling con cursor:** en lugar de timestamp, usar el ID del último elemento procesado. El servidor devuelve solo los elementos con ID mayor al cursor, lo que es más eficiente que filtrar por timestamp.
+
+## La Decisión: Un Criterio Claro
+
+**Usa webhooks cuando:**
+- El sistema externo los soporta
+- Tu endpoint es accesible públicamente
+- La latencia de notificación importa (pagos, actualizaciones de estado críticas)
+- El volumen de eventos es alto (webhooks evitan N consultas sin resultado)
+
+**Usa polling cuando:**
+- El sistema externo no tiene webhooks
+- El entorno no permite conexiones entrantes
+- Los eventos son poco frecuentes y la latencia no es crítica
+- Necesitas control total del ritmo de consulta
+
+Para la mayoría de integraciones modernas (Stripe, GitHub, Slack, Shopify), webhooks es la elección correcta. Para ERPs legacy, sistemas industriales o APIs internas sin soporte de webhooks, polling con conditional GET es la alternativa pragmática.

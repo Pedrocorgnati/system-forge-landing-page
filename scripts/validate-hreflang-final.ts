@@ -19,6 +19,7 @@ const BUILDS = [
   { outDir: 'dist-br', buildLocale: 'pt-BR', domain: 'forjadesistemas.com.br' },
   { outDir: 'dist-it', buildLocale: 'it-IT', domain: 'systemforge.it' },
   { outDir: 'dist-en', buildLocale: 'en',    domain: 'systemforgesoftware.com' },
+  { outDir: 'dist-es', buildLocale: 'es-ES', domain: 'systemforge.es' },
 ]
 
 const LOCALE_DOMAIN: Record<string, string> = {
@@ -26,6 +27,8 @@ const LOCALE_DOMAIN: Record<string, string> = {
   'it':    'systemforge.it',
   'it-IT': 'systemforge.it',
   'en':    'systemforgesoftware.com',
+  'es':    'systemforge.es',
+  'es-ES': 'systemforge.es',
   'x-default': 'systemforgesoftware.com',
 }
 

@@ -1,0 +1,126 @@
+---
+title: "RBAC en dashboards: control de acceso por perfil"
+slug: "control-acceso-basado-roles-dashboards"
+date: "2024-08-14"
+description: "Cómo implementar Role-Based Access Control en dashboards B2B: definición de roles, protección de rutas, ocultación de UI y filtrado de datos por permiso."
+tags: ["rbac", "autorizacion", "dashboard", "seguridad", "next.js"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar Role-Based Access Control en dashboards B2B: definición de roles, protección de rutas, ocultación de UI y filtrado de datos por permiso."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'role-based-access-control-dashboards'
+  - locale: 'it-IT'
+    slug: 'controllo-accessi-dashboard-rbac'
+  - locale: 'en'
+    slug: 'role-based-access-control-dashboards'
+---
+
+En un dashboard B2B multiusuario, mostrar los datos incorrectos a la persona incorrecta no es solo un problema de UX — es un problema de seguridad, cumplimiento normativo y, en algunos casos, un problema legal. Un analista junior que ve el margen bruto por cliente de la competencia dentro de la empresa, un comercial que accede a las comisiones de otros vendedores, un usuario de una sucursal que ve datos de otra — todos son escenarios reales que ocurren cuando RBAC se implementa de forma superficial.
+
+La implementación correcta de RBAC en dashboards tiene cuatro capas que deben funcionar en conjunto: el modelo de permisos, la protección de rutas, la ocultación de componentes en la UI y — la más importante — el filtrado de datos en el backend.
+
+## Modelo de Permisos: Roles, Permisos y Recursos
+
+El enfoque más robusto separa roles de permisos: los roles son conjuntos de permisos, y los permisos definen qué acciones se pueden realizar sobre qué recursos.
+
+```typescript
+// Definición de permisos
+const permissions = {
+  'reports:read': 'Ver informes',
+  'reports:create': 'Crear informes',
+  'reports:export': 'Exportar informes',
+  'users:read': 'Ver usuarios',
+  'users:manage': 'Gestionar usuarios',
+  'billing:read': 'Ver facturación',
+  'billing:manage': 'Gestionar facturación',
+} as const;
+
+// Roles con sus permisos
+const roles = {
+  admin: ['reports:read', 'reports:create', 'reports:export', 'users:read', 'users:manage', 'billing:read', 'billing:manage'],
+  manager: ['reports:read', 'reports:create', 'reports:export', 'users:read'],
+  analyst: ['reports:read', 'reports:export'],
+  viewer: ['reports:read'],
+} as const;
+```
+
+Esta separación permite añadir nuevos roles sin tocar el código — solo configurando qué permisos tiene cada rol.
+
+## Protección de Rutas en Next.js
+
+```typescript
+// middleware.ts — protección a nivel de ruta
+export async function middleware(request: NextRequest) {
+  const session = await getSession(request);
+
+  const routePermissions: Record<string, string> = {
+    '/dashboard/billing': 'billing:read',
+    '/dashboard/users': 'users:read',
+    '/dashboard/reports/export': 'reports:export',
+  };
+
+  const requiredPermission = routePermissions[request.nextUrl.pathname];
+  if (requiredPermission && !hasPermission(session.user, requiredPermission)) {
+    return NextResponse.redirect('/dashboard/unauthorized');
+  }
+
+  return NextResponse.next();
+}
+```
+
+## Ocultación de Componentes en la UI
+
+La UI debe reflejar los permisos — no mostrar botones que el usuario no puede usar. Esto no es seguridad (la seguridad está en el backend), pero mejora la UX evitando frustración:
+
+```typescript
+// Hook para verificar permisos en componentes
+function usePermission(permission: string) {
+  const { user } = useSession();
+  return user?.permissions?.includes(permission) ?? false;
+}
+
+// Uso en componentes
+function ReportsPage() {
+  const canExport = usePermission('reports:export');
+  const canCreate = usePermission('reports:create');
+
+  return (
+    <div>
+      <ReportsList />
+      {canCreate && <CreateReportButton />}
+      {canExport && <ExportButton />}
+    </div>
+  );
+}
+```
+
+## Filtrado de Datos en el Backend: La Capa Más Importante
+
+La ocultación en la UI y la protección de rutas pueden ser bypasseadas por un usuario técnico que llame directamente a los endpoints de la API. La única defensa real está en el backend.
+
+```typescript
+// Cada query de datos debe incluir filtros de permiso
+async function getReports(userId: string, userRole: string) {
+  const baseQuery = db.reports.findMany();
+
+  // Los analistas solo ven informes de su departamento
+  if (userRole === 'analyst') {
+    return baseQuery.where({ departmentId: getUserDepartment(userId) });
+  }
+
+  // Los managers ven informes de su equipo
+  if (userRole === 'manager') {
+    return baseQuery.where({ teamId: getUserTeam(userId) });
+  }
+
+  // Los admins ven todo
+  return baseQuery;
+}
+```
+
+El test de seguridad obligatorio: llamar a cada endpoint con tokens de roles distintos y verificar que cada rol recibe solo los datos a los que tiene derecho. Estos tests deben ejecutarse en CI en cada PR que modifique la lógica de autorización.

@@ -24,10 +24,11 @@ const EnvSchema = z.object({
     .min(1, 'ENV_002: WHATSAPP_NUMBER é obrigatório para CTAs de WhatsApp')
     .regex(/^\+[1-9]\d{1,14}$/, 'Formato: +5548999999999'),
 
+  // ENV_003: Calendly removido — CTAs Calendly desativados em todos os locales.
+  // Campo preservado como opcional para builds legados que ainda passam a env var.
   NEXT_PUBLIC_CALENDLY_URL: z
     .string()
-    .url('ENV_003: CALENDLY_URL deve ser uma URL válida')
-    .startsWith('https://calendly.com/', 'Deve ser uma URL Calendly válida'),
+    .optional(),
 
   NEXT_PUBLIC_BUDGET_ENGINE_URL: z
     .string()
@@ -53,12 +54,12 @@ const EnvSchema = z.object({
   // Newsletter worker URLs são lidas diretamente via config/sites/{br,it,en}.ts
   // (NEXT_PUBLIC_NEWSLETTER_WORKER_URL_{BR,IT,EN})
 
-  // ===== i18n Triple-Market =====
-  // Obrigatório nos scripts build:br / build:it / build:en
+  // ===== i18n Quad-Market =====
+  // Obrigatório nos scripts build:br / build:it / build:en / build:es
   // Opcional em dev e no script build genérico (fallback: 'pt-BR' via getActiveLocale)
   NEXT_PUBLIC_LOCALE: z
-    .enum(['pt-BR', 'it-IT', 'en'] as const, {
-      errorMap: () => ({ message: 'NEXT_PUBLIC_LOCALE deve ser um de: pt-BR, it-IT, en' }),
+    .enum(['pt-BR', 'it-IT', 'en', 'es-ES'] as const, {
+      errorMap: () => ({ message: 'NEXT_PUBLIC_LOCALE deve ser um de: pt-BR, it-IT, en, es-ES' }),
     })
     .optional(),
 

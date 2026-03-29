@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { MessageCircle, CalendarDays, Calculator, ArrowRight, Mail } from 'lucide-react'
+import { MessageCircle, Calculator, ArrowRight, Mail } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { buildWhatsAppUrl } from '@/lib/cta'
 import { getSiteConfig } from '@config'
@@ -33,22 +33,6 @@ const channels = [
     },
   },
   {
-    icon: CalendarDays,
-    label: ct.scheduleLabel,
-    description: ct.scheduleDesc,
-    cta: ct.scheduleCta,
-    href: SITE.calendly,
-    external: true,
-    highlight: false,
-    accent: {
-      bg: 'bg-blue-500/15',
-      text: 'text-blue-400',
-      border: 'hover:border-blue-500/40',
-      glow: 'bg-blue-500/[0.07]',
-      shadow: 'hover:shadow-[0_8px_30px_rgba(59,130,246,0.15)]',
-    },
-  },
-  {
     icon: Calculator,
     label: ct.budgetLabel,
     description: ct.budgetDesc,
@@ -75,6 +59,7 @@ export function ContactSection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return
         if (entry.isIntersecting) {
           el.setAttribute('data-contact-visible', 'true')
           observer.disconnect()
@@ -125,7 +110,7 @@ export function ContactSection() {
           </div>
 
           {/* Channel cards */}
-          <div data-testid="contact-channels" className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+          <div data-testid="contact-channels" className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {channels.map((channel, index) => {
               const Icon = channel.icon
               return (

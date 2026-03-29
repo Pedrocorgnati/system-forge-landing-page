@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # scripts/smoke-test-features.sh
-# Smoke tests de funcionalidades i18n-triple-market nos 3 domínios.
+# Smoke tests de funcionalidades i18n-quad-market nos 4 domínios.
 # Verifica blog listing, contact page e slug nativo por locale.
 #
 # Uso:
@@ -25,6 +25,7 @@ declare -a BLOG_URLS=(
   "https://forjadesistemas.com.br/blog|BR"
   "https://systemforge.it/blog|IT"
   "https://systemforgesoftware.com/blog|EN"
+  "https://systemforge.es/blog|ES"
 )
 
 for url_locale in "${BLOG_URLS[@]}"; do
@@ -47,8 +48,9 @@ declare -A CONTACT_URLS
 CONTACT_URLS["BR"]="https://forjadesistemas.com.br/contato"
 CONTACT_URLS["IT"]="https://systemforge.it/contatti"
 CONTACT_URLS["EN"]="https://systemforgesoftware.com/contact"
+CONTACT_URLS["ES"]="https://systemforge.es/contacto"
 
-for locale in BR IT EN; do
+for locale in BR IT EN ES; do
   url="${CONTACT_URLS[$locale]}"
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "$url" 2>/dev/null || echo "000")
   if [ "$STATUS" == "200" ]; then
@@ -67,13 +69,15 @@ declare -A SERVICE_URLS
 SERVICE_URLS["BR"]="https://forjadesistemas.com.br/servicos"
 SERVICE_URLS["IT"]="https://systemforge.it/servizi"
 SERVICE_URLS["EN"]="https://systemforgesoftware.com/services"
+SERVICE_URLS["ES"]="https://systemforge.es/servicios"
 
 declare -A SERVICE_REQUIRED
 SERVICE_REQUIRED["BR"]="true"
 SERVICE_REQUIRED["IT"]="false"
 SERVICE_REQUIRED["EN"]="false"
+SERVICE_REQUIRED["ES"]="false"
 
-for locale in BR IT EN; do
+for locale in BR IT EN ES; do
   url="${SERVICE_URLS[$locale]}"
   required="${SERVICE_REQUIRED[$locale]}"
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "$url" 2>/dev/null || echo "000")

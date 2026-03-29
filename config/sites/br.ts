@@ -19,7 +19,7 @@ export const brConfig: SiteConfig = {
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
-  calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge',
+  calendly: '',
   budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.corgnati.com/quote'}?locale=pt-BR`,
   address: 'Curitiba/PR, Brasil',
   compliance: 'LGPD',

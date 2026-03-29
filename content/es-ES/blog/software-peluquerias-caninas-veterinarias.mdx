@@ -1,0 +1,80 @@
+---
+title: "Software para peluquerías caninas y veterinarias"
+slug: "software-peluquerias-caninas-veterinarias"
+date: "2024-10-29"
+description: "Requisitos de sistema para peluquerías caninas y clínicas veterinarias: agenda especializada, ficha veterinaria, vacunas, recordatorios y fidelización."
+tags: ["peluqueria canina", "software veterinario", "agenda", "gestion sectorial", "fidelizacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Requisitos de sistema para peluquerías caninas y clínicas veterinarias: agenda especializada, ficha veterinaria, vacunas, recordatorios y fidelización."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'software-petshops-agendamento-prontuario'
+  - locale: 'it-IT'
+    slug: 'software-per-negozi-animali-gestione'
+  - locale: 'en'
+    slug: 'petshop-management-software-scheduling'
+---
+
+La peluquería canina y la clínica veterinaria son negocios con un flujo operativo que los sistemas genéricos de citas simplemente ignoran. Una peluquería para personas agenda personas. Una peluquería canina agenda mascotas — y las mascotas tienen raza, tamaño, temperamento y necesidades específicas que afectan directamente al tiempo del servicio, la capacidad de la agenda y el enfoque del peluquero. Un Golden Retriever de 30kg tarda tres veces más en el baño y corte que un Chihuahua de 3kg. Un perro ansioso o agresivo necesita horario aislado. Esto no es capricho operativo — es la diferencia entre una agenda que funciona y una que genera caos.
+
+Además de la agenda especializada, un negocio de mascota completo necesita ficha veterinaria, control de vacunas, recordatorios automáticos para los dueños y un programa de fidelización que incentive la recurrencia.
+
+## Agenda de Peluquería Canina: Duración, Conflictos y Capacidad
+
+La primera funcionalidad diferenciadora es la configuración de duración por tipo de servicio y tamaño/raza de la mascota:
+
+```typescript
+interface ConfiguracionServicio {
+  tipoServicio: 'bano-corte' | 'bano-solo' | 'corte-estetico' | 'stripping' | 'consulta';
+  tamano: 'toy' | 'pequeno' | 'mediano' | 'grande' | 'gigante';
+  duracionMinutos: number;
+  precioBase: number;
+  requiereIsolamiento: boolean; // para razas agresivas
+}
+
+// Ejemplos de configuración
+const servicios: ConfiguracionServicio[] = [
+  { tipoServicio: 'bano-corte', tamano: 'toy', duracionMinutos: 60, precioBase: 35 },
+  { tipoServicio: 'bano-corte', tamano: 'mediano', duracionMinutos: 120, precioBase: 55 },
+  { tipoServicio: 'bano-corte', tamano: 'grande', duracionMinutos: 180, precioBase: 75 },
+  { tipoServicio: 'bano-corte', tamano: 'gigante', duracionMinutos: 240, precioBase: 95 },
+];
+```
+
+La agenda debe calcular automáticamente el tiempo disponible para cada cita basándose en la raza/tamaño de la mascota y el servicio solicitado, sin permitir solapamientos.
+
+## Ficha Veterinaria: Datos Clínicos de la Mascota
+
+La ficha de la mascota debe capturar:
+- Datos básicos: nombre, especie, raza, fecha de nacimiento, sexo, color, microchip
+- Datos del dueño: nombre, teléfono, dirección, email para recordatorios
+- Historial veterinario: visitas anteriores, diagnósticos, medicación crónica
+- Alergias y condiciones especiales (miedoso, agresivo con otros perros, alérgico al champú X)
+- Historial de servicios de peluquería con fotos del antes/después
+
+Las notas sobre el temperamento de la mascota son especialmente importantes para el equipo: "requiere bozal", "hay que aislar del ruido", "le tranquiliza música suave" son detalles operativos que marcan la diferencia en el servicio y en la seguridad del personal.
+
+## Control de Vacunas y Recordatorios Automáticos
+
+El módulo de vacunas registra qué vacunas tiene cada mascota, la fecha de vacunación y la fecha de vencimiento del próximo refuerzo. El sistema debe enviar recordatorios automáticos al dueño (por WhatsApp, SMS o email) cuando se acerque la fecha del refuerzo.
+
+En España, la vacuna antirrábica es obligatoria en varias comunidades autónomas (Aragón, Castilla-La Mancha, Extremadura, Murcia, Valencia) y muchas peluquerías caninas la exigen como requisito para dar el servicio. El sistema debe verificar el estado de la vacuna al confirmar la cita y alertar si está vencida.
+
+## Recordatorios para Aumentar la Recurrencia
+
+Los recordatorios automáticos son la funcionalidad de mayor impacto en la recurrencia. Los patrones que funcionan:
+
+- Recordatorio de cita 24h antes y 1h antes
+- "Han pasado 6 semanas desde el último baño de Toby — ¿quieres reservar su próxima cita?"
+- Recordatorio de vacuna próxima a vencer con enlace de reserva directo
+
+En España, WhatsApp Business es el canal preferido para este tipo de comunicaciones. La integración con la API de WhatsApp Business permite enviar estos mensajes de forma automatizada y escalable.
+
+## Programa de Fidelización
+
+Un sistema de puntos sencillo tiene un impacto medible en la recurrencia. Por ejemplo: 1 punto por euro gastado, canje a partir de 100 puntos por un servicio básico gratuito. El sistema debe gestionar el saldo de puntos, aplicar el descuento en el momento del pago y comunicar el saldo acumulado en los recordatorios de cita.

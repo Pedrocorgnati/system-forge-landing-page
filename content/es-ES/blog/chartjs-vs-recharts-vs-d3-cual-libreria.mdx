@@ -1,0 +1,113 @@
+---
+title: "Chart.js vs Recharts vs D3: qué librería usar"
+slug: "chartjs-vs-recharts-vs-d3-cual-libreria"
+date: "2024-07-31"
+description: "Comparativa práctica entre Chart.js, Recharts y D3.js para dashboards en React — rendimiento, personalización, bundle size y curva de aprendizaje."
+tags: ["chart.js", "recharts", "d3", "graficos", "visualizacion de datos"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Comparativa práctica entre Chart.js, Recharts y D3.js para dashboards en React — rendimiento, personalización, bundle size y curva de aprendizaje."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'chartjs-vs-recharts-vs-d3-qual-biblioteca'
+  - locale: 'it-IT'
+    slug: 'chartjs-vs-recharts-vs-d3-quale-libreria'
+  - locale: 'en'
+    slug: 'chartjs-vs-recharts-vs-d3-which-library'
+---
+
+La elección de la librería de gráficos parece una decisión técnica de segundo plano. No lo es. Afecta al bundle size, al rendimiento con grandes volúmenes de datos, a la capacidad de personalización visual y, principalmente, a la velocidad con que el equipo puede iterar en el producto.
+
+Elegir la librería incorrecta al inicio de un proyecto de dashboard significa cargar deuda técnica en cada nueva funcionalidad.
+
+## Chart.js: Simple y Efectivo
+
+Chart.js es el punto de partida natural para la mayoría de los dashboards. Tiene los tipos de gráfico más comunes (líneas, barras, áreas, pie, donut, radar), es relativamente ligero y tiene una curva de aprendizaje baja.
+
+Para React, `react-chartjs-2` es el wrapper estándar:
+
+```tsx
+import { Line } from 'react-chartjs-2'
+import {
+  Chart as ChartJS,
+  CategoryScale, LinearScale, PointElement,
+  LineElement, Title, Tooltip, Legend
+} from 'chart.js'
+
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend)
+
+export function GraficoVentas({ datos }: { datos: number[] }) {
+  return (
+    <Line
+      data={{
+        labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Ventas mensuales (€)',
+          data: datos,
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.1)',
+        }]
+      }}
+      options={{ responsive: true, maintainAspectRatio: false }}
+    />
+  )
+}
+```
+
+**Limitaciones:** La personalización profunda es torpe — la API de plugins es compleja. Con datasets muy grandes (100K+ puntos), el rendimiento cae. No tiene soporte nativo para React — el wrapper añade cierta fricción.
+
+## Recharts: React-First
+
+Recharts está construido sobre D3 pero expone una API completamente declarativa y orientada a componentes React. Si tu equipo trabaja con React y valora la coherencia del modelo mental, Recharts es más natural:
+
+```tsx
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
+
+const datos = [
+  { mes: 'Ene', ventas: 4200, pedidos: 240 },
+  { mes: 'Feb', ventas: 3800, pedidos: 218 },
+  // ...
+]
+
+export function GraficoVentas() {
+  return (
+    <LineChart width={600} height={300} data={datos}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="mes" />
+      <YAxis />
+      <Tooltip formatter={(v) => `${v.toLocaleString('es-ES')} €`} />
+      <Line type="monotone" dataKey="ventas" stroke="#3b82f6" />
+    </LineChart>
+  )
+}
+```
+
+**Ventajas sobre Chart.js:** API componentes-first, más fácil de personalizar con CSS, mejor integración con el estado de React. **Limitaciones:** Bundle más grande, rendimiento inferior a D3 puro para visualizaciones muy complejas.
+
+## D3.js: Poder Absoluto con Complejidad Alta
+
+D3 no es una librería de gráficos — es una librería de manipulación del DOM orientada a datos. Con D3 puedes crear cualquier visualización concebible, pero a un coste de complejidad muy alto.
+
+Para la mayoría de los dashboards empresariales en España, D3 directo es sobreingeniería. Tiene sentido cuando: necesitas visualizaciones completamente personalizadas que no existen en otras librerías (mapas interactivos, árboles de jerarquía, grafos de red), o cuando tienes un diseñador de datos especializado en el equipo.
+
+**La alternativa:** Usar Recharts o Visx (construida sobre D3 por Airbnb) que dan acceso a la potencia de D3 con una API más manejable.
+
+## Decisión: Cuándo Usar Cada Una
+
+| Caso | Recomendación |
+|---|---|
+| Dashboard empresarial estándar (KPIs, tendencias) | Recharts |
+| Prototipo rápido, presupuesto técnico limitado | Chart.js |
+| Visualización personalizada compleja | D3 o Visx |
+| Dashboard con datos en tiempo real (WebSocket) | Recharts con actualizaciones de estado |
+| App con bundle size crítico | Chart.js con tree-shaking |
+
+## Conclusión
+
+Para la mayoría de los dashboards B2B en España, Recharts es el punto de partida recomendado: API React-first, suficientemente flexible para la mayoría de los requisitos, y bundle razonable. Chart.js es una buena segunda opción si la curva de aprendizaje es una prioridad.
+
+¿Estás construyendo un dashboard para tu empresa o producto? [Contacta con SystemForge](https://systemforge.es/contacto).

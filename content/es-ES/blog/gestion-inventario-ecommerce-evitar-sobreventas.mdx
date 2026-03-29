@@ -1,0 +1,125 @@
+---
+title: "Gestión de inventario en e-commerce: evitar sobreventas"
+slug: "gestion-inventario-ecommerce-evitar-sobreventas"
+date: "2024-09-06"
+description: "Cómo implementar gestión de inventario en e-commerce para evitar sobreventas — reservas temporales, sincronización multicanal y estrategias de stock mínimo."
+tags: ["inventario ecommerce", "sobreventa", "stock", "sincronizacion inventario", "omnicanal"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar gestión de inventario en e-commerce para evitar sobreventas — reservas temporales, sincronización multicanal y estrategias de stock mínimo."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-estoque-ecommerce-evitar-overselling'
+  - locale: 'it-IT'
+    slug: 'gestione-scorte-ecommerce-evitare-overselling'
+  - locale: 'en'
+    slug: 'inventory-management-ecommerce-avoid-overselling'
+---
+
+Vender algo que no tienes en stock es uno de los errores más costosos en e-commerce — no solo en términos de devoluciones y logística, sino en pérdida de confianza del cliente. En España, la Ley de Ordenación del Comercio Minorista y la normativa de protección al consumidor obligan a cumplir con lo anunciado. Una sobreventa no es solo un problema operacional — puede tener consecuencias legales.
+
+La solución técnica no es trivial, especialmente en contextos multicanal (tienda online + tienda física + marketplaces).
+
+## Por Qué Ocurren las Sobreventas
+
+**Concurrencia sin control:** Dos clientes añaden el último producto al carrito simultáneamente. Ambos ven stock disponible, ambos pagan. El stock era de 1.
+
+**Sincronización de inventario lenta:** Tienes 5 unidades en tu almacén, 3 en Amazon, 2 en Zalando. Si la sincronización no es en tiempo real, puedes vender más de lo que tienes en total.
+
+**Reservas de carrito no expiradas:** El cliente añade al carrito pero nunca compra. Si el stock queda reservado indefinidamente, otros clientes ven el producto como agotado cuando en realidad está disponible.
+
+## Reservas Temporales: El Patrón Correcto
+
+La solución estándar para la concurrencia es la reserva temporal: cuando el cliente añade al carrito, el stock se reserva por un tiempo limitado (15-30 minutos). Si el cliente completa la compra, la reserva se convierte en venta. Si el cliente abandona, la reserva expira y el stock vuelve a estar disponible.
+
+Implementación con PostgreSQL y transacciones:
+
+```typescript
+// Reservar stock con transacción atómica
+async function reservarStock(productoId: string, cantidad: number, sesionId: string) {
+  return await db.$transaction(async (tx) => {
+    // Bloquear la fila del producto para escritura (FOR UPDATE)
+    const producto = await tx.$queryRaw`
+      SELECT stock_disponible, stock_reservado
+      FROM productos
+      WHERE id = ${productoId}
+      FOR UPDATE
+    `
+
+    if (producto.stock_disponible < cantidad) {
+      throw new Error('Stock insuficiente')
+    }
+
+    // Actualizar stock
+    await tx.producto.update({
+      where: { id: productoId },
+      data: {
+        stock_disponible: { decrement: cantidad },
+        stock_reservado: { increment: cantidad },
+      }
+    })
+
+    // Crear reserva con expiración
+    await tx.reservaStock.create({
+      data: {
+        productoId,
+        cantidad,
+        sesionId,
+        expiresAt: new Date(Date.now() + 30 * 60 * 1000), // 30 minutos
+      }
+    })
+  })
+}
+```
+
+Un job periódico (cada 5 minutos) libera las reservas expiradas:
+
+```typescript
+// Liberar reservas expiradas
+async function liberarReservasExpiradas() {
+  const reservasExpiradas = await db.reservaStock.findMany({
+    where: { expiresAt: { lt: new Date() } }
+  })
+
+  for (const reserva of reservasExpiradas) {
+    await db.$transaction(async (tx) => {
+      await tx.producto.update({
+        where: { id: reserva.productoId },
+        data: {
+          stock_disponible: { increment: reserva.cantidad },
+          stock_reservado: { decrement: reserva.cantidad },
+        }
+      })
+      await tx.reservaStock.delete({ where: { id: reserva.id } })
+    })
+  }
+}
+```
+
+## Sincronización Multicanal en España
+
+Los e-commerces españoles suelen vender en múltiples canales: tienda propia, Amazon.es, El Corte Inglés marketplace, Zalando, Leroy Merlin... Cada canal tiene su propio sistema de gestión de pedidos.
+
+La arquitectura correcta para multicanal:
+
+1. **Fuente de verdad única:** Un sistema central de inventario (puede ser tu ERP, tu plataforma de e-commerce o una herramienta como Linnworks o TradeGecko) que tiene el stock real
+2. **Sincronización push en tiempo real:** Cada venta en cualquier canal actualiza la fuente de verdad inmediatamente
+3. **Buffer de seguridad por canal:** Nunca sincronices el 100% del stock a cada canal. Si tienes 10 unidades y vendes en 4 canales, muestra máximo 3 en cada uno. Esto evita sobreventas por latencia de sincronización.
+
+## Stock Mínimo y Reposición Automática
+
+Para evitar stockouts que causan malas experiencias, configura alertas y reposición automática:
+
+- **Stock de seguridad:** El nivel mínimo antes de iniciar reposición, calculado como (días de entrega del proveedor × ventas medias diarias) + buffer de seguridad
+- **Alertas automáticas:** Email/Slack cuando el stock cae por debajo del mínimo
+- **Ocultación automática:** Si el stock llega a 0, el producto se marca como "Agotado" o se oculta automáticamente
+
+## Conclusión
+
+La gestión correcta de inventario en e-commerce es técnicamente más exigente de lo que parece. Reservas temporales con transacciones atómicas, sincronización en tiempo real y buffers de seguridad por canal son las piezas clave para evitar sobreventas.
+
+¿Estás construyendo o mejorando un e-commerce y necesitas una arquitectura de inventario robusta? [Contacta con SystemForge](https://systemforge.es/contacto).

@@ -1,0 +1,100 @@
+---
+title: "Chatbot: reglas, NLP o LLM — cuál elegir"
+slug: "chatbot-reglas-nlp-llm-cual-elegir"
+date: "2024-08-26"
+description: "Comparativa entre chatbots basados en reglas, NLP (Rasa, Dialogflow) y LLMs (GPT-4, Claude) — coste, mantenimiento y calidad de respuesta por caso de uso."
+tags: ["chatbot", "nlp", "llm", "dialogflow", "rasa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Comparativa entre chatbots basados en reglas, NLP (Rasa, Dialogflow) y LLMs (GPT-4, Claude) — coste, mantenimiento y calidad de respuesta por caso de uso."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'chatbot-regras-vs-nlp-vs-llm'
+  - locale: 'it-IT'
+    slug: 'chatbot-regole-nlp-llm-quale-scegliere'
+  - locale: 'en'
+    slug: 'chatbot-rules-nlp-llm-which-to-choose'
+---
+
+Cuando alguien dice "vamos a poner un chatbot en nuestra web", la pregunta que debería venir inmediatamente después es: "¿qué tipo de chatbot?". La respuesta cambia radicalmente el coste, la complejidad de mantenimiento y la calidad de la experiencia del usuario.
+
+Hay tres arquitecturas principales hoy: basada en reglas, basada en NLP (procesamiento de lenguaje natural) y basada en LLMs (modelos de lenguaje grande como GPT-4 y Claude). Cada una resuelve problemas distintos.
+
+## Chatbots Basados en Reglas: Simples y Predecibles
+
+Un chatbot de reglas es, esencialmente, un árbol de decisiones. Si el usuario dice X, responde Y. Si hace clic en el botón A, muestra el menú B.
+
+**Cuándo tiene sentido:** Para flujos muy acotados y predecibles. El bot de pedido de pizza de Domino's, la reserva de cita de una clínica, el seguimiento de un pedido de transporte. Cuando el número de variantes es limitado y las respuestas son siempre las mismas.
+
+**Herramientas:** Landbot, Typebot, ManyChat (para WhatsApp/Instagram). No requieren conocimientos técnicos para implementar.
+
+**Coste:** El más bajo. Implementación en horas o días, mantenimiento mínimo.
+
+**Limitación:** Se rompe en cuanto el usuario se sale del script. "¿Puedo pedir para mañana pero que llegue antes de las 10?" — el bot de reglas no sabe qué hacer con eso.
+
+## NLP: Dialogflow y Rasa
+
+Los chatbots basados en NLP entienden la intención del usuario aunque use palabras distintas. "Quiero cancelar mi suscripción", "dar de baja mi cuenta" y "ya no quiero seguir pagando" son la misma intención — el bot NLP lo reconoce.
+
+**Dialogflow (Google):** Servicio cloud de Google. Fácil de configurar, buen soporte para español, integración directa con WhatsApp Business. Precio basado en peticiones — puede ser caro a alto volumen.
+
+**Rasa:** Open-source, self-hosted. Mayor control, sin coste de API pero requiere infraestructura y conocimiento técnico para desplegar y entrenar.
+
+**Cuándo tiene sentido:** Cuando tienes un dominio acotado pero con variedad lingüística. Atención al cliente de un banco, soporte de primer nivel de un SaaS, reservas con múltiples opciones. El número de intenciones es manejable (20-100) y las respuestas son relativamente estructuradas.
+
+**Limitación:** Fuera del dominio entrenado, el bot falla. Si el usuario hace una pregunta que no está en los intents de entrenamiento, la respuesta es genérica o incorrecta.
+
+## LLMs: GPT-4 y Claude
+
+Los chatbots basados en LLMs pueden responder a casi cualquier pregunta dentro del conocimiento del modelo y del contexto que les proveas (documentación de la empresa, FAQs, catálogo de productos).
+
+**Cuándo tiene sentido:** Cuando las consultas son diversas y difíciles de anticipar. Soporte técnico de segundo nivel, asistentes de ventas que responden preguntas sobre productos complejos, asistentes internos para empleados que consultan políticas de empresa.
+
+**Implementación típica en España:**
+
+```typescript
+import OpenAI from 'openai'
+
+const openai = new OpenAI()
+
+export async function chatbotEmpresa(preguntaUsuario: string, contextoEmpresa: string) {
+  const completion = await openai.chat.completions.create({
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `Eres el asistente de atención al cliente de [Empresa].
+        Responde siempre en español. Usa este contexto: ${contextoEmpresa}
+        Si no conoces la respuesta, di que derivarás a un agente humano.`
+      },
+      { role: 'user', content: preguntaUsuario }
+    ],
+    max_tokens: 500,
+  })
+  return completion.choices[0].message.content
+}
+```
+
+**Coste:** Variable y potencialmente alto. GPT-4o-mini es mucho más económico que GPT-4 con calidad suficiente para la mayoría de los casos de atención al cliente.
+
+**Limitación:** Puede alucinar — inventar respuestas plausibles pero incorrectas. Para información crítica (precios, garantías, condiciones legales), necesitas un mecanismo de verificación.
+
+## La Decisión Correcta Según el Caso
+
+| Caso de Uso | Arquitectura |
+|---|---|
+| FAQ estática, flujo predecible | Reglas (Landbot, Typebot) |
+| Atención al cliente con variedad media | NLP (Dialogflow) |
+| Soporte técnico complejo | LLM con RAG |
+| Asistente interno de empresa | LLM con documentación indexada |
+| Requisito de bajo coste y alto volumen | Reglas o NLP |
+
+## Conclusión
+
+No existe un tipo de chatbot universalmente superior. La elección correcta depende de la complejidad del dominio, el volumen esperado, el presupuesto y la tolerancia al error. Para muchas PYMEs españolas, un chatbot de reglas bien diseñado resuelve el 70% de las consultas con el 10% del coste de un LLM.
+
+¿Quieres implementar un chatbot para tu empresa en España? [Contacta con SystemForge](https://systemforge.es/contacto) — te ayudamos a elegir la arquitectura correcta.

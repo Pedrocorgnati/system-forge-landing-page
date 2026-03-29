@@ -1,0 +1,97 @@
+---
+title: "Fine-tuning vs prompt engineering: estrategia de IA"
+slug: "fine-tuning-vs-prompting-estrategia-ia"
+date: "2024-09-19"
+description: "Cuándo hacer fine-tuning de un LLM vs optimizar el prompt — coste, calidad, mantenimiento y los casos donde cada estrategia tiene sentido en producción."
+tags: ["fine-tuning", "prompt engineering", "llm", "openai", "ia produccion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cuándo hacer fine-tuning de un LLM vs optimizar el prompt — coste, calidad, mantenimiento y los casos donde cada estrategia tiene sentido en producción."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'fine-tuning-vs-prompting-estrategia-ia'
+  - locale: 'it-IT'
+    slug: 'fine-tuning-vs-prompt-engineering-strategia-ia'
+  - locale: 'en'
+    slug: 'fine-tuning-vs-prompt-engineering-ai-strategy'
+---
+
+"¿Necesito hacer fine-tuning del modelo?" es una pregunta que surge naturalmente cuando el prompt engineering empieza a verse complejo o cuando los resultados del modelo no son suficientemente buenos. La respuesta honesta: la mayoría de las veces, el fine-tuning no es la solución correcta, y el prompt bien estructurado resuelve el problema con menos coste y más flexibilidad.
+
+Pero hay casos donde el fine-tuning es claramente la opción correcta. Entender la diferencia evita invertir semanas en la estrategia equivocada.
+
+## Qué es el Prompt Engineering
+
+El prompt engineering es el arte de formular instrucciones al modelo para obtener el output deseado. Va desde cambiar el orden de las instrucciones hasta usar few-shot examples (ejemplos en el prompt que muestran qué formato quieres), system prompts detallados, cadenas de pensamiento (chain of thought) y técnicas más avanzadas.
+
+La mayor ventaja: es inmediato y flexible. Cambias el prompt, cambias el comportamiento. No hay entrenamiento, no hay coste de cómputo de training, no hay espera.
+
+## Qué es el Fine-Tuning
+
+El fine-tuning es entrenar un modelo base (GPT-4o, Llama, etc.) con tus propios datos para que aprenda patrones específicos de tu caso de uso. El modelo resultante tiene el comportamiento deseado "incorporado" — no necesita ejemplos en el prompt porque ya aprendió el patrón.
+
+## Cuándo Prompt Engineering es Suficiente
+
+La respuesta: **siempre empieza con prompt engineering**. Los modelos modernos (GPT-4o, Claude 3.5) son extraordinariamente capaces con prompts bien diseñados. El 80% de los casos que parecen necesitar fine-tuning se resuelven con:
+
+**Few-shot examples bien elegidos:**
+```
+Eres un asistente de atención al cliente para una empresa de fontanería en Madrid.
+Responde siempre en español formal pero cercano.
+
+Ejemplos:
+Cliente: "Mi grifo pierde agua desde ayer"
+Respuesta: "Entendemos la urgencia. Para atenderte lo antes posible, ¿puedes indicarnos tu código postal? Nuestro técnico más cercano puede estar allí en menos de 2 horas."
+
+Cliente: "¿Cuánto cuesta arreglar una tubería rota?"
+Respuesta: "El precio depende del tipo de avería. Podemos enviarte un técnico para diagnóstico gratuito. ¿Te va bien hoy por la tarde?"
+```
+
+**Chain of thought para razonamiento complejo:**
+```
+Antes de clasificar el email, piensa paso a paso:
+1. ¿Qué tipo de solicitud es?
+2. ¿Hay urgencia explícita?
+3. ¿Cuál es el departamento correcto?
+Luego devuelve el JSON de clasificación.
+```
+
+## Cuándo el Fine-Tuning Tiene Sentido
+
+**1. Formato de output muy específico y consistente:** Si necesitas que el modelo devuelva siempre un formato JSON exacto con un schema específico y los few-shot examples no dan consistencia del 99%, el fine-tuning puede entrenar ese comportamiento directamente.
+
+**2. Vocabulario o estilo muy específico del dominio:** Si tu empresa tiene una terminología técnica propia (nombres de productos internos, jerga del sector) que el modelo base no conoce, el fine-tuning puede incorporar ese vocabulario.
+
+**3. Coste de tokens en prompts muy largos:** Si tu sistema prompt tiene 5.000 tokens de ejemplos en cada request y tienes un millón de requests al día, ese coste se acumula. Un modelo fine-tuned que tiene el comportamiento incorporado puede usar un system prompt de 200 tokens.
+
+**4. Velocidad de inferencia:** Los modelos fine-tuned más pequeños pueden ser más rápidos que los modelos base grandes, porque el comportamiento deseado ya está en los pesos del modelo.
+
+## El Coste Real del Fine-Tuning
+
+Fine-tuning no es gratis ni instantáneo:
+
+- **Datos de entrenamiento:** Necesitas 50-1000+ ejemplos de alta calidad del input-output deseado. Preparar esos datos correctamente lleva tiempo.
+- **Coste de entrenamiento:** OpenAI cobra por token de entrenamiento. Un dataset de 1000 ejemplos con GPT-4o puede costar 20-100€.
+- **Coste de mantenimiento:** Cuando el modelo base actualiza, tu fine-tune puede quedar desfasado. Necesitas re-entrenar.
+- **Evaluación:** Necesitas benchmarks para comparar el fine-tuned vs el base en tu tarea específica.
+
+## La Estrategia Correcta
+
+```
+1. Define el caso de uso con precisión
+2. Implementa con prompt engineering (few-shot, chain of thought, structured outputs)
+3. Mide la calidad en un set de evaluación de 100+ casos reales
+4. Si la calidad es < 90% y el prompt está optimizado: considera fine-tuning
+5. Si el coste de tokens en producción es muy alto: considera fine-tuning en un modelo más pequeño
+6. En todos los demás casos: sigue con prompt engineering
+```
+
+## Conclusión
+
+El fine-tuning es una herramienta poderosa para casos específicos, pero es la última opción, no la primera. Un prompt bien diseñado con few-shot examples resuelve la mayoría de los casos con más flexibilidad y menos coste operacional.
+
+¿Estás diseñando un sistema de IA para tu empresa? [Contacta con SystemForge](https://systemforge.es/contacto) — te ayudamos a elegir la estrategia correcta.

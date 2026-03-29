@@ -1,0 +1,133 @@
+---
+title: "Extracción de datos con LLM: de documentos a JSON"
+slug: "extraccion-de-datos-con-llm-documentos"
+date: "2024-10-17"
+description: "Cómo usar LLMs para extraer datos estructurados de PDFs, facturas y documentos — structured outputs, validación con Zod y manejo de errores en producción."
+tags: ["extraccion datos", "llm", "pdf parsing", "structured output", "automatizacion documentos"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo usar LLMs para extraer datos estructurados de PDFs, facturas y documentos — structured outputs, validación con Zod y manejo de errores en producción."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'extracao-de-dados-com-llm-documentos'
+  - locale: 'it-IT'
+    slug: 'estrazione-dati-con-llm-documenti'
+  - locale: 'en'
+    slug: 'data-extraction-with-llm-from-pdfs-to-json'
+---
+
+Las empresas españolas gestionan miles de documentos: facturas de proveedores, albaranes, contratos, formularios. Extraer datos de esos documentos manualmente — copiar NIF, importe, fecha, número de factura a un sistema interno — es trabajo tedioso, lento y propenso a errores. Los LLMs han hecho este proceso automatizable de forma práctica.
+
+La extracción de datos con LLM no es solo pegar el contenido del PDF en ChatGPT. En producción requiere structured outputs, validación, manejo de errores y un pipeline robusto que funcione con documentos reales que no siempre son perfectos.
+
+## El Pipeline Básico: PDF → Texto → JSON
+
+El proceso tiene tres etapas:
+
+1. **Extracción de texto del PDF:** Los PDFs pueden ser texto seleccionable (generados digitalmente) o imágenes escaneadas. Para PDFs digitales, `pdf-parse` o `pdfjs-dist` extraen el texto directamente. Para documentos escaneados, necesitas OCR — `tesseract.js` para procesamiento local, o Google Document AI / Azure Document Intelligence para mayor precisión.
+
+2. **Extracción estructurada con LLM:** El texto extraído se envía al LLM con un prompt que pide datos en formato JSON específico.
+
+3. **Validación del JSON resultante:** Validar con Zod que los datos extraídos tienen el formato y tipos esperados.
+
+## Structured Outputs con OpenAI
+
+OpenAI ofrece "Structured Outputs" — una forma de garantizar que el modelo devuelve JSON que sigue exactamente el schema especificado. Es más fiable que pedirle al modelo "devuelve JSON":
+
+```typescript
+import OpenAI from 'openai'
+import { z } from 'zod'
+import { zodResponseFormat } from 'openai/helpers/zod'
+
+const openai = new OpenAI()
+
+// Schema de factura española
+const FacturaSchema = z.object({
+  numero_factura: z.string(),
+  fecha_emision: z.string().describe('Formato DD/MM/YYYY'),
+  nif_emisor: z.string().describe('NIF o CIF del emisor'),
+  nombre_emisor: z.string(),
+  nif_receptor: z.string().nullable(),
+  nombre_receptor: z.string().nullable(),
+  base_imponible: z.number().describe('Importe sin IVA en euros'),
+  porcentaje_iva: z.number().describe('Porcentaje del IVA (ej: 21)'),
+  cuota_iva: z.number().describe('Importe del IVA en euros'),
+  total: z.number().describe('Importe total en euros'),
+  concepto: z.string().describe('Descripción de los servicios o productos'),
+})
+
+type Factura = z.infer<typeof FacturaSchema>
+
+export async function extraerDatosFactura(textoFactura: string): Promise<Factura> {
+  const completion = await openai.beta.chat.completions.parse({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `Eres un extractor de datos de facturas españolas.
+        Extrae con precisión todos los datos financieros.
+        Si un campo no está claramente visible en el documento, devuelve null.`,
+      },
+      {
+        role: 'user',
+        content: `Extrae los datos de esta factura:\n\n${textoFactura}`,
+      },
+    ],
+    response_format: zodResponseFormat(FacturaSchema, 'factura'),
+  })
+
+  return completion.choices[0].message.parsed!
+}
+```
+
+## Manejo de Documentos Problemáticos
+
+Los documentos reales en producción no siempre son perfectos. Estrategias para los casos problemáticos:
+
+**PDFs escaneados con mala calidad:** El OCR puede producir caracteres erróneos. El LLM es tolerante a estos errores, pero errores en NIFs o importes pueden propagarse. Implementa un paso de validación post-extracción: verifica que el NIF tiene formato válido, que los importes son coherentes (base + IVA ≈ total).
+
+**Facturas en formatos no estándar:** España tiene gran diversidad en el diseño de facturas — desde las generadas por Holded o Sage hasta plantillas de Word artesanales. El LLM maneja bien esta variedad, pero es buena práctica tener casos de prueba que cubran los formatos más comunes de tus proveedores.
+
+**Documentos en varios idiomas:** Si recibes facturas de proveedores europeos en inglés, alemán o francés, el LLM extrae igualmente los datos financieros. Puedes incluir en el prompt: "el documento puede estar en cualquier idioma europeo, extrae siempre los valores numéricos correctamente".
+
+## Validación y Confianza
+
+No todas las extracciones son igualmente fiables. Implementa un score de confianza:
+
+```typescript
+async function extraerConConfianza(texto: string) {
+  const datos = await extraerDatosFactura(texto)
+
+  // Validaciones de coherencia
+  const coherenciaIVA = Math.abs(datos.base_imponible * (datos.porcentaje_iva / 100) - datos.cuota_iva) < 0.10
+  const coherenciaTotal = Math.abs(datos.base_imponible + datos.cuota_iva - datos.total) < 0.10
+  const nifValido = validarNIFCIF(datos.nif_emisor)
+
+  const confianza = [coherenciaIVA, coherenciaTotal, nifValido].filter(Boolean).length / 3
+
+  return {
+    datos,
+    confianza,
+    requiereRevision: confianza < 0.8,
+  }
+}
+```
+
+Las facturas con confianza < 0.8 se marcan para revisión humana antes de ser contabilizadas. Esta combinación de automatización + revisión selectiva es más eficiente que la revisión manual de todas las facturas Y más segura que confiar ciegamente en el LLM.
+
+## Casos de Uso Específicos para España
+
+- **Digitalización de facturas de proveedores** para contabilidad automática en Holded, Sage u Odoo
+- **Extracción de datos de contratos** para gestión documental legal
+- **Procesamiento de albaranes** para actualización automática de inventario
+- **Análisis de nóminas** para verificación de liquidaciones
+
+## Conclusión
+
+La extracción de datos con LLM transforma horas de trabajo manual en segundos de procesamiento automático. Con structured outputs, validación con Zod y revisión selectiva de casos problemáticos, el pipeline es fiable en producción.
+
+¿Quieres automatizar el procesamiento de documentos en tu empresa? [Contacta con SystemForge](https://systemforge.es/contacto).

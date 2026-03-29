@@ -1,0 +1,129 @@
+---
+title: "Pruebas en apps móviles: estrategia de QA completa"
+slug: "pruebas-apps-moviles-estrategia-qa"
+date: "2024-09-23"
+description: "Cómo estructurar pruebas en apps React Native — tests unitarios con Jest, componentes con Testing Library, E2E con Detox y pruebas en dispositivos reales."
+tags: ["pruebas movil", "react native", "jest", "detox", "qa movil"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo estructurar pruebas en apps React Native — tests unitarios con Jest, componentes con Testing Library, E2E con Detox y pruebas en dispositivos reales.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'testes-apps-mobile-estrategia-qa'
+  - locale: 'it-IT'
+    slug: 'test-app-mobile-strategia-qa'
+  - locale: 'en'
+    slug: 'mobile-app-testing-complete-qa-strategy'
+---
+
+Una app sin pruebas es un lanzamiento con bomba de relojería. La cuestión no es si va a explotar, sino cuándo — y si será en la fase de desarrollo, donde el coste es bajo, o en producción, donde el coste es alto: usuarios quejándose, valoraciones negativas en la tienda, churn que podría haberse evitado. Las pruebas no son opcionales en software profesional. En móvil, donde el ciclo de despliegue es más lento (cualquier actualización debe pasar por la revisión de las tiendas), las pruebas son todavía más críticas.
+
+La buena noticia es que no necesitas probarlo todo para tener una app fiable. Necesitas probar las cosas correctas en el nivel correcto.
+
+## La Pirámide de Pruebas para Móvil
+
+La pirámide de pruebas define la proporción correcta de cada tipo de test:
+
+**Base (70%): Tests unitarios** — pruebas de funciones, hooks personalizados y lógica de negocio aislada. Rápidos, baratos, ejecutables en cualquier entorno.
+
+**Medio (20%): Tests de componentes** — renderizar componentes de forma aislada y verificar que muestran el contenido correcto, responden a interacciones y manejan estados de carga y error.
+
+**Cima (10%): Tests E2E** — flujos completos de usuario en un simulador o dispositivo real. Lentos, costosos, pero los únicos que validan la experiencia real del usuario.
+
+## Tests Unitarios con Jest
+
+```typescript
+// Prueba de un hook de lógica de carrito
+describe('useCart', () => {
+  it('should add an item to the cart', () => {
+    const { result } = renderHook(() => useCart());
+
+    act(() => {
+      result.current.addItem({ id: '1', name: 'Producto', price: 9.99, quantity: 1 });
+    });
+
+    expect(result.current.items).toHaveLength(1);
+    expect(result.current.total).toBe(9.99);
+  });
+
+  it('should increase quantity if item already exists', () => {
+    const { result } = renderHook(() => useCart());
+    const item = { id: '1', name: 'Producto', price: 9.99, quantity: 1 };
+
+    act(() => {
+      result.current.addItem(item);
+      result.current.addItem(item);
+    });
+
+    expect(result.current.items[0].quantity).toBe(2);
+    expect(result.current.total).toBe(19.98);
+  });
+});
+```
+
+## Tests de Componentes con Testing Library
+
+React Native Testing Library permite renderizar componentes de forma aislada con un DOM de prueba:
+
+```typescript
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
+
+describe('LoginForm', () => {
+  it('should show error when credentials are invalid', async () => {
+    const mockLogin = jest.fn().mockRejectedValue(new Error('Invalid credentials'));
+    const { getByPlaceholderText, getByText } = render(
+      <LoginForm onLogin={mockLogin} />
+    );
+
+    fireEvent.changeText(getByPlaceholderText('Email'), 'test@example.com');
+    fireEvent.changeText(getByPlaceholderText('Contraseña'), 'wrongpassword');
+    fireEvent.press(getByText('Iniciar sesión'));
+
+    await waitFor(() => {
+      expect(getByText('Credenciales incorrectas')).toBeTruthy();
+    });
+  });
+});
+```
+
+## E2E con Detox: Flujos Completos en Simulador
+
+Detox es el framework de tests E2E de referencia para React Native. Ejecuta pruebas sobre la app real corriendo en un simulador iOS o emulador Android.
+
+```typescript
+describe('Flujo de compra', () => {
+  beforeAll(async () => {
+    await device.launchApp();
+  });
+
+  it('should complete a purchase end-to-end', async () => {
+    // Login
+    await element(by.id('email-input')).typeText('usuario@test.com');
+    await element(by.id('password-input')).typeText('contraseña123');
+    await element(by.id('login-button')).tap();
+
+    // Navegación al producto
+    await waitFor(element(by.id('product-list'))).toBeVisible().withTimeout(3000);
+    await element(by.id('product-item-1')).tap();
+    await element(by.id('add-to-cart-button')).tap();
+
+    // Checkout
+    await element(by.id('cart-icon')).tap();
+    await element(by.id('checkout-button')).tap();
+    await waitFor(element(by.text('Pedido confirmado'))).toBeVisible().withTimeout(5000);
+  });
+});
+```
+
+## Pruebas en Dispositivos Reales
+
+Los simuladores no reproducen todos los comportamientos reales: rendimiento en hardware antiguo, comportamiento de la batería, interrupciones de llamadas, comportamiento del GPS en exterior. Para el lanzamiento, es esencial probar en al menos 2-3 dispositivos reales:
+
+- iPhone con iOS actual (iPhone 13 o posterior) y un iPhone más antiguo (iPhone 11 o SE)
+- Android de gama media (el 60-70% de los usuarios de Android en España tienen dispositivos de gama media)
+
+Firebase Test Lab permite ejecutar los tests de Detox en una batería de dispositivos reales en la nube, automatizando este proceso en el CI.

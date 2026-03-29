@@ -1,0 +1,77 @@
+---
+title: "UX móvil en 2025: patrones que aumentan la retención"
+slug: "ux-movil-2025-patrones-retencion"
+date: "2024-10-07"
+description: "Los patrones de UX móvil que aumentan la retención en 2025 — gestos, bottom sheets, haptic feedback, skeleton screens y navegación por tabs vs drawer."
+tags: ["ux movil", "diseno movil", "retencion app", "haptic feedback", "bottom sheet"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Los patrones de UX móvil que aumentan la retención en 2025 — gestos, bottom sheets, haptic feedback, skeleton screens y navegación por tabs vs drawer.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ux-mobile-2025-padroes-retencao'
+  - locale: 'it-IT'
+    slug: 'ux-mobile-2025-pattern-di-retention'
+  - locale: 'en'
+    slug: 'mobile-ux-2025-patterns-that-increase-retention'
+---
+
+La UX móvil es sobre sensación, no solo sobre apariencia. Una app puede ser visualmente atractiva y seguir siendo frustrante de usar. Una app visualmente simple puede crear una sensación de fluidez y control que mantiene al usuario volviendo. La diferencia está en los detalles que la mayoría de diseñadores y desarrolladores trata como adorno — gestos, feedback táctil, comportamiento de carga, patrones de navegación — pero que en conjunto definen si el usuario siente que la app trabaja con él o contra él.
+
+En 2025, las apps que retienen usuarios no son necesariamente las más bonitas. Son las que crean la mejor sensación de uso.
+
+## Gestos: Swipe, Pull-to-Refresh y Long Press con Propósito
+
+Los gestos deben ser predecibles y revelar su función en la primera interacción. El swipe horizontal para navegar entre pestañas, el swipe desde el borde izquierdo para volver atrás (iOS), el pull-to-refresh para actualizar contenido — estos son gestos que los usuarios ya conocen por otras apps y los aplican de forma instintiva.
+
+El riesgo es añadir gestos custom que el usuario debe descubrir. Si un gesto no es evidente en la primera sesión, la mayoría de los usuarios no lo descubrirá y nunca usará esa funcionalidad. Los gestos no descubiertos son features invisibles.
+
+La regla: los gestos custom solo funcionan cuando hay un mecanismo de descubrimiento (un tooltip, una animación de hint, o un punto de entrada visible que sugiere la acción).
+
+## Bottom Sheets: La Alternativa al Modal Bloqueante
+
+Los bottom sheets (paneles que aparecen desde la parte inferior de la pantalla) se han convertido en el patrón estándar para acciones contextuales en móvil. Superan a los modales de pantalla completa porque:
+- Permiten ver el contexto detrás del panel
+- Son más fáciles de descartar (swipe hacia abajo)
+- Funcionan mejor en pantallas grandes (no hay que llegar con el pulgar hasta la parte superior)
+
+Casos de uso ideales: menú de acciones sobre un elemento, formulario simple de entrada de datos, selector de opciones, preview de contenido.
+
+En React Native, `@gorhom/bottom-sheet` es la librería de referencia. Soporta snappoints configurables, gestos fluidos y comportamiento correcto con el teclado.
+
+## Haptic Feedback: La Capa Física de la UX
+
+El feedback táctil (vibración) es la dimensión que más diferencía la UX móvil de la web. Bien usado, hace que las interacciones se sientan más reales y satisfactorias. Mal usado, es spam vibratorio que molesta.
+
+```typescript
+import * as Haptics from 'expo-haptics';
+
+// Para acciones de éxito (confirmar pedido, completar tarea)
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+
+// Para selecciones en un picker o toggle
+await Haptics.selectionAsync();
+
+// Para errores o acciones de advertencia
+await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+```
+
+La regla del haptic feedback: úsalo en momentos de confirmación (pedido completado, mensaje enviado, tarea marcada como hecha), no en cada tap o scroll. Si el usuario percibe la vibración conscientemente, la estás usando demasiado.
+
+## Skeleton Screens: Mejor que Spinners
+
+Los skeleton screens (placeholders con la forma del contenido que va a aparecer) reducen la percepción de carga comparado con un spinner genérico. El usuario ve la estructura de la pantalla inmediatamente y percibe que algo está pasando en la dirección correcta.
+
+El skeleton screen correcto imita fielmente la estructura del contenido real: si la lista tiene elementos con foto circular, título y dos líneas de descripción, el skeleton debe tener esos mismos elementos en gris. Un skeleton genérico de barras horizontales funciona menos bien.
+
+## Tabs vs Drawer: Navegación que el Usuario Espera
+
+Para apps con 2-5 secciones principales: **tabs inferiores** (bottom tabs). Accesibles con el pulgar, siempre visibles, patrón conocido por todos los usuarios de iOS y Android.
+
+Para apps con más de 5 secciones o con secciones secundarias: **drawer** (menú hamburguesa lateral) para las secciones menos frecuentes, tabs para las 4-5 más usadas.
+
+La regla de oro: las secciones que el usuario visita más del 80% de las veces deben estar en tabs. El drawer es para lo que rara vez se usa pero necesita estar accesible.

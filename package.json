@@ -17,6 +17,7 @@
     "prebuild:br": "cp config/manifests/manifest.br.json public/manifest.json && NEXT_PUBLIC_LOCALE=pt-BR tsx scripts/validate-frontmatter.ts",
     "prebuild:it": "cp config/manifests/manifest.it.json public/manifest.json && NEXT_PUBLIC_LOCALE=it-IT tsx scripts/validate-frontmatter.ts",
     "prebuild:en": "cp config/manifests/manifest.en.json public/manifest.json && NEXT_PUBLIC_LOCALE=en tsx scripts/validate-frontmatter.ts",
+    "prebuild:es": "cp config/manifests/manifest.es.json public/manifest.json && NEXT_PUBLIC_LOCALE=es-ES tsx scripts/validate-frontmatter.ts",
     "optimize:images": "tsx scripts/optimize-images.ts",
     "type-check": "tsc --noEmit",
     "prebuild": "npm run build:content && npm run generate:search-index && ([ -f public/manifest.json ] || cp config/manifests/manifest.en.json public/manifest.json)",
@@ -24,7 +25,8 @@
     "build:br": "NEXT_PUBLIC_LOCALE=pt-BR NEXT_PUBLIC_SITE_URL=https://forjadesistemas.com.br OUT_DIR=dist-br next build",
     "build:it": "NEXT_PUBLIC_LOCALE=it-IT NEXT_PUBLIC_SITE_URL=https://systemforge.it OUT_DIR=dist-it next build",
     "build:en": "NEXT_PUBLIC_LOCALE=en NEXT_PUBLIC_SITE_URL=https://systemforgesoftware.com OUT_DIR=dist-en next build",
-    "smoke:seo": "npm run build:br && npm run build:it && npm run build:en && npm run validate:sitemap-hreflang",
+    "build:es": "NEXT_PUBLIC_LOCALE=es-ES NEXT_PUBLIC_SITE_URL=https://systemforge.es OUT_DIR=dist-es next build",
+    "smoke:seo": "npm run build:br && npm run build:it && npm run build:en && npm run build:es && npm run validate:sitemap-hreflang",
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
@@ -72,6 +74,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.5.0",
     "velite": "^0.3.1",
+    "web-vitals": "^5.2.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {

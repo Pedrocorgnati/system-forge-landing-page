@@ -7,6 +7,7 @@ import type { SiteConfig, SupportedLocale } from './types'
 import { brConfig } from './sites/br'
 import { itConfig } from './sites/it'
 import { enConfig } from './sites/en'
+import { esConfig } from './sites/es'
 
 export type { SiteConfig, SupportedLocale, NavItem, LocaleRoutes, LocaleMessages } from './types'
 
@@ -14,6 +15,7 @@ const SITE_CONFIGS: Record<SupportedLocale, SiteConfig> = {
   'pt-BR': brConfig,
   'it-IT': itConfig,
   'en': enConfig,
+  'es-ES': esConfig,
 }
 
 /**
@@ -53,9 +55,10 @@ export const LOCALE_URLS: Record<SupportedLocale, string> = {
   'pt-BR': 'https://forjadesistemas.com.br',
   'it-IT': 'https://systemforge.it',
   'en': 'https://systemforgesoftware.com',
+  'es-ES': 'https://systemforge.es',
 }
 
 /**
  * Todos os locales suportados.
  */
-export const SUPPORTED_LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en']
+export const SUPPORTED_LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en', 'es-ES']

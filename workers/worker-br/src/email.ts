@@ -67,6 +67,7 @@ export async function sendWelcomeEmailBR(
       subject: "Bem-vindo à newsletter da Forja de Sistemas!",
       html,
     }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

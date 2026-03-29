@@ -147,6 +147,7 @@ export async function sendConfirmationEmail(
       subject: "Conferma la tua iscrizione alla newsletter",
       html,
     }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {
@@ -177,6 +178,7 @@ export async function sendWelcomeEmailIT(
       subject: "Benvenuto nella newsletter SystemForge!",
       html,
     }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

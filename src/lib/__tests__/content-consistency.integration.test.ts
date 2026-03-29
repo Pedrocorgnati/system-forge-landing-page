@@ -2,14 +2,14 @@
  * src/lib/__tests__/content-consistency.integration.test.ts
  *
  * Testes de INTEGRAÇÃO — consistência cross-locale do content layer.
- * Lê arquivos JSON reais do disco e valida paridade entre os 3 locales.
+ * Lê arquivos JSON reais do disco e valida paridade entre os 4 locales.
  *
  * Superfície testada:
  *   content/{locale}/pages/{type}.json — existência e paridade de keys
  *
  * Cobertura:
- *   Cenário 1 — Todos os 30 arquivos existem no disco
- *   Cenário 2 — messages.json: top-level keys idênticos em pt-BR / it-IT / en
+ *   Cenário 1 — Todos os 40 arquivos existem no disco
+ *   Cenário 2 — messages.json: top-level keys idênticos em pt-BR / it-IT / en / es-ES
  *   Cenário 3 — Todos os arquivos são JSON válido (não corrompido)
  *   Cenário 4 — Nenhum arquivo de conteúdo está vazio ({}  ou [])
  *
@@ -23,7 +23,7 @@ import { describe, it, expect } from 'vitest'
 import path from 'path'
 import fs from 'fs'
 
-const LOCALES = ['pt-BR', 'it-IT', 'en'] as const
+const LOCALES = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 const CONTENT_TYPES = [
   'messages',
   'services',

@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 /**
  * scripts/check-content-parity.ts
- * Verifica paridade de conteúdo entre os 3 locales.
+ * Verifica paridade de conteúdo entre os 4 locales.
  * Falha com exit 1 se paridade quebrada.
  *
  * Uso: npx tsx scripts/check-content-parity.ts
@@ -10,7 +10,7 @@
 import { readFileSync, existsSync } from 'fs'
 import path from 'path'
 
-const LOCALES = ['pt-BR', 'it-IT', 'en'] as const
+const LOCALES = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 
 const CONTENT_FILES = [
   'messages.json',

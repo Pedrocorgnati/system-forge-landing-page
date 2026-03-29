@@ -1,6 +1,6 @@
 /**
  * scripts/hreflang-validator.ts
- * Validação bidirecional de hreflang entre pastas de locale do blog triple-market.
+ * Validação bidirecional de hreflang entre pastas de locale do blog quad-market.
  *
  * Para cada artigo universal (exclusive=false), verifica:
  *   1. Frontmatter válido (PostFrontmatterSchema)
@@ -30,7 +30,7 @@ import type { SupportedLocale } from '@/lib/blog'
 // Configuração
 // ---------------------------------------------------------------------------
 
-const SUPPORTED_LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en']
+const SUPPORTED_LOCALES: SupportedLocale[] = ['pt-BR', 'it-IT', 'en', 'es-ES']
 const CONTENT_ROOT = path.resolve(process.cwd(), 'content')
 const BLOG_SUBFOLDER = 'blog'
 
@@ -185,7 +185,7 @@ function validate(articles: ParsedArticle[]): ValidationError[] {
 
 function main(): void {
   console.log('========================================')
-  console.log('  Hreflang Validator — Blog Triple-Market')
+  console.log('  Hreflang Validator — Blog Quad-Market')
   console.log('========================================\n')
 
   if (!fs.existsSync(CONTENT_ROOT)) {

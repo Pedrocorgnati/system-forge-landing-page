@@ -61,8 +61,8 @@ if [ -d "src" ]; then
   fi
 fi
 
-# URLs hardcodadas de domínios IT e EN em componentes
-for domain in "systemforge\.it" "systemforgesoftware\.com"; do
+# URLs hardcodadas de domínios IT, EN e ES em componentes
+for domain in "systemforge\.it" "systemforgesoftware\.com" "systemforge\.es"; do
   DOMAIN_FOUND=$(grep -r "$domain" src/ --include="*.tsx" --include="*.ts" \
     --exclude-dir="config" 2>/dev/null | grep -v '^\s*//' | wc -l || echo 0)
   if [ "$DOMAIN_FOUND" -gt 0 ]; then

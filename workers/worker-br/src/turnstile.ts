@@ -33,7 +33,7 @@ export async function verifyTurnstile(
   try {
     const res = await fetch(
       "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-      { method: "POST", body },
+      { method: "POST", body, signal: AbortSignal.timeout(5_000) },
     );
     const data = (await res.json()) as TurnstileResponse;
     // Validar hostname — sem isso, token de outro domínio seria aceito

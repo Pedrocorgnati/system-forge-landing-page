@@ -32,12 +32,14 @@ const BUILD_DIRS: Record<string, string> = {
   'pt-BR': 'out-br',
   'it-IT': 'out-it',
   'en': 'out-en',
+  'es-ES': 'out-es',
 }
 
 const LOCALE_HREFLANG: Record<string, string> = {
   'pt-BR': 'pt-BR',
   'it-IT': 'it',
   'en': 'en',
+  'es-ES': 'es',
 }
 
 // ---------------------------------------------------------------------------
@@ -138,7 +140,7 @@ function validateRoute(routeKey: string): PageResult[] {
     const html = fs.readFileSync(htmlPath, 'utf-8')
     const hreflangLinks = extractHreflangLinks(html)
 
-    // Verificar que todos os 3 locales têm alternate
+    // Verificar que todos os 4 locales têm alternate
     for (const [targetLocale, targetBuildDir] of Object.entries(BUILD_DIRS)) {
       const targetSlugs = ROUTE_SLUGS[targetLocale as keyof typeof ROUTE_SLUGS]
       const targetSlug = targetSlugs[routeKey as keyof typeof targetSlugs]
@@ -206,7 +208,7 @@ function validateRoute(routeKey: string): PageResult[] {
 
 function main(): void {
   console.log('=============================================')
-  console.log('  Hreflang Pages Validator — Triple-Market')
+  console.log('  Hreflang Pages Validator — Quad-Market')
   console.log('=============================================\n')
 
   const allResults: PageResult[] = []

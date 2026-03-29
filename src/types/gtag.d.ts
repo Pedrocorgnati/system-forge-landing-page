@@ -13,6 +13,8 @@ interface Window {
     target: string | Date,
     params?: Record<string, string | number | boolean | undefined>,
   ) => void
+  // dataLayer is the GA4 event queue; bootstrapped before gtag.js loads
+  dataLayer?: unknown[]
 }
 
 declare function gtag(

@@ -18,6 +18,7 @@ export const HREFLANG_CODE: Record<SupportedLocale, string> = {
   'pt-BR': 'pt-BR',
   'it-IT': 'it',
   'en': 'en',
+  'es-ES': 'es',
 }
 
 /**

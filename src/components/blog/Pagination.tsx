@@ -5,6 +5,9 @@
  */
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 interface PaginationProps {
   currentPage: number
@@ -25,7 +28,7 @@ export function Pagination({ currentPage, totalPages, basePath }: PaginationProp
   return (
     <nav
       data-testid="blog-pagination"
-      aria-label="Paginação"
+      aria-label={m.sections.blog.paginationAriaLabel}
       className="flex items-center justify-center gap-4 mt-8"
     >
       {currentPage > 1 ? (

@@ -1,10 +1,10 @@
 #!/usr/bin/env tsx
 /**
  * scripts/check-build-isolation.ts
- * Verifica que cada build (dist-br/dist-it/dist-en) contém APENAS
+ * Verifica que cada build (dist-br/dist-it/dist-en/dist-es) contém APENAS
  * conteúdo do locale correto. Zero strings de outros locales no HTML.
  *
- * Roda APÓS os 3 builds completarem (npm run build:br && build:it && build:en).
+ * Roda APÓS os 4 builds completarem (npm run build:br && build:it && build:en && build:es).
  * Pré-deploy gate — bloqueia deploys com cross-contamination de locale.
  *
  * Uso: npx tsx scripts/check-build-isolation.ts
@@ -47,6 +47,14 @@ const checks: BuildCheck[] = [
     expectedLang: 'en',
     expectedDomain: 'systemforgesoftware.com',
   },
+  {
+    locale: 'es-ES',
+    outDir: 'dist-es',
+    forbiddenStrings: ['forjadesistemas.com.br', 'systemforge.it', 'systemforgesoftware.com', 'pt-BR', 'it-IT'],
+    requiredStrings: ['systemforge.es', 'lang="es"'],
+    expectedLang: 'es',
+    expectedDomain: 'systemforge.es',
+  },
 ]
 
 let errors = 0
@@ -67,7 +75,7 @@ for (const { outDir } of checks) {
   }
 }
 if (errors > 0) {
-  console.error(`\n❌ ${errors} build(s) ausente(s). Execute npm run build:br && build:it && build:en antes deste script.`)
+  console.error(`\n❌ ${errors} build(s) ausente(s). Execute npm run build:br && build:it && build:en && build:es antes deste script.`)
   process.exit(1)
 }
 console.log('✅ dist-br/ dist-it/ dist-en/ presentes')

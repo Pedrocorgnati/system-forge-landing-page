@@ -1,0 +1,127 @@
+---
+title: "Bases de datos vectoriales: guía práctica para devs de IA"
+slug: "bases-de-datos-vectoriales-guia-devs-ia"
+date: "2024-11-20"
+description: "Qué son las bases de datos vectoriales, cuándo usarlas, comparativa entre Pinecone, Weaviate, pgvector y Chroma con ejemplos prácticos."
+tags: ["vector database", "embeddings", "rag", "pgvector", "pinecone"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Qué son las bases de datos vectoriales, cuándo usarlas, comparativa entre Pinecone, Weaviate, pgvector y Chroma con ejemplos prácticos.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'vector-databases-guia-pratico-devs-ia'
+  - locale: 'it-IT'
+    slug: 'vector-database-guida-pratica-sviluppatori-ia'
+  - locale: 'en'
+    slug: 'vector-databases-practical-guide-for-ai-devs'
+---
+
+## El Problema que las Bases de Datos Vectoriales Resuelven
+
+Los sistemas de IA basados en LLMs frecuentemente necesitan buscar información relevante en una base de datos — contratos, documentos, base de conocimiento, historial de conversaciones. La búsqueda tradicional (SQL LIKE, full-text search) funciona con palabras clave exactas. Pero "¿cuál es la política de vacaciones?" y "¿cuántos días de descanso tienen los empleados?" son semánticamente equivalentes y léxicamente completamente diferentes.
+
+Las bases de datos vectoriales resuelven esto almacenando representaciones numéricas del significado (embeddings) y permitiendo búsqueda por similitud semántica — no por palabras clave.
+
+## Cómo Funcionan los Embeddings
+
+Un embedding es un vector de números (típicamente 1.536 dimensiones con los modelos de OpenAI) que representa el significado de un texto. Textos semánticamente similares tienen vectores similares en el espacio multidimensional.
+
+```python
+from openai import OpenAI
+
+client = OpenAI()
+
+def get_embedding(text: str) -> list[float]:
+    response = client.embeddings.create(
+        input=text,
+        model="text-embedding-3-small"
+    )
+    return response.data[0].embedding
+
+# Textos semánticamente similares tienen embeddings cercanos
+e1 = get_embedding("política de vacaciones de la empresa")
+e2 = get_embedding("días libres que tengo disponibles")
+# La similitud coseno entre e1 y e2 es alta (~0.85)
+
+e3 = get_embedding("receta de paella valenciana")
+# La similitud coseno entre e1 y e3 es baja (~0.15)
+```
+
+## pgvector: La Opción Más Pragmática
+
+Si ya tienes PostgreSQL, `pgvector` es la forma más sencilla de añadir búsqueda vectorial sin introducir una base de datos nueva en la infraestructura:
+
+```sql
+-- Instalar extensión
+CREATE EXTENSION vector;
+
+-- Tabla con columna de embedding
+CREATE TABLE documents (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  content TEXT NOT NULL,
+  embedding vector(1536), -- dimensiones del modelo de OpenAI
+  metadata JSONB,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Índice para búsqueda aproximada (mucho más rápido que exacta)
+CREATE INDEX ON documents USING ivfflat (embedding vector_cosine_ops)
+  WITH (lists = 100);
+
+-- Búsqueda por similitud
+SELECT content, 1 - (embedding <=> '[...]') AS similarity
+FROM documents
+ORDER BY embedding <=> '[...]'  -- distancia coseno
+LIMIT 5;
+```
+
+Para la mayoría de los proyectos con menos de 1 millón de vectores, pgvector tiene el rendimiento suficiente y elimina la complejidad operativa de gestionar otra base de datos.
+
+## Pinecone: Managed Service para Producción
+
+Pinecone es el servicio gestionado de referencia para bases de datos vectoriales. Sin infraestructura que gestionar, escalado automático, y rendimiento optimizado para búsqueda aproximada a escala.
+
+Es la elección correcta cuando: el proyecto supera los 10 millones de vectores, no hay equipo DevOps para gestionar pgvector en producción, o la latencia de búsqueda es un SLO crítico.
+
+El inconveniente es el precio: a partir de 70 $/mes para el plan de pago, y puede escalar significativamente con volumen.
+
+## Chroma: Para Desarrollo y Prototipado
+
+Chroma es una base de datos vectorial open source que puede correr completamente en memoria o en disco, sin servidor externo. Es ideal para desarrollo local y prototipado:
+
+```python
+import chromadb
+
+client = chromadb.Client()
+collection = client.create_collection("documents")
+
+# Añadir documentos (Chroma calcula los embeddings)
+collection.add(
+    documents=["política de vacaciones...", "manual de empleados..."],
+    ids=["doc1", "doc2"]
+)
+
+# Buscar por similitud
+results = collection.query(
+    query_texts=["días libres"],
+    n_results=2
+)
+```
+
+Chroma también tiene un servidor HTTP para deploy en producción, aunque para aplicaciones serias con más de 100k vectores, pgvector o Pinecone son más robustos.
+
+## Cuándo Usar Cada Opción
+
+| Escenario | Recomendación |
+|-----------|---------------|
+| Prototipo / desarrollo local | Chroma |
+| Producción con PostgreSQL existente, < 1M vectores | pgvector |
+| Producción sin PostgreSQL o > 5M vectores | Pinecone |
+| Multi-modalidad (texto + imágenes) | Weaviate |
+| Open source autohosteado a escala | Qdrant |
+
+La regla más importante: empieza con pgvector si ya tienes Postgres. Migra a un servicio dedicado solo cuando hayas verificado que tienes un caso de uso real y el volumen lo justifica.

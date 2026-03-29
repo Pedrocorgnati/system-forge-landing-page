@@ -8,12 +8,14 @@ const AREA_SERVED: Record<SupportedLocale, string> = {
   'pt-BR': 'Brasil',
   'it-IT': 'Italia',
   'en': 'International',
+  'es-ES': 'España y Latinoamérica',
 }
 
 const SERVICE_TYPE: Record<SupportedLocale, string> = {
   'pt-BR': 'Desenvolvimento de Software',
   'it-IT': 'Sviluppo Software',
   'en': 'Software Development',
+  'es-ES': 'Desarrollo de Software',
 }
 
 export function JsonLdLocalBusiness({ siteConfig }: Props) {
@@ -35,6 +37,7 @@ export function JsonLdLocalBusiness({ siteConfig }: Props) {
       addressCountry:
         siteConfig.locale === 'pt-BR' ? 'BR'
         : siteConfig.locale === 'it-IT' ? 'IT'
+        : siteConfig.locale === 'es-ES' ? 'ES'
         : 'US',
     }
   }

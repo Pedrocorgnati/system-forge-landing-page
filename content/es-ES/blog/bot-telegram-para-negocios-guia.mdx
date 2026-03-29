@@ -1,0 +1,111 @@
+---
+title: "Bot de Telegram para negocios: guía completa"
+slug: "bot-telegram-para-negocios-guia"
+date: "2024-10-21"
+description: "Cómo crear un bot de Telegram para automatización de notificaciones, atención al cliente e integración con sistemas internos — con ejemplos en Python y Node.js."
+tags: ["telegram bot", "telegram api", "chatbot", "notificaciones", "automatizacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo crear un bot de Telegram para automatización de notificaciones, atención al cliente e integración con sistemas internos — con ejemplos en Python y Node.js."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'bot-telegram-para-negocios-guia'
+  - locale: 'it-IT'
+    slug: 'bot-telegram-per-aziende-guida'
+  - locale: 'en'
+    slug: 'telegram-bot-for-business-complete-guide'
+---
+
+Telegram tiene más de 900 millones de usuarios activos y una API de bots que es, técnicamente, la mejor del mercado entre plataformas de mensajería. Sin restricciones de plantilla como WhatsApp, sin aprobación de contenido, sin coste por mensaje enviado. A pesar de eso, la mayoría de las empresas en España ignora Telegram como canal de negocio — un error que queda claro cuando descubres lo que se puede hacer con un bot bien construido.
+
+Los bots de Telegram son ideales para notificaciones internas (alertas de error, informes automáticos, aprobaciones), atención a comunidades técnicas (developers, entusiastas, usuarios de SaaS) e integración con sistemas internos donde el canal de comunicación es Telegram por elección del equipo.
+
+## Creando el Bot: BotFather y Configuración Inicial
+
+El proceso de creación es sorprendentemente simple. Abre Telegram, busca `@BotFather` y sigue las instrucciones:
+
+```
+/newbot
+> Nombre: MiEmpresaBot
+> Username: miempresa_bot
+> Token: 7234567890:AAH5...
+```
+
+Guarda ese token — es el que usarás en toda la integración.
+
+## Implementación con Node.js: grammY
+
+`grammY` es el framework más moderno y mejor tipado para bots de Telegram en Node.js/TypeScript:
+
+```typescript
+import { Bot, Context } from 'grammy'
+
+const bot = new Bot(process.env.TELEGRAM_TOKEN!)
+
+bot.command('start', (ctx) => {
+  ctx.reply('Hola! Soy el bot de soporte de MiEmpresa. ¿En qué puedo ayudarte?', {
+    reply_markup: {
+      keyboard: [
+        [{ text: '📦 Estado de mi pedido' }],
+        [{ text: '❓ Preguntas frecuentes' }],
+        [{ text: '👤 Hablar con un agente' }],
+      ],
+      resize_keyboard: true,
+    },
+  })
+})
+
+bot.hears('📦 Estado de mi pedido', async (ctx) => {
+  await ctx.reply('Por favor, indica tu número de pedido (ej: PED-2024-1234)')
+})
+
+bot.start()
+```
+
+## Casos de Uso para Empresas Españolas
+
+**Notificaciones de sistemas internos:** Un bot que envía alertas al canal de Telegram del equipo cuando hay un error crítico en producción, cuando un pedido supera cierto valor o cuando un KPI sale de rango. Más efectivo que el email para alertas urgentes.
+
+```typescript
+// Enviar notificación desde cualquier sistema
+async function notificarEquipo(mensaje: string) {
+  await fetch(`https://api.telegram.org/bot${TOKEN}/sendMessage`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      chat_id: CHANNEL_ID,
+      text: mensaje,
+      parse_mode: 'HTML',
+    }),
+  })
+}
+```
+
+**Aprobaciones de workflow:** Un bot que envía una solicitud de aprobación con botones inline. El gestor aprueba o rechaza directamente desde Telegram sin tener que abrir otra aplicación.
+
+**Informes automáticos:** Envío programado de resumen diario de ventas, incidencias abiertas o métricas clave al canal del equipo directivo. Con `node-cron` o el cron de tu servidor, el informe se genera y envía automáticamente.
+
+## Privacidad y RGPD en Bots de Telegram
+
+Para bots que procesan datos de usuarios (nombres, pedidos, consultas), el RGPD es aplicable. Puntos a considerar:
+
+- **Base legal:** El usuario debe consentir explícitamente al usar el bot para comunicaciones comerciales
+- **Almacenamiento:** Los datos de conversaciones no deben almacenarse indefinidamente sin justificación
+- **Telegram como procesador:** Telegram puede actuar como encargado del tratamiento — revisa su DPA (Data Processing Agreement)
+- **Sede en España:** Si el bot procesa datos de usuarios en España, informar en la política de privacidad
+
+## Cuándo WhatsApp Business API vs Telegram
+
+En España, WhatsApp tiene mayor penetración que Telegram entre el público general. Para atención al cliente B2C, WhatsApp Business API suele ser la elección correcta a pesar del coste por mensaje.
+
+Telegram tiene sentido cuando: tu audiencia es tech-savvy, usas el bot para comunicaciones internas de equipo, necesitas funcionalidades avanzadas (bots inline, canales de broadcast grandes) o quieres evitar el coste por conversación de WhatsApp.
+
+## Conclusión
+
+Un bot de Telegram bien construido puede automatizar notificaciones, simplificar aprobaciones y mejorar la comunicación interna con un coste marginal casi nulo. Para equipos técnicos o empresas con audiencia tech-savvy en España, es un canal con ROI excelente.
+
+¿Quieres implementar un bot de Telegram para tu empresa? [Contacta con SystemForge](https://systemforge.es/contacto).

@@ -1,0 +1,75 @@
+---
+title: "Seguridad en SaaS: qué implementar antes de lanzar"
+slug: "seguridad-saas-que-implementar-antes-de-lanzar"
+date: "2024-10-30"
+description: "Checklist de seguridad obligatorio para SaaS antes del lanzamiento: autenticación, autorización, cifrado, rate limiting, auditoría y protección de datos."
+tags: ["seguridad saas", "autenticacion", "owasp", "cifrado", "compliance saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Checklist de seguridad obligatorio para SaaS antes del lanzamiento: autenticación, autorización, cifrado, rate limiting, auditoría y protección de datos."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-saas-o-que-implementar-antes-de-lancar'
+  - locale: 'it-IT'
+    slug: 'sicurezza-saas-cosa-implementare-prima-del-lancio'
+  - locale: 'en'
+    slug: 'saas-security-what-to-implement-before-launch'
+---
+
+Un fallo de seguridad justo después del lanzamiento puede cerrar un SaaS antes de que tenga la oportunidad de demostrar su valor. No porque el ataque sea necesariamente catastrófico en escala — sino porque la reputación es el activo más frágil de un producto nuevo. Una brecha de datos de clientes en el primer mes de operación raramente es recuperable.
+
+La buena noticia es que la mayoría de las vulnerabilidades explotadas en SaaS nuevos no son zero-days sofisticados. Son fallos básicos y predecibles: contraseñas sin límite de intentos, tokens expuestos en logs, ausencia de validación de permisos en endpoints de API, datos sensibles sin cifrar. Resolver estas vulnerabilidades antes del lanzamiento es laborioso pero completamente factible.
+
+Esta guía cubre las cinco capas de seguridad que todo SaaS debe tener implementadas antes de recibir los primeros usuarios reales.
+
+## Capa 1: Autenticación Robusta
+
+La autenticación es la primera línea de defensa. Los requisitos mínimos no negociables:
+
+**Límite de intentos de login:** máximo 5-10 intentos fallidos antes de bloquear temporalmente la cuenta o requerir CAPTCHA. Sin esto, cualquier contraseña es susceptible a fuerza bruta automatizada.
+
+**Verificación de email obligatoria:** no permitir acceso a funcionalidades reales hasta que el email esté verificado. Reduce spam, cuentas falsas y facilita la recuperación de cuentas.
+
+**Contraseñas: mínimo 8 caracteres, hash con bcrypt o Argon2** (no MD5, no SHA-1). Considerar el compromiso de base de datos como un escenario posible y hacer que las contraseñas hasheadas sean inútiles para el atacante.
+
+**MFA disponible (obligatorio para cuentas enterprise):** TOTP (Google Authenticator, Authy) como mínimo. Para cuentas con acceso a datos especialmente sensibles, considerar MFA obligatorio.
+
+## Capa 2: Autorización y RBAC
+
+Toda acción sensible debe validar que el usuario tiene permiso para realizarla — no solo que está autenticado. El error clásico es proteger las rutas de la interfaz pero olvidar validar los permisos en los endpoints de API.
+
+Un endpoint que devuelve datos de facturación debe verificar que el usuario tiene el permiso `billing:read` antes de procesar la solicitud, independientemente de cómo llegó la solicitud.
+
+## Capa 3: Protección de Datos bajo el RGPD
+
+En España y la UE, el RGPD es obligatorio para cualquier producto que maneje datos de residentes europeos — que en la práctica es casi cualquier SaaS. Los requisitos mínimos:
+
+**Política de privacidad clara:** qué datos se recogen, para qué se usan, cuánto tiempo se conservan y cómo puede el usuario ejercer sus derechos (acceso, rectificación, supresión, portabilidad).
+
+**Consentimiento explícito:** para cookies no esenciales, para comunicaciones de marketing, y para cualquier tratamiento de datos que vaya más allá de la prestación del servicio contratado.
+
+**Cifrado de datos sensibles en reposo:** datos de pago (nunca almacenar el número de tarjeta completo — usar tokens de Stripe/pasarela), datos de salud si aplica, y cualquier dato personal de carácter especial.
+
+**Proceso de eliminación de cuenta:** cuando un usuario solicita eliminar su cuenta, todos sus datos personales deben eliminarse o anonimizarse en un plazo razonable (máximo 30 días).
+
+## Capa 4: Seguridad de la Infraestructura
+
+**Variables de entorno, nunca en código:** ningún secreto (API keys, contraseñas de base de datos, tokens de JWT) debe estar en el repositorio. Usar variables de entorno gestionadas por la plataforma de hosting.
+
+**HTTPS obligatorio en todos los endpoints:** sin excepción. Configurar HSTS (HTTP Strict Transport Security) para forzar HTTPS en navegadores.
+
+**Headers de seguridad HTTP:** Content-Security-Policy, X-Frame-Options, X-Content-Type-Options. Next.js permite configurarlos en `next.config.js`.
+
+**Rate limiting en todos los endpoints sensibles:** especialmente en autenticación, registro y cualquier endpoint que genere carga significativa.
+
+## Capa 5: Logs y Auditoría
+
+**Logs de acceso a datos sensibles:** quién accedió a qué datos y cuándo. Este registro es requerido por el RGPD para datos sensibles y es esencial para responder a incidentes.
+
+**Alertas de anomalías:** picos de solicitudes fallidas de autenticación, accesos desde IPs/países inusuales, exportaciones masivas de datos. Sentry para errores de aplicación y alertas en el canal de ops de Slack para eventos de seguridad.
+
+**Prueba de penetración básica antes del lanzamiento:** herramientas como OWASP ZAP o Burp Suite Community Edition permiten hacer un scan básico de vulnerabilidades sin coste. Identifica los problemas más obvios antes de que lo haga un atacante.

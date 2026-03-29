@@ -1,0 +1,144 @@
+---
+title: "Logística en marketplaces españoles: transportistas y devoluciones"
+slug: "logistica-marketplace-transportistas-espana"
+date: "2024-09-16"
+description: "Gestión de logística en marketplaces españoles — modelos de fulfillment, integración con transportistas, política de devoluciones y costes reales."
+tags: ["marketplace logistica", "fulfillment", "devolucion ecommerce", "transportistas", "marketplace espana"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Gestión de logística en marketplaces españoles — modelos de fulfillment, integración con transportistas, política de devoluciones y costes reales."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'logistica-marketplace-transportadoras-brasil'
+  - locale: 'it-IT'
+    slug: 'logistica-marketplace-italia-spedizioni-resi'
+  - locale: 'en'
+    slug: 'marketplace-logistics-shipping-returns'
+---
+
+La logística en un marketplace es fundamentalmente más compleja que en un e-commerce propio. Los pedidos pueden contener productos de múltiples vendedores. Cada vendedor puede usar distintos transportistas con distintos plazos. Las devoluciones pueden ir al marketplace, al vendedor, o a ambos. Y toda esta complejidad debe ser invisible para el comprador, que espera una experiencia homogénea independientemente de quién envíe el producto.
+
+Este artículo cubre los modelos de fulfillment disponibles para marketplaces en España y cómo gestionar cada uno.
+
+## Los Tres Modelos de Fulfillment
+
+### 1. Fulfillment por el Vendedor (FBM)
+
+Cada vendedor gestiona su propio almacenamiento, empaquetado y envío. El marketplace recibe el pedido, lo transmite al vendedor, y el vendedor gestiona el envío.
+
+**Ventajas:**
+- Sin inversión en infraestructura logística por parte del marketplace
+- Cada vendedor puede usar su transportista preferido
+- Menor complejidad técnica para el marketplace
+
+**Desventajas:**
+- La experiencia de entrega varía por vendedor (diferente packaging, distintos plazos, distinta calidad)
+- Si el comprador hace un pedido con productos de 3 vendedores, recibe 3 paquetes distintos
+- La calidad del servicio post-venta depende de cada vendedor individualmente
+
+Para marketplaces en fase inicial en España, FBM es casi siempre el modelo de partida. La complejidad operacional es manejable y no requiere inversión en almacenamiento.
+
+### 2. Fulfillment por el Marketplace (FBP)
+
+El marketplace gestiona el almacenamiento y el envío. Los vendedores envían su inventario al almacén del marketplace, y el marketplace gestiona todos los envíos.
+
+**Ventajas:**
+- Experiencia de entrega homogénea para todos los compradores
+- Posibilidad de consolidar paquetes de distintos vendedores en un solo envío
+- Mayor control de calidad del proceso de envío
+
+**Desventajas:**
+- Requiere inversión significativa en almacenamiento y logística
+- Coste operacional más alto
+- Los vendedores pierden control sobre su inventario
+
+Este modelo es para marketplaces con volumen suficiente que justifica la infraestructura — generalmente con cientos de vendedores activos y miles de pedidos mensuales.
+
+### 3. Modelo Híbrido
+
+Los marketplaces más maduros en España (El Corte Inglés marketplace, Leroy Merlin marketplace) suelen operar en modo híbrido: FBP para vendedores premium o de alto volumen, FBM para el resto.
+
+## Gestión Técnica de Envíos Multivendedor
+
+Cuando un pedido tiene productos de múltiples vendedores, la plataforma debe:
+
+```typescript
+interface PedidoMultivendedor {
+  id: string
+  items: ItemPedido[]
+  // Agrupar items por vendedor automáticamente
+  subpedidos: SubpedidoVendedor[]
+}
+
+interface SubpedidoVendedor {
+  vendedorId: string
+  items: ItemPedido[]
+  transportista?: string
+  trackingNumber?: string
+  estado: EstadoEnvio
+  fechaEnvioEstimada: Date
+}
+
+// El comprador ve un único pedido; internamente hay múltiples envíos
+```
+
+Cada vendedor recibe notificación de los items de su subpedido. La experiencia del comprador muestra los múltiples envíos con sus respectivos trackings.
+
+## Política de Devoluciones: El Punto Más Delicado
+
+Las devoluciones en un marketplace son complejas porque implican al menos tres partes: el comprador, el vendedor y el marketplace (como árbitro y garante de la experiencia).
+
+### Marco Legal en España
+
+El derecho de desistimiento permite a los consumidores devolver compras online sin justificación en 14 días naturales desde la recepción. Esto aplica también a compras en marketplaces.
+
+El marketplace tiene responsabilidad ante el consumidor aunque el envío venga del vendedor. Si el vendedor no gestiona la devolución correctamente, el marketplace debe intervenir para proteger al comprador.
+
+### Flujos de Devolución
+
+**Devolución por desistimiento (dentro de 14 días):**
+1. Comprador solicita devolución en el portal del marketplace
+2. Se genera etiqueta de devolución (puede ser a cargo del vendedor o del marketplace según la política)
+3. El paquete vuelve al vendedor (o al almacén del marketplace si es FBP)
+4. El reembolso se procesa automáticamente al confirmar la recepción
+
+**Devolución por producto defectuoso:**
+El vendedor tiene obligación de reparación, sustitución o reembolso por garantía legal de conformidad (2 años en España). El proceso es similar pero el coste de devolución siempre es del vendedor.
+
+**Disputa sin acuerdo:**
+Si el vendedor rechaza la devolución y el comprador escala al marketplace, el marketplace debe mediar con acceso a la conversación y evidencias. La política debe definir plazos máximos de resolución (recomendado: 5 días hábiles).
+
+## Integración con Transportistas en el Marketplace
+
+Para marketplaces en España, las integraciones más frecuentes son:
+
+**Para envíos nacionales estándar:** MRW, SEUR, GLS — los tres tienen APIs bien documentadas.
+
+**Para envíos internacionales:** GLS (para Europa), DHL Express (para fuera de Europa).
+
+**Para puntos de recogida:** La red de Puntos Pack de Correos, los ParcelShops de GLS y los PUDOs de SEUR son alternativas de entrega que reducen el coste y mejoran la flexibilidad para el comprador.
+
+La integración técnica mínima con cada transportista para un marketplace:
+- Generación automática de etiquetas al confirmar pedido
+- Registro del número de tracking
+- Webhook para actualización de estados
+- Generación de etiqueta de devolución cuando se aprueba la solicitud
+
+## Costes Reales: Lo que Nadie Menciona
+
+Para marketplaces en España, los costes de logística que debes anticipar en tu modelo financiero:
+
+- **Envío medio nacional:** 3,50€ - 6€ dependiendo del volumen y el transportista
+- **Porcentaje de devoluciones:** 10-20% en moda y electrónica, 2-5% en otras categorías
+- **Coste gestión de devolución:** Similar al envío + 1-2€ de gestión
+- **Pérdidas por producto dañado en devolución:** Estima 15-20% de las devoluciones con algún nivel de deterioro
+
+## Conclusión
+
+La logística en un marketplace español no es un componente opcional — es parte del producto. Una experiencia de entrega inconsistente o un proceso de devolución frustrante destruye la confianza del comprador más rápido que cualquier otro problema.
+
+¿Estás construyendo un marketplace y necesitas diseñar la arquitectura logística? [Contacta con SystemForge](https://systemforge.es/contacto).

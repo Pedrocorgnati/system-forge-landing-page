@@ -1,0 +1,106 @@
+---
+title: "Integración con marketplaces: Amazon, eBay y Zalando"
+slug: "integracion-marketplaces-amazon-ebay-zalando"
+date: "2024-09-20"
+description: "Cómo integrar tu e-commerce con Amazon España, eBay y Zalando — gestión de catálogo, sincronización de stock y automatización de pedidos via API."
+tags: ["marketplace", "amazon espana", "ebay", "zalando", "multicanalidad"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo integrar tu e-commerce con Amazon España, eBay y Zalando — gestión de catálogo, sincronización de stock y automatización de pedidos via API."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integracao-marketplaces-ml-shopee-amazon'
+  - locale: 'it-IT'
+    slug: 'integrare-marketplace-amazon-ebay-zalando-api'
+  - locale: 'en'
+    slug: 'marketplace-integration-amazon-ebay-etsy-api'
+---
+
+Vender en múltiples marketplaces multiplica la exposición de tu producto — Amazon España tiene más de 30 millones de visitantes únicos mensuales, Zalando es el referente para moda en Europa. Pero la gestión manual de catálogos, precios y pedidos en múltiples canales se vuelve insostenible rápidamente: actualizas el stock en tu tienda, pero no en Amazon, y vendes algo que ya no tienes.
+
+La integración técnica correcta hace que los marketplaces sean un canal de crecimiento, no una fuente de caos operacional.
+
+## La Arquitectura de Integración Multicanal
+
+El patrón correcto tiene tres componentes:
+
+1. **Fuente de verdad de catálogo y stock:** Tu sistema (WooCommerce, Shopify, Holded, ERP) es la única fuente de verdad. Los marketplaces son canales de venta que consumen datos de ese sistema.
+
+2. **Sincronización bidireccional:** Los cambios de catálogo y stock fluyen de tu sistema a los marketplaces. Los pedidos de los marketplaces fluyen hacia tu sistema.
+
+3. **Buffer de stock por canal:** Para evitar sobreventas por latencia de sincronización, nunca sincronices el 100% del stock. Si tienes 10 unidades, muestra 7 en Amazon, 5 en eBay, y reserva 3 para tu tienda.
+
+## Amazon España: Selling Partner API
+
+Amazon usa su Selling Partner API (SP-API) para integraciones. Para vender en Amazon.es necesitas una cuenta de Amazon Seller, registro de marca (Brand Registry) recomendado, y una app de SP-API aprobada o usar un middleware como Channable o Webgains.
+
+La gestión de catálogo en Amazon tiene sus peculiaridades:
+
+- Los productos se indexan mediante ASIN (Amazon Standard Identification Number). Si tu producto ya existe en el catálogo de Amazon, haces una oferta sobre ese ASIN. Si no existe, creas un nuevo listing.
+- Las imágenes tienen requisitos estrictos: fondo blanco, producto ocupa 85% del frame, resolución mínima 1000x1000px.
+- El precio debe incluir IVA en las páginas de detalle (es el estándar en Europa, a diferencia de US).
+
+```typescript
+// Ejemplo de actualización de precio e inventario via SP-API
+const response = await sp.callAPI({
+  operation: 'submitFeed',
+  endpoint: 'feeds',
+  body: {
+    feedType: 'JSON_LISTINGS_FEED',
+    marketplaceIds: ['A1RKKUPIHCS9HS'], // Amazon.es
+    // Contenido del feed en formato JSON
+  }
+})
+```
+
+## Zalando: Partner API para Moda
+
+Zalando es el marketplace de referencia para moda, calzado y accesorios en España y Europa. Su Partner API permite gestión de catálogo, stock y pedidos, pero tiene requisitos de calidad más estrictos que Amazon:
+
+- Imágenes de producto con modelos o flat lay de alta calidad
+- Descripciones detalladas con tallas, materiales y composición
+- Cumplimiento con sus guías de sostenibilidad (cada vez más importantes)
+- Precios en euros con IVA incluido
+
+Para acceder a la API de Zalando como Partner, necesitas aplicar a su programa Partner Program y ser aprobado — el proceso puede tardar semanas.
+
+## eBay España: Trading API y REST API
+
+eBay tiene dos APIs activas: la Trading API (legacy pero con funcionalidades completas) y la REST API (moderna, preferida para nuevas integraciones). Para España, `es` como site ID y EUR como moneda.
+
+eBay España tiene menor volumen que Amazon.es pero puede ser muy rentable para ciertas categorías: tecnología de segunda mano, coleccionismo, repuestos industriales, material deportivo.
+
+## Middleware: ¿Construir o Comprar?
+
+Para la mayoría de los vendedores españoles, usar un middleware de integración (Channable, ChannelAdvisor, Omnivore, o locales como Klik&Pay) es más rentable que construir la integración desde cero.
+
+**Construir tiene sentido cuando:**
+- Volumen muy alto que hace el coste del middleware desproporcionado
+- Lógica de negocio muy específica que el middleware no soporta
+- Necesitas integración profunda con tu ERP o sistema propietario
+
+**Usar middleware tiene sentido cuando:**
+- Estás empezando en marketplaces y quieres validar el canal
+- El equipo técnico no puede dedicar meses a construir y mantener integraciones
+- Vendes en 3+ marketplaces con requisitos heterogéneos
+
+## Gestión de Pedidos Multicanal
+
+Independientemente del canal de origen, el pedido debe procesarse en tu sistema central para fulfillment, facturación y atención post-venta. El flujo:
+
+1. Pedido llega de Amazon/eBay/Zalando via webhook o polling
+2. Se crea pedido en tu sistema con referencia del marketplace
+3. Tu sistema envía confirmación al marketplace y actualiza el stock
+4. Al enviar, registras el número de tracking en el marketplace
+
+La facturación es un punto específico de España: el marketplace puede o no gestionar la emisión de facturas. Amazon genera facturas automáticamente para pedidos a empresa. Para otros marketplaces, puedes necesitar emitir tus propias facturas, cumpliendo con los requisitos de la AEAT.
+
+## Conclusión
+
+La integración multicanal con marketplaces es una de las palancas de crecimiento más potentes para e-commerces españoles. La clave está en una arquitectura con fuente de verdad única, sincronización automática y buffers de seguridad de stock.
+
+¿Quieres integrar tu e-commerce con Amazon, Zalando u otros marketplaces españoles o europeos? [Contacta con SystemForge](https://systemforge.es/contacto).

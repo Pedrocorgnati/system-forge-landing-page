@@ -1,0 +1,64 @@
+---
+title: "API gateway: cuándo vale la pena implementarlo"
+slug: "api-gateway-cuando-vale-la-pena"
+date: "2024-10-18"
+description: "Qué es un API gateway, qué problemas resuelve — autenticación centralizada, rate limiting, logging y enrutamiento — y cuándo añade complejidad innecesaria."
+tags: ["api gateway", "kong", "aws api gateway", "microservicios", "arquitectura"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Qué es un API gateway, qué problemas resuelve — autenticación centralizada, rate limiting, logging y enrutamiento — y cuándo añade complejidad innecesaria."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'api-gateway-quando-vale-a-pena'
+  - locale: 'it-IT'
+    slug: 'api-gateway-quando-vale-la-pena'
+  - locale: 'en'
+    slug: 'api-gateway-when-is-it-worth-implementing'
+---
+
+La propuesta del API gateway es seductora: "centraliza autenticación, rate limiting, logging, transformación de requests y enrutamiento en una única capa. Tus servicios quedan libres de esas preocupaciones transversales." Para arquitecturas de microservicios con decenas de servicios, tiene sentido. Para un monolito Next.js con tres desarrolladores, es sobreingeniería pura.
+
+El problema con los API gateways no es que sean malos — es que se adoptan con frecuencia antes de que el proyecto tenga el tamaño que justifica la complejidad. Esta guía explica qué hace bien un API gateway, cuándo la complejidad se paga y cuándo deberías resolver el problema de forma más simple.
+
+## Lo que un API Gateway Hace Bien
+
+Un API gateway centraliza preocupaciones transversales que de otro modo cada servicio tendría que implementar por su cuenta:
+
+**Autenticación centralizada.** En lugar de verificar el JWT en cada servicio, el gateway lo verifica una vez y pasa la identidad del usuario downstream como header de confianza. Si cambias la estrategia de autenticación, lo cambias en un solo lugar.
+
+**Rate limiting y throttling.** Proteger APIs del abuso sin código en cada servicio. El gateway puede limitar por IP, por API key, por usuario autenticado o por combinación de factores — con reglas configurables sin redeploy.
+
+**Observabilidad unificada.** Todos los requests pasan por el gateway, que puede loggear latencia, errores y patrones de uso en un punto centralizado. Identificar qué servicio es el cuello de botella se vuelve trivial.
+
+**Enrutamiento y versionado.** El gateway puede enrutar `/api/v1/users` al servicio legacy y `/api/v2/users` al nuevo, sin que los clientes noten la transición. Facilita migraciones graduales.
+
+## Cuándo la Complejidad se Paga
+
+El API gateway justifica su complejidad cuando tienes **más de 3-5 servicios independientes** que necesitan compartir autenticación, cuando tienes **APIs consumidas por clientes externos** (partners, aplicaciones de terceros) que necesitan API keys y rate limiting formal, o cuando manejas **múltiples versiones de API** en producción simultáneamente.
+
+En el mercado español, esto aplica típicamente a startups Series A+ con equipos de backend divididos, o a empresas con integraciones hacia portales de proveedores o clientes B2B.
+
+## Cuándo NO Implementar un API Gateway
+
+Para la mayoría de las aplicaciones SaaS en España y LATAM en fase inicial o de crecimiento temprano, un API gateway es overhead innecesario. Si tienes un monolito Next.js o una API backend única, el middleware de autenticación, los rate limiters de librerías como `express-rate-limit` y el logging con Winston o Pino resuelven el 95% de los casos sin la complejidad operativa de un gateway adicional.
+
+Las señales de que aún no lo necesitas: un solo repositorio de backend, equipo de menos de 5 developers, sin consumidores externos de tu API, sin requisito de versionar endpoints públicos.
+
+## Opciones en el Mercado
+
+Si ya justificas el API gateway, las opciones principales son:
+
+- **Kong Gateway (OSS):** El más popular en self-hosted. Plugin ecosystem rico, pero requiere experiencia para operar correctamente.
+- **AWS API Gateway:** Managed, integrado con el ecosistema AWS. Pricing por llamada puede ser elevado a alto volumen.
+- **Traefik:** Más simple que Kong, excelente para entornos con Docker/Kubernetes. Configuración vía etiquetas.
+- **Azure API Management:** Para empresas en el ecosistema Microsoft, especialmente relevante en España donde Azure tiene fuerte presencia.
+
+## Conclusión
+
+El API gateway es una herramienta poderosa para el problema correcto. Usarlo prematuramente añade una capa de infraestructura que tu equipo tendrá que operar, monitorizar y mantener — sin que el producto se beneficie aún de esa complejidad.
+
+¿Estás evaluando la arquitectura correcta para tu API? [Contacta con SystemForge](https://systemforge.es/contacto) y analizamos tu caso específico antes de comprometer una dirección técnica.

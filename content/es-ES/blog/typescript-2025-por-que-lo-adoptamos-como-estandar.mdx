@@ -1,0 +1,71 @@
+---
+title: "TypeScript en 2025: por qué lo adoptamos como estándar"
+slug: "typescript-2025-por-que-lo-adoptamos-como-estandar"
+date: "2024-10-02"
+description: "Por qué SystemForge usa TypeScript en el 100% de los proyectos — beneficios reales en producción, curva de aprendizaje, herramientas e impacto en la mantenibilidad."
+tags: ["typescript", "javascript", "estandares desarrollo", "calidad codigo", "software house"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Por qué SystemForge usa TypeScript en el 100% de los proyectos — beneficios reales en producción, curva de aprendizaje, herramientas e impacto en la mantenibilidad.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'typescript-2025-por-que-adotamos-como-padrao'
+  - locale: 'it-IT'
+    slug: 'typescript-2025-perche-lo-abbiamo-adottato'
+  - locale: 'en'
+    slug: 'typescript-2025-why-we-adopted-it-as-standard'
+---
+
+## TypeScript No es Opcional Para Nosotros — es Estándar No Negociable
+
+En 2019, todavía debatíamos TypeScript vs JavaScript en proyectos nuevos. En 2024, esa discusión no existe en SystemForge. Todo proyecto nuevo comienza en TypeScript, con configuración strict, sin excepciones.
+
+Esta no es una decisión basada en hype o moda. Es una decisión técnica fundamentada en años de experiencia con lo que sucede con proyectos JavaScript no tipados a lo largo del tiempo — y lo que TypeScript cambia de forma concreta.
+
+## El Coste Real del JavaScript Sin Tipos
+
+Los errores de tipos en JavaScript son silenciosos hasta que llegan a producción. Una función que espera un `string` recibe `undefined`. Un objeto que debería tener la propiedad `user.email` llega sin ella. Una API que devuelve datos en formato diferente al esperado. Todos estos errores son detectables en tiempo de compilación con TypeScript. Sin él, aparecen en producción a las 3 de la mañana.
+
+El coste no es solo el tiempo de debugging. Es la confianza degradada del equipo en el código. En proyectos JavaScript grandes sin tipos, los desarrolladores tienen miedo de refactorizar porque no saben qué rompieron. TypeScript convierte ese miedo en certeza: el compilador dice exactamente qué se rompió.
+
+## Los Beneficios Reales en Producción
+
+**Refactorizaciones seguras:** renombrar una función, cambiar la firma de un método, reorganizar estructuras de datos — TypeScript muestra cada lugar donde el cambio tiene impacto. Lo que en JavaScript requiere grep y revisión manual, en TypeScript el compilador lo resuelve.
+
+**Autocompletado como documentación:** cuando el IDE sugiere los métodos disponibles en un objeto, la forma correcta de llamar una función y los valores posibles de un enum, el desarrollador tarda menos en entender el código y comete menos errores. Esto es especialmente valioso al incorporar nuevos miembros al equipo.
+
+**Detección temprana de bugs:** en nuestros proyectos, estimamos que el 30-40% de los bugs que habríamos encontrado en QA o producción son detectados por el compilador de TypeScript durante el desarrollo.
+
+## Configuración Strict: Sin Concesiones
+
+La configuración que usamos en todos los proyectos:
+
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
+```
+
+`strict: true` activa un conjunto de comprobaciones que eliminan las categorías más comunes de errores. `noUncheckedIndexedAccess` es especialmente valioso: hace que acceder a `array[0]` devuelva `T | undefined` en lugar de `T`, forzando al desarrollador a manejar el caso en que el array está vacío.
+
+## La Curva de Aprendizaje: Honestidad sobre los Costes
+
+TypeScript tiene una curva de aprendizaje real. Los tipos genéricos, los tipos condicionales, el sistema de discriminated unions — todo esto tiene profundidad que lleva tiempo dominar.
+
+Nuestra posición: los primeros dos sprints con TypeScript son más lentos. A partir del tercer sprint, el equipo está en velocidad de crucero. A partir del tercer mes, la velocidad supera a la del JavaScript equivalente porque hay menos debugging y las refactorizaciones son más ágiles.
+
+## Por Qué JavaScript No es una Alternativa Viable en 2025
+
+JSDoc proporciona cierto nivel de tipado en JavaScript, pero sin la integración del compilador, los errores no se detectan en tiempo de compilación. Solo se ven en el IDE si el desarrollador recuerda revisar las advertencias.
+
+La industria ha votado: React, Next.js, Astro, Remix, tRPC — los frameworks más adoptados tienen TypeScript como ciudadano de primera clase. Trabajar en JavaScript en 2025 es remar contra corriente en el ecosistema.

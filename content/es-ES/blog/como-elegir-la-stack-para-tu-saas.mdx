@@ -1,0 +1,77 @@
+---
+title: "Cómo elegir la stack técnica para tu SaaS"
+slug: "como-elegir-la-stack-para-tu-saas"
+date: "2025-11-10"
+description: "Guía práctica para founders y CTOs para elegir la stack ideal para un SaaS B2B o B2C. Next.js, Node.js, base de datos y más."
+tags: ["saas", "stack tecnica", "next.js", "desarrollo web"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Guía práctica para founders y CTOs para elegir la stack ideal para un SaaS B2B o B2C. Next.js, Node.js, base de datos y más."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-escolher-stack-saas'
+  - locale: 'it-IT'
+    slug: 'come-scegliere-stack-saas'
+  - locale: 'en'
+    slug: 'how-to-choose-your-saas-tech-stack'
+---
+
+Elegir la stack técnica correcta para tu SaaS es una de las decisiones más importantes que tomarás como founder o CTO. Una elección incorrecta puede costar meses de retrabajo, retrasar el lanzamiento y dificultar la contratación de desarrolladores. La buena noticia: con los criterios correctos, esta decisión se vuelve mucho más clara.
+
+## Las Preguntas que Debes Hacerte Antes de Elegir
+
+Antes de buscar la "mejor stack", define tus restricciones reales:
+
+**¿Cuánto tiempo puedes esperar hasta el primer cliente?** Si el time-to-market es crítico (6-12 meses), necesitas una stack que maximice la velocidad de desarrollo, no la que técnicamente es "la mejor". Una startup que lanza en 8 meses con Next.js y Supabase suele ganar contra una que pasa 18 meses construyendo una arquitectura de microservicios perfecta.
+
+**¿Qué saben tus developers?** La mejor stack del mundo en manos de un equipo que no la conoce es lenta y produce código de baja calidad. La stack "subóptima" en manos de expertos entrega resultados mucho mejores. Prioriza el conocimiento del equipo sobre las preferencias teóricas.
+
+**¿Es B2B o B2C?** Los SaaS B2B tienen patrones distintos: multi-tenancy, roles complejos, integraciones empresariales (SSO, Active Directory), contratos anuales. Los B2C priorizan velocidad de registro, escala de usuarios concurrentes, UX fluida. Cada uno tiene tradeoffs distintos en la arquitectura.
+
+## La Stack Dominante para SaaS en 2025
+
+Para la gran mayoría de los SaaS B2B lanzados en España en 2025, la combinación más productiva es:
+
+**Frontend + Backend:** Next.js (App Router) — permite server-side rendering, API routes, y un modelo de desarrollo full-stack en un solo repositorio. Vercel como deployment, que elimina toda la complejidad de infraestructura en la fase inicial.
+
+**Base de datos:** PostgreSQL. Relacional, madura, con excelente soporte en todos los cloud providers. No uses MongoDB para SaaS a menos que tengas una razón técnica específica — el modelo relacional es más adecuado para la mayoría de los dominios de negocio.
+
+**ORM:** Prisma — tipado estático, migraciones automáticas, developer experience excelente con TypeScript.
+
+**Auth:** Auth.js (NextAuth) para aplicaciones donde los usuarios se registran directamente, o Clerk para startups que quieren delegarlo completamente y incluir SSO enterprise desde el día 1.
+
+**Pagos:** Stripe. Sin discusión para el mercado europeo. Soporta SEPA, facturación recurrente, facturación por uso, portales de cliente, y tiene el mejor developer experience del mercado.
+
+## Multi-tenancy: La Decisión Arquitectónica Clave
+
+El modelo multi-tenant determina cómo los datos de diferentes organizaciones están segregados. Hay tres enfoques:
+
+**Base de datos compartida, schema compartido (Row-Level Security):** Todos los datos en las mismas tablas, con un campo `organizationId` que los segrega. Más simple de implementar, menor coste de infraestructura. El riesgo de filtración de datos entre tenants se mitiga con Row-Level Security en PostgreSQL o políticas de acceso en el ORM.
+
+**Base de datos compartida, schemas distintos:** Cada tenant tiene su propio schema en la misma base de datos. Mayor aislamiento, pero gestión de migraciones más compleja.
+
+**Base de datos por tenant:** El mayor aislamiento posible, pero coste de infraestructura que escala lineal con el número de clientes. Solo tiene sentido para enterprise con requisitos de compliance muy exigentes.
+
+Para la mayoría de los SaaS B2B en etapas tempranas en España, el primer modelo (RLS) es el correcto. Es escalable, tiene coste controlado y el aislamiento es suficiente para la mayoría de los clientes.
+
+## Infraestructura: Empezar Simple
+
+Un error común en SaaS iniciales: sobrecomplicar la infraestructura antes de tener clientes.
+
+El stack de infraestructura mínimo para lanzar en España:
+- **Vercel** para el frontend/backend Next.js (gratis hasta tráfico considerable)
+- **Supabase o Railway** para PostgreSQL (planes gratuitos o de bajo coste para empezar)
+- **Cloudflare** para CDN y protección básica
+- **Resend o Postmark** para emails transaccionales
+
+Este stack puede manejar decenas de miles de usuarios y es suficiente para llegar a los primeros 100K€ de ARR sin infraestructura propia. Cuando el negocio lo justifique, migras a AWS/GCP con más control.
+
+## Conclusión
+
+Para un SaaS lanzado en España en 2025, la stack recomendada para la mayoría de los casos es: Next.js + PostgreSQL + Prisma + Auth.js + Stripe + Vercel. No es la más sofisticada — es la que maximiza la velocidad de lanzamiento y tiene el ecosistema más amplio de developers disponibles.
+
+¿Estás empezando un SaaS y quieres validar tu arquitectura técnica? [Contacta con SystemForge](https://systemforge.es/contacto).

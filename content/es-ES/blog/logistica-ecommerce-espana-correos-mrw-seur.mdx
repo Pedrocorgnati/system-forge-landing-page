@@ -1,0 +1,114 @@
+---
+title: "Logística en e-commerce español: Correos, MRW y SEUR"
+slug: "logistica-ecommerce-espana-correos-mrw-seur"
+date: "2024-09-09"
+description: "Comparativa de transportistas para e-commerce en España — Correos, MRW, SEUR, GLS y DHL: tarifas, cobertura, API y cuándo elegir cada uno."
+tags: ["logistica ecommerce", "correos", "mrw", "seur", "envios espana"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Comparativa de transportistas para e-commerce en España — Correos, MRW, SEUR, GLS y DHL: tarifas, cobertura, API y cuándo elegir cada uno."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'logistica-ecommerce-correios-jadlog'
+  - locale: 'it-IT'
+    slug: 'logistica-ecommerce-italia-poste-italiane-brt-gls'
+  - locale: 'en'
+    slug: 'ecommerce-shipping-integration-usps-fedex-ups'
+---
+
+La logística es el talón de Aquiles de muchos e-commerces españoles. Un cliente puede perdonar un packaging mediocre o una web con usabilidad mejorable — pero no perdonará un paquete que llega tarde, roto o a una dirección equivocada. Y el coste del envío es con frecuencia la razón número uno por la que los carritos se abandonan.
+
+Elegir el transportista correcto — o la combinación correcta — tiene impacto directo en la satisfacción del cliente, el coste operativo y la tasa de conversión.
+
+## Los Transportistas Principales en España
+
+### Correos: La Cobertura Universal
+
+Correos es el servicio postal nacional, con presencia en todas las localidades de España incluyendo las más pequeñas, las Islas Baleares y Canarias. Es el único operador con cobertura completa del territorio español.
+
+**Cuándo es la mejor opción:**
+- Envíos a zonas rurales o municipios pequeños
+- Envíos a Canarias y Baleares con tarifas base (aunque existen suplementos)
+- Paquetes de bajo coste donde la tarifa es el factor principal
+- Tráfico ecommerce que no tiene urgencia de 24h
+
+**Limitaciones:**
+- Los tiempos de entrega son menos consistentes que los privados
+- El seguimiento online es menos detallado
+- El servicio de atención al cliente es más lento en resolución de incidencias
+
+**Integración:** Correos tiene una API REST para gestión de envíos, impresión de etiquetas y seguimiento. El portal web tiene buenas herramientas para empresas.
+
+### MRW: El Equilibrio Precio-Servicio
+
+MRW es especialmente fuerte en la Península y tiene presencia en Baleares. Su servicio "Hoy" (entrega en el mismo día en ciudades principales) y "MRW 24" (entrega en 24h) son muy competitivos para e-commerce con clientes en zonas urbanas.
+
+**Cuándo es la mejor opción:**
+- E-commerce con clientes principalmente en capitales de provincia
+- Productos que necesitan entrega rápida (24h) a buen precio
+- Paquetes de tamaño medio (hasta 30kg, dimensiones estándar)
+
+**Integración:** API bien documentada, soporte para etiquetas automáticas, webhook para notificaciones de estado.
+
+### SEUR: Profesional y Completo
+
+SEUR (del Grupo GeoPost/DPDgroup) tiene una red bien desarrollada en España con opciones premium como entrega en franja horaria y entrega en puntos SEUR. Su servicio "Classic" (48h) y "Predict" (con notificación y gestión de la entrega por el destinatario) son populares en e-commerce.
+
+**Cuándo es la mejor opción:**
+- E-commerce premium donde la experiencia de entrega es parte del valor
+- Clientes que valoran la gestión de la entrega (cambio de dirección, de franja horaria)
+- Paquetes voluminosos donde MRW tiene suplementos
+
+### GLS: Buena Opción para Europa
+
+GLS tiene presencia en España y es especialmente relevante si tu e-commerce tiene ventas a Europa. Su red en 41 países europeos es la ventaja principal.
+
+**Cuándo es la mejor opción:**
+- E-commerce con porcentaje significativo de ventas a Europa
+- Integración con su red de puntos de recogida (GLS Parcelshops)
+
+### DHL Express: Para Urgentes y Exportación
+
+DHL Express es la opción para envíos internacionales urgentes y paquetería internacional premium. Sus tarifas para envíos nacionales son más altas que los anteriores, pero para exportar a América Latina o Asia es la opción más robusta.
+
+## Canarias y Baleares: El Caso Especial
+
+Las Islas Canarias tienen un régimen fiscal propio (IGIC en vez de IVA) y los envíos desde la Península tienen coste de transporte significativamente mayor. Consideraciones para e-commerce:
+
+- **IGIC (7%):** Si vendes a clientes en Canarias, debes aplicar IGIC no IVA. Tu plataforma de e-commerce debe soportar esto.
+- **Coste de envío:** El coste real de envío a Canarias puede ser 3-5x el de la Península. Muchos e-commerces cobran suplemento o tienen umbral de envío gratis más alto para Canarias.
+- **Tiempo de entrega:** 24-48h adicionales respecto a la Península.
+
+Baleares tiene IVA normal (como la Península) pero también tiene suplemento de envío, especialmente para las islas menores (Formentera, Menorca, etc.).
+
+## Integración Técnica: Comparativa de APIs
+
+Para e-commerces con volumen, la integración vía API es indispensable para automatizar la generación de etiquetas, el seguimiento y las notificaciones:
+
+| Transportista | API REST | Webhook eventos | Calidad documentación |
+|---|---|---|---|
+| Correos | Sí | Limitado | Media |
+| MRW | Sí | Sí | Buena |
+| SEUR | Sí | Sí | Buena |
+| GLS | Sí | Sí | Buena |
+| DHL | Sí | Sí | Excelente |
+
+Para tiendas Shopify, existen apps para todos los transportistas principales. Para WooCommerce, plugins con mayor o menor madurez. Para integraciones personalizadas, usar directamente la API del transportista.
+
+## Plataformas Multicarrier
+
+Para e-commerces con volumen medio-alto que quieren flexibilidad entre transportistas, las plataformas multicarrier (Packlink Pro, Shipkraken, Sendcloud) permiten gestionar todos los transportistas desde una sola interfaz, comparar tarifas en tiempo real y enrutar automáticamente cada pedido al transportista más económico o más rápido.
+
+## Conclusión
+
+No existe el transportista perfecto para todos los e-commerces españoles. La combinación más común y efectiva para PYMEs con e-commerce:
+
+- **MRW o SEUR** para envíos estándar en Península
+- **Correos** para Canarias, Baleares y zonas rurales
+- **GLS o DHL** para envíos internacionales
+
+¿Estás construyendo o optimizando la logística de tu e-commerce en España? [Contacta con SystemForge](https://systemforge.es/contacto) — integramos los transportistas correctos en tu plataforma.

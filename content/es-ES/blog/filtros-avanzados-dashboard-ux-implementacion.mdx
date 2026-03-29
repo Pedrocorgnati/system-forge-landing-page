@@ -1,0 +1,192 @@
+---
+title: "Filtros avanzados en dashboard: UX e implementación"
+slug: "filtros-avanzados-dashboard-ux-implementacion"
+date: "2024-08-29"
+description: "Cómo diseñar e implementar filtros avanzados en dashboards — estado en URL, filtros compuestos, chips removibles y sincronización con la API."
+tags: ["filtros dashboard", "ux filtros", "next.js", "url state", "dashboard"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo diseñar e implementar filtros avanzados en dashboards — estado en URL, filtros compuestos, chips removibles y sincronización con la API."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'filtros-avancados-dashboard-ux-implementacao'
+  - locale: 'it-IT'
+    slug: 'filtri-avanzati-dashboard-ux-implementazione'
+  - locale: 'en'
+    slug: 'advanced-dashboard-filters-ux-implementation'
+---
+
+Los filtros mal implementados son el mayor punto de fricción en los dashboards B2B. El usuario aplica tres filtros, el sistema tarda 3 segundos en responder, al recargar la página los filtros se pierden, y cuando quiere compartir la vista filtrada con un compañero no puede porque la URL no refleja el estado.
+
+Estas no son limitaciones inevitables — son consecuencias de decisiones de implementación. Los filtros bien implementados son rápidos, persistibles en URL y componibles sin fricción.
+
+## El Principio Más Importante: Estado en URL
+
+El filtro activo debe vivir en la URL, no en el estado del componente React. Razones:
+
+1. **Compartir vista:** `?estado=pendiente&rango=2025-01&vendedor=pedro` es una URL que cualquier compañero puede recibir y ver exactamente la misma vista
+2. **Persistir en recarga:** Si el usuario recarga la página, los filtros se mantienen
+3. **Historial del navegador:** El botón "atrás" lleva al estado anterior de los filtros
+4. **Deep linking:** Desde una notificación por email puedes enviar directamente a una vista filtrada específica
+
+En Next.js con App Router, el estado de filtros en URL se gestiona con `useSearchParams` y `useRouter`:
+
+```typescript
+'use client'
+import { useRouter, useSearchParams } from 'next/navigation'
+import { useCallback } from 'react'
+
+export function useFiltros() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const setFiltro = useCallback((clave: string, valor: string | null) => {
+    const params = new URLSearchParams(searchParams.toString())
+    if (valor === null) {
+      params.delete(clave)
+    } else {
+      params.set(clave, valor)
+    }
+    // Resetear a página 1 al cambiar filtros
+    params.set('pagina', '1')
+    router.push(`?${params.toString()}`, { scroll: false })
+  }, [router, searchParams])
+
+  const limpiarFiltros = useCallback(() => {
+    router.push('?', { scroll: false })
+  }, [router])
+
+  return {
+    filtros: {
+      estado: searchParams.get('estado') ?? undefined,
+      rango: searchParams.get('rango') ?? undefined,
+      vendedor: searchParams.get('vendedor') ?? undefined,
+      busqueda: searchParams.get('q') ?? undefined,
+    },
+    setFiltro,
+    limpiarFiltros,
+  }
+}
+```
+
+## UI de Filtros: Chips Removibles
+
+Los filtros activos deben ser visibles y removibles de un vistazo. El patrón de chips (etiquetas con icono de cierre) es el estándar:
+
+```tsx
+function ChipsFiltrosActivos() {
+  const { filtros, setFiltro, limpiarFiltros } = useFiltros()
+  const filtrosActivos = Object.entries(filtros).filter(([, valor]) => valor !== undefined)
+
+  if (filtrosActivos.length === 0) return null
+
+  return (
+    <div className="flex flex-wrap gap-2 items-center">
+      {filtrosActivos.map(([clave, valor]) => (
+        <span
+          key={clave}
+          className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+        >
+          <span className="font-medium capitalize">{clave}:</span>
+          <span>{valor}</span>
+          <button
+            onClick={() => setFiltro(clave, null)}
+            className="ml-1 hover:text-blue-600"
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      <button
+        onClick={limpiarFiltros}
+        className="text-sm text-gray-500 hover:text-gray-700 underline"
+      >
+        Limpiar todos
+      </button>
+    </div>
+  )
+}
+```
+
+## Debouncing para Búsqueda en Tiempo Real
+
+Para el campo de búsqueda de texto libre, actualizar la URL (y por tanto el fetch) en cada keystroke crea una carga innecesaria en la API y una experiencia nerviosa. El debouncing retrasa la actualización hasta que el usuario deja de escribir:
+
+```typescript
+import { useDebounce } from 'use-debounce'
+
+function CampoBusqueda() {
+  const { setFiltro } = useFiltros()
+  const [valorLocal, setValorLocal] = useState('')
+  const [valorDebounced] = useDebounce(valorLocal, 300)
+
+  useEffect(() => {
+    setFiltro('q', valorDebounced || null)
+  }, [valorDebounced, setFiltro])
+
+  return (
+    <input
+      value={valorLocal}
+      onChange={e => setValorLocal(e.target.value)}
+      placeholder="Buscar pedidos..."
+      className="border rounded-lg px-3 py-2"
+    />
+  )
+}
+```
+
+## Sincronización con la API: Server Components
+
+En Next.js App Router, el componente de datos puede ser un Server Component que lee los filtros de los searchParams y hace la query directamente, sin paso intermedio de estado del cliente:
+
+```typescript
+// app/dashboard/pedidos/page.tsx
+import { PedidosTable } from './pedidos-table'
+import { getPedidosFiltrados } from '@/lib/data'
+
+interface PageProps {
+  searchParams: { [key: string]: string | undefined }
+}
+
+export default async function PedidosPage({ searchParams }: PageProps) {
+  const pedidos = await getPedidosFiltrados({
+    estado: searchParams.estado,
+    desde: searchParams.desde,
+    hasta: searchParams.hasta,
+    vendedor: searchParams.vendedor,
+    busqueda: searchParams.q,
+    pagina: Number(searchParams.pagina) || 1,
+  })
+
+  return <PedidosTable pedidos={pedidos} />
+}
+```
+
+Esta arquitectura elimina el useEffect de fetch en el cliente — los datos llegan ya filtrados desde el servidor, con el rendimiento que eso implica.
+
+## Filtros Guardados
+
+Para dashboards de uso intensivo, permitir guardar combinaciones de filtros frecuentes como "vistas" tiene alto impacto en productividad:
+
+```typescript
+// Guardar la vista actual
+const guardarVista = async (nombre: string) => {
+  await fetch('/api/vistas', {
+    method: 'POST',
+    body: JSON.stringify({
+      nombre,
+      filtros: Object.fromEntries(new URLSearchParams(window.location.search))
+    })
+  })
+}
+```
+
+## Conclusión
+
+Los filtros bien implementados en un dashboard B2B son la diferencia entre una herramienta que el equipo usa a diario y una que abre solo cuando no queda otro remedio. El estado en URL, los chips removibles, el debouncing y la sincronización directa con Server Components son las piezas clave.
+
+¿Estás construyendo un dashboard para tu empresa? [Contacta con SystemForge](https://systemforge.es/contacto).

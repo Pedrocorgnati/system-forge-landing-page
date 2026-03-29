@@ -1,0 +1,106 @@
+---
+title: "Gestión de vendedores en marketplace: onboarding y calidad"
+slug: "gestion-vendedores-marketplace-onboarding"
+date: "2024-09-13"
+description: "Cómo diseñar el onboarding de vendedores en un marketplace, sistemas de calidad, verificación de identidad y gestión de disputas para el mercado español."
+tags: ["marketplace", "vendedores", "onboarding", "kyc", "calidad marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo diseñar el onboarding de vendedores en un marketplace, sistemas de calidad, verificación de identidad y gestión de disputas para el mercado español."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'gestao-vendedores-marketplace-onboarding'
+  - locale: 'it-IT'
+    slug: 'gestione-venditori-marketplace-onboarding'
+  - locale: 'en'
+    slug: 'marketplace-seller-management-onboarding'
+---
+
+El marketplace que no controla la calidad de sus vendedores termina con una experiencia de compra que destruye la confianza del comprador. La paradoja del marketplace: cuantos más vendedores tienes, más difícil es mantener la calidad — pero la calidad es exactamente lo que diferencia tu marketplace de un directorio de vendedores aleatorios.
+
+El onboarding y la gestión de vendedores es donde muchos marketplaces en España fallan. O es demasiado fácil (cualquiera puede vender, incluyendo vendedores fraudulentos o de baja calidad) o demasiado difícil (el proceso de alta frustra a buenos vendedores antes de que puedan publicar).
+
+## El Onboarding en Tres Etapas
+
+### Etapa 1: Registro y Verificación de Identidad
+
+El primer paso es verificar que el vendedor es quien dice ser y que tiene derecho legal a vender. En España, esto implica:
+
+**Para autónomos:** NIF, número de autónomo (afiliación a la Seguridad Social), y para sectores regulados (alimentación, farmacia, etc.) la licencia correspondiente.
+
+**Para empresas:** NIF de la empresa, escritura de constitución o CIF, administrador con poderes suficientes para firmar el acuerdo con el marketplace.
+
+La verificación de identidad (KYC) puede ser:
+- **Manual:** El equipo de ops revisa los documentos. Funciona para marketplaces con pocos vendedores al inicio.
+- **Automatizada con servicios como Stripe Identity o Sumsub:** Verificación documental y biométrica en minutos. Obligatoria para marketplaces que gestionan pagos (requisito de la normativa AML/KYC para plataformas de pago en Europa).
+
+### Etapa 2: Configuración de Tienda
+
+Una vez verificado, el vendedor configura su presencia en el marketplace:
+- Logo y banner
+- Descripción de la empresa y especialización
+- Política de devoluciones propia (dentro de los mínimos del marketplace)
+- Plazos de envío prometidos
+- Integración de datos bancarios (IBAN para cobrar)
+
+El checklist de onboarding gamificado — con barra de progreso y mensajes de "Tu tienda está al 70%, falta configurar..." — aumenta significativamente la tasa de completitud del perfil.
+
+### Etapa 3: Primeros Productos y Aprobación
+
+El primer lote de productos pasa por revisión manual antes de publicarse. Esto sirve dos propósitos: asegurar calidad inicial y educar al vendedor sobre los estándares del marketplace.
+
+Criterios de revisión:
+- Imágenes con fondo blanco o neutro, resolución mínima 800x800px
+- Título descriptivo con palabras clave relevantes
+- Descripción con características técnicas principales
+- Precio coherente con el mercado
+- Stock real disponible
+
+Una vez el vendedor ha publicado 10 productos aprobados, pasa a publicación automática con auditoría aleatoria.
+
+## Sistema de Calidad: Health Score del Vendedor
+
+Igual que un marketplace necesita un health score para identificar vendedores problemáticos, el health score del vendedor es la herramienta de gestión de calidad continua.
+
+Métricas clave:
+
+| Métrica | Peso |
+|---|---|
+| Valoración media de compradores | Alto |
+| Tasa de pedidos entregados a tiempo | Alto |
+| Tasa de devoluciones por problema del vendedor | Alto (negativo) |
+| Tiempo de respuesta a mensajes | Medio |
+| Tasa de cancelaciones por falta de stock | Medio (negativo) |
+| Pedidos sin tracking registrado | Bajo (negativo) |
+
+Los vendedores con health score < 3,5/5 reciben advertencia. Los que bajan de 3/5 son suspendidos preventivamente.
+
+## Gestión de Disputas
+
+Las disputas entre compradores y vendedores son inevitables. El proceso que funciona:
+
+1. **Período de resolución directa (3 días):** El comprador primero intenta resolver con el vendedor directamente. El sistema facilita la comunicación.
+
+2. **Escalada al marketplace (si no hay resolución):** El comprador puede escalar al equipo del marketplace con la documentación de la disputa.
+
+3. **Resolución:** El equipo analiza evidencias (fotos, tracking, mensajes) y decide. El marketplace tiene última palabra y puede emitir reembolso al comprador con cargo al vendedor si corresponde.
+
+4. **Aprendizaje:** Las disputas resueltas a favor del comprador incrementan el contador de incidencias del vendedor. Suficientes incidencias = revisión de la cuenta.
+
+## Facturación y Obligaciones Fiscales para Vendedores en España
+
+El marketplace debe informar y facilitar las obligaciones fiscales de los vendedores:
+
+- **Factura electrónica:** Los vendedores deben emitir facturas correctas. El marketplace puede facilitarlo con generación automática de facturas cumpliendo con los requisitos de la AEAT.
+- **Modelo 347:** Las operaciones superiores a 3.005,06€ con un mismo proveedor/cliente en el año deben declararse. Para los vendedores, el marketplace puede generar el resumen necesario.
+- **DAC7 (Directiva europea de plataformas digitales):** A partir de 2023, los marketplaces con más de 25 vendedores o 2.000 transacciones anuales deben reportar ingresos de vendedores a la AEAT.
+
+## Conclusión
+
+La gestión de vendedores en un marketplace es, en esencia, la gestión de la calidad de la oferta. El onboarding correcto, el health score continuo y los procesos claros de disputa determinan si tu marketplace construye confianza o la destruye.
+
+¿Estás construyendo un marketplace para el mercado español? [Contacta con SystemForge](https://systemforge.es/contacto) — tenemos experiencia con los requisitos específicos del entorno regulatorio español.

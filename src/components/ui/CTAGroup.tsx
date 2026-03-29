@@ -1,5 +1,3 @@
-'use client'
-
 import { type CTAConfig } from '@/lib/types'
 import { CTAButton } from './CTAButton'
 import { cn } from '@/lib/utils'

@@ -1,0 +1,184 @@
+---
+title: "Whisper: transcripción automática para negocios"
+slug: "whisper-transcripcion-automatica-negocios"
+date: "2024-11-05"
+description: "Cómo usar Whisper de OpenAI para transcripción automática de reuniones, atenciones y contenido en español con alta precisión."
+tags: ["whisper", "transcripcion automatica", "openai", "ia audio", "automatizacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo usar Whisper de OpenAI para transcripción automática de reuniones, atenciones y contenido en español con alta precisión."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'whisper-transcricao-automatica-negocios'
+  - locale: 'it-IT'
+    slug: 'whisper-trascrizione-automatica-business'
+  - locale: 'en'
+    slug: 'whisper-automatic-transcription-for-business'
+---
+
+Hasta 2022, la transcripción automática en español con calidad utilizable costaba caro y todavía requería corrección manual extensa. Whisper, lanzado por OpenAI en septiembre de 2022 como modelo open-source, cambió radicalmente este panorama.
+
+Whisper es un modelo de reconocimiento automático de voz (ASR) entrenado en 680.000 horas de audio multilingüe. Su rendimiento en español es notablemente superior a los servicios comerciales anteriores — y puede ejecutarse localmente (sin coste por transcripción) o vía API de OpenAI.
+
+## Casos de Uso Reales en Empresas Españolas
+
+**Transcripción de reuniones:** Equipos que hacen 10-20 reuniones semanales pueden transcribir automáticamente y extraer actas, decisiones y tareas sin esfuerzo manual. Con una reunión de 1 hora, Whisper genera la transcripción completa en 3-5 minutos vía API, o 8-15 minutos en hardware estándar local.
+
+**Atención al cliente:** Centros de contacto con decenas de llamadas diarias pueden transcribir cada interacción para análisis de calidad, detección de problemas recurrentes y formación de agentes. El coste via API de OpenAI es de 0,006$/minuto — una llamada de 10 minutos cuesta 0,06$.
+
+**Contenido multimedia:** Canales de YouTube, podcasts y webinars pueden generar subtítulos y transcripciones automáticamente, mejorando el SEO (Google indexa el contenido de las transcripciones) y la accesibilidad.
+
+**Cumplimiento normativo:** Despachos de abogados, empresas de servicios financieros y clínicas que necesitan registro de comunicaciones pueden automatizar la transcripción y archivo de llamadas.
+
+## Implementación Vía API de OpenAI
+
+La forma más rápida de empezar:
+
+```typescript
+import OpenAI from 'openai'
+import fs from 'fs'
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
+async function transcribirAudio(rutaArchivo: string): Promise<string> {
+  const audioFile = fs.createReadStream(rutaArchivo)
+
+  const transcripcion = await openai.audio.transcriptions.create({
+    file: audioFile,
+    model: 'whisper-1',
+    language: 'es', // Especificar español mejora la precisión
+    response_format: 'verbose_json', // Incluye timestamps por segmento
+    timestamp_granularities: ['segment', 'word'],
+  })
+
+  return transcripcion.text
+}
+
+// Transcripción con timestamps para subtítulos
+async function generarSubtitulos(rutaArchivo: string): Promise<string> {
+  const audioFile = fs.createReadStream(rutaArchivo)
+
+  const resultado = await openai.audio.transcriptions.create({
+    file: audioFile,
+    model: 'whisper-1',
+    language: 'es',
+    response_format: 'srt', // Formato de subtítulos estándar
+  })
+
+  return resultado as unknown as string
+}
+```
+
+## Whisper Local: Sin Coste por Transcripción
+
+Para volúmenes altos o cuando los datos no pueden salir de la infraestructura propia (requisito RGPD frecuente en España), Whisper puede ejecutarse localmente:
+
+```python
+# Instalación
+# pip install openai-whisper
+
+import whisper
+
+# Cargar modelo (se descarga la primera vez)
+# Modelos disponibles: tiny, base, small, medium, large-v3
+modelo = whisper.load_model("medium")  # Mejor equilibrio precisión/velocidad para español
+
+# Transcribir
+resultado = modelo.transcribe(
+    "reunion.mp3",
+    language="es",
+    task="transcribe",  # o "translate" para traducir al inglés
+    verbose=False
+)
+
+print(resultado["text"])
+
+# Con timestamps por segmento
+for segmento in resultado["segments"]:
+    inicio = segmento["start"]
+    fin = segmento["end"]
+    texto = segmento["text"]
+    print(f"[{inicio:.1f}s - {fin:.1f}s]: {texto}")
+```
+
+**Comparativa de modelos locales para español:**
+
+| Modelo | VRAM GPU | Velocidad (x real-time) | Precisión ES |
+|--------|----------|-------------------------|--------------|
+| tiny | 1 GB | 32x | Buena para uso casual |
+| base | 1 GB | 16x | Buena |
+| small | 2 GB | 6x | Muy buena |
+| medium | 5 GB | 2x | Excelente |
+| large-v3 | 10 GB | 1x | La mejor disponible |
+
+Para servidores sin GPU, el modelo `small` en CPU ofrece un buen equilibrio: transcribe 1 hora de audio en aproximadamente 15-20 minutos en una instancia con 4 vCPUs.
+
+## Pipeline Completo: Reuniones con Extracción de Actas
+
+```typescript
+import OpenAI from 'openai'
+
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
+
+async function procesarReunion(rutaAudio: string): Promise<{
+  transcripcion: string
+  acta: string
+  tareas: string[]
+  decisiones: string[]
+}> {
+  // Paso 1: Transcribir
+  const audioFile = require('fs').createReadStream(rutaAudio)
+  const transcripcionResult = await openai.audio.transcriptions.create({
+    file: audioFile,
+    model: 'whisper-1',
+    language: 'es',
+  })
+
+  const transcripcion = transcripcionResult.text
+
+  // Paso 2: Extraer acta con GPT-4
+  const extraccion = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    messages: [
+      {
+        role: 'system',
+        content: `Eres un asistente que extrae información estructurada de transcripciones de reuniones.
+        Responde en JSON con los campos: resumen, tareas (array de strings), decisiones (array de strings).`,
+      },
+      {
+        role: 'user',
+        content: `Analiza esta transcripción y extrae el acta:\n\n${transcripcion}`,
+      },
+    ],
+    response_format: { type: 'json_object' },
+  })
+
+  const datos = JSON.parse(extraccion.choices[0].message.content!)
+
+  return {
+    transcripcion,
+    acta: datos.resumen,
+    tareas: datos.tareas,
+    decisiones: datos.decisiones,
+  }
+}
+```
+
+## Consideraciones RGPD para Transcripciones
+
+En España, la transcripción de audio que contiene datos personales (voces de empleados, clientes, datos de identificación) está sujeta al RGPD y la LOPDGDD. Puntos clave:
+
+- **Base jurídica:** Para reuniones internas, el interés legítimo suele ser suficiente. Para grabaciones de clientes, necesitas consentimiento explícito.
+- **Retención:** Define un periodo máximo de retención para las transcripciones y automatiza su eliminación.
+- **Localización de datos:** Si usas la API de OpenAI, los datos se procesan en EE.UU. Revisa si tu caso de uso lo permite o si necesitas procesamiento local (Whisper self-hosted).
+- **Comunicación:** Informa a los participantes de que la reunión se va a transcribir.
+
+## Conclusión
+
+Whisper democratizó la transcripción automática en español. La elección entre API de OpenAI (rápida, sin infraestructura) y Whisper local (privado, sin coste variable) depende del volumen, los requisitos de privacidad y la infraestructura disponible. Para la mayoría de empresas españolas que empiezan, la API es el camino de menor resistencia.
+
+¿Quieres implementar transcripción automática en los procesos de tu empresa? [Contacta con SystemForge](https://systemforge.es/contacto).

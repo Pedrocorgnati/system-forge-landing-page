@@ -1,0 +1,103 @@
+---
+title: "WhatsApp Business API: chatbot profesional"
+slug: "whatsapp-business-api-chatbot-profesional"
+date: "2024-07-28"
+description: "Cómo construir un chatbot profesional con la API oficial de WhatsApp Business: proveedores BSP, flujos de conversación, plantillas y limitaciones."
+tags: ["whatsapp business", "chatbot", "whatsapp api", "automatizacion atencion", "bots"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo construir un chatbot profesional con la API oficial de WhatsApp Business: proveedores BSP, flujos de conversación, plantillas y limitaciones."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'whatsapp-business-api-chatbot-profissional'
+  - locale: 'it-IT'
+    slug: 'whatsapp-business-api-chatbot-professionale'
+  - locale: 'en'
+    slug: 'whatsapp-business-api-professional-chatbot'
+---
+
+WhatsApp tiene más de dos mil millones de usuarios activos en el mundo y es el canal de comunicación más utilizado en España y LATAM. A pesar de eso, la mayoría de las empresas sigue tratando WhatsApp como un número de teléfono más — alguien responde manualmente, en sus ratos libres, sin ninguna automatización. Es dinero dejándose sobre la mesa cada día.
+
+Construir un chatbot profesional en WhatsApp va más allá de instalar una aplicación de terceros. La API oficial de WhatsApp Business (también llamada Cloud API o WABA) ofrece una infraestructura robusta, escalable y auditable que separa la atención amateur de la atención que realmente convierte.
+
+## API Oficial vs Soluciones No Oficiales: Riesgos y Diferencias
+
+Existen soluciones no oficiales basadas en automatización del cliente WhatsApp Web (Baileys, whatsapp-web.js). Son más fáciles de montar y no requieren aprobación de Meta. El problema: violan los términos de servicio de WhatsApp. Las empresas que las usan corren el riesgo de que su número sea bloqueado permanentemente — lo que en la práctica significa perder todo el historial de conversaciones y la reputación asociada al número.
+
+La API oficial requiere aprobación, tiene un coste por conversación y un proceso de onboarding más complejo, pero ofrece estabilidad garantizada, soporte de Meta y acceso a funcionalidades avanzadas (botones, listas, mensajes de plantilla).
+
+## Proveedores BSP: Qué Son y Cómo Elegir
+
+Para acceder a la API oficial de WhatsApp Business, necesitas trabajar con un BSP (Business Solution Provider) — un partner certificado por Meta que proporciona acceso a la API y gestiona la infraestructura técnica.
+
+Los BSPs más relevantes en España y LATAM:
+- **Twilio:** el más usado internacionalmente. Documentación excelente, integración sencilla con Node.js/Python. Precio: ~0,05-0,15 $/conversación.
+- **Infobip:** fuerte en Europa y LATAM, con soporte en español y herramientas de automatización de flujos.
+- **360dialog:** acceso más directo a la Cloud API de Meta, con precios más competitivos para alto volumen.
+- **Meta Cloud API directa:** para empresas con mayor madurez técnica, Meta permite acceso directo sin BSP intermediario.
+
+## Plantillas de Mensaje: El Sistema de Aprobación
+
+Fuera de una ventana de conversación activa (24 horas desde el último mensaje del usuario), solo puedes enviar mensajes usando plantillas aprobadas por Meta. Las plantillas son mensajes predefinidos con variables que se pueden personalizar por destinatario.
+
+```javascript
+// Enviar plantilla de confirmación de pedido
+const response = await fetch(
+  `https://graph.facebook.com/v17.0/${phoneNumberId}/messages`,
+  {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to: customerPhone,
+      type: 'template',
+      template: {
+        name: 'order_confirmation',
+        language: { code: 'es' },
+        components: [
+          {
+            type: 'body',
+            parameters: [
+              { type: 'text', text: orderNumber },
+              { type: 'text', text: estimatedDelivery },
+            ]
+          }
+        ]
+      }
+    })
+  }
+);
+```
+
+Las plantillas deben ser aprobadas por Meta antes de usarse (generalmente en 24-72 horas). El contenido debe seguir sus políticas: no spam, no contenido engañoso, y el usuario debe haber dado consentimiento previo para recibir mensajes.
+
+## Flujos de Conversación: Mensajes Interactivos
+
+Dentro de la ventana de conversación activa (24h), puedes enviar mensajes interactivos con botones y listas que el usuario puede tocar para responder:
+
+```javascript
+// Mensaje con botones de respuesta rápida
+{
+  type: 'interactive',
+  interactive: {
+    type: 'button',
+    body: { text: '¿Cómo podemos ayudarte hoy?' },
+    action: {
+      buttons: [
+        { type: 'reply', reply: { id: 'track_order', title: 'Seguir mi pedido' } },
+        { type: 'reply', reply: { id: 'return', title: 'Hacer una devolución' } },
+        { type: 'reply', reply: { id: 'speak_human', title: 'Hablar con agente' } },
+      ]
+    }
+  }
+}
+```
+
+Los flujos de conversación combinan respuestas automáticas para los casos estándar con escalado a agente humano para los casos que requieren criterio. El traspaso debe ser transparente para el usuario: "Te paso con un agente para resolver esto mejor, estará disponible en menos de 5 minutos."

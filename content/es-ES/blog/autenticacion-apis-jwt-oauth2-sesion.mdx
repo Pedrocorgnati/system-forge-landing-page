@@ -1,0 +1,83 @@
+---
+title: "Autenticación en APIs: JWT, OAuth2 y sesiones"
+slug: "autenticacion-apis-jwt-oauth2-sesion"
+date: "2024-07-26"
+description: "Cuándo usar JWT, OAuth2 o sesiones en APIs — seguridad, revocación de tokens, refresh tokens e implementación práctica en Next.js con Auth.js."
+tags: ["autenticacion", "jwt", "oauth2", "sesion", "seguridad api"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cuándo usar JWT, OAuth2 o sesiones en APIs — seguridad, revocación de tokens, refresh tokens e implementación práctica en Next.js con Auth.js."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'autenticacao-apis-jwt-oauth2-session'
+  - locale: 'it-IT'
+    slug: 'autenticazione-api-jwt-oauth2-session'
+  - locale: 'en'
+    slug: 'api-authentication-jwt-oauth2-sessions'
+---
+
+La autenticación mal implementada no es solo un bug — es una vulnerabilidad. Según el OWASP Top 10, los fallos de autenticación y control de acceso representan las dos primeras categorías de riesgo más críticas en aplicaciones web. Y la ironía es que la mayoría de los errores no están en la criptografía en sí, sino en decisiones arquitectónicas equivocadas.
+
+Para empresas en España que deben cumplir con el RGPD, una brecha de seguridad derivada de autenticación deficiente puede resultar en multas de hasta el 4% de la facturación global. Las decisiones técnicas de autenticación tienen consecuencias regulatorias directas.
+
+## JWT: Cómo Funciona y Dónde Fallar
+
+Un JSON Web Token (JWT) es un token firmado digitalmente que contiene claims sobre el usuario. La ventaja principal es que es stateless — el servidor no necesita almacenar sesiones, lo que simplifica el escalado horizontal.
+
+El problema más común: **usar JWT donde las sesiones funcionarían mejor**. Los JWT no se pueden revocar antes de su expiración sin un mecanismo adicional (una blacklist, que elimina la ventaja de ser stateless). Si un usuario cierra sesión, el token técnicamente sigue siendo válido hasta que expire.
+
+Errores frecuentes:
+
+- **Expiración demasiado larga:** Tokens con expiración de 30 días son el equivalente de dejar la puerta abierta. El estándar para access tokens es 15 minutos a 1 hora.
+- **Sin refresh tokens:** Si el access token expira rápido pero no hay refresh token, el usuario tiene que re-autenticarse constantemente.
+- **Almacenar en localStorage:** Los tokens en localStorage son accesibles desde JavaScript y vulnerables a XSS. El almacenamiento correcto son httpOnly cookies.
+
+## OAuth2: Cuándo es la Opción Correcta
+
+OAuth2 no es un protocolo de autenticación — es un protocolo de **autorización**. Permite que una aplicación acceda a recursos en nombre de un usuario sin que ese usuario revele sus credenciales a la aplicación.
+
+Es la elección correcta cuando:
+- Necesitas "Login con Google/Microsoft/Apple" — delegar la autenticación a un proveedor de identidad
+- Tu API va a ser consumida por aplicaciones de terceros — el authorization code flow protege al usuario
+- Gestionas múltiples aplicaciones que comparten la misma base de usuarios
+
+Para productos SaaS en España que integran con Microsoft 365 (muy común en el entorno empresarial español) o con sistemas de la Administración Pública via Cl@ve, OAuth2/OIDC es el estándar que debes implementar.
+
+## Sesiones: Simple y Efectivo para Monolitos
+
+Las sesiones de servidor son stateful — el servidor almacena el estado de la sesión (normalmente en Redis) y el cliente solo tiene una cookie con el session ID. Son más simples de implementar correctamente, tienen revocación inmediata y son menos vulnerables a ciertos tipos de ataques.
+
+Son la mejor opción para aplicaciones web tradicionales, paneles de administración o cualquier caso donde el escalado horizontal no sea un requisito inmediato.
+
+## Implementación Práctica en Next.js
+
+Para Next.js, `Auth.js` (anteriormente NextAuth.js) es la solución más madura. Soporta JWT, sesiones de base de datos, OAuth2 con decenas de proveedores y callbacks de personalización:
+
+```typescript
+// app/api/auth/[...nextauth]/route.ts
+import NextAuth from 'next-auth'
+import Google from 'next-auth/providers/google'
+import { PrismaAdapter } from '@auth/prisma-adapter'
+
+export const { handlers, auth } = NextAuth({
+  adapter: PrismaAdapter(prisma),
+  providers: [Google],
+  session: { strategy: 'database' }, // sesiones en DB, revocación inmediata
+  callbacks: {
+    session({ session, user }) {
+      session.user.role = user.role
+      return session
+    }
+  }
+})
+```
+
+## Conclusión
+
+La regla práctica: **sesiones para aplicaciones web donde el escalado no es crítico, JWT para APIs consumidas por apps móviles o SPAs, OAuth2 cuando delegas la autenticación a proveedores externos**. No uses JWT solo porque "es moderno" — las sesiones resuelven el 80% de los casos con menos complejidad.
+
+¿Necesitas una arquitectura de autenticación robusta y conforme con el RGPD para tu aplicación? [Contacta con SystemForge](https://systemforge.es/contacto).

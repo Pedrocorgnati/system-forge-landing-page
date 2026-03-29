@@ -1,0 +1,143 @@
+---
+title: "OpenAPI: documentación automática de API en Next.js"
+slug: "openapi-documentacion-automatica-swagger-nextjs"
+date: "2024-08-23"
+description: "Cómo configurar OpenAPI 3.x con Swagger UI en APIs Next.js — generación automática desde tipos TypeScript con zod-to-openapi o ts-to-openapi."
+tags: ["openapi", "swagger", "documentacion api", "nextjs", "typescript"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo configurar OpenAPI 3.x con Swagger UI en APIs Next.js — generación automática desde tipos TypeScript con zod-to-openapi o ts-to-openapi.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'openapi-documentacao-automatica-swagger-nextjs'
+  - locale: 'it-IT'
+    slug: 'openapi-documentazione-automatica-swagger-nextjs'
+  - locale: 'en'
+    slug: 'openapi-automatic-documentation-swagger-nextjs'
+---
+
+La documentación de API escrita manualmente tiene fecha de caducidad: el siguiente pull request que modifica un endpoint sin actualizar el README. En equipos que se mueven rápido, la documentación manual inevitablemente se queda desactualizada — y la documentación desactualizada es peor que ninguna documentación, porque genera confianza en información incorrecta.
+
+La solución es generar la documentación directamente desde el código. Con OpenAPI 3.x y las herramientas correctas para TypeScript, defines tus schemas una vez (en Zod, por ejemplo) y la documentación Swagger se genera automáticamente y siempre refleja el estado real de la API.
+
+## OpenAPI 3.x: Estructura y Componentes Principales
+
+OpenAPI 3.x describe una API en formato YAML o JSON. Define los endpoints disponibles, los parámetros de cada uno, el formato de los requests y responses, y los esquemas de los objetos.
+
+La versión 3.x trajo mejoras importantes sobre la 2.x (Swagger): soporte para múltiples servidores, callbacks para webhooks, y un modelo de components más expresivo que permite reutilizar schemas, responses y parameters.
+
+Un spec OpenAPI mínimo para un endpoint de API:
+
+```yaml
+openapi: 3.0.3
+info:
+  title: Mi API
+  version: 1.0.0
+paths:
+  /api/users:
+    get:
+      summary: Listar usuarios
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+      responses:
+        '200':
+          description: Lista de usuarios
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserList'
+```
+
+## zod-to-openapi: Generación desde Schemas Zod
+
+Si ya usas Zod para validación (y deberías), `@asteasolutions/zod-to-openapi` genera el spec OpenAPI directamente desde tus schemas Zod. Defines los tipos una vez y obtienes validación + documentación del mismo código.
+
+```typescript
+import { z } from 'zod';
+import { extendZodWithOpenApi } from '@asteasolutions/zod-to-openapi';
+
+extendZodWithOpenApi(z);
+
+const UserSchema = z.object({
+  id: z.string().uuid().openapi({ example: '550e8400-e29b-41d4-a716' }),
+  email: z.string().email().openapi({ example: 'usuario@empresa.es' }),
+  name: z.string().openapi({ example: 'María García' }),
+  createdAt: z.string().datetime(),
+}).openapi('User');
+
+// Registrar el schema
+registry.register('User', UserSchema);
+```
+
+## Configurar Swagger UI en Next.js
+
+```typescript
+// app/api/docs/route.ts
+import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
+import { registry } from '@/lib/openapi-registry';
+
+export async function GET() {
+  const generator = new OpenApiGeneratorV3(registry.definitions);
+  const spec = generator.generateDocument({
+    openapi: '3.0.0',
+    info: { title: 'API', version: '1.0.0' },
+    servers: [{ url: process.env.NEXT_PUBLIC_API_URL }],
+  });
+
+  return Response.json(spec);
+}
+```
+
+```typescript
+// app/docs/page.tsx - Swagger UI con SwaggerUIBundle
+'use client';
+import SwaggerUI from 'swagger-ui-react';
+import 'swagger-ui-react/swagger-ui.css';
+
+export default function DocsPage() {
+  return <SwaggerUI url="/api/docs" />;
+}
+```
+
+## Autenticación en el Spec OpenAPI
+
+Para APIs con autenticación Bearer, el spec debe declarar el security scheme y marcarlo en los endpoints protegidos:
+
+```typescript
+registry.registerComponent('securitySchemes', 'bearerAuth', {
+  type: 'http',
+  scheme: 'bearer',
+  bearerFormat: 'JWT',
+});
+
+// En cada endpoint protegido
+registry.registerPath({
+  method: 'get',
+  path: '/api/users/me',
+  security: [{ bearerAuth: [] }],
+  // ...
+});
+```
+
+Con esto, el Swagger UI muestra el botón "Authorize" que permite probar la API directamente desde la documentación con un token JWT real.
+
+## Generar el Spec en Build Time
+
+Para producción, es mejor generar el spec en build time y servirlo como archivo estático, en lugar de generarlo en cada request:
+
+```typescript
+// scripts/generate-openapi.ts
+import { writeFileSync } from 'fs';
+const spec = generateOpenApiSpec();
+writeFileSync('./public/openapi.json', JSON.stringify(spec, null, 2));
+```
+
+Esto mejora el tiempo de respuesta del endpoint de documentación y permite versionar el spec en el repositorio para detectar cambios en CI.

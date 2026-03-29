@@ -1,0 +1,128 @@
+---
+title: "Rate limiting: cómo proteger tu API en producción"
+slug: "rate-limiting-proteger-api-produccion"
+date: "2024-08-09"
+description: "Cómo implementar rate limiting en APIs Node.js — algoritmos (token bucket, leaky bucket), Redis para conteo distribuido y respuestas 429 con Retry-After."
+tags: ["rate limiting", "throttling", "api", "redis", "seguridad"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo implementar rate limiting en APIs Node.js — algoritmos (token bucket, leaky bucket), Redis para conteo distribuido y respuestas 429 con Retry-After.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rate-limiting-throttling-proteger-api'
+  - locale: 'it-IT'
+    slug: 'rate-limiting-proteggere-api-produzione'
+  - locale: 'en'
+    slug: 'rate-limiting-how-to-protect-your-api'
+---
+
+Imagina que lanzas tu API y en la primera semana un solo cliente con un bug en su código de integración empieza a hacer 10.000 solicitudes por minuto. Sin rate limiting, tu API cae para todos los demás clientes. Con rate limiting, ese cliente recibe respuestas `429 Too Many Requests`, su bug queda visible en los logs y los demás usuarios ni se enteran del problema.
+
+El rate limiting no es solo protección contra ataques DDoS — es garantía de disponibilidad y equidad entre los consumidores de tu API. Es una de las primeras funcionalidades que debería implementarse en cualquier API que va a producción.
+
+## Algoritmos: Token Bucket vs Leaky Bucket vs Fixed Window
+
+**Fixed Window** es el más simple: se permite N solicitudes por ventana de tiempo (por ejemplo, 100 solicitudes por minuto). El problema es el "thundering herd": al inicio de cada ventana, todos los clientes que esperaban pueden hacer solicitudes simultáneamente.
+
+**Token Bucket** es el más equilibrado: cada cliente tiene un "bucket" con capacidad máxima de N tokens. Los tokens se reponen a una tasa constante. Cada solicitud consume un token. Si el bucket está vacío, la solicitud se rechaza. Permite ráfagas controladas (usar todos los tokens del bucket) sin comprometer la tasa media.
+
+**Sliding Window** es más preciso que Fixed Window: en lugar de resetear el contador al inicio de cada minuto, se cuenta cuántas solicitudes hubo en los últimos 60 segundos desde el momento actual. Más costoso computacionalmente pero sin el problema del thundering herd.
+
+## Implementación con Redis: Rate Limiting Distribuido
+
+En un sistema con múltiples instancias de API, el contador de rate limit no puede vivir en memoria de cada instancia — los clientes roteados a diferentes instancias tendrían límites independientes. Redis resuelve esto con contadores atómicos compartidos:
+
+```typescript
+import { Redis } from 'ioredis';
+
+const redis = new Redis(process.env.REDIS_URL);
+
+async function checkRateLimit(
+  identifier: string,  // IP o API key
+  limit: number,
+  windowSeconds: number
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const key = `rate_limit:${identifier}`;
+  const now = Math.floor(Date.now() / 1000);
+
+  const pipeline = redis.pipeline();
+  pipeline.zadd(key, now, `${now}-${Math.random()}`);
+  pipeline.zremrangebyscore(key, 0, now - windowSeconds);
+  pipeline.zcard(key);
+  pipeline.expire(key, windowSeconds);
+
+  const results = await pipeline.exec();
+  const count = results?.[2]?.[1] as number;
+
+  return {
+    allowed: count <= limit,
+    remaining: Math.max(0, limit - count),
+    resetAt: now + windowSeconds,
+  };
+}
+```
+
+## Middleware en Express/Next.js
+
+```typescript
+// middleware de rate limiting para Next.js API routes
+export async function rateLimitMiddleware(
+  request: NextRequest,
+  identifier: string
+) {
+  const { allowed, remaining, resetAt } = await checkRateLimit(
+    identifier,
+    100, // 100 solicitudes
+    60   // por minuto
+  );
+
+  if (!allowed) {
+    return new Response('Too Many Requests', {
+      status: 429,
+      headers: {
+        'Retry-After': String(resetAt - Math.floor(Date.now() / 1000)),
+        'X-RateLimit-Limit': '100',
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': String(resetAt),
+      },
+    });
+  }
+
+  // Añadir headers informativos en solicitudes permitidas
+  return null; // continuar con la solicitud
+}
+```
+
+## Diferentes Límites por Tipo de Endpoint
+
+No todos los endpoints necesitan el mismo límite. Los endpoints de autenticación merecen límites más estrictos (5-10 intentos por minuto) para prevenir ataques de fuerza bruta. Los endpoints de lectura pueden tener límites más generosos que los de escritura.
+
+```typescript
+const rateLimitConfig = {
+  '/api/auth/login': { limit: 5, window: 60 },
+  '/api/auth/register': { limit: 3, window: 300 },
+  '/api/data/read': { limit: 200, window: 60 },
+  '/api/data/write': { limit: 50, window: 60 },
+  default: { limit: 100, window: 60 },
+};
+```
+
+## Upstash Redis: Rate Limiting Serverless
+
+Para proyectos en Vercel o plataformas serverless, Upstash ofrece Redis serverless con un SDK específico para rate limiting que no requiere gestionar conexiones persistentes:
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit';
+import { Redis } from '@upstash/redis';
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(10, '10 s'),
+});
+
+const { success } = await ratelimit.limit(identifier);
+```

@@ -1,22 +1,22 @@
 # .github/workflows/deploy.yml
-# Triple Market Deploy — 3 SFTP deploys paralelos (BR, IT, EN)
+# Quad Market Deploy — 4 SFTP deploys paralelos (BR, IT, EN, ES)
 # Secrets documentados em: docs/ci-cd-secrets.md
 #
 # Pré-requisito: build.yml deve ter completado com sucesso (artifacts build-{locale} disponíveis)
 # Trigger: workflow_run após "Triple Market Build" completar em main
 # Manual: workflow_dispatch para re-deploy de mercado específico
-name: Triple Market Deploy
+name: Quad Market Deploy
 
 on:
   workflow_run:
-    workflows: ["Triple Market Build"]
+    workflows: ["Quad Market Build"]
     types: [completed]
     branches: [main]
 
   workflow_dispatch:
     inputs:
       market:
-        description: 'Mercado para deploy manual (all, br, it, en)'
+        description: 'Mercado para deploy manual (all, br, it, en, es)'
         required: false
         default: 'all'
 
@@ -353,14 +353,122 @@ jobs:
           echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
 
   # ===========================================================================
-  # POST-DEPLOY: Smoke Tests (3 domínios)
+  # DEPLOY: Espanha (es-ES) → systemforge.es
+  # ===========================================================================
+  deploy-es:
+    name: Deploy ES (systemforge.es)
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout (scripts only)
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            scripts/generate-htaccess.ts
+            package.json
+            package-lock.json
+            tsconfig.json
+          sparse-checkout-cone-mode: false
+
+      - name: Download build artifact (es-ES)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-es-ES
+          path: out/
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install tsx
+        run: npm install --no-save tsx
+
+      - name: Generate .htaccess (ES — GDPR, sem GTM)
+        run: npx tsx scripts/generate-htaccess.ts --locale=es
+
+      - name: Copy .htaccess into build output
+        run: cp dist/es/.htaccess out/.htaccess
+
+      - name: Verify security headers in .htaccess (ES)
+        run: |
+          grep -q "Strict-Transport-Security" out/.htaccess && echo "✅ HSTS present" || (echo "❌ HSTS missing" && exit 1)
+          grep -q "X-Frame-Options" out/.htaccess && echo "✅ X-Frame-Options present" || (echo "❌ X-Frame-Options missing" && exit 1)
+          grep -q "Content-Security-Policy" out/.htaccess && echo "✅ CSP present" || (echo "❌ CSP missing" && exit 1)
+          ! grep -q "googletagmanager" out/.htaccess && echo "✅ GTM absent from ES CSP (GDPR compliant)" || (echo "❌ GTM must NOT be in ES CSP" && exit 1)
+
+      - name: Deploy to systemforge.es
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_ES_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_ES_USER }}
+          SSHPASS: ${{ secrets.SFTP_ES_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_ES_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_ES_PUBLIC_HTML }}
+        run: |
+          sudo apt-get install -y sshpass > /dev/null 2>&1
+          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          TARGET="$SFTP_USER@$SFTP_HOST"
+          BATCH_DIRS=$(mktemp)
+          find out -type d | sort | while IFS= read -r dir; do
+            echo "-mkdir ${dir/#out/$SFTP_PATH}"
+          done >> "$BATCH_DIRS"
+          echo "quit" >> "$BATCH_DIRS"
+          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
+          mapfile -t ALL_FILES < <(find out -type f | sort)
+          TOTAL=${#ALL_FILES[@]}
+          PARALLEL=5
+          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
+          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
+          PIDS=()
+          for i in $(seq 0 $((PARALLEL - 1))); do
+            BATCH=$(mktemp)
+            START=$((i * CHUNK))
+            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
+              echo "put $file ${file/#out/$SFTP_PATH}"
+            done >> "$BATCH"
+            echo "quit" >> "$BATCH"
+            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
+            PIDS+=($!)
+          done
+          FAILED=0
+          for pid in "${PIDS[@]}"; do
+            wait "$pid" || FAILED=1
+          done
+          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
+
+      - name: Purge Cloudflare cache (ES)
+        if: success()
+        run: |
+          ZONE_ID="${{ secrets.CLOUDFLARE_ZONE_ID_ES }}"
+          if [ -n "$ZONE_ID" ]; then
+            curl -s -X POST "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/purge_cache" \
+              -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+              -H "Content-Type: application/json" \
+              --data '{"purge_everything":true}' || true
+          fi
+
+      - name: Deploy summary (ES)
+        if: success()
+        run: |
+          echo "## Deploy ES concluído" >> $GITHUB_STEP_SUMMARY
+          echo "- **Domínio:** systemforge.es" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+  # ===========================================================================
+  # POST-DEPLOY: Smoke Tests (4 domínios)
   # ===========================================================================
   post-deploy-smoke:
     name: Post-Deploy Smoke Tests
-    needs: [deploy-br, deploy-it, deploy-en]
+    needs: [deploy-br, deploy-it, deploy-en, deploy-es]
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: ${{ always() && needs.deploy-br.result == 'success' && needs.deploy-it.result == 'success' && needs.deploy-en.result == 'success' }}
+    if: ${{ always() && needs.deploy-br.result == 'success' && needs.deploy-it.result == 'success' && needs.deploy-en.result == 'success' && needs.deploy-es.result == 'success' }}
 
     steps:
       - name: Checkout repository
@@ -380,9 +488,10 @@ jobs:
           WORKER_BR: ${{ secrets.NEWSLETTER_WORKER_URL_BR }}
           WORKER_IT: ${{ secrets.NEWSLETTER_WORKER_URL_IT }}
           WORKER_EN: ${{ secrets.NEWSLETTER_WORKER_URL_EN }}
+          WORKER_ES: ${{ secrets.NEWSLETTER_WORKER_URL_ES }}
         run: |
           [ -n "$WORKER_BR" ] && bash scripts/smoke-test-workers.sh \
-            || echo "⚠️ WORKER_BR/IT/EN não configurados — pulando smoke-test-workers"
+            || echo "⚠️ WORKER_BR/IT/EN/ES não configurados — pulando smoke-test-workers"
 
       - name: Smoke test summary
         if: always()

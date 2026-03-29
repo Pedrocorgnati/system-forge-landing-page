@@ -1,0 +1,80 @@
+---
+title: "Apps desktop para industria: requisitos y desafíos"
+slug: "apps-desktop-para-industria-requisitos"
+date: "2024-11-29"
+description: "Requisitos específicos de apps desktop para entornos industriales: comunicación serial, protocolos OPC-UA/MODBUS, alta disponibilidad y UX para operadores."
+tags: ["desktop industrial", "opc ua", "modbus", "automatizacion industrial", "desktop app"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Requisitos específicos de apps desktop para entornos industriales: comunicación serial, protocolos OPC-UA/MODBUS, alta disponibilidad y UX para operadores."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'apps-desktop-para-industria-requisitos'
+  - locale: 'it-IT'
+    slug: 'app-desktop-industria-requisiti'
+  - locale: 'en'
+    slug: 'desktop-apps-for-industry-requirements'
+---
+
+Un sistema de control industrial no es un dashboard web en una pantalla más grande. Los requisitos son fundamentalmente diferentes en casi todas las dimensiones: el hardware con el que necesita comunicarse no fue diseñado pensando en APIs REST, la disponibilidad esperada se mide en años sin interrupción no planificada, los usuarios operan con guantes en entornos ruidosos, y un fallo del software puede detener una línea de producción con costes de decenas de miles de euros por hora.
+
+España tiene un tejido industrial potente — sector automotriz en Cataluña y Comunidad Valenciana, agroalimentario en Murcia y Andalucía, metal y maquinaria en el País Vasco. Construir software para este sector con las mismas prácticas usadas para un SaaS B2B es una receta para el fracaso.
+
+## Comunicación con Hardware: Serial, OPC-UA y MODBUS
+
+La primera diferencia radical respecto al software de consumo es la comunicación con hardware físico. Las máquinas industriales no tienen REST APIs — hablan protocolos como MODBUS (para sensores, PLCs básicos), OPC-UA (estándar moderno para automatización industrial) o comunicación serial RS-232/RS-485.
+
+En apps Electron, la comunicación serial se maneja con `serialport`, una librería Node.js que expone los puertos COM del sistema:
+
+```javascript
+const { SerialPort } = require('serialport')
+const { ModbusRTU } = require('modbus-serial')
+
+const client = new ModbusRTU()
+await client.connectRTUBuffered('/dev/ttyUSB0', { baudRate: 9600 })
+
+// Leer registros de un PLC
+const data = await client.readHoldingRegisters(0, 10)
+console.log('Temperatura:', data.data[0] / 10, '°C')
+```
+
+Para OPC-UA (más común en instalaciones modernas o plantas alemanas que son frecuentes en el ecosistema industrial español), `node-opcua` ofrece una implementación completa del protocolo.
+
+## Alta Disponibilidad: El Requisito que Cambia Todo
+
+En software empresarial típico, un fallo que causa reinicio de la aplicación es un inconveniente. En software industrial, puede detener la producción. Los requisitos cambian:
+
+- **Watchdog process:** Un proceso separado monitoriza la app principal y la reinicia automáticamente si falla, idealmente en menos de 5 segundos
+- **Modo degradado:** Si la conexión con el servidor central falla, la app debe poder operar con capacidades reducidas usando datos locales cacheados
+- **Logging robusto:** Registrar en disco cada acción y cada dato recibido, para diagnóstico post-fallo
+- **Sin updates automáticos durante producción:** Al contrario del software de consumo, los updates deben ser manuales y programados en paradas de mantenimiento
+
+## UX para Operadores Industriales
+
+Los operadores de planta tienen condiciones de uso completamente distintas al usuario de oficina. Consideraciones críticas de UX:
+
+**Texto grande y contraste alto.** Las pantallas suelen estar a 50-80 cm de distancia, a veces en condiciones de iluminación adversas. El texto debe ser legible sin esfuerzo.
+
+**Objetivos táctiles grandes.** Aunque la mayoría de las pantallas industriales son táctiles o con mouse, muchos operadores trabajan con guantes. Los botones deben tener al menos 44px de altura — idealmente más.
+
+**Feedback inmediato y claro.** Cuando el operador ejecuta una acción (activar una válvula, iniciar un proceso), el feedback debe ser visual e instantáneo. El operador no puede esperar 2 segundos mirando un spinner.
+
+**Alertas diferenciadas por severidad.** Informativo (verde/azul), advertencia (amarillo), crítico (rojo parpadeante con sonido). La jerarquía visual de alertas debe ser imposible de ignorar.
+
+## Entorno Operativo: Red, Actualizaciones y Seguridad
+
+Las plantas industriales en España raramente tienen conectividad a internet estable en el suelo de fábrica. La app debe funcionar offline-first, sincronizando datos cuando hay conectividad disponible.
+
+La seguridad también tiene particularidades: las máquinas industriales suelen correr Windows 7 o Windows 10 LTSC — versiones antiguas con actualizaciones limitadas. La app no puede depender de APIs del sistema operativo modernas y debe ser compatible con entornos sin internet.
+
+Para plantas con requisitos de seguridad según el Reglamento de Seguridad Industrial español, el logging de auditoría y los controles de acceso por rol son obligatorios, no opcionales.
+
+## Conclusión
+
+El software industrial bien hecho requiere un conocimiento profundo del entorno de operación que va mucho más allá del conocimiento técnico estándar. Los tradeoffs — disponibilidad vs simplicidad, modo offline vs sincronización, UX para operadores vs para administradores — son distintos a cualquier otro tipo de software.
+
+¿Necesitas desarrollar software desktop para una planta industrial en España? [Contáctanos en SystemForge](https://systemforge.es/contacto) — tenemos experiencia en los requisitos específicos del sector industrial.

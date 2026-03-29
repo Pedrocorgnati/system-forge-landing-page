@@ -98,6 +98,7 @@ export async function sendWelcomeEmailEN(
       html,
       headers: rfc8058Headers,
     }),
+    signal: AbortSignal.timeout(10_000),
   });
 
   if (!response.ok) {

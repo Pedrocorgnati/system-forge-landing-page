@@ -1,12 +1,12 @@
 # .github/workflows/build.yml
-# Triple Market Build — 3 builds paralelos por locale
+# Quad Market Build — 4 builds paralelos por locale
 # Secrets documentados em: docs/ci-cd-secrets.md
 #
 # Fluxo:
 #   push para main → este workflow → artifacts build-{locale}
 #   → deploy.yml (via workflow_run) → 3 deploys SFTP paralelos
 #   → smoke-test.yml (via workflow_run) → 3 smoke tests paralelos
-name: Triple Market Build
+name: Quad Market Build
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
     strategy:
       fail-fast: false   # Outros locales continuam se um falhar
       matrix:
-        locale: [pt-BR, it-IT, en]
+        locale: [pt-BR, it-IT, en, es-ES]
         include:
           - locale: pt-BR
             build_suffix: br
@@ -45,6 +45,10 @@ jobs:
             build_suffix: en
             site_url: https://systemforgesoftware.com
             contact_email: contact@systemforgesoftware.com
+          - locale: es-ES
+            build_suffix: es
+            site_url: https://systemforge.es
+            contact_email: hola@systemforge.es
 
     steps:
       - name: Checkout repository
@@ -100,7 +104,6 @@ jobs:
           NEXT_PUBLIC_CONTACT_EMAIL: ${{ matrix.contact_email }}
           NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
           NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
-          NEXT_PUBLIC_CALENDLY_URL: ${{ secrets.NEXT_PUBLIC_CALENDLY_URL }}
           NEXT_PUBLIC_BUDGET_ENGINE_URL: ${{ secrets.NEXT_PUBLIC_BUDGET_ENGINE_URL }}
 
       - name: Upload build artifact
@@ -148,6 +151,12 @@ jobs:
         with:
           name: build-en
           path: dist-en/
+
+      - name: Download build artifact (es-ES)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-es-ES
+          path: dist-es/
 
       - name: Check build isolation (zero cross-contamination)
         run: npx tsx scripts/check-build-isolation.ts

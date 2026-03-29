@@ -1,0 +1,57 @@
+---
+title: "Cuándo construir app de escritorio en vez de web"
+slug: "cuando-construir-app-desktop-vs-web"
+date: "2024-09-04"
+description: "Criterios para decidir entre app de escritorio y web app: acceso a hardware, rendimiento offline, seguridad local e integración con el sistema operativo."
+tags: ["desktop app", "web app", "decision tecnica", "electron", "tauri"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Criterios para decidir entre app de escritorio y web app: acceso a hardware, rendimiento offline, seguridad local e integración con el sistema operativo."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'quando-construir-app-desktop-vs-web'
+  - locale: 'it-IT'
+    slug: 'quando-costruire-app-desktop-vs-web'
+  - locale: 'en'
+    slug: 'when-to-build-desktop-app-vs-web-app'
+---
+
+La web es un entorno increíblemente potente. Con Next.js, React, APIs modernas del navegador y una buena CDN, es posible construir aplicaciones sofisticadas que funcionan en cualquier dispositivo con un navegador. Para la aplastante mayoría de los casos de uso — dashboards, e-commerces, plataformas SaaS, sistemas de gestión — una web app bien construida es más barata, más fácil de actualizar y más accesible que una app de escritorio.
+
+Pero existe un conjunto específico de requisitos donde la web simplemente no puede entregar lo que el negocio necesita. Cuando te encuentras con esos requisitos, intentar forzar una solución web generalmente resulta en hacks frágiles, experiencia de usuario degradada — y eventualmente en la necesidad de reescribir todo como app de escritorio de todas formas.
+
+Entender cuándo el escritorio es la elección correcta ahorra meses de desarrollo y retrabajo. Estos son los criterios técnicos que determinan esa decisión.
+
+## Acceso a Hardware: El Límite de las APIs del Navegador
+
+Los navegadores modernos tienen acceso a hardware a través de APIs web: WebUSB (dispositivos USB), Web Bluetooth (dispositivos Bluetooth), WebHID (dispositivos HID como lectores de código de barras), Web Serial (puertos serie). Pero este acceso es limitado, requiere HTTPS, necesita permiso explícito del usuario en cada sesión, y no todos los navegadores soportan todas las APIs.
+
+Si el producto necesita comunicarse de forma fiable con hardware industrial — básculas, impresoras de etiquetas, PLCs, lectores de tarjetas, tornos CNC — la web no es una opción realista. Una app de escritorio con acceso directo a los drivers del sistema operativo es la solución correcta.
+
+## Operación Offline: Cuando la Red No Es Garantía
+
+Los service workers y las Progressive Web Apps permiten operación offline básica en navegadores. Pero la caché de service worker tiene límites de almacenamiento (generalmente 50MB en mobile), el comportamiento en iOS Safari es inconsistente, y la sincronización de datos complejos con resolución de conflictos es significativamente más difícil que en una app nativa con SQLite local.
+
+Para aplicaciones que deben funcionar offline de forma completa — sistemas de punto de venta en zonas con conectividad variable, aplicaciones industriales en almacenes sin Wi-Fi, software de campo para técnicos — la app de escritorio con SQLite local es la arquitectura correcta.
+
+## Rendimiento Computacional Intensivo
+
+Rendering de CAD/CAM, procesamiento de imágenes médicas, análisis de datos en tiempo real de sensores industriales, compiladores e IDEs: estas aplicaciones requieren acceso directo a la CPU y memoria del sistema, sin la capa de abstracción del navegador.
+
+Tauri (Rust + WebView) o apps nativas (C++/C#/Swift) son la respuesta para este tipo de cargas computacionales.
+
+## Integración Profunda con el Sistema Operativo
+
+Algunas necesidades de integración son imposibles o muy complicadas desde el navegador: registrarse como handler de protocolo de sistema (abrir ciertos archivos con tu aplicación), integración con el gestor de credenciales del SO, menús del sistema y dock icons, atajos de teclado globales, o tareas en segundo plano que se ejecutan cuando el usuario no está usando la app activamente.
+
+## Electron vs Tauri: La Decisión en 2025
+
+Si el equipo tiene experiencia en JavaScript/TypeScript, **Electron** es la opción más madura: ecosistema grande, muchos ejemplos de referencia (VS Code, Slack, Figma), y el mismo lenguaje que el frontend web.
+
+**Tauri** (Rust + WebView del sistema) produce binarios mucho más ligeros (5-15MB vs 80-200MB de Electron) y tiene mejor rendimiento, pero requiere conocimiento de Rust para la parte nativa. Para 2025, Tauri 2.0 con soporte mobile hace que invertir en aprenderlo tenga sentido para proyectos que también necesitan versión móvil.
+
+La regla práctica: si el equipo ya sabe Rust o tiene tiempo para aprenderlo, Tauri. Si no, Electron.

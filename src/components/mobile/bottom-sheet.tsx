@@ -3,6 +3,9 @@
 import { useEffect, useRef, useCallback } from 'react'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 interface BottomSheetProps {
   isOpen: boolean
@@ -89,7 +92,7 @@ export function BottomSheet({
                 'text-foreground hover:bg-accent transition-colors',
                 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
               )}
-              aria-label="Fechar"
+              aria-label={m.accessibility.close}
             >
               <X className="w-5 h-5" />
             </button>

@@ -1,0 +1,73 @@
+---
+title: "Split de pagos en marketplace: Europa y LATAM"
+slug: "split-pagos-marketplace-europa"
+date: "2024-08-10"
+description: "Cómo implementar split de pagos en marketplace europeo y latinoamericano: Stripe Connect, MangoPay y Adyen — comparativa técnica con ejemplos."
+tags: ["split pago", "marketplace", "stripe connect", "mangopay", "fintech"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar split de pagos en marketplace europeo y latinoamericano: Stripe Connect, MangoPay y Adyen — comparativa técnica con ejemplos."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'split-pagamentos-marketplace-brasil'
+  - locale: 'it-IT'
+    slug: 'split-pagamenti-marketplace-stripe-connect-mangopay'
+  - locale: 'en'
+    slug: 'marketplace-payment-splitting-stripe-connect-adyen'
+---
+
+El split de pago es el mecanismo que transforma un e-commerce en marketplace. Es lo que garantiza que cuando un cliente paga 300 € por productos de tres vendedores diferentes, cada uno recibe su parte automáticamente, ya descontada la comisión de la plataforma. Simple en la descripción, complejo en la implementación — y es exactamente aquí donde la mayoría de los proyectos de marketplace se atascan.
+
+La buena noticia es que existen soluciones maduras en el mercado europeo. La mala es que cada una tiene sus propias limitaciones, costes y requisitos de compliance que hay que evaluar antes de escribir una línea de código.
+
+## Stripe Connect: La Opción Más Completa para Europa
+
+Stripe Connect es el producto de Stripe específico para marketplaces y plataformas. Permite que la plataforma reciba el pago completo del comprador y distribuya automáticamente a los vendedores.
+
+Hay tres tipos de cuenta en Stripe Connect:
+- **Standard:** los vendedores tienen su propia cuenta de Stripe y gestionan su propio onboarding y compliance. La plataforma toma una comisión.
+- **Express:** Stripe gestiona el onboarding y el dashboard del vendedor. La plataforma tiene más control sobre la experiencia.
+- **Custom:** la plataforma gestiona todo el onboarding y tiene control total de la UX, a cambio de más responsabilidades de compliance.
+
+Para marketplaces españoles y europeos, Stripe Connect está totalmente disponible, con soporte para SEPA Direct Debit, Bizum (via Stripe Checkout), y los principales métodos de pago europeos.
+
+```typescript
+// Crear un Payment Intent con split automático
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 30000, // 300.00 €
+  currency: 'eur',
+  payment_method_types: ['card', 'sepa_debit'],
+  application_fee_amount: 1500, // 15 € comisión de la plataforma (5%)
+  transfer_data: {
+    destination: vendorStripeAccountId,
+  },
+});
+```
+
+## MangoPay: Especializado en Marketplaces Europeos
+
+MangoPay es una solución de pagos desarrollada específicamente para marketplaces y plataformas. A diferencia de Stripe Connect (que se apoya en la infraestructura de Stripe), MangoPay es una entidad de dinero electrónico regulada en Luxemburgo, lo que le da ciertas ventajas regulatorias en el mercado europeo.
+
+MangoPay gestiona el dinero a través de "monederos" (wallets): el comprador paga, el dinero entra al wallet del marketplace, y se distribuye a los wallets de los vendedores. La liquidación a cuentas bancarias se hace desde los wallets.
+
+Las ventajas de MangoPay: fuerte en el mercado europeo, mejor soporte para pagos en múltiples monedas europeas, y módulo de KYC/AML integrado que facilita el onboarding de vendedores.
+
+## Adyen MarketPay: Para Grandes Volúmenes
+
+Adyen es la plataforma de pagos de referencia para empresas con alto volumen (Uber, eBay, Booking). Su producto para marketplaces, MarketPay, es comparable a Stripe Connect en funcionalidades pero está orientado a operaciones más grandes.
+
+El acceso a Adyen requiere volumen mínimo de procesamiento y un proceso de onboarding más largo. No es la opción adecuada para un marketplace en fase de lanzamiento.
+
+## Compliance: PSD2 y KYC para Vendedores
+
+En Europa, la Directiva de Servicios de Pago (PSD2) establece que los marketplaces que intermedian pagos pueden necesitar licencia de entidad de pago o trabajar con un proveedor autorizado. Tanto Stripe Connect como MangoPay gestionan el compliance regulatorio, pero el marketplace tiene responsabilidades en el KYC de sus vendedores.
+
+Los requisitos mínimos de KYC para vendedores en Europa: verificación de identidad (DNI/pasaporte), verificación del IBAN de la cuenta de destino, y para empresas, verificación del CIF y de los beneficiarios reales (UBO - Ultimate Beneficial Owner).
+
+## Split para LATAM: MercadoPago
+
+Para marketplaces que operan en México, Argentina, Colombia o Chile, MercadoPago (Mercado Libre) tiene un producto de split específico para la región con integración nativa a métodos de pago locales (OXXO en México, transferencias bancarias locales, etc.).

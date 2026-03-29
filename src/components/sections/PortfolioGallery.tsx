@@ -14,10 +14,8 @@ import { loadMessages } from '@config/content'
 
 const config = getSiteConfig()
 const messages = loadMessages()
-const locale = config.locale
 
-const ALL_LABEL =
-  locale === 'it-IT' ? 'Tutti' : locale === 'en' ? 'All' : 'Todos'
+const ALL_LABEL = messages.sections.portfolio.filterAll
 
 const categoryLabels: Record<string, string> = {
   all: ALL_LABEL,
@@ -25,7 +23,7 @@ const categoryLabels: Record<string, string> = {
   [ServiceCategory.MOBILE]: 'Mobile',
   [ServiceCategory.ECOMMERCE]: 'E-commerce',
   [ServiceCategory.DASHBOARD]: 'Dashboard',
-  [ServiceCategory.AI]: locale === 'it-IT' ? 'AI' : locale === 'en' ? 'AI' : 'IA',
+  [ServiceCategory.AI]: 'AI / IA',
   [ServiceCategory.MARKETPLACE]: 'Marketplace',
   [ServiceCategory.ERP]: 'ERP',
   [ServiceCategory.API]: 'API',
@@ -72,13 +70,13 @@ export function PortfolioGallery({ hideHeader = false, showAll = false }: Portfo
             <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
               <div className="flex flex-col gap-2">
                 <span className="text-sm font-semibold text-primary uppercase tracking-wide">
-                  {locale === 'it-IT' ? 'Portfolio' : locale === 'en' ? 'Portfolio' : 'Portfólio'}
+                  {messages.sections.portfolio.label}
                 </span>
                 <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
-                  {locale === 'it-IT' ? 'Progetti che abbiamo consegnato' : locale === 'en' ? 'Projects we have delivered' : 'Projetos que entregamos'}
+                  {messages.sections.portfolio.title}
                 </h2>
                 <p className="text-muted-foreground">
-                  {portfolioProjects.length} {locale === 'it-IT' ? 'progetti e in crescita.' : locale === 'en' ? 'projects and counting.' : 'projetos e contando.'}
+                  {portfolioProjects.length} {messages.sections.portfolio.countSuffix}
                 </p>
               </div>
               <Link
@@ -97,7 +95,7 @@ export function PortfolioGallery({ hideHeader = false, showAll = false }: Portfo
             data-testid="portfolio-filters"
             className="flex gap-2 overflow-x-auto scrollbar-hide pb-1"
             role="tablist"
-            aria-label={locale === 'it-IT' ? 'Filtra per categoria' : locale === 'en' ? 'Filter by category' : 'Filtrar por categoria'}
+            aria-label={messages.sections.portfolio.filterAriaLabel}
           >
             {filterTabs.map((cat) => (
               <button
@@ -126,7 +124,7 @@ export function PortfolioGallery({ hideHeader = false, showAll = false }: Portfo
             <div
               id="portfolio-filter-panel"
               role="tabpanel"
-              aria-label={locale === 'it-IT' ? 'Progetti filtrati' : locale === 'en' ? 'Filtered projects' : 'Projetos filtrados'}
+              aria-label={messages.sections.portfolio.ariaLabel}
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
             >
               {visible.map((project) => (

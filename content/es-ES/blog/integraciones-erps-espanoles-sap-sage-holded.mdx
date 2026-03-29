@@ -1,0 +1,149 @@
+---
+title: "Integraciones con ERPs españoles: SAP, Sage y Holded"
+slug: "integraciones-erps-espanoles-sap-sage-holded"
+date: "2024-10-24"
+description: "Cómo integrar aplicaciones con los ERPs más usados en España — SAP Business One, Sage 50/200, Holded y A3 — APIs disponibles, limitaciones y estrategias de integración."
+tags: ["erp integracion", "sap business one", "sage api", "holded api", "integracion sistemas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo integrar aplicaciones con los ERPs más usados en España — SAP Business One, Sage 50/200, Holded y A3 — APIs disponibles, limitaciones y estrategias de integración."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integracoes-erps-brasileiros-sap-totvs-omie'
+  - locale: 'it-IT'
+    slug: 'integrare-erp-sap-teamsystem-zucchetti-api'
+  - locale: 'en'
+    slug: 'erp-integration-sap-netsuite-quickbooks-api'
+---
+
+La integración entre sistemas es uno de los trabajos más frecuentes en el desarrollo de software empresarial en España. Tienes un e-commerce que necesita sincronizarse con el ERP para facturación, o una app de gestión de visitas que necesita leer los clientes del CRM del ERP, o un portal del cliente que debe mostrar el estado de facturas del sistema contable.
+
+Los ERPs más usados en PYMEs españolas — Holded, Sage 50/200, SAP Business One, A3 — tienen capacidades de integración muy distintas, y conocer esas diferencias ahorra semanas de frustración.
+
+## Holded: La API REST Más Moderna
+
+Holded es el ERP español con la API más moderna y bien documentada. API REST con autenticación por API Key, formato JSON, documentación en swagger y versionado semántico.
+
+Casos de uso comunes con la API de Holded:
+
+```typescript
+const HOLDED_API_KEY = process.env.HOLDED_API_KEY
+const BASE_URL = 'https://api.holded.com/api'
+
+// Crear una factura en Holded desde tu aplicación
+async function crearFacturaHolded(factura: FacturaData) {
+  const response = await fetch(`${BASE_URL}/invoices/v1/`, {
+    method: 'POST',
+    headers: {
+      'key': HOLDED_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contactId: factura.clienteHoldedId,
+      date: Math.floor(factura.fecha.getTime() / 1000),
+      notes: factura.observaciones,
+      products: factura.lineas.map(l => ({
+        productId: l.productoHoldedId,
+        units: l.cantidad,
+        subtotal: l.precio,
+        tax: l.iva,
+      })),
+    }),
+  })
+  return response.json()
+}
+
+// Obtener contactos (clientes/proveedores)
+async function obtenerContactos() {
+  const response = await fetch(`${BASE_URL}/contacts/v1/`, {
+    headers: { 'key': HOLDED_API_KEY }
+  })
+  return response.json()
+}
+```
+
+Holded también tiene webhooks — cuando se crea una factura, se cobra un pago o se crea un contacto, envía un HTTP POST a tu endpoint. Esto permite sincronizaciones en tiempo real sin polling.
+
+## Sage 50/200: Integración más Compleja
+
+Sage 50 (anteriormente Sage ContaPlus) y Sage 200 tienen una API más limitada que Holded. Sage 50 históricamente no tenía API REST — la integración se hacía mediante acceso directo a la base de datos (Pervasive/PSQL o MS SQL Server) o mediante el SDK de integración de Sage.
+
+Sage 200 tiene una API REST con más funcionalidades, pero su documentación es menos accesible y el entorno de desarrollo requiere configuración específica.
+
+Estrategias de integración con Sage 50:
+- **Importación de ficheros:** La forma más compatible con versiones antiguas. Géneras un archivo en el formato que Sage entiende (CSV, XML según la versión) y lo importas manualmente o automáticamente.
+- **Acceso directo a BBDD:** Arriesgado (puede romper la integridad del sistema), pero usado por muchas integraciones legacy.
+- **SDK de Sage:** Para desarrolladores certificados Sage, el SDK permite interacción más estructurada.
+
+## SAP Business One: SDK y Service Layer
+
+SAP Business One es el ERP de SAP para medianas empresas. En España está bastante extendido en sectores industriales y de distribución.
+
+SAP B1 tiene dos opciones de integración principales:
+
+**Service Layer (REST API):** Disponible desde la versión 9.1. API REST sobre OData que permite leer y escribir en los objetos de negocio principales (BusinessPartners, Orders, Invoices, Items).
+
+```typescript
+// Autenticación en SAP Service Layer
+async function loginSAP() {
+  const response = await fetch('https://sap-server:50000/b1s/v1/Login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      CompanyDB: 'EMPRESA_DB',
+      UserName: 'usuario',
+      Password: 'password'
+    })
+  })
+  const { SessionId } = await response.json()
+  return SessionId
+}
+
+// Crear Business Partner (cliente/proveedor)
+async function crearClienteSAP(sessionId: string, cliente: ClienteData) {
+  const response = await fetch('https://sap-server:50000/b1s/v1/BusinessPartners', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': `B1SESSION=${sessionId}`
+    },
+    body: JSON.stringify({
+      CardCode: cliente.codigo,
+      CardName: cliente.nombre,
+      CardType: 'C', // Customer
+      EmailAddress: cliente.email,
+    })
+  })
+  return response.json()
+}
+```
+
+**SAP Integration Framework (DI API):** Basado en COM/ActiveX para aplicaciones .NET/Windows. Legacy pero aún ampliamente usado para integraciones desktop en entornos Windows.
+
+## A3 ERP (Wolters Kluwer): Integración Limitada
+
+A3 ERP es muy común en empresas que trabajan con asesorías y gestorías en España. Su API de integración es más limitada que las anteriores. Las opciones principales son importación de ficheros en formato propio de A3 y, en versiones más recientes, una API limitada para operaciones básicas.
+
+Para integraciones con A3, lo más frecuente es trabajar con la empresa o con el distribuidor de A3 para acceder a la documentación de integración específica.
+
+## Estrategia General para Integraciones con ERP
+
+Independientemente del ERP, sigue estas prácticas:
+
+**1. Nunca leer directamente de la BBDD del ERP:** Excepto si es la única opción documentada. Los esquemas de BBDD del ERP pueden cambiar con actualizaciones sin aviso.
+
+**2. Implementa idempotencia:** Las integraciones fallan y se reintentan. Una factura creada dos veces en el ERP es un problema. Usa identificadores únicos de tu sistema para detectar duplicados.
+
+**3. Queue con reintentos:** Usa una cola de mensajes (Redis/BullMQ, SQS) para las operaciones hacia el ERP. Si el ERP no está disponible, los mensajes se retienen y procesan cuando vuelva.
+
+**4. Monitorización y alertas:** Una integración silenciosamente rota es peor que una que falla con ruido. Alerta cuando la cola se acumula, cuando hay errores repetidos o cuando hay latencia inusual.
+
+## Conclusión
+
+Las integraciones con ERPs españoles tienen niveles de madurez muy distintos: Holded ofrece la mejor API del mercado local, SAP Business One tiene la solución enterprise más completa, y Sage/A3 requieren enfoques más creativos.
+
+¿Necesitas integrar tu aplicación con el ERP de tu empresa en España? [Contacta con SystemForge](https://systemforge.es/contacto) — tenemos experiencia con los principales ERPs del mercado español.

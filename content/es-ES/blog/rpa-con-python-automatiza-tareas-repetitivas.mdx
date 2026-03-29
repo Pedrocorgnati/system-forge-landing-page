@@ -1,0 +1,107 @@
+---
+title: "RPA con Python: automatiza sin inversión enterprise"
+slug: "rpa-con-python-automatiza-tareas-repetitivas"
+date: "2024-08-12"
+description: "Cómo usar Python para automatización robótica de procesos sin necesitar UiPath o Automation Anywhere — Playwright, Selenium y PyAutoGUI con ejemplos reales."
+tags: ["rpa", "python", "automatizacion", "playwright", "selenium"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo usar Python para automatización robótica de procesos sin necesitar UiPath o Automation Anywhere — Playwright, Selenium y PyAutoGUI con ejemplos reales.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rpa-com-python-automatize-tarefas-repetitivas'
+  - locale: 'it-IT'
+    slug: 'rpa-con-python-automatizzare-senza-investimento'
+  - locale: 'en'
+    slug: 'rpa-with-python-automate-without-enterprise-tools'
+---
+
+RPA — Robotic Process Automation — se ha convertido en sinónimo de UiPath, Automation Anywhere y Blue Prism: plataformas enterprise con contratos anuales de seis cifras, equipos de implantación y curvas de aprendizaje empinadas. Pero la verdad es que la mayoría de las empresas no necesitan nada de eso. Si el proceso puede describirse en pasos lógicos y ocurre en un ordenador, Python lo resuelve.
+
+La premisa del RPA es simple: automatizar el trabajo repetitivo que un humano hace frente al ordenador. Login en sistemas, extracción de datos de hojas de cálculo, relleno de formularios, envío de emails basados en reglas, generación de informes — todo esto puede hacerlo un script Python corriendo en segundo plano, sin coste de licencia, sin vendor lock-in y con control total del código.
+
+En este artículo verás qué herramientas usar para cada tipo de automatización y cómo estructurar scripts que no se rompan con el primer cambio de layout.
+
+## Playwright: Automatización Web Moderna
+
+Playwright es la librería de referencia para automatización de navegadores en 2024. Supera a Selenium en velocidad, fiabilidad y capacidades modernas (async/await nativo, soporte para múltiples navegadores, captura de red, etc.).
+
+```python
+from playwright.async_api import async_playwright
+import asyncio
+
+async def extract_invoice_data(invoice_url: str, credentials: dict):
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        page = await browser.new_page()
+
+        # Login
+        await page.goto(credentials['login_url'])
+        await page.fill('#username', credentials['username'])
+        await page.fill('#password', credentials['password'])
+        await page.click('[type="submit"]')
+        await page.wait_for_url('**/dashboard')
+
+        # Navegar a facturas
+        await page.goto(invoice_url)
+        await page.wait_for_selector('.invoice-table')
+
+        # Extraer datos
+        rows = await page.query_selector_all('.invoice-row')
+        invoices = []
+        for row in rows:
+            invoice_id = await row.query_selector('.invoice-id')
+            amount = await row.query_selector('.amount')
+            invoices.append({
+                'id': await invoice_id.inner_text(),
+                'amount': await amount.inner_text(),
+            })
+
+        await browser.close()
+        return invoices
+
+asyncio.run(extract_invoice_data(...))
+```
+
+## Selenium vs Playwright: Cuándo Usar Cada Uno
+
+**Playwright** para proyectos nuevos. Más rápido, más fiable, soporte nativo para async/await, mejor manejo de SPAs modernas (React, Vue, Angular).
+
+**Selenium** cuando la aplicación target tiene controles ActiveX o Flash (legacy industrial), cuando el equipo ya tiene infraestructura Selenium Grid configurada, o cuando se necesita compatibilidad con versiones muy antiguas de Internet Explorer.
+
+## PyAutoGUI: Automatización de Desktop
+
+Para aplicaciones de escritorio que no tienen API ni pueden controlarse por navegador (software legacy sin acceso web, aplicaciones de facturación antiguas, software de maquinaria industrial), PyAutoGUI permite controlar el ratón y el teclado mediante código:
+
+```python
+import pyautogui
+import time
+
+def fill_legacy_form(data: dict):
+    # Localizar campo por imagen o coordenadas
+    field = pyautogui.locateOnScreen('field_username.png', confidence=0.9)
+    if field:
+        pyautogui.click(field)
+        pyautogui.typewrite(data['username'], interval=0.05)
+        pyautogui.press('tab')
+        pyautogui.typewrite(data['password'], interval=0.05)
+        pyautogui.press('enter')
+        time.sleep(2)  # Esperar que cargue
+```
+
+PyAutoGUI funciona con capturas de pantalla de referencia, lo que lo hace más frágil ante cambios de resolución o escala de pantalla. Úsalo solo cuando no hay alternativa.
+
+## Estructura de Scripts Resilientes
+
+Los scripts de automatización se rompen cuando cambia el sistema objetivo. Para minimizar el mantenimiento:
+
+1. **Nunca usar coordenadas absolutas** — usar selectores semánticos (aria-label, data-testid) o localización por imagen
+2. **Timeouts y reintentos** — los sistemas legados son lentos e inconsistentes
+3. **Logs detallados** — cuando falla en producción (y fallará), los logs deben decir exactamente dónde y por qué
+4. **Alertas de fallo** — el script debe notificar por email o Slack cuando no puede completar la tarea
+
+Un script de automatización sin alertas es una bomba de tiempo: falla silenciosamente durante semanas hasta que alguien se da cuenta de que los informes no se han generado.

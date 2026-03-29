@@ -17,7 +17,7 @@ ERRORS=0
 
 echo ""
 echo "══════════════════════════════════════════════"
-echo "  Smoke Tests — Triple Market (3 domínios)"
+echo "  Smoke Tests — Quad Market (4 domínios)"
 echo "══════════════════════════════════════════════"
 echo ""
 
@@ -55,7 +55,7 @@ ROBOTS_IT=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://system
 
 # ─── Domínio EN ────────────────────────────────────────────────────────────────
 echo ""
-echo "▶ [3/3] English — systemforgesoftware.com"
+echo "▶ [3/4] English — systemforgesoftware.com"
 if bash "$SCRIPT_DIR/smoke-test.sh" "https://systemforgesoftware.com" "SystemForge Software" "en"; then
   echo "  ✅ EN: PASS"
 else
@@ -68,6 +68,21 @@ ROBOTS_EN=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://system
 [ "$SITEMAP_EN" == "200" ] && echo "  ✅ sitemap.xml: HTTP 200" || { echo "  ❌ sitemap.xml: HTTP $SITEMAP_EN"; ERRORS=$((ERRORS + 1)); }
 [ "$ROBOTS_EN" == "200" ] && echo "  ✅ robots.txt: HTTP 200" || echo "  ⚠️  robots.txt: HTTP $ROBOTS_EN"
 
+# ─── Domínio ES ────────────────────────────────────────────────────────────────
+echo ""
+echo "▶ [4/4] Español — systemforge.es"
+if bash "$SCRIPT_DIR/smoke-test.sh" "https://systemforge.es" "SystemForge" "es"; then
+  echo "  ✅ ES: PASS"
+else
+  echo "  ❌ ES: FAIL"
+  ERRORS=$((ERRORS + 1))
+fi
+
+SITEMAP_ES=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://systemforge.es/sitemap.xml" 2>/dev/null || echo "000")
+ROBOTS_ES=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://systemforge.es/robots.txt" 2>/dev/null || echo "000")
+[ "$SITEMAP_ES" == "200" ] && echo "  ✅ sitemap.xml: HTTP 200" || { echo "  ❌ sitemap.xml: HTTP $SITEMAP_ES"; ERRORS=$((ERRORS + 1)); }
+[ "$ROBOTS_ES" == "200" ] && echo "  ✅ robots.txt: HTTP 200" || echo "  ⚠️  robots.txt: HTTP $ROBOTS_ES"
+
 # ─── Resumo ────────────────────────────────────────────────────────────────────
 echo ""
 echo "══════════════════════════════════════════════"
@@ -75,5 +90,5 @@ if [ $ERRORS -gt 0 ]; then
   echo "❌ FAIL: $ERRORS domínio(s) com erros"
   exit 1
 fi
-echo "✅ PASS: Todos os 3 domínios passaram no smoke test"
+echo "✅ PASS: Todos os 4 domínios passaram no smoke test"
 exit 0

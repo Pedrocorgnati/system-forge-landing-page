@@ -19,7 +19,7 @@ import path from 'path'
 import type { SupportedLocale } from '../config/types'
 import { generateSearchIndex } from '../src/lib/search'
 
-const ALLOWED_LOCALES: readonly SupportedLocale[] = ['pt-BR', 'it-IT', 'en'] as const
+const ALLOWED_LOCALES: readonly SupportedLocale[] = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 
 async function run(): Promise<void> {
   const rawLocale = process.env.NEXT_PUBLIC_LOCALE

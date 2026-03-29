@@ -1,0 +1,120 @@
+---
+title: "KPIs que importan: cómo definirlos con los stakeholders"
+slug: "kpis-que-importan-definir-metricas-stakeholders"
+date: "2024-10-22"
+description: "Cómo definir KPIs que realmente guían decisiones — el proceso de alineación con stakeholders, la diferencia entre métricas vanidad y métricas accionables."
+tags: ["kpis", "metricas negocio", "dashboard", "objetivos", "stakeholders"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo definir KPIs que realmente guían decisiones — el proceso de alineación con stakeholders, la diferencia entre métricas vanidad y métricas accionables."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'kpis-que-importam-definir-metricas-stakeholders'
+  - locale: 'it-IT'
+    slug: 'kpi-che-contano-definire-metriche-stakeholder'
+  - locale: 'en'
+    slug: 'kpis-that-matter-how-to-define-with-stakeholders'
+---
+
+El dashboard perfecto con las métricas incorrectas es inútil. Y las métricas incorrectas abundan en casi todos los dashboards corporativos: número de visitas a la web, seguidores en Instagram, número de emails enviados. Estas son métricas vanidad — crecen bien en una presentación pero no te dicen si el negocio va bien o mal.
+
+Los KPIs que importan son aquellos que, cuando los ves moverse, sabes exactamente qué decisión tomar. El proceso de llegar a esos KPIs requiere alineación con los stakeholders correctos.
+
+## La Diferencia entre Métrica Vanidad y KPI Accionable
+
+Una métrica vanidad sube casi siempre, está fuera de tu control directo o no cambia ninguna decisión:
+- Visitas totales a la web (¿y si son bots? ¿y si entran y salen en 3 segundos?)
+- Número de emails en la lista de distribución
+- Número de posts publicados
+
+Un KPI accionable te dice qué hacer cuando cambia en cualquier dirección:
+- Tasa de conversión de visitas a leads (cae → problema en la landing o el tráfico)
+- CAC por canal (sube → el canal se está saturando, redirige presupuesto)
+- Churn mensual (sube → alerta de retención, revisa señales de clientes en riesgo)
+
+La prueba del KPI accionable: "Si este número baja un 20% esta semana, ¿sé exactamente qué haría?" Si la respuesta es sí, es un KPI accionable.
+
+## El Proceso de Alineación con Stakeholders
+
+El error más común al definir KPIs para un dashboard: el equipo técnico o de producto decide qué métricas mostrar sin preguntar a quien va a usar el dashboard. El resultado es un dashboard que recoge los datos más fáciles de obtener, no los más útiles.
+
+El proceso correcto:
+
+**Paso 1: Entrevistas con stakeholders (1 semana)**
+
+Habla con cada tipo de usuario del dashboard. Las preguntas clave:
+- "¿Qué decisión tomas cada semana que este dashboard debería facilitar?"
+- "¿Cuándo sabes que algo va mal en tu área? ¿Qué número miras?"
+- "Si solo pudieras ver un número al empezar el lunes, ¿cuál sería?"
+
+**Paso 2: Construir el árbol de métricas (1 sesión)**
+
+Las métricas tienen jerarquía. El North Star Metric es la métrica que mejor captura el valor que entregas a clientes — todo lo demás son inputs que la mueven.
+
+Ejemplo para un SaaS B2B:
+```
+North Star: MRR (Monthly Recurring Revenue)
+├── Nuevos clientes × Ticket medio nuevo cliente
+├── Expansión MRR (upgrades de plan)
+└── - Churn MRR
+    ├── Tasa de churn
+    └── MRR promedio de clientes perdidos
+```
+
+**Paso 3: Validar con el negocio**
+
+¿Tienes acceso a los datos para calcularlo? ¿La definición es exacta y sin ambigüedad? ¿Todos los stakeholders interpretan el KPI de la misma forma?
+
+## Definición Exacta: El Diablo Está en los Detalles
+
+"Usuarios activos" puede significar cosas distintas para distintas personas. Antes de implementar el KPI, define exactamente:
+
+- **¿Qué período cubre?** (últimas 24h, 7 días, 30 días, mes natural)
+- **¿Qué acción cualifica?** (¿basta con hacer login? ¿o hay que completar una acción específica?)
+- **¿Cómo se tratan los valores nulos?** (¿usuarios sin datos en el período se cuentan como 0 o se excluyen?)
+- **¿Qué se incluye/excluye?** (¿se incluyen los empleados de la empresa? ¿las cuentas de prueba gratuitas?)
+
+Esta definición debe estar documentada y ser accesible desde el tooltip de la métrica en el dashboard.
+
+## KPIs por Área de Negocio
+
+**Para ventas:**
+- MRR y ARR con tendencia
+- Nuevos clientes por canal
+- Tiempo medio de cierre
+- Tasa de conversión por etapa del pipeline
+
+**Para marketing:**
+- CAC (Customer Acquisition Cost) por canal
+- LTV (Lifetime Value) estimado por segmento
+- Tasa de conversión de MQL a SQL
+- ROI por canal
+
+**Para producto/tech:**
+- Métricas de adopción de features clave
+- NPS/CSAT
+- Tiempo de respuesta de la API (p95, p99)
+- Uptime
+
+**Para operaciones:**
+- Tiempo de resolución de incidencias
+- SLA cumplido %
+- Coste por pedido/transacción
+
+## Los 5 Principios para KPIs que Funcionan
+
+1. **Pocos y enfocados:** Máximo 5-7 KPIs por área. Más métricas = menos foco.
+2. **Propietario único:** Cada KPI tiene un responsable. Si nadie es responsable, nadie actúa cuando baja.
+3. **Revisión regular:** Los KPIs correctos hoy pueden no ser los correctos en 6 meses. Revisa y ajusta trimestralmente.
+4. **Target explícito:** Sin target, una métrica no es un KPI. "Churn < 2%" es un KPI. "Churn" es solo una métrica.
+5. **Contexto junto al número:** El número solo dice qué. El contexto dice por qué y qué hacer.
+
+## Conclusión
+
+Definir los KPIs correctos es el trabajo más importante antes de construir cualquier dashboard. La alineación con stakeholders, la definición exacta y la jerarquía de métricas determinan si el dashboard se convierte en una herramienta de decisión o en un decorado.
+
+¿Estás construyendo un dashboard para tu empresa y necesitas ayuda para definir las métricas correctas? [Contacta con SystemForge](https://systemforge.es/contacto).

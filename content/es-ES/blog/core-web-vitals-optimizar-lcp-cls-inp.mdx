@@ -1,0 +1,137 @@
+---
+title: "Core Web Vitals: optimizar LCP, CLS e INP"
+slug: "core-web-vitals-optimizar-lcp-cls-inp"
+date: "2024-09-27"
+description: "Cómo optimizar LCP, CLS e INP en sitios Next.js — técnicas de lazy loading, font swap, layout shift e interactividad con ejemplos de código."
+tags: ["core web vitals", "lcp", "cls", "inp", "rendimiento web", "seo tecnico"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo optimizar LCP, CLS e INP en sitios Next.js — técnicas de lazy loading, font swap, layout shift e interactividad con ejemplos de código."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'core-web-vitals-otimizar-lcp-cls-fid'
+  - locale: 'it-IT'
+    slug: 'core-web-vitals-ottimizzare-lcp-cls-inp'
+  - locale: 'en'
+    slug: 'core-web-vitals-optimize-lcp-cls-inp'
+---
+
+Los Core Web Vitals son las métricas de rendimiento de usuario que Google usa como factor de ranking desde 2021. Un sitio lento no solo frustra a los usuarios — pierde posiciones en resultados de búsqueda, lo que en España, donde el 95% del tráfico orgánico pasa por Google, tiene impacto directo en la adquisición.
+
+Los tres indicadores clave: **LCP** (Largest Contentful Paint — velocidad de carga del elemento principal), **CLS** (Cumulative Layout Shift — estabilidad visual), **INP** (Interaction to Next Paint — respuesta a interacciones del usuario).
+
+## LCP: El Elemento Principal Debe Cargar Rápido
+
+El LCP mide cuánto tarda en renderizarse el elemento más grande visible en el viewport inicial — generalmente la imagen hero o el bloque de texto principal.
+
+**Umbral:** LCP < 2,5 segundos es "bueno". LCP > 4 segundos es "malo".
+
+Las causas más comunes de LCP lento:
+
+**Imagen hero no optimizada:** La imagen más grande de la página sin optimización es la causa número uno de LCP lento.
+
+```tsx
+// MAL: imagen sin prioridad ni dimensiones
+<img src="/hero.jpg" alt="Hero" />
+
+// BIEN: next/image con priority y dimensiones explícitas
+import Image from 'next/image'
+
+<Image
+  src="/hero.jpg"
+  alt="Hero de SystemForge"
+  width={1200}
+  height={600}
+  priority // Carga sin lazy loading — es el LCP element
+  sizes="100vw"
+/>
+```
+
+**Fuentes externas bloqueantes:** Google Fonts cargado sin `display=swap` bloquea el renderizado del texto.
+
+```tsx
+// next/font elimina el render-blocking de Google Fonts
+import { Inter } from 'next/font/google'
+
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap', // El texto se muestra con fuente fallback inmediatamente
+})
+```
+
+**Server response time alto:** Si el servidor tarda más de 600ms en responder, el LCP nunca será bueno independientemente de lo demás. Usa ISR (Incremental Static Regeneration) o SSG para páginas de alto tráfico.
+
+## CLS: Sin Saltos Visuales
+
+El CLS mide cuánto se mueve el contenido visualmente mientras la página carga. El caso clásico: el usuario está a punto de hacer clic en un botón y un banner de cookies se carga encima, desplazando todo el contenido.
+
+**Umbral:** CLS < 0,1 es "bueno". CLS > 0,25 es "malo".
+
+Causas y soluciones:
+
+**Imágenes sin dimensiones definidas:**
+```tsx
+// MAL: sin width/height, el espacio no está reservado
+<img src="/producto.jpg" />
+
+// BIEN: dimensiones explícitas reservan el espacio
+<Image src="/producto.jpg" width={400} height={300} alt="Producto" />
+```
+
+**Fuentes que generan layout shift:** El FOUT (Flash of Unstyled Text) hace que el texto se redibuje cuando carga la fuente web. `display: swap` en `next/font` lo mitiga aunque no lo elimina completamente. Para CLS muy bajo, `display: optional` es más estricto (usa la fuente web solo si ya está en caché).
+
+**Banners y notificaciones dinámicas:** El banner de cookies, pop-ups de notificaciones push, banners de ofertas — todos generan CLS si se cargan después del contenido principal. La solución: reservar el espacio para ellos desde el HTML inicial con altura fija, aunque el contenido se cargue después.
+
+## INP: Respuesta a Interacciones
+
+INP (Interaction to Next Paint) reemplazó a FID en marzo 2024. Mide el tiempo desde que el usuario interactúa (click, teclado, tap) hasta que la siguiente frame se pinta visualmente.
+
+**Umbral:** INP < 200ms es "bueno". INP > 500ms es "malo".
+
+Las causas de INP alto en Next.js:
+
+**Handlers de evento pesados en el main thread:**
+```typescript
+// MAL: procesamiento pesado en el click handler bloquea la UI
+function handleClick() {
+  const resultado = procesarDatos10000elementos() // Bloquea 500ms
+  setEstado(resultado)
+}
+
+// BIEN: diferir el procesamiento pesado
+function handleClick() {
+  setLoading(true)
+  // Usar setTimeout(0) o scheduler.postTask para diferir al siguiente frame
+  setTimeout(() => {
+    const resultado = procesarDatos10000elementos()
+    setEstado(resultado)
+    setLoading(false)
+  }, 0)
+}
+```
+
+**Hidratación de React en el cliente:** Con App Router y Server Components, gran parte del código no se hidrata en el cliente. Minimizar los `'use client'` components reduce la carga de JavaScript en el navegador y mejora el INP.
+
+## Herramientas para Medir en España
+
+- **PageSpeed Insights:** Datos reales de usuarios españoles en Chrome (CrUX). La métrica más relevante para SEO en Google.es.
+- **Chrome DevTools > Performance:** Para diagnóstico técnico detallado en local.
+- **web-vitals.js:** Librería para medir y reportar Core Web Vitals en producción con usuarios reales.
+
+```typescript
+import { onCLS, onINP, onLCP } from 'web-vitals'
+
+onCLS(console.log)
+onINP(console.log)
+onLCP(console.log)
+```
+
+## Conclusión
+
+Los Core Web Vitals son una inversión en SEO y en experiencia de usuario al mismo tiempo. Para sitios en España donde el tráfico orgánico de Google es crítico, tener LCP < 2,5s, CLS < 0,1 e INP < 200ms puede representar diferencias de posicionamiento significativas.
+
+¿Quieres una auditoría de rendimiento de tu sitio web con plan de acción específico? [Contacta con SystemForge](https://systemforge.es/contacto).

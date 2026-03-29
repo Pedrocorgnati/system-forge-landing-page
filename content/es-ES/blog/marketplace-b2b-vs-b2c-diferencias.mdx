@@ -1,0 +1,73 @@
+---
+title: "Marketplace B2B vs B2C: diferencias que importan"
+slug: "marketplace-b2b-vs-b2c-diferencias"
+date: "2024-09-12"
+description: "Cómo difieren producto, UX y arquitectura técnica entre marketplaces B2B y B2C — precios, aprobación de compras, crédito e integración con ERPs."
+tags: ["marketplace b2b", "marketplace b2c", "e-commerce b2b", "ux b2b", "marketplace"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo difieren producto, UX y arquitectura técnica entre marketplaces B2B y B2C — precios, aprobación de compras, crédito e integración con ERPs.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'marketplace-b2b-vs-b2c-diferencas'
+  - locale: 'it-IT'
+    slug: 'marketplace-b2b-vs-b2c-differenze'
+  - locale: 'en'
+    slug: 'marketplace-b2b-vs-b2c-differences'
+---
+
+A primera vista, un marketplace B2B y uno B2C parecen hacer lo mismo: conectar a quien vende con quien compra. En la práctica, son productos tan distintos que compartir la misma base de código entre ambos suele generar más problemas que ahorro de tiempo. El público, el flujo de compra, la fijación de precios, los medios de pago y los requisitos de integración son estructuralmente diferentes — y entender esas diferencias antes de diseñar el sistema es lo que separa los proyectos que escalan de los que quedan atrapados en retrabajo.
+
+Un marketplace B2C sirve a consumidores finales. La decisión de compra es individual, impulsiva en muchos casos, y el criterio principal suele ser el precio y la experiencia. Un marketplace B2B sirve a empresas. La decisión de compra involucra a múltiples personas, procesos de aprobación, presupuesto previamente asignado y criterios técnicos que van mucho más allá del precio.
+
+## Flujo de Compra B2B: Aprobaciones y Múltiples Compradores
+
+En el B2C, el flujo de compra es lineal: búsqueda → producto → carrito → checkout → pago. En minutos. En el B2B, ese flujo puede extenderse días e involucrar a múltiples personas con roles distintos.
+
+Un flujo B2B real funciona así: un comprador técnico identifica la necesidad y selecciona el proveedor. El responsable de compras valida si el proveedor está aprobado en la lista de proveedores homologados. El responsable financiero verifica si hay presupuesto disponible. El director aprueba si supera cierto importe. Solo entonces se emite la orden de compra.
+
+Esta cadena de aprobación necesita estar modelada en el sistema. El marketplace B2B debe soportar: usuarios con roles diferenciados dentro de la misma empresa, flujos de aprobación configurables por importe o categoría, notificaciones para cada aprobador en su momento y visibilidad del estado del pedido para todos los involucrados.
+
+Implementar esto en una arquitectura pensada para B2C es casi imposible sin refactorizaciones profundas. Por eso, separar desde el principio es la decisión correcta.
+
+## Precios en B2B: Negociados, por Volumen y por Cliente
+
+En B2C, el precio es público. Todos pagan lo mismo, con descuentos aplicados de forma homogénea (cupones, temporadas). En B2B, el precio suele ser resultado de negociación comercial y varía por cliente, por volumen, por contrato vigente y por canal de distribución.
+
+Un proveedor industrial puede tener precios distintos para cinco distribuidores diferentes del mismo producto. Ese precio negociado necesita estar accesible solo para ese cliente, invisible para todos los demás y actualizable por el equipo comercial sin necesidad de código.
+
+El modelo de datos necesita soportar: price lists por cliente o grupo de clientes, descuentos escalonados por volumen (cuanto más compras, menor el precio unitario), precios contractuales con fecha de vigencia y visibilidad controlada por autenticación y rol.
+
+## Medios de Pago B2B en España: Crédito, Transferencia y Confirming
+
+En el B2C español, Bizum, tarjeta de crédito y PayPal cubren la mayoría de las transacciones. En el B2B, los pagos funcionan de forma completamente diferente.
+
+Las empresas raramente pagan en el momento de la compra. Lo habitual son pagos a 30, 60 o 90 días desde la factura. Existe el confirming (el banco del comprador garantiza el pago al proveedor anticipadamente), el factoring (el proveedor cede los créditos al banco para cobrar antes del vencimiento), y la línea de crédito con el propio marketplace que funciona como intermediario financiero.
+
+Esto implica que el marketplace B2B necesita: gestión de crédito por cliente, límites de crédito configurables, integración con entidades financieras para confirming, emisión de facturas con plazos de pago y seguimiento de cuentas por cobrar.
+
+## Integración con ERPs: SAP, Sage y A3
+
+Cualquier empresa mediana o grande en España tiene un ERP. SAP, Sage 200, A3ERP, Holded o Odoo son algunos de los más habituales. El marketplace B2B que no se integra con el ERP del cliente no conseguirá adopción en cuentas enterprise.
+
+El comprador B2B necesita que los pedidos del marketplace aparezcan automáticamente en su sistema de compras, que las facturas se concilien sin intervención manual y que el histórico de compras esté disponible en el ERP para auditorías y reportes.
+
+Las integraciones habituales son: exportación en formato EDI o XML compatible con SAP, webhooks para notificar pedidos al ERP del comprador, API de facturación compatible con el SII (Suministro Inmediato de Información) de la AEAT, y soporte para NIF/CIF en campos de facturación.
+
+## Catálogo B2B: SKUs Técnicos, Fichas Detalladas y Búsqueda Avanzada
+
+El comprador B2B busca por referencia técnica, código de proveedor, número de pieza o especificación técnica. No busca por "camisa azul talla M" — busca por "tornillo M8x30 acero inoxidable DIN 912 caja de 100 unidades".
+
+El catálogo B2B necesita: campos técnicos extensibles por categoría de producto, búsqueda por referencia exacta y búsqueda semántica, comparador de especificaciones técnicas entre productos similares, y soporte para listas de compra recurrente (el comprador replica el pedido del mes anterior con un clic).
+
+## Separar desde el Inicio o Pagar el Precio Después
+
+La decisión de construir B2B y B2C sobre la misma plataforma suele tomarse por razones de coste inicial. Funciona durante los primeros meses, cuando los requerimientos de ambos segmentos parecen similares. A medida que el B2B crece, las diferencias se hacen evidentes: flujos de aprobación que no caben en el modelo de datos, precios negociados que requieren tablas adicionales, integraciones con ERPs que suponen excepciones en cada endpoint.
+
+El resultado es deuda técnica acumulada que eventualmente fuerza una separación de todas formas, pero con el coste adicional de migrar datos y reescribir lógica de negocio que ya está en producción.
+
+La arquitectura correcta depende del caso, pero como regla general: si el plan es atacar ambos mercados en los próximos 12 meses con volumen relevante en ambos, separar desde el principio es más barato que converger después.

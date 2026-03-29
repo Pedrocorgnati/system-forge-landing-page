@@ -23,6 +23,7 @@ export function CTASection() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
+        if (!entry) return
         if (entry.isIntersecting) {
           el.setAttribute('data-visible', 'true')
           observer.disconnect()
@@ -80,7 +81,7 @@ export function CTASection() {
           {/* CTA Button */}
           <div className="cta-stagger-4">
             <CTAButton
-              config={ctas[0]}
+              config={ctas[0]!}
               size="lg"
               variant="primary"
               className="bg-white !text-[#0C1120] cta-btn-glow shadow-[0_8px_25px_rgba(37,99,235,0.3)] hover:shadow-[0_8px_35px_rgba(37,99,235,0.5)] hover:-translate-y-px active:translate-y-0 transition-all duration-200"

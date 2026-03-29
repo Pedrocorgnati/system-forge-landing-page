@@ -65,7 +65,7 @@ export default async function ServicoPage({ params }: Props) {
       />
       <div data-testid="page-servico-detalhe" className="py-12 md:py-16 bg-background">
         <Container>
-          <div className="flex flex-col gap-8 max-w-3xl">
+          <div className="flex flex-col gap-10 max-w-4xl">
             <Breadcrumb items={breadcrumbs} />
 
             <Link
@@ -77,6 +77,7 @@ export default async function ServicoPage({ params }: Props) {
               {messages.pages.services.backToAll}
             </Link>
 
+            {/* Hero */}
             <div className="flex flex-col gap-4">
               <span className="text-5xl leading-none" role="img" aria-label={service.name}>
                 {service.icon}
@@ -84,11 +85,80 @@ export default async function ServicoPage({ params }: Props) {
               <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
                 {service.name}
               </h1>
-              <p className="text-lg text-muted-foreground leading-relaxed">
+              <p className="text-lg text-muted-foreground leading-relaxed max-w-3xl">
                 {service.longDescription}
               </p>
             </div>
 
+            {/* Benefits */}
+            {service.benefits && service.benefits.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="text-2xl font-bold text-foreground">{messages.pages.services.benefitsTitle}</h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {service.benefits.map((b, i) => (
+                    <div key={i} className="flex gap-4 p-5 rounded-xl border border-border bg-card">
+                      <span className="text-2xl shrink-0" role="img" aria-hidden="true">{b.icon}</span>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-foreground">{b.title}</span>
+                        <span className="text-sm text-muted-foreground">{b.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Process */}
+            {service.process && service.process.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="text-2xl font-bold text-foreground">{messages.pages.services.processTitle}</h2>
+                <div className="flex flex-col gap-3">
+                  {service.process.map((step) => (
+                    <div key={step.step} className="flex gap-4 p-5 rounded-xl border border-border bg-card">
+                      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
+                        {step.step}
+                      </span>
+                      <div className="flex flex-col gap-1">
+                        <span className="font-semibold text-foreground">{step.title}</span>
+                        <span className="text-sm text-muted-foreground">{step.description}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Use Cases */}
+            {service.useCases && service.useCases.length > 0 && (
+              <div className="flex flex-col gap-4">
+                <h2 className="text-2xl font-bold text-foreground">{messages.pages.services.useCasesTitle}</h2>
+                <ul className="flex flex-col gap-2">
+                  {service.useCases.map((uc, i) => (
+                    <li key={i} className="flex gap-3 text-muted-foreground">
+                      <span className="text-primary mt-0.5 shrink-0">✓</span>
+                      {uc}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* FAQ */}
+            {service.faq && service.faq.length > 0 && (
+              <div className="flex flex-col gap-4 pt-2 border-t border-border">
+                <h2 className="text-2xl font-bold text-foreground">{messages.pages.services.faqTitle}</h2>
+                <div className="flex flex-col gap-4">
+                  {service.faq.map((item, i) => (
+                    <div key={i} className="flex flex-col gap-2 p-5 rounded-xl border border-border bg-card">
+                      <span className="font-semibold text-foreground">{item.q}</span>
+                      <span className="text-sm text-muted-foreground leading-relaxed">{item.a}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Related */}
             {related.length > 0 && (
               <div className="flex flex-col gap-4 pt-8 border-t border-border">
                 <h2 className="font-semibold text-foreground">{messages.pages.services.relatedTitle}</h2>

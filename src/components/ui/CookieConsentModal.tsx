@@ -112,8 +112,8 @@ export function CookieConsentModal({ onClose, onSave }: CookieConsentModalProps)
       )
       if (focusable.length === 0) return
 
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
+      const first = focusable[0]!
+      const last = focusable[focusable.length - 1]!
 
       if (e.shiftKey && document.activeElement === first) {
         e.preventDefault()
@@ -154,7 +154,7 @@ export function CookieConsentModal({ onClose, onSave }: CookieConsentModalProps)
         ref={modalRef}
         role="dialog"
         aria-modal="true"
-        aria-label={title}
+        aria-labelledby="cookie-modal-title"
         onKeyDown={handleKeyDown}
         className={cn(
           'fixed inset-x-4 top-1/2 z-50 mx-auto max-w-lg -translate-y-1/2',
@@ -182,7 +182,7 @@ export function CookieConsentModal({ onClose, onSave }: CookieConsentModalProps)
 
         {/* Header */}
         <div className="mb-6 pr-8">
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 id="cookie-modal-title" className="text-lg font-semibold text-foreground">{title}</h2>
           <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
         </div>
 

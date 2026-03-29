@@ -28,6 +28,10 @@ const BANNER_MESSAGES: Record<
       message: 'Parli italiano?',
       visitLabel: 'Visita systemforge.it',
     },
+    'es-ES': {
+      message: '¿Hablas español?',
+      visitLabel: 'Visita systemforge.es',
+    },
   },
   'it-IT': {
     'it-IT': { message: '', visitLabel: '' },
@@ -38,6 +42,10 @@ const BANNER_MESSAGES: Record<
     'en': {
       message: 'Do you speak English?',
       visitLabel: 'Visit systemforgesoftware.com',
+    },
+    'es-ES': {
+      message: '¿Hablas español?',
+      visitLabel: 'Visita systemforge.es',
     },
   },
   'en': {
@@ -50,6 +58,25 @@ const BANNER_MESSAGES: Record<
       message: 'Você fala português?',
       visitLabel: 'Acesse forjadesistemas.com.br',
     },
+    'es-ES': {
+      message: '¿Hablas español?',
+      visitLabel: 'Visita systemforge.es',
+    },
+  },
+  'es-ES': {
+    'es-ES': { message: '', visitLabel: '' },
+    'pt-BR': {
+      message: 'Você fala português?',
+      visitLabel: 'Acesse forjadesistemas.com.br',
+    },
+    'en': {
+      message: 'Do you speak English?',
+      visitLabel: 'Visit systemforgesoftware.com',
+    },
+    'it-IT': {
+      message: 'Parli italiano?',
+      visitLabel: 'Visita systemforge.it',
+    },
   },
 }
 
@@ -58,6 +85,7 @@ export function LanguageSuggestionBanner() {
   const buildLocale = config.locale
   const closeLabel = buildLocale === 'it-IT' ? 'Chiudi suggerimento lingua'
     : buildLocale === 'en' ? 'Close language suggestion'
+    : buildLocale === 'es-ES' ? 'Cerrar sugerencia de idioma'
     : 'Fechar sugestão de idioma'
   const { suggestedLocale, isDismissed, dismiss } = useLanguageDetection(
     config.domain,

@@ -115,6 +115,23 @@ export interface PortfolioProject {
 
 export type ServiceFilterGroup = 'produto' | 'mobile-ia' | 'dados'
 
+export interface ServiceBenefit {
+  icon: string
+  title: string
+  description: string
+}
+
+export interface ServiceProcessStep {
+  step: number
+  title: string
+  description: string
+}
+
+export interface ServiceFaqItem {
+  q: string
+  a: string
+}
+
 export interface Service {
   slug: string
   name: string
@@ -126,6 +143,10 @@ export interface Service {
   techHints?: string[]
   deliveryWeeks?: string
   filterGroup?: ServiceFilterGroup
+  benefits?: ServiceBenefit[]
+  process?: ServiceProcessStep[]
+  useCases?: string[]
+  faq?: ServiceFaqItem[]
 }
 
 export interface ServiceData {

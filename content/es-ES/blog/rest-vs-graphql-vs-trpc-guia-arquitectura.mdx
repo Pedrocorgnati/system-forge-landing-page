@@ -1,0 +1,79 @@
+---
+title: "REST vs GraphQL vs tRPC: guía de arquitectura de API"
+slug: "rest-vs-graphql-vs-trpc-guia-arquitectura"
+date: "2024-07-12"
+description: "Cómo elegir entre REST, GraphQL y tRPC para tu API — comparativa de complejidad, rendimiento, type-safety y casos de uso ideales de cada enfoque."
+tags: ["rest api", "graphql", "trpc", "arquitectura api", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo elegir entre REST, GraphQL y tRPC para tu API — comparativa de complejidad, rendimiento, type-safety y casos de uso ideales de cada enfoque.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rest-vs-graphql-vs-trpc-quando-usar'
+  - locale: 'it-IT'
+    slug: 'rest-vs-graphql-vs-trpc-guida-architettura'
+  - locale: 'en'
+    slug: 'rest-vs-graphql-vs-trpc-architecture-guide'
+---
+
+La elección del protocolo de comunicación de una API no es un detalle técnico — es una decisión arquitectural que moldeará cómo trabaja tu equipo durante los próximos años. REST, GraphQL y tRPC representan filosofías distintas sobre cómo deben comunicarse clientes y servidores. Elegir mal implica refactorizaciones costosas, inconsistencias de contrato entre equipos y un backlog lleno de "migrar endpoints heredados".
+
+Esta guía ofrece una comparativa honesta de los tres enfoques: cuándo cada uno brilla, dónde falla cada uno y cómo tomar la decisión correcta para tu proyecto.
+
+## REST: El Estándar que Funciona para el 90% de los Casos
+
+REST (Representational State Transfer) organiza la API alrededor de recursos (entidades del dominio) y usa los verbos HTTP (GET, POST, PUT, DELETE, PATCH) para las operaciones sobre esos recursos.
+
+Un endpoint REST típico:
+```
+GET  /api/users          → lista usuarios
+GET  /api/users/:id      → obtener usuario específico
+POST /api/users          → crear usuario
+PUT  /api/users/:id      → actualizar usuario
+DELETE /api/users/:id    → eliminar usuario
+```
+
+La ventaja de REST es la universalidad: cualquier lenguaje, cualquier cliente (browsers, apps móviles, otras APIs, herramientas CLI) puede consumir una API REST sin ningún SDK especial. La documentación con OpenAPI/Swagger está madura. El caching en HTTP funciona de forma natural con REST.
+
+Las limitaciones aparecen con aplicaciones complejas: el problema de overfetching (el endpoint devuelve más campos de los que el cliente necesita) y underfetching (el cliente necesita hacer múltiples llamadas para obtener datos relacionados). Estos problemas son manejables con un buen diseño de API, pero en aplicaciones con muchas vistas distintas consumiendo los mismos recursos, la proliferación de endpoints específicos se convierte en overhead.
+
+**REST es la elección correcta cuando:** la API es pública (consumida por terceros), el equipo tiene desarrolladores con distintos stacks, o el sistema necesita interoperar con herramientas que entienden REST/HTTP de forma nativa.
+
+## GraphQL: Flexibilidad al Precio de la Complejidad
+
+GraphQL permite al cliente especificar exactamente qué datos necesita, evitando overfetching y underfetching. Con un solo endpoint `/graphql`, el cliente puede pedir datos de múltiples recursos en una sola query.
+
+La ventaja es real para frontends complejos donde diferentes vistas necesitan combinaciones distintas de datos. GitHub y Shopify tienen APIs GraphQL públicas precisamente porque sus clientes tienen necesidades muy diversas de datos.
+
+El precio de esa flexibilidad: complejidad de setup (servidor GraphQL, schema definition language, resolvers), el problema de N+1 queries en las bases de datos (que requiere DataLoader para solucionar), y mayor dificultad para hacer caching efectivo.
+
+**GraphQL es la elección correcta cuando:** la API es consumida por múltiples clientes con necesidades de datos muy distintas (web, mobile, diferentes secciones con layouts distintos), el equipo tiene experiencia con GraphQL, o la API es pública con consumidores externos con necesidades diversas.
+
+## tRPC: Type-Safety Total en Proyectos TypeScript Full-Stack
+
+tRPC no es un protocolo de red — es una librería que genera un cliente TypeScript type-safe a partir de los tipos del servidor. Si defines el tipo de retorno de un procedimiento en el backend, el cliente TypeScript lo conoce automáticamente. Sin generación de código, sin OpenAPI, sin serialización manual.
+
+```typescript
+// Backend (Next.js API)
+export const appRouter = router({
+  user: {
+    getById: publicProcedure
+      .input(z.object({ id: z.string() }))
+      .query(async ({ input }) => {
+        return db.users.findUnique({ where: { id: input.id } });
+      }),
+  },
+});
+
+// Frontend: el tipo está inferido automáticamente
+const { data: user } = trpc.user.getById.useQuery({ id: '123' });
+// user tiene el tipo exacto del return de la query
+```
+
+La limitación de tRPC es que solo funciona en proyectos TypeScript full-stack donde el cliente y el servidor comparten el mismo repositorio o pueden importar los tipos del servidor. No es viable para APIs públicas consumidas por terceros.
+
+**tRPC es la elección correcta cuando:** el proyecto es TypeScript en cliente y servidor, el equipo es pequeño y trabaja en el mismo repositorio, y la API no necesita ser consumida por clientes externos.

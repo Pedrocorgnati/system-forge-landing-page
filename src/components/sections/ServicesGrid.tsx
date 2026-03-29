@@ -50,9 +50,11 @@ export function ServicesGrid() {
     ? services
     : services.filter((s) => s.filterGroup === filterGroup)
 
-  const activeService = visibleServices.find((s) => s.slug === activeId)
+  const activeService = (
+    visibleServices.find((s) => s.slug === activeId)
     ?? visibleServices[0]
     ?? services[0]
+  )!
 
   // When filter changes, reset activeId to the first visible service
   useEffect(() => {

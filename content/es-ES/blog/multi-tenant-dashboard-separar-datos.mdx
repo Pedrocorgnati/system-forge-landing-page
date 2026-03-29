@@ -1,0 +1,112 @@
+---
+title: "Multi-tenant en dashboards: separando datos por cliente"
+slug: "multi-tenant-dashboard-separar-datos"
+date: "2024-10-09"
+description: "Cómo implementar aislamiento de datos en dashboards multi-tenant — Row Level Security en PostgreSQL, middleware de tenant y prevención de data leakage."
+tags: ["multi-tenancy", "dashboard", "row level security", "postgresql", "saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo implementar aislamiento de datos en dashboards multi-tenant — Row Level Security en PostgreSQL, middleware de tenant y prevención de data leakage.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'multi-tenant-dashboard-separar-dados'
+  - locale: 'it-IT'
+    slug: 'dashboard-multi-tenant-separare-dati-clienti'
+  - locale: 'en'
+    slug: 'multi-tenant-dashboards-separating-client-data'
+---
+
+Un bug de multi-tenancy es diferente de todos los demás bugs. No es un crash, no es una pantalla rota, no es un número incorrecto. Es silencioso: un usuario de la Empresa A consigue ver datos de la Empresa B. Y generalmente nadie se da cuenta hasta que un cliente llama para quejarse de que vio información confidencial de un competidor.
+
+Las consecuencias son serias: pérdida de contrato, proceso legal, notificación a la AEPD (Agencia Española de Protección de Datos bajo el RGPD), daño irreparable a la reputación. En SaaS B2B con datos corporativos sensibles, el data leakage entre tenants es uno de los pocos bugs que pueden cerrar una empresa.
+
+## Row Level Security en PostgreSQL: Configuración Completa
+
+Row Level Security (RLS) es el mecanismo de PostgreSQL que aplica políticas de acceso directamente en la base de datos, independientemente de cómo llegó la query. Aunque la aplicación envíe una query sin filtro de tenant, PostgreSQL aplica la política y devuelve solo las filas que el usuario tiene permiso de ver.
+
+El RLS es la última línea de defensa — y por eso es la más importante.
+
+```sql
+-- Activar RLS en la tabla
+ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
+
+-- Crear política que filtra por tenant
+CREATE POLICY tenant_isolation ON orders
+  USING (tenant_id = current_setting('app.current_tenant')::uuid);
+```
+
+La aplicación establece el contexto de tenant al inicio de cada solicitud:
+
+```sql
+SET app.current_tenant = 'uuid-del-tenant-actual';
+```
+
+Con esto, cualquier `SELECT * FROM orders` devuelve solo los registros del tenant actual, sin ningún filtro adicional en la query.
+
+## Middleware de Tenant en Next.js
+
+El middleware de tenant resuelve el tenant a partir del request (por subdominio, por header o por JWT) y lo propaga a toda la solicitud.
+
+```typescript
+// middleware.ts
+export async function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host') || '';
+  const subdomain = hostname.split('.')[0];
+
+  const tenant = await getTenantBySubdomain(subdomain);
+  if (!tenant) {
+    return NextResponse.redirect('/not-found');
+  }
+
+  const response = NextResponse.next();
+  response.headers.set('x-tenant-id', tenant.id);
+  return response;
+}
+```
+
+En la capa de base de datos, cada query incluye el tenant_id del contexto:
+
+```typescript
+// lib/db.ts
+export async function getDbWithTenant(tenantId: string) {
+  const client = await pool.connect();
+  await client.query(`SET app.current_tenant = '${tenantId}'`);
+  return client;
+}
+```
+
+## Prevención de Data Leakage: Las Cuatro Capas
+
+El aislamiento correcto necesita cuatro capas funcionando en conjunto:
+
+**Capa 1 — Base de datos:** RLS activo en todas las tablas con datos de tenant. Sin excepción. Las tablas de configuración global pueden estar exentas, pero cualquier tabla que contenga datos de negocio necesita RLS.
+
+**Capa 2 — API/Backend:** Todos los endpoints validan que el tenant del JWT coincide con el tenant del recurso solicitado antes de proceder. Una doble verificación que captura errores de lógica de aplicación que el RLS no detectaría.
+
+**Capa 3 — Frontend:** El dashboard no renderiza datos de otro tenant aunque lleguen por error. Los componentes asumen que los datos son del tenant actual y no renderizan identificadores de otros tenants.
+
+**Capa 4 — Caché:** Si usas Redis u otro caché, las keys deben incluir el tenant_id para evitar que una respuesta cacheada de un tenant se sirva a otro. `cache:tenant_a:dashboard:metrics` en lugar de `cache:dashboard:metrics`.
+
+## Tests de Aislamiento: Cómo Verificar que Funciona
+
+Los tests de aislamiento de multi-tenancy son obligatorios en cualquier SaaS B2B. Deben verificar que un usuario de Tenant A no puede acceder a datos de Tenant B en ningún endpoint.
+
+```typescript
+describe('Tenant isolation', () => {
+  it('should not return data from another tenant', async () => {
+    const tenantAToken = await loginAs(userTenantA);
+    const tenantBData = await api.get('/api/orders', {
+      headers: { Authorization: `Bearer ${tenantAToken}` },
+      params: { tenant: tenantB.id } // intento de acceso cruzado
+    });
+
+    expect(tenantBData.body.data).toHaveLength(0);
+  });
+});
+```
+
+Estos tests deben ejecutarse en cada PR que modifique la capa de datos. Un CI que no incluye tests de aislamiento de tenant es una deuda técnica que eventualmente costará muy caro.

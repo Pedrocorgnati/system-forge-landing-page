@@ -201,7 +201,7 @@ describe('CookieBanner — GDPR (IT)', () => {
     const focusable = modal.querySelectorAll<HTMLElement>('button:not([disabled])')
     expect(focusable.length).toBeGreaterThanOrEqual(2)
     // Focus last focusable, press Tab → should wrap to first
-    const last = focusable[focusable.length - 1]
+    const last = focusable[focusable.length - 1]!
     last.focus()
     fireEvent.keyDown(modal, { key: 'Tab', shiftKey: false })
     // After tab, focus should be on the first element (wrapped)

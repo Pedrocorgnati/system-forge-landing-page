@@ -3,7 +3,7 @@
  * Tipos centrais do sistema i18n triple-market.
  */
 
-export type SupportedLocale = 'pt-BR' | 'it-IT' | 'en'
+export type SupportedLocale = 'pt-BR' | 'it-IT' | 'en' | 'es-ES'
 
 export type MarketCurrency = 'BRL' | 'EUR' | 'USD'
 

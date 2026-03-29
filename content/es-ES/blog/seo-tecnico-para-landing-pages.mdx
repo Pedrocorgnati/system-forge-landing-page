@@ -1,0 +1,102 @@
+---
+title: "SEO técnico para landing pages: más allá del contenido"
+slug: "seo-tecnico-para-landing-pages"
+date: "2024-08-29"
+description: "Cómo optimizar landing pages para SEO técnico: Core Web Vitals, Schema.org, canonical tags, hreflang, rastreabilidad e indexación correcta."
+tags: ["seo tecnico", "landing page", "core web vitals", "schema.org", "indexacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo optimizar landing pages para SEO técnico: Core Web Vitals, Schema.org, canonical tags, hreflang, rastreabilidad e indexación correcta."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seo-tecnico-para-landing-pages'
+  - locale: 'it-IT'
+    slug: 'seo-tecnico-per-landing-page'
+  - locale: 'en'
+    slug: 'technical-seo-for-landing-pages'
+---
+
+El buen contenido en un sitio lento no rankea. Esta realidad quedó explícita en 2021, cuando Google oficializó los Core Web Vitals como factor de ranking. Antes de eso, el SEO técnico se trataba frecuentemente como un complemento — algo que hacías después de tener el contenido correcto. Ahora, el rendimiento del servidor, la estabilidad visual de la página durante la carga y la capacidad de respuesta a las interacciones del usuario son métricas que afectan directamente la posición en los resultados de búsqueda.
+
+Pero los Core Web Vitals son solo una capa del SEO técnico. Hay otros elementos igualmente críticos que la mayoría de las landing pages ignoran: Schema.org para rich snippets, gestión correcta de canonical tags en páginas con múltiples variaciones, rastreabilidad garantizada para que el bot de Google indexe correctamente y — cuando aplica — hreflang para sitios multilingües.
+
+## Core Web Vitals: LCP, CLS y FID en la Práctica
+
+**LCP (Largest Contentful Paint)** mide cuánto tarda en renderizarse el elemento más grande visible de la página (generalmente el hero image o el H1 principal). El objetivo es < 2,5 segundos.
+
+Para mejorar el LCP: usar `next/image` con `priority={true}` para el hero image (precarga el recurso en el `<head>`), usar formatos modernos (WebP, AVIF) que son 30-50% más ligeros que JPEG/PNG, y asegurarse de que el servidor responde en < 200ms (TTFB).
+
+**CLS (Cumulative Layout Shift)** mide la inestabilidad visual — cuánto se desplazan los elementos durante la carga. El objetivo es < 0,1.
+
+Los culpables habituales: imágenes sin dimensiones explícitas (el navegador no sabe cuánto espacio reservar), fuentes web que producen FOUT (Flash of Unstyled Text), y anuncios o embeds que se cargan tarde y empujan el contenido.
+
+**FID/INP (Interaction to Next Paint)** mide la capacidad de respuesta a las interacciones del usuario. En Next.js, el SSR y el SSG ya garantizan tiempos de carga iniciales bajos, pero JavaScript pesado que bloquea el thread principal puede degradar el INP.
+
+## Schema.org: Rich Snippets que Mejoran el CTR
+
+Schema.org permite añadir metadatos estructurados que Google puede mostrar directamente en los resultados de búsqueda (rich snippets): valoraciones con estrellas, preguntas frecuentes, pasos de un proceso, precios de productos.
+
+Para una landing page de servicio de software, el schema más útil es `FAQPage` (preguntas frecuentes que aparecen desplegadas en los resultados) y `Service` con información del servicio.
+
+```typescript
+// En Next.js, añadir el script JSON-LD al <head>
+export default function LandingPage() {
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "¿Cuánto cuesta desarrollar una app móvil?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "El coste de una app móvil varía entre 8.000 y 60.000 €..."
+        }
+      }
+    ]
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      {/* contenido de la página */}
+    </>
+  );
+}
+```
+
+## Canonical Tags: Evitar Contenido Duplicado
+
+Las canonical tags le dicen a Google cuál es la URL "oficial" de una página cuando el mismo contenido es accesible desde múltiples URLs (con y sin www, con parámetros de tracking, etc.).
+
+En Next.js con App Router, la canonical se configura en `generateMetadata`:
+
+```typescript
+export async function generateMetadata({ params }) {
+  return {
+    alternates: {
+      canonical: `https://tusitio.es/${params.slug}`,
+    },
+  };
+}
+```
+
+## Hreflang para Sitios Multilingües
+
+Si tu landing page tiene versiones en varios idiomas (español, inglés, italiano), el hreflang indica a Google qué versión mostrar a cada audiencia según su idioma y región.
+
+```html
+<link rel="alternate" hreflang="es" href="https://tusitio.es/es/landing" />
+<link rel="alternate" hreflang="en" href="https://tusitio.es/en/landing" />
+<link rel="alternate" hreflang="it" href="https://tusitio.it/landing" />
+<link rel="alternate" hreflang="x-default" href="https://tusitio.es/landing" />
+```
+
+El hreflang mal configurado (URLs que no se corresponden, falta del `x-default`) es uno de los problemas técnicos de SEO más frecuentes en sitios multilingües.

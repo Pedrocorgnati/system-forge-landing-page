@@ -1,0 +1,57 @@
+---
+title: "Next.js para landing pages: por qué no WordPress"
+slug: "nextjs-para-landing-pages-vs-wordpress"
+date: "2024-09-13"
+description: "Por qué Next.js con exportación estática supera a WordPress en rendimiento, seguridad y SEO para landing pages institucionales — con comparativa técnica."
+tags: ["nextjs", "landing page", "wordpress", "rendimiento", "jamstack"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Por qué Next.js con exportación estática supera a WordPress en rendimiento, seguridad y SEO para landing pages institucionales — con comparativa técnica.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'nextjs-para-landing-pages-vs-wordpress'
+  - locale: 'it-IT'
+    slug: 'nextjs-per-landing-page-vs-wordpress'
+  - locale: 'en'
+    slug: 'nextjs-for-landing-pages-vs-wordpress'
+---
+
+WordPress alimenta el 43% de todos los sitios web de internet. Usar eso como argumento a favor de la plataforma es como decir que el coche de entrada es una buena elección para las 24 Horas de Le Mans porque el 90% de la gente conduce coches de entrada. Popularidad y adecuación al objetivo son cosas distintas.
+
+Para landing pages — especialmente landing pages institucionales, de producto o enfocadas en conversión mediante tráfico de pago — WordPress carga un conjunto de limitaciones estructurales que lo convierten en la elección equivocada. Y las alternativas modernas, en particular Next.js con exportación estática, eliminan esas limitaciones manteniendo lo mejor de WordPress: la accesibilidad para no desarrolladores.
+
+## WordPress: Por Qué Sigue Dominando y Sus Límites
+
+WordPress domina porque redujo a cero la barrera técnica de publicar un sitio. En 2005, eso fue revolucionario. En 2024, ese legado se ha convertido en un peso.
+
+La arquitectura de WordPress es PHP server-side con base de datos MySQL. Cada solicitud de página genera una consulta a la base de datos, procesa plantillas PHP y devuelve el HTML. Esto significa que el tiempo de respuesta depende del servidor, la carga de la base de datos y los plugins activos. Un WordPress sin optimización tiene tiempos de primera byte (TTFB) de 800ms a 2 segundos. Con plugins de caché bien configurados, puede bajar a 200-400ms. Pero nunca llega al rango de 30-80ms que consiguen los sitios estáticos.
+
+El problema de los plugins es real: un WordPress promedio en producción tiene 15-25 plugins activos. Cada uno añade peticiones HTTP, JavaScript adicional y riesgo de conflictos. Y las actualizaciones de seguridad de WordPress y sus plugins son continuas — descuidarlas durante unos meses deja el sitio vulnerable a ataques automatizados.
+
+## Next.js con Exportación Estática: La Alternativa
+
+Next.js con exportación estática (`next export`) genera archivos HTML, CSS y JavaScript estáticos en el momento del build. No hay servidor procesando solicitudes en tiempo real — los archivos se sirven directamente desde una CDN como Vercel Edge Network o Cloudflare Pages.
+
+Los efectos son inmediatos: TTFB de 20-50ms globalmente, sin dependencias de servidor que puedan caer, superficie de ataque mínima (no hay base de datos expuesta, no hay PHP que explotar), y Core Web Vitals excelentes por defecto cuando se usa `next/image` para imágenes y `next/font` para tipografías.
+
+Para SEO, los Core Web Vitals son factor de ranking desde 2021. Una landing page en Next.js estático compite directamente con las mejores puntuaciones posibles en PageSpeed Insights. Una landing page en WordPress sin optimización avanzada raramente supera 60-70 puntos en mobile.
+
+## El Argumento del CMS: Notion, Contentful y Alternatives
+
+El argumento habitual a favor de WordPress es que el cliente necesita editar el contenido sin saber programar. Es un argumento válido — pero WordPress no es la única solución.
+
+**Notion como CMS:** el equipo edita el contenido en Notion, un webhook dispara el rebuild en Vercel, y el sitio se actualiza en 30-60 segundos. Simple, familiar para equipos no técnicos, y sin plugins de seguridad que mantener.
+
+**Contentful o Sanity:** CMS headless con interfaz visual amigable. El contenido vive en el CMS, Next.js lo consume via API en el momento del build. La separación entre contenido y presentación hace más fácil rediseñar sin migrar datos.
+
+**Storyblok:** CMS headless con editor visual que muestra previews en tiempo real. Para equipos de marketing que necesitan ver los cambios antes de publicar, es una experiencia superior al editor de bloques de WordPress.
+
+## Cuándo WordPress Sigue Teniendo Sentido
+
+WordPress tiene un caso de uso legítimo: cuando el equipo ya lo conoce profundamente, el sitio tiene mucho contenido editado frecuentemente por personas no técnicas, y el presupuesto para un developer que mantenga el ecosistema es limitado. En ese contexto, WordPress con un buen tema y plugins auditados puede ser la elección pragmática.
+
+Para landing pages nuevas, con un presupuesto razonable y un objetivo claro de conversión y performance, Next.js estático es superior en todas las dimensiones que importan para el negocio: velocidad, seguridad, SEO y coste de hosting.

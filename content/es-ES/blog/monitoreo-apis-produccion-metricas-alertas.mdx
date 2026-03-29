@@ -1,0 +1,77 @@
+---
+title: "Monitoreo de APIs en producción: métricas y alertas"
+slug: "monitoreo-apis-produccion-metricas-alertas"
+date: "2024-11-22"
+description: "Cómo monitorear APIs en producción — latencia p50/p95/p99, error rate, alertas con PagerDuty, distributed tracing con OpenTelemetry y dashboards Grafana."
+tags: ["monitoreo api", "opentelemetry", "grafana", "alertas", "observabilidad"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo monitorear APIs en producción — latencia p50/p95/p99, error rate, alertas con PagerDuty, distributed tracing con OpenTelemetry y dashboards Grafana.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'monitoramento-apis-producao-metricas-alertas'
+  - locale: 'it-IT'
+    slug: 'monitoraggio-api-produzione-metriche-alert'
+  - locale: 'en'
+    slug: 'api-monitoring-in-production-metrics-alerts'
+---
+
+Hay dos formas de descubrir que tu API tiene problemas en producción: tus alertas te avisan, o tus clientes te avisan. La primera es solo un incidente. La segunda es un incidente y una crisis de confianza.
+
+El monitoreo de API en producción no es opcional — es la infraestructura de calidad que diferencia un servicio profesional de un prototipo en producción. Y con las herramientas correctas, configurar observabilidad básica lleva menos de un día de trabajo.
+
+## Métricas Esenciales: Latencia, Error Rate y Throughput
+
+Las tres métricas fundamentales de cualquier API son conocidas como las "Golden Signals" del SRE (Site Reliability Engineering):
+
+**Latencia** — cuánto tarda tu API en responder. El error clásico es monitorear solo el promedio. El promedio oculta outliers: si el 95% de las solicitudes tardan 50ms y el 5% tardan 10 segundos, el promedio puede ser 550ms — que parece razonable pero representa una pésima experiencia para 1 de cada 20 usuarios.
+
+Lo correcto es monitorear percentiles: p50 (la mediana), p95 (el 95% de las solicitudes está por debajo de este valor) y p99 (el 99%). Para APIs críticas, p99 es el número que define si el SLO se está cumpliendo.
+
+**Error Rate** — porcentaje de solicitudes que devuelven error (4xx y 5xx). Un error rate del 0,1% puede parecer insignificante hasta que tu API procesa 1 millón de solicitudes al día — son 1.000 errores diarios que afectan a usuarios reales.
+
+**Throughput** — solicitudes por segundo (RPS). Es la métrica de carga que permite correlacionar aumentos de latencia y error rate con picos de tráfico.
+
+## OpenTelemetry: El Estándar de Observabilidad
+
+OpenTelemetry (OTel) es el estándar abierto para instrumentar aplicaciones. Permite recopilar trazas, métricas y logs con un único SDK, y exportarlos a cualquier backend (Grafana, Datadog, Jaeger, etc.) sin cambiar el código de instrumentación.
+
+La instrumentación automática de Node.js con OpenTelemetry captura automáticamente:
+- Trazas de solicitudes HTTP entrantes y salientes
+- Queries a bases de datos (PostgreSQL, MySQL, MongoDB)
+- Llamadas a servicios externos
+- Tiempo de cada operación dentro del request
+
+Con trazas distribuidas, puedes ver exactamente qué ocurre dentro de una solicitud lenta: si el tiempo se está yendo en la base de datos, en una llamada a un servicio externo o en lógica de negocio.
+
+## Grafana y Prometheus: Stack de Monitoreo Open Source
+
+Para equipos que prefieren control total sobre la infraestructura de monitoreo, Prometheus + Grafana es el stack más adoptado.
+
+Prometheus recoge métricas mediante scraping (consulta activa a los endpoints `/metrics` de los servicios) o mediante el OpenTelemetry Collector que actúa como puente. Grafana visualiza esas métricas en dashboards configurables.
+
+Un dashboard de API básico debe incluir: gráfico de latencia p50/p95/p99 por endpoint, gráfico de error rate por código HTTP, gráfico de throughput (RPS), y tabla con los 10 endpoints más lentos.
+
+## Alertas: PagerDuty y Cuándo Despertar a Alguien
+
+No toda alerta merece despertar a alguien a las 3 de la mañana. Una buena estrategia de alertas distingue entre severidades:
+
+**Crítico (paging inmediato):** error rate > 5% por más de 2 minutos, latencia p99 > 10 segundos por más de 5 minutos, API completamente inaccesible.
+
+**Alto (notificación en horario de trabajo):** error rate entre 1% y 5% sostenido, latencia p95 degradada pero sin romper SLO, spikes de tráfico inusuales.
+
+**Informativo (dashboard, no alerta activa):** aumento gradual de latencia, cambios en patrones de uso.
+
+PagerDuty y OpsGenie manejan la rotación on-call y el enrutamiento de alertas. Para equipos pequeños, alertas a Slack con un canal dedicado de incidents suele ser suficiente como punto de partida.
+
+## Distributed Tracing: Encontrar el Cuello de Botella
+
+Cuando una API tiene latencia alta, el dashboard de métricas te dice que hay un problema. El distributed tracing te dice exactamente dónde está.
+
+Una traza distribuida muestra el timeline completo de una solicitud: cuánto tiempo pasó en el middleware de autenticación, cuánto en la query a la base de datos, cuánto en la llamada a la API de pagos, cuánto en serializar la respuesta. Con esta visibilidad, optimizar la latencia deja de ser adivinanza y se convierte en cirugía de precisión.
+
+Jaeger y Tempo (parte del stack Grafana) son los backends de trazas más usados en el ecosistema open source. La instrumentación con OpenTelemetry es compatible con ambos sin cambiar el código de la aplicación.

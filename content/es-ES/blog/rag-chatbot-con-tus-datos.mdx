@@ -1,0 +1,102 @@
+---
+title: "RAG en la práctica: búsqueda semántica con tus datos"
+slug: "rag-chatbot-con-tus-datos"
+date: "2024-08-01"
+description: "Cómo implementar RAG (Retrieval-Augmented Generation) para crear chatbots que responden con tus datos — embeddings, vector stores y chunking de documentos."
+tags: ["rag", "embeddings", "vector store", "langchain", "ia generativa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo implementar RAG (Retrieval-Augmented Generation) para crear chatbots que responden con tus datos — embeddings, vector stores y chunking de documentos.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'rag-chatbot-com-seus-dados'
+  - locale: 'it-IT'
+    slug: 'rag-chatbot-con-i-tuoi-dati'
+  - locale: 'en'
+    slug: 'rag-chatbot-with-your-own-data'
+---
+
+Los LLMs como GPT-4o y Claude tienen un problema fundamental cuando se usan de forma aislada: no conocen tus datos. Fueron entrenados con información hasta una fecha concreta, no tienen acceso a tus documentos internos, políticas de empresa, historial de clientes ni ningún dato privado. Cuando un usuario pregunta algo específico de tu empresa, el modelo o inventa una respuesta plausible o admite que no sabe.
+
+RAG — Retrieval-Augmented Generation — es la solución estándar para este problema. En lugar de confiar solo en el conocimiento paramétrico del modelo, recuperas documentos relevantes de tu base de datos y los inyectas en el contexto antes de generar la respuesta. El modelo pasa a responder con tus datos, de forma actualizada y trazable.
+
+## Arquitectura de un Sistema RAG
+
+El pipeline RAG tiene dos fases diferenciadas:
+
+**Fase de indexación (offline):**
+1. Carga los documentos (PDFs, Markdown, páginas web, datos de base de datos)
+2. Divide los documentos en chunks (fragmentos de texto)
+3. Genera embeddings (representaciones vectoriales) para cada chunk
+4. Almacena los embeddings en una base de datos vectorial
+
+**Fase de consulta (online, en cada pregunta del usuario):**
+1. Genera el embedding de la pregunta del usuario
+2. Busca los chunks más similares semánticamente en la base vectorial
+3. Inyecta los chunks recuperados como contexto en el prompt
+4. El LLM genera la respuesta usando ese contexto
+
+## Chunking: El Detalle que Marca la Diferencia
+
+La calidad del chunking determina en gran medida la calidad de las respuestas RAG. Un chunk demasiado pequeño pierde contexto. Un chunk demasiado grande supera los límites del contexto del LLM o incluye información irrelevante que confunde al modelo.
+
+Las estrategias más efectivas:
+
+**Por párrafos con solapamiento:** divide el documento en párrafos, con un solapamiento de 1-2 oraciones entre chunks consecutivos. Esto evita que información importante quede dividida entre dos chunks.
+
+**Por secciones semánticas:** para documentos con estructura clara (manuales, FAQs), cada sección se convierte en un chunk. Preserva mejor el contexto de cada tema.
+
+**Recursive text splitting:** divide por caracteres respetando separadores naturales (párrafos, frases, palabras). LangChain incluye `RecursiveCharacterTextSplitter` como implementación de referencia.
+
+## Embeddings y Vector Store: Opciones Prácticas
+
+Para embeddings, las opciones más usadas son:
+- **OpenAI text-embedding-3-small:** buena precisión, precio bajo (0,02 USD/millón de tokens)
+- **Cohere Embed:** alternativa con soporte multilingüe robusto, útil si los documentos están en español
+- **Modelos locales (Ollama + nomic-embed-text):** sin coste por API, mayor latencia, ideal para datos sensibles que no pueden salir de la infraestructura propia
+
+Para el vector store:
+- **pgvector:** extensión de PostgreSQL. Si ya tienes Postgres, es la opción con menos overhead operativo
+- **Pinecone:** managed service, escalable, sin gestión de infraestructura
+- **Chroma:** open source, fácil de arrancar localmente para desarrollo
+
+## Implementación con LangChain y pgvector
+
+```typescript
+import { OpenAIEmbeddings } from 'langchain/embeddings/openai';
+import { PGVectorStore } from 'langchain/vectorstores/pgvector';
+import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
+
+// Indexar documentos
+const splitter = new RecursiveCharacterTextSplitter({
+  chunkSize: 1000,
+  chunkOverlap: 200,
+});
+
+const chunks = await splitter.splitDocuments(documents);
+const vectorStore = await PGVectorStore.fromDocuments(
+  chunks,
+  new OpenAIEmbeddings(),
+  { postgresConnectionOptions: { connectionString: process.env.DATABASE_URL } }
+);
+
+// Consulta RAG
+const relevantDocs = await vectorStore.similaritySearch(userQuery, 4);
+const context = relevantDocs.map(d => d.pageContent).join('\n\n');
+
+const response = await openai.chat.completions.create({
+  model: 'gpt-4o',
+  messages: [
+    { role: 'system', content: `Responde basándote en este contexto:\n\n${context}` },
+    { role: 'user', content: userQuery }
+  ]
+});
+```
+
+## Evaluación de la Calidad RAG
+
+Las métricas para evaluar un sistema RAG: precisión de recuperación (los chunks recuperados son relevantes para la pregunta), recall (no se pierden chunks importantes), y fidelidad de la respuesta (la respuesta se basa en el contexto, no en conocimiento inventado). RAGAS es el framework de referencia para evaluar estos componentes automáticamente.

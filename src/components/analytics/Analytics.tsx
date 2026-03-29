@@ -29,22 +29,18 @@ export function Analytics() {
     // Guard: prevent duplicate script injection
     if (document.getElementById('gtag-script')) {
       // Script already loaded — just re-configure (handles re-trigger after consent change)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const w = window as any
-      if (w.gtag) {
-        w.gtag('config', measurementId, { page_path: window.location.pathname })
+      if (window.gtag) {
+        window.gtag('config', measurementId, { page_path: window.location.pathname })
       }
       return
     }
 
     // Bootstrap dataLayer queue BEFORE script loads (gtag.js reads from it)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const w = window as any
-    w.dataLayer = w.dataLayer || []
+    window.dataLayer = window.dataLayer ?? []
     // eslint-disable-next-line prefer-rest-params
-    if (!w.gtag) w.gtag = function () { w.dataLayer.push(arguments) }
-    w.gtag('js', new Date())
-    w.gtag('config', measurementId, {
+    if (!window.gtag) window.gtag = function () { window.dataLayer!.push(arguments) }
+    window.gtag('js', new Date())
+    window.gtag('config', measurementId, {
       page_path: window.location.pathname,
       anonymize_ip: true,
     })

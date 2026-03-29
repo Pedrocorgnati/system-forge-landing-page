@@ -8,6 +8,10 @@ const withAnalyzer = withBundleAnalyzer({
 
 const nextConfig: NextConfig = {
   output: 'export',
+  experimental: {
+    // RESOLVED: tree-shaking otimizado para lucide-react
+    optimizePackageImports: ['lucide-react'],
+  },
   // distDir dinâmico para builds triple-market: dist-br/, dist-it/, dist-en/
   // Fallback para '.next' em dev e no script build genérico
   distDir: process.env.OUT_DIR ?? '.next',

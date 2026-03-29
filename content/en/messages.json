@@ -109,10 +109,20 @@
       "ariaLabel": "Main presentation"
     },
     "portfolio": {
-      "ariaLabel": "Project portfolio"
+      "ariaLabel": "Project portfolio",
+      "filterAriaLabel": "Filter projects by category",
+      "label": "Portfolio",
+      "title": "Projects we have delivered",
+      "countSuffix": "projects and counting.",
+      "filterAll": "All"
     },
     "blog": {
-      "ariaLabel": "Recent blog articles"
+      "ariaLabel": "Recent blog articles",
+      "paginationAriaLabel": "Pagination",
+      "categoryFilterAriaLabel": "Filter by category"
+    },
+    "clients": {
+      "ariaLabel": "Clients who trusted SystemForge"
     },
     "contact": {
       "ariaLabel": "Contact form"
@@ -134,7 +144,12 @@
       "eyebrow": "Next step",
       "headline": "Ready to turn your idea into software?",
       "description": "Get in touch now. No fluff — we analyze your project and deliver a proposal within 24 hours.",
-      "trustSignals": ["Free quote", "Response within 2 hours", "Clear contract", "Your code, no lock-in"]
+      "trustSignals": [
+        "Free quote",
+        "Response within 2 hours",
+        "Clear contract",
+        "Your code, no lock-in"
+      ]
     },
     "why": {
       "ariaLabel": "Why choose SystemForge"
@@ -166,7 +181,12 @@
       "badge": "Coming soon",
       "title": "AI Advisor",
       "description": "Describe your project and get a complete analysis in seconds — with technology recommendations, investment estimates, and a suggested roadmap.",
-      "benefits": ["Technical feasibility analysis in seconds", "Personalized stack recommendations", "Realistic investment estimate", "Suggested roadmap with milestones"],
+      "benefits": [
+        "Technical feasibility analysis in seconds",
+        "Personalized stack recommendations",
+        "Realistic investment estimate",
+        "Suggested roadmap with milestones"
+      ],
       "comingSoonTitle": "Tool under development",
       "comingSoonDescription": "The AI Advisor will be available soon. In the meantime, talk directly to our team for a personalized analysis.",
       "backToHome": "Back to home",
@@ -178,7 +198,11 @@
       "title": "Our services",
       "description": "From MVP to scalable product — custom software solutions for every stage of your business. We work with the most modern tech stacks available.",
       "backToAll": "All services",
-      "relatedTitle": "Related services"
+      "relatedTitle": "Related services",
+      "benefitsTitle": "Benefits",
+      "processTitle": "How it works",
+      "useCasesTitle": "Who it is for",
+      "faqTitle": "Frequently asked questions"
     },
     "portfolio": {
       "title": "Full portfolio",
@@ -229,19 +253,58 @@
       "defaultTitle": "Turn your idea into software",
       "defaultSubtitle": "SystemForge builds digital products from scratch to launch.",
       "services": {
-        "saas": { "title": "Need SaaS Development?", "subtitle": "SystemForge builds scalable SaaS platforms from scratch to deploy." },
-        "aplicativo-mobile": { "title": "Need a Mobile App?", "subtitle": "We build iOS and Android apps with React Native or Flutter." },
-        "marketplace": { "title": "Want to Build a Marketplace?", "subtitle": "We deliver complete B2B and B2C marketplace platforms." },
-        "automacao-com-ia": { "title": "Want to Automate with AI?", "subtitle": "We implement AI and automation solutions for businesses of all sizes." },
-        "bots-automacoes": { "title": "Need Bots and Automation?", "subtitle": "We build custom bots and automation workflows for your business." },
-        "landing-page": { "title": "Need a Landing Page?", "subtitle": "We create high-converting landing pages with SEO and performance." },
-        "e-commerce": { "title": "Want to Build an E-commerce?", "subtitle": "We build complete online stores, from catalog to checkout." },
-        "dashboard-b2b": { "title": "Need a B2B Dashboard?", "subtitle": "We build analytics dashboards and management panels on demand." },
-        "api-integracoes": { "title": "Need API and Integrations?", "subtitle": "We build robust APIs and integrate with any system." },
-        "desktop": { "title": "Need Desktop Software?", "subtitle": "We build cross-platform desktop applications with Electron or Tauri." },
-        "gestao-setorial": { "title": "Need Industry Management Software?", "subtitle": "We build custom management systems for your industry." },
-        "erp": { "title": "Need an ERP?", "subtitle": "We build custom ERP systems for your business." },
-        "consultoria": { "title": "Need Consulting?", "subtitle": "We offer specialized technical consulting for your project." }
+        "saas": {
+          "title": "Need SaaS Development?",
+          "subtitle": "SystemForge builds scalable SaaS platforms from scratch to deploy."
+        },
+        "aplicativo-mobile": {
+          "title": "Need a Mobile App?",
+          "subtitle": "We build iOS and Android apps with React Native or Flutter."
+        },
+        "marketplace": {
+          "title": "Want to Build a Marketplace?",
+          "subtitle": "We deliver complete B2B and B2C marketplace platforms."
+        },
+        "automacao-com-ia": {
+          "title": "Want to Automate with AI?",
+          "subtitle": "We implement AI and automation solutions for businesses of all sizes."
+        },
+        "bots-automacoes": {
+          "title": "Need Bots and Automation?",
+          "subtitle": "We build custom bots and automation workflows for your business."
+        },
+        "landing-page": {
+          "title": "Need a Landing Page?",
+          "subtitle": "We create high-converting landing pages with SEO and performance."
+        },
+        "e-commerce": {
+          "title": "Want to Build an E-commerce?",
+          "subtitle": "We build complete online stores, from catalog to checkout."
+        },
+        "dashboard-b2b": {
+          "title": "Need a B2B Dashboard?",
+          "subtitle": "We build analytics dashboards and management panels on demand."
+        },
+        "api-integracoes": {
+          "title": "Need API and Integrations?",
+          "subtitle": "We build robust APIs and integrate with any system."
+        },
+        "desktop": {
+          "title": "Need Desktop Software?",
+          "subtitle": "We build cross-platform desktop applications with Electron or Tauri."
+        },
+        "gestao-setorial": {
+          "title": "Need Industry Management Software?",
+          "subtitle": "We build custom management systems for your industry."
+        },
+        "erp": {
+          "title": "Need an ERP?",
+          "subtitle": "We build custom ERP systems for your business."
+        },
+        "consultoria": {
+          "title": "Need Consulting?",
+          "subtitle": "We offer specialized technical consulting for your project."
+        }
       },
       "serviceNames": {
         "saas": "SaaS Development",

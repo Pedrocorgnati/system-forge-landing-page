@@ -21,7 +21,7 @@ import { ServiceCategory } from './src/lib/types'
 // SYNC: manter alinhado com config/index.ts SUPPORTED_LOCALES e config/types.ts SupportedLocale.
 // Não é possível importar de config/ pois SupportedLocale[] não é compatível com `as const`
 // requerido por s.enum(). Se um novo locale for adicionado, atualizar AMBOS os arquivos.
-const SUPPORTED_LOCALES = ['pt-BR', 'it-IT', 'en'] as const
+const SUPPORTED_LOCALES = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
 const DEFAULT_LOCALE: SupportedLocale = 'pt-BR'
 

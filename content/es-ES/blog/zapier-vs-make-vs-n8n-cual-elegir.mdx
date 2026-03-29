@@ -1,0 +1,163 @@
+---
+title: "Zapier vs Make vs n8n: qué herramienta elegir"
+slug: "zapier-vs-make-vs-n8n-cual-elegir"
+date: "2024-09-09"
+description: "Comparativa detallada entre Zapier, Make (Integromat) y n8n para automatización de flujos de trabajo — precio, flexibilidad, self-hosting y casos de uso."
+tags: ["zapier", "make", "n8n", "automatizacion", "no-code"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "bots-automacoes"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Comparativa detallada entre Zapier, Make (Integromat) y n8n para automatización de flujos de trabajo — precio, flexibilidad, self-hosting y casos de uso."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'zapier-vs-make-vs-n8n-qual-escolher'
+  - locale: 'it-IT'
+    slug: 'zapier-vs-make-vs-n8n-quale-scegliere'
+  - locale: 'en'
+    slug: 'zapier-vs-make-vs-n8n-which-to-choose'
+---
+
+Automatizar flujos de trabajo entre aplicaciones distintas solía requerir un desarrollador disponible para escribir integraciones personalizadas. Hoy, herramientas como Zapier, Make y n8n han democratizado este proceso — cualquier persona con un mínimo de razonamiento lógico puede conectar dos sistemas y automatizar tareas repetitivas sin escribir código.
+
+Pero las tres herramientas son muy diferentes entre sí. Elegir mal significa pagar más de lo necesario, quedarte atrapado en un ecosistema limitante o tener dolores de cabeza con el mantenimiento que no existirían con la herramienta correcta. Esta comparativa es honesta sobre los puntos débiles que los sitios oficiales no mencionan.
+
+## Zapier: El Clásico con Mayor Ecosistema
+
+Zapier es la herramienta más veterana de las tres (2011) y tiene el ecosistema de conectores más amplio: más de 6.000 aplicaciones integradas. Si la aplicación que necesitas conectar existe, probablemente Zapier la soporta.
+
+**Modelo de funcionamiento:** Zaps (automatizaciones) que siguen el patrón Trigger → Action (desencadenador → acción). Muy simple conceptualmente, pero limitado para flujos complejos.
+
+**Ventajas:**
+- La más fácil de aprender — cualquier persona puede crear un Zap en 10 minutos
+- Mayor número de integraciones disponibles, especialmente para herramientas de marketing (HubSpot, Mailchimp, ActiveCampaign, Salesforce)
+- Soporte técnico en inglés de calidad
+- Multi-step Zaps permiten encadenar hasta 100 pasos
+
+**Desventajas:**
+- El precio escala rápido: el plan profesional cuesta desde 49$/mes para 2.000 tareas. A 10.000 tareas/mes ya estás en 73$/mes, y los precios suben de forma no lineal.
+- La lógica condicional es limitada — Filters sí, pero lógica compleja requiere workarounds
+- No hay self-hosting: todos tus datos pasan por la infraestructura de Zapier (relevante para RGPD)
+- Los errores en Zaps son difíciles de debuggear — el historial de ejecución es básico
+
+**Cuándo usar Zapier:**
+- Equipos de marketing o ventas que necesitan automatizar tareas con herramientas SaaS estándar (CRM, email, formularios)
+- Cuando la velocidad de implementación es prioritaria sobre el coste
+- Flujos simples que no requieren lógica compleja
+
+## Make (antes Integromat): El Más Visual y Flexible
+
+Make, rebautizado desde Integromat en 2022, ofrece un diseñador visual de flujos mucho más potente que Zapier. Los escenarios se construyen como un diagrama de flujo, lo que facilita flujos complejos con ramificaciones, bucles e iteraciones.
+
+**Ventajas:**
+- El precio es significativamente mejor que Zapier: 9$/mes para 10.000 operaciones, 16$/mes para 40.000
+- La interfaz visual permite construir flujos complejos que en Zapier serían imposibles
+- Soporte para estructuras de datos complejas (arrays, objetos anidados)
+- Módulos de transformación de datos potentes (funciones matemáticas, manipulación de strings, parsing JSON/XML)
+- Ejecutar escenarios síncronamente o asíncronamente
+- Webhooks custom incluidos en todos los planes
+
+**Desventajas:**
+- Curva de aprendizaje más pronunciada que Zapier — los flujos complejos requieren entender el modelo de datos de Make
+- Menor número de integraciones nativas (~1.500) que Zapier, aunque cubre la mayoría de herramientas relevantes
+- No hay self-hosting (hay una versión enterprise pero no está disponible para SMBs)
+- La documentación en español es limitada
+
+**Cuándo usar Make:**
+- Automatizaciones con lógica compleja: transformaciones de datos, flujos condicionales, iteraciones
+- Cuando el coste es importante y el volumen es alto
+- Empresas con perfil técnico que pueden aprovechar la flexibilidad
+
+```
+Ejemplo comparativo de coste:
+- 50.000 operaciones/mes:
+  - Zapier: ~180$/mes (plan Business)
+  - Make: 29$/mes (plan Pro)
+```
+
+## n8n: El Poder del Open Source y Self-Hosting
+
+n8n es la alternativa open-source. La diferencia fundamental respecto a Zapier y Make es que puedes instalarlo en tu propia infraestructura — lo que significa control total sobre los datos y coste fijo una vez instalado.
+
+**Ventajas:**
+- Self-hosting: tus datos nunca salen de tu infraestructura. Fundamental para empresas con requisitos RGPD estrictos, datos de salud (sanidad), datos financieros o confidencialidad corporativa.
+- Coste: si lo hosteas tú mismo, el coste es solo el servidor (desde 10-20€/mes en un VPS básico). La versión cloud de n8n tiene un tier gratuito y planes desde 20$/mes.
+- Código ejecutable: puedes escribir nodos custom en JavaScript/TypeScript directamente dentro del flujo
+- Comunidad muy activa y en crecimiento — más de 1.000 integraciones disponibles vía community nodes
+- Ideal para equipos técnicos que quieren máximo control
+
+**Desventajas:**
+- Self-hosting requiere mantenimiento: actualizaciones, backups, monitorización
+- La UX es menos pulida que Make o Zapier — la curva de aprendizaje es la más alta de las tres
+- El soporte oficial es limitado en el tier gratuito
+- Algunos nodos de la comunidad no se mantienen activamente
+
+**Instalación básica con Docker:**
+
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: always
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_BASIC_AUTH_ACTIVE=true
+      - N8N_BASIC_AUTH_USER=admin
+      - N8N_BASIC_AUTH_PASSWORD=${N8N_PASSWORD}
+      - N8N_HOST=tudominio.es
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=https
+      - WEBHOOK_URL=https://n8n.tudominio.es/
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_PORT=5432
+      - DB_POSTGRESDB_DATABASE=n8n
+    volumes:
+      - n8n_data:/home/node/.n8n
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=n8n
+      - POSTGRES_USER=n8n
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  n8n_data:
+  postgres_data:
+```
+
+**Cuándo usar n8n:**
+- Empresas con requisitos de privacidad o compliance que exigen que los datos no salgan de la infraestructura propia
+- Equipos técnicos que quieren construir automatizaciones complejas con código
+- Proyectos con volúmenes altos donde el modelo de precios por operación de Zapier/Make no escala
+
+## La Decisión Correcta para Empresas Españolas
+
+| Criterio | Zapier | Make | n8n |
+|----------|--------|------|-----|
+| Facilidad de uso | ★★★★★ | ★★★★ | ★★★ |
+| Flexibilidad técnica | ★★★ | ★★★★ | ★★★★★ |
+| Precio (volumen medio) | ★★ | ★★★★ | ★★★★★ |
+| Privacidad/RGPD | ★★★ | ★★★ | ★★★★★ |
+| Ecosistema de integraciones | ★★★★★ | ★★★★ | ★★★★ |
+
+**Resumen práctico:**
+- **Zapier** si el equipo es no técnico y prioriza la velocidad de implementación sobre el coste
+- **Make** si necesitas lógica compleja con mejor precio que Zapier y no tienes requisitos de self-hosting
+- **n8n** si tienes requisitos de privacidad, volúmenes altos o un equipo técnico que quiere control total
+
+## Conclusión
+
+No hay una respuesta universal. Para la mayoría de PYMEs españolas que están empezando con automatización, Make es el punto de equilibrio correcto: precio razonable, suficiente flexibilidad y sin la curva de aprendizaje de n8n. Para empresas con datos sensibles o equipos técnicos, n8n self-hosted es la mejor inversión a largo plazo.
+
+¿Necesitas automatizar procesos en tu empresa y no sabes por dónde empezar? [Contacta con SystemForge](https://systemforge.es/contacto).

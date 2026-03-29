@@ -36,13 +36,17 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
     waMessage = context
       ? `Hi! I saw your website and I'm interested in ${context}.`
       : "Hi! I saw SystemForge's website and would like to know more about your services."
+  } else if (locale === 'es-ES') {
+    waMessage = context
+      ? `¡Hola! He visto vuestro sitio y estoy interesado en ${context}.`
+      : '¡Hola! He visto el sitio de SystemForge y me gustaría saber más sobre los servicios.'
   } else {
     waMessage = context
       ? `Olá! Vi seu site e tenho interesse em ${context}.`
       : 'Olá! Vi o site da SystemForge e gostaria de saber mais sobre os serviços.'
   }
 
-  return [
+  const ctaList: CTAConfig[] = [
     {
       action: ConversionAction.WHATSAPP,
       label: m.cta.whatsapp,
@@ -51,19 +55,25 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
       icon: '💬',
     },
     {
-      action: ConversionAction.CALENDLY,
-      label: m.cta.calendly,
-      href: config.calendly,
-      variant: 'secondary',
-      icon: '📅',
-    },
-    {
       action: ConversionAction.BUDGET_ENGINE,
       label: m.cta.budget,
       href: config.budgetEngine,
       variant: 'ghost',
     },
   ]
+
+  // Only include Calendly CTA if a URL is configured
+  if (config.calendly) {
+    ctaList.splice(1, 0, {
+      action: ConversionAction.CALENDLY,
+      label: m.cta.calendly,
+      href: config.calendly,
+      variant: 'secondary',
+      icon: '📅',
+    })
+  }
+
+  return ctaList
 }
 
 export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
@@ -78,6 +88,10 @@ export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
     message = context
       ? `Hi! I'm interested in ${context}.`
       : "Hi! I saw SystemForge's website and would like to learn more."
+  } else if (locale === 'es-ES') {
+    message = context
+      ? `¡Hola! Estoy interesado en ${context}.`
+      : '¡Hola! He visto el sitio de SystemForge y me gustaría saber más.'
   } else {
     message = context
       ? `Olá! Tenho interesse em ${context}.`

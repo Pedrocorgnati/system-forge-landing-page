@@ -1,0 +1,95 @@
+---
+title: "Cómo escribir un briefing técnico para no-devs"
+slug: "como-escribir-un-briefing-tecnico-para-no-devs"
+date: "2024-09-08"
+description: "Guía para founders y gestores sin background técnico para escribir un briefing claro para empresas de software — qué incluir, qué evitar y plantilla lista."
+tags: ["briefing tecnico", "requisitos software", "gestion de producto", "contratacion software", "documentacion"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Guía para founders y gestores sin background técnico para escribir un briefing claro para empresas de software — qué incluir, qué evitar y plantilla lista."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-escrever-briefing-tecnico-nao-desenvolvedores'
+  - locale: 'it-IT'
+    slug: 'come-scrivere-brief-tecnico-non-sviluppatori'
+  - locale: 'en'
+    slug: 'how-to-write-a-technical-brief-for-non-devs'
+---
+
+La mayoría de los retrasos en proyectos de software no empiezan en el desarrollo — empiezan en el briefing. Cuando un cliente entrega un documento vago, la empresa de software hace suposiciones. Cuando el software entregado no corresponde a lo que el cliente imaginaba, empieza el ciclo de retrabajo.
+
+Esta guía es para founders, gestores y emprendedores en España sin background técnico que necesitan comunicar su idea a un equipo de desarrollo de forma clara y objetiva.
+
+## Por Qué el Briefing Importa Tanto
+
+Imagina que contratas a un arquitecto para diseñar tu oficina y le dices solo "quiero una oficina moderna y funcional". Recibirás un diseño que es moderno y funcional según el criterio del arquitecto — que puede ser completamente diferente al tuyo. Las correcciones después de que ya está construido son caras y tardías.
+
+El software funciona igual. Cada asunción no documentada se convierte en código que luego hay que cambiar. Una hora de briefing bien hecho puede ahorrarte semanas de retrabajo.
+
+## La Estructura de un Buen Briefing
+
+### 1. Contexto del Negocio (1 página)
+
+No empieces por las funcionalidades — empieza por el problema. Explica:
+- Qué hace tu empresa / cuál es tu modelo de negocio
+- Qué problema específico resolverá este software
+- Quién es el usuario final (cliente, empleado, proveedor...)
+- Qué hace actualmente la empresa sin el software (Excel, proceso manual, nada)
+
+### 2. Usuarios y Sus Necesidades
+
+Define los roles principales que usarán el sistema:
+- **Administrador:** Gestiona configuración, usuarios, reportes
+- **Gestor:** Opera el día a día del negocio
+- **Cliente final:** (si aplica) Accede a información o servicios propios
+
+Para cada rol, describe en lenguaje natural qué necesitan hacer: "El gestor necesita poder ver todos los pedidos pendientes, asignarlos a un repartidor y marcarlos como entregados. También necesita ver el historial de entregas por cliente."
+
+### 3. Funcionalidades Principales (con Prioridades)
+
+Lista las funcionalidades por importancia usando la clasificación MoSCoW:
+- **Must have:** Sin esto, el sistema no cumple su propósito
+- **Should have:** Muy importante, pero el sistema funciona sin ello de forma degradada
+- **Could have:** Deseable, pero prescindible para el lanzamiento
+- **Won't have (por ahora):** Claramente fuera del alcance inicial
+
+Sé específico en las "Must have". No "gestión de pedidos" — "el sistema debe permitir crear pedidos con múltiples productos, asignar un repartidor, rastrear el estado (pendiente/en proceso/entregado/cancelado) y enviar notificación por SMS al cliente al cambiar de estado".
+
+### 4. Integraciones con Sistemas Existentes
+
+¿El nuevo sistema debe conectarse con algo que ya tienes?
+- Tu CRM actual (Salesforce, HubSpot, Zoho...)
+- Tu ERP (SAP, Sage, A3, Holded...)
+- Tu tienda online (Shopify, Magento, WooCommerce)
+- Sistemas de pago (Stripe, Redsys, Bizum)
+- Otros (¿hay un sistema legado del que hay que importar datos?)
+
+### 5. Restricciones Técnicas y de Negocio
+
+- **Plataformas:** ¿Web, app móvil, ambas? ¿Hay dispositivos específicos (tablets industriales, escáneres de código de barras)?
+- **Usuarios simultáneos:** ¿Cuántas personas usarán el sistema a la vez?
+- **Volumen de datos:** ¿Cuántos registros se esperan en 12 meses?
+- **Disponibilidad:** ¿El sistema debe funcionar 24/7 o solo en horario laboral?
+- **Cumplimiento:** ¿Hay requisitos de RGPD, sector sanitario (ENS), financiero (PSD2)?
+
+### 6. Lo Que NO Incluye el Proyecto
+
+Definir explícitamente lo que está fuera de alcance previene malentendidos. "El sistema NO incluirá: app móvil nativa (solo web responsive), integración con Sage (lo dejaremos para fase 2), exportación a PDF (usaremos CSV de momento)."
+
+## Los Errores Más Comunes
+
+**Describir la solución técnica en vez del problema.** "Necesito una base de datos relacional con tablas de usuarios y pedidos" — eso es lo que el developer decide. Lo que tú describes es: "Necesito saber quién hizo cada pedido y poder filtrar pedidos por cliente."
+
+**Mezclar funcionalidades del presente y del futuro.** "Ahora mismo usamos Excel, pero en el futuro queremos integración con el ERP y una app móvil." Define claramente qué es fase 1 y qué es visión futura.
+
+**Omitir el contexto de uso real.** "El sistema se usará en almacén" esconde información crítica: ¿con guantes? ¿con escáner? ¿con conexión a internet estable? ¿en turnos de noche con poca luz? El contexto de uso define los requisitos técnicos reales.
+
+## Conclusión
+
+Un briefing técnico bien escrito no requiere conocimiento técnico — requiere claridad sobre el problema que resuelves, los usuarios que lo usan y las restricciones reales del negocio. Las empresas de software que trabajan con briefings claros entregan en tiempo y presupuesto. Las que trabajan con briefings vagos repiten el trabajo.
+
+¿Tienes una idea de software y quieres ayuda para documentarla antes de solicitar presupuestos? [Contacta con SystemForge](https://systemforge.es/contacto) — te ayudamos a escribir el briefing correcto.

@@ -1,0 +1,120 @@
+---
+title: "Offline-first en desktop: SQLite local vs sync"
+slug: "offline-first-desktop-sqlite-vs-sync"
+date: "2024-10-19"
+description: "Arquitectura offline-first para apps de escritorio: SQLite local con better-sqlite3, sincronización con servidor y resolución de conflictos sin internet."
+tags: ["offline first", "sqlite", "electron", "sincronizacion", "desktop app"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Arquitectura offline-first para apps de escritorio: SQLite local con better-sqlite3, sincronización con servidor y resolución de conflictos sin internet."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'offline-first-desktop-sqlite-vs-sync'
+  - locale: 'it-IT'
+    slug: 'offline-first-desktop-sqlite-vs-sincronizzazione'
+  - locale: 'en'
+    slug: 'offline-first-desktop-sqlite-vs-sync'
+---
+
+Las aplicaciones industriales viven en un mundo donde la conectividad no puede darse por garantizada. Una fábrica en zona rural puede tener internet de calidad variable. Un almacén puede tener zonas ciegas de Wi-Fi. Una obra en campo puede quedarse sin señal durante horas. Un barco puede operar en aguas sin cobertura durante días enteros.
+
+Para estos escenarios, construir una aplicación que depende de una conexión constante con un servidor remoto es una elección que generará incidentes en producción de forma predecible. El modelo correcto es el offline-first: la aplicación funciona completamente con los datos locales y sincroniza con el servidor siempre que la conectividad está disponible.
+
+Implementar offline-first de forma robusta implica tres problemas entrelazados: almacenamiento local eficiente, estrategia de sincronización y resolución de conflictos cuando dos usuarios modifican el mismo dato sin estar conectados al mismo tiempo.
+
+## SQLite con better-sqlite3: Persistencia Local en Electron
+
+Para aplicaciones Electron, `better-sqlite3` es la librería de referencia para SQLite. Es síncrona (lo que simplifica mucho el código en el proceso principal de Electron), rápida y con soporte completo del protocolo SQLite.
+
+```typescript
+import Database from 'better-sqlite3';
+import path from 'path';
+import { app } from 'electron';
+
+const dbPath = path.join(app.getPath('userData'), 'app.db');
+const db = new Database(dbPath);
+
+// Configurar WAL mode para mejor performance
+db.pragma('journal_mode = WAL');
+
+// Schema inicial
+db.exec(`
+  CREATE TABLE IF NOT EXISTS work_orders (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    updated_at INTEGER NOT NULL,
+    synced_at INTEGER,
+    is_deleted INTEGER DEFAULT 0
+  );
+`);
+```
+
+El campo `synced_at` es clave para la estrategia de sincronización: permite identificar qué registros tienen cambios locales no sincronizados (donde `updated_at > synced_at` o `synced_at IS NULL`).
+
+## Estrategia de Sincronización: Push-Pull Incremental
+
+La sincronización eficiente es incremental: en lugar de enviar y recibir todos los datos en cada sync, se intercambian solo los cambios desde la última sincronización.
+
+```typescript
+async function syncWithServer() {
+  const lastSyncAt = getLastSyncTimestamp();
+
+  // Pull: traer cambios del servidor
+  const serverChanges = await api.get('/sync/pull', {
+    params: { since: lastSyncAt }
+  });
+
+  for (const change of serverChanges.data) {
+    applyServerChange(change);
+  }
+
+  // Push: enviar cambios locales
+  const localChanges = getLocalChanges(lastSyncAt);
+  if (localChanges.length > 0) {
+    await api.post('/sync/push', { changes: localChanges });
+    markAsSynced(localChanges.map(c => c.id));
+  }
+
+  updateLastSyncTimestamp(Date.now());
+}
+```
+
+La sincronización debe ejecutarse: al arrancar la aplicación si hay conectividad, cuando se detecta que la conexión se restaura, y en segundo plano a intervalos regulares mientras la aplicación está activa.
+
+## Detección de Conectividad en Electron
+
+```typescript
+import { net } from 'electron';
+
+function isOnline(): boolean {
+  return net.isOnline();
+}
+
+// Verificar periódicamente
+setInterval(async () => {
+  if (isOnline() && hasPendingChanges()) {
+    await syncWithServer();
+  }
+}, 30_000); // cada 30 segundos
+```
+
+## Resolución de Conflictos: El Caso Industrial
+
+En entornos industriales, el caso típico de conflicto es dos técnicos actualizando la misma orden de trabajo mientras estaban sin conexión. La estrategia más pragmática para este contexto es "Last Write Wins" con log de auditoría: el cambio más reciente gana, pero todos los cambios se registran para trazabilidad.
+
+Para documentos donde ambas versiones tienen valor (por ejemplo, notas de campo añadidas por dos técnicos diferentes), el merge por campos es preferible: se combinan los textos con un separador que indica el origen de cada parte.
+
+## Indicadores de Estado en la UI
+
+La UX debe comunicar claramente el estado de sincronización sin interrumpir el trabajo:
+- Icono verde en la barra de estado: sincronizado y conectado
+- Icono amarillo: cambios pendientes de sincronización
+- Icono rojo: sin conexión, trabajando en modo offline
+- Tooltip con el timestamp de la última sincronización exitosa
+
+Estos indicadores dan confianza al usuario de que sus datos están siendo gestionados correctamente, sin necesidad de intervención manual.

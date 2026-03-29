@@ -1,0 +1,65 @@
+---
+title: "MVP de SaaS en 30 días: hoja de ruta práctica"
+slug: "mvp-saas-en-30-dias-hoja-de-ruta"
+date: "2024-10-16"
+description: "Cómo construir un MVP de SaaS en 30 días sin sacrificar lo que importa — elección de stack, features del alcance mínimo, auth, billing básico y primeros usuarios."
+tags: ["mvp saas", "startup", "desarrollo rapido", "saas", "nextjs"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo construir un MVP de SaaS en 30 días sin sacrificar lo que importa — elección de stack, features del alcance mínimo, auth, billing básico y primeros usuarios.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'mvp-saas-em-30-dias-roteiro'
+  - locale: 'it-IT'
+    slug: 'mvp-saas-in-30-giorni-roadmap'
+  - locale: 'en'
+    slug: 'saas-mvp-in-30-days-practical-roadmap'
+---
+
+30 días es suficiente para validar una hipótesis. No para construir un producto. Esta distinción lo define todo en el proceso de desarrollo de un MVP de SaaS.
+
+El objetivo del MVP no es entregar un producto completo — es descubrir si la gente pagará para resolver el problema que estás atacando. Todo lo que no contribuye a esa respuesta es desperdicio. Pero eso no significa construir algo roto técnicamente: un MVP mal hecho genera deuda que paraliza el crecimiento durante meses después de la validación.
+
+Esta hoja de ruta divide los 30 días en cuatro semanas con objetivos claros, y define qué es esencial, qué puede esperar y por qué cada decisión importa.
+
+## Semana 1: Stack, Auth y Estructura de Multi-tenancy
+
+La primera semana es sobre fundación — las decisiones técnicas que serán más caras de cambiar después.
+
+**Stack recomendado para velocidad:** Next.js + TypeScript, Supabase (PostgreSQL + Auth + Storage), Stripe para pagos, Vercel para deploy. Esta combinación permite ir desde cero a producción en días porque resuelve auth, base de datos, storage y billing con configuración mínima.
+
+**Auth desde el día uno.** Implementar auth después cuesta el doble que implementarla desde el inicio. Con Supabase Auth, tienes email/password, magic link y OAuth (Google, GitHub) funcionando en menos de una tarde. La estructura de multi-tenancy (organizaciones, miembros, roles) también debe estar en el schema desde el principio.
+
+**Lo que NO hacer en la semana 1:** personalización visual profunda, optimización de performance, funcionalidades avanzadas de cualquier tipo.
+
+## Semana 2: Core Feature — La Razón de Existir del Producto
+
+La semana 2 es donde se construye el único feature que responde a la pregunta de validación. No dos features. No tres. El que define si el producto tiene razón de existir.
+
+Si el SaaS es de gestión de proyectos para agencias de diseño, el core feature es la gestión de proyectos — no las notificaciones, no los informes, no las integraciones con Slack. Esas vienen después de validar que alguien quiere pagar por la gestión de proyectos.
+
+El criterio para definir el core feature: ¿sin esto, el usuario puede resolver el problema para el que está pagando? Si la respuesta es no, es core. Si es sí, espera.
+
+En esta semana también se implementa la UX mínima viable: el onboarding que lleva al usuario del registro al primer valor en el menor tiempo posible. Empty states que explican cómo empezar. Mensajes de error claros.
+
+## Semana 3: Billing y Primeros Usuarios Beta
+
+El billing en el MVP no necesita ser sofisticado, pero necesita existir. Un SaaS que no cobra desde el primer usuario beta no está validando el modelo de negocio — está validando el interés gratuito, que es un dato de mucho menor valor.
+
+**Stripe Checkout** es el punto de partida: formulario de pago hosteado por Stripe, sin necesidad de formulario propio, con soporte nativo para tarjetas de crédito y débito. En España, también soporta SEPA Direct Debit para pagos recurrentes y Bizum a través de integraciones.
+
+En la semana 3 también se reclutan los primeros 5-10 usuarios beta. El perfil ideal son personas del segmento target que ya conoces — no usuarios de Product Hunt que nunca pagarán, sino personas con el problema que el producto resuelve y disposición a dar feedback honesto.
+
+## Semana 4: Pulido y Lanzamiento
+
+La semana 4 es para cerrar lo que impide el lanzamiento, no para añadir features nuevas.
+
+**Checklist de lanzamiento:** configuración de dominios y SSL, variables de entorno en producción, monitoreo básico (Sentry para errores, Uptime Robot para disponibilidad), política de privacidad y términos de servicio (obligatorios bajo el RGPD europeo), y configuración de analytics para medir activación.
+
+**Lo que no necesitas en el lanzamiento:** internacionalización (i18n), aplicación móvil, modo oscuro, integraciones con terceros, documentación para desarrolladores.
+
+El lanzamiento en España puede usar Product Hunt, comunidades de emprendedores como Lanzadera Network, grupos de LinkedIn de tu sector target, y outreach directo por email a los perfiles identificados como ICP (Ideal Customer Profile). La lista de espera construida antes del lanzamiento es el activo más valioso para los primeros días.

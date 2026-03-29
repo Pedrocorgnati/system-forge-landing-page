@@ -1,0 +1,62 @@
+---
+title: "Software para clínicas: requisitos y compliance OMC"
+slug: "software-clinicas-requisitos-compliance-omc"
+date: "2024-08-02"
+description: "Requisitos técnicos y regulatorios para software médico en España: historia clínica electrónica (Ley 41/2002), RGPD en datos de salud e integraciones con aseguradoras."
+tags: ["software medico", "clinica", "historia clinica electronica", "omc", "rgpd salud"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Requisitos técnicos y regulatorios para software médico en España: historia clínica electrónica (Ley 41/2002), RGPD en datos de salud e integraciones con aseguradoras."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'software-clinicas-requisitos-compliance-cfm'
+  - locale: 'it-IT'
+    slug: 'software-cliniche-requisiti-compliance-omceo-gdpr'
+  - locale: 'en'
+    slug: 'medical-clinic-software-requirements-hipaa-gdpr-compliance'
+---
+
+Desarrollar software para clínicas médicas en España es una de las tareas más exigentes del universo de sistemas de gestión sectorial. Al contrario que un ERP de comercio o una herramienta de control financiero, el software médico necesita cumplir un conjunto de obligaciones regulatorias que van mucho más allá del RGPD. Antes siquiera de pensar en funcionalidades como citas online o dashboard de indicadores, el desarrollador debe garantizar que el sistema cumple con la Ley 41/2002 de Autonomía del Paciente, los estándares de las aseguradoras para facturación y los requisitos de auditoría de historias clínicas.
+
+Ignorar estos requisitos no es solo un riesgo jurídico — es un riesgo para la operación de la clínica. Un software que no genera historia clínica válida puede inviabilizar la participación en convenios con aseguradoras. Un sistema sin trazabilidad de accesos puede resultar en sanciones del Colegio Oficial de Médicos.
+
+## Ley 41/2002: Requisitos de la Historia Clínica Electrónica
+
+La Ley 41/2002 de Autonomía del Paciente y de Derechos y Obligaciones en Materia de Información y Documentación Clínica establece los requisitos mínimos para la historia clínica en España:
+
+**Contenido mínimo obligatorio:**
+- Datos identificativos del paciente (incluyendo número de tarjeta sanitaria si aplica)
+- Datos de la asistencia sanitaria (fecha, centro, profesional)
+- Información clínica (anamnesis, exploración, diagnóstico, tratamiento, evolución)
+- Consentimiento informado firmado cuando sea preceptivo
+- Informes de resultados de pruebas diagnósticas
+
+**Conservación:** la historia clínica debe conservarse como mínimo 5 años desde la fecha de alta de cada proceso. Las comunidades autónomas pueden establecer plazos más largos (Cataluña y País Vasco, por ejemplo, exigen 10 años).
+
+**Acceso:** el paciente tiene derecho de acceso a su historia clínica. El médico puede denegar el acceso a las anotaciones subjetivas si lo considera perjudicial para el paciente, pero debe razonarlo. Terceros (familiares, abogados) solo acceden con autorización expresa del paciente o por resolución judicial.
+
+## RGPD en Datos de Salud: Categoría Especial
+
+Los datos de salud son categoría especial bajo el artículo 9 del RGPD, lo que implica obligaciones reforzadas:
+
+**Análisis de impacto (DPIA):** obligatorio para el tratamiento de datos de salud a gran escala. Debe documentarse y revisarse periódicamente.
+
+**Encargado del tratamiento:** si la software house aloja los datos, es encargada del tratamiento y debe firmar un contrato de encargo de tratamiento con la clínica (artículo 28 RGPD).
+
+**Notificación de brechas:** las brechas de seguridad que afecten a datos de salud deben notificarse a la AEPD en 72 horas.
+
+**Medidas técnicas:** cifrado en reposo y en tránsito, control de acceso basado en roles, log de auditoría de todos los accesos.
+
+## Facturación a Aseguradoras: Catálogos de Actos Médicos
+
+La facturación a aseguradoras requiere codificar los actos médicos con los catálogos propietarios de cada aseguradora, además de los catálogos estándar (NOMEN de la OMC para cirugía, catálogos de SEDISA para hospitalización).
+
+El mayor reto es que cada aseguradora tiene su propio catálogo y su propio portal de facturación. Un sistema bien integrado debe gestionar estos catálogos de forma centralizada, permitir al médico seleccionar el acto con autocompletado y generar la factura en el formato requerido por cada aseguradora.
+
+## Firma Electrónica del Consentimiento Informado
+
+El consentimiento informado firmado digitalmente es válido en España con el nivel de firma avanzada (eIDAS). Para procedimientos de especial riesgo, algunas comunidades autónomas exigen firma manuscrita o firma cualificada. El software debe gestionar qué tipo de consentimiento requiere cada tipo de procedimiento y almacenar el documento firmado vinculado a la historia clínica.

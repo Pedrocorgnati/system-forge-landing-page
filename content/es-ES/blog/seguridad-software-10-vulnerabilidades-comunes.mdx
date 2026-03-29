@@ -1,0 +1,115 @@
+---
+title: "Seguridad en software: 10 vulnerabilidades comunes"
+slug: "seguridad-software-10-vulnerabilidades-comunes"
+date: "2024-10-30"
+description: "Las 10 vulnerabilidades de seguridad más comunes en aplicaciones web y móvil — basadas en el OWASP Top 10 — con ejemplos de código y cómo corregirlas."
+tags: ["seguridad", "owasp", "vulnerabilidades", "desarrollo seguro", "sql injection"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Las 10 vulnerabilidades de seguridad más comunes en aplicaciones web y móvil — basadas en el OWASP Top 10 — con ejemplos de código y cómo corregirlas.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'seguranca-software-10-vulnerabilidades-comuns'
+  - locale: 'it-IT'
+    slug: 'sicurezza-software-10-vulnerabilita-comuni'
+  - locale: 'en'
+    slug: 'software-security-10-common-vulnerabilities'
+---
+
+## El 95% de las Vulnerabilidades Explotadas Son Conocidas y Evitables
+
+La mayoría de los ataques exitosos no explotan vulnerabilidades zero-day sofisticadas. Explotan fallos conocidos y documentados que podrían haberse evitado con prácticas básicas de desarrollo seguro. La OWASP (Open Web Application Security Project) documenta las vulnerabilidades más críticas en aplicaciones web desde 2003, y las mismas categorías aparecen repetidamente.
+
+Este artículo cubre las 10 vulnerabilidades más comunes, con ejemplos prácticos y cómo corregirlas.
+
+## 1. Inyección SQL
+
+Un atacante inserta código SQL en un campo de entrada para manipular las consultas a la base de datos.
+
+**Vulnerable:**
+```typescript
+const users = await db.query(
+  `SELECT * FROM users WHERE email = '${email}'`
+);
+// Si email = "'; DROP TABLE users; --", la tabla se elimina
+```
+
+**Correcto:**
+```typescript
+const users = await db.query(
+  'SELECT * FROM users WHERE email = $1', [email]
+);
+// Los parámetros parametrizados evitan la inyección
+```
+
+## 2. Cross-Site Scripting (XSS)
+
+Un atacante inyecta JavaScript malicioso que se ejecuta en el navegador de otros usuarios.
+
+La solución: escapar todo el contenido de usuario antes de renderizarlo en HTML. En React, JSX escapa automáticamente — el riesgo aparece cuando se usa `dangerouslySetInnerHTML` sin sanitización.
+
+## 3. Autenticación Rota
+
+Contraseñas débiles, sin límite de intentos, tokens de sesión predecibles o almacenados de forma insegura.
+
+Solución: bcrypt/Argon2 para contraseñas, límite de intentos de login, JWT con tiempo de expiración corto, refresh tokens en httpOnly cookies.
+
+## 4. Exposición de Datos Sensibles
+
+Datos sensibles transmitidos o almacenados sin cifrado. El caso más frecuente: logs que incluyen tokens, contraseñas o datos personales.
+
+Solución: HTTPS en todos los endpoints, cifrado en reposo para datos sensibles, sanitización de logs.
+
+## 5. Control de Acceso Roto
+
+El usuario puede acceder a recursos de otros usuarios simplemente cambiando el ID en la URL.
+
+**Vulnerable:**
+```typescript
+app.get('/api/invoices/:id', async (req, res) => {
+  const invoice = await db.invoices.findById(req.params.id);
+  res.json(invoice); // Cualquier usuario puede ver cualquier factura
+});
+```
+
+**Correcto:**
+```typescript
+app.get('/api/invoices/:id', requireAuth, async (req, res) => {
+  const invoice = await db.invoices.findFirst({
+    where: { id: req.params.id, userId: req.user.id } // Solo las del usuario
+  });
+  if (!invoice) return res.status(404).json({ error: 'Not found' });
+  res.json(invoice);
+});
+```
+
+## 6. Configuración Incorrecta de Seguridad
+
+Headers de seguridad HTTP ausentes, permisos excesivos en buckets de almacenamiento, mensajes de error que exponen stack traces en producción.
+
+## 7. Componentes con Vulnerabilidades Conocidas
+
+Dependencias npm/pip con CVEs conocidas que no se actualizan.
+
+Solución: `npm audit` y `dependabot` en GitHub Actions para detectar y alertar sobre vulnerabilidades en dependencias.
+
+## 8. Fallos en el Registro y Monitoreo
+
+Sin logs de eventos de seguridad (login fallido, cambios de permisos, exportaciones de datos), es imposible detectar una brecha o reconstruir qué pasó.
+
+## 9. Server-Side Request Forgery (SSRF)
+
+El servidor hace solicitudes HTTP a URLs proporcionadas por el usuario, permitiendo al atacante acceder a recursos internos.
+
+Solución: validar que las URLs de destino no apuntan a rangos de IP privados (10.x.x.x, 172.16.x.x, 192.168.x.x, 127.x.x.x) antes de hacer la solicitud.
+
+## 10. Criptografía Débil
+
+Usar MD5 o SHA-1 para contraseñas, claves API demasiado cortas, o generar tokens con `Math.random()` en lugar de `crypto.randomBytes()`.
+
+Solución: bcrypt/Argon2 para contraseñas, `crypto.randomBytes(32).toString('hex')` para tokens, AES-256-GCM para cifrado simétrico.
+
+Implementar estas correcciones antes del lanzamiento no es perfectismo — es el estándar mínimo para un producto que maneja datos de otros.

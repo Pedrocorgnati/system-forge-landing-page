@@ -1,0 +1,109 @@
+---
+title: "Búsqueda inteligente en e-commerce: más allá del SQL LIKE"
+slug: "busqueda-inteligente-ecommerce"
+date: "2024-09-16"
+description: "Cómo implementar búsqueda relevante en e-commerce con Elasticsearch, Algolia o Typesense — autocompletado, tolerancia a errores y ranking por ventas."
+tags: ["busqueda ecommerce", "elasticsearch", "algolia", "typesense", "search"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar búsqueda relevante en e-commerce con Elasticsearch, Algolia o Typesense — autocompletado, tolerancia a errores y ranking por ventas."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'busca-inteligente-ecommerce'
+  - locale: 'it-IT'
+    slug: 'ricerca-intelligente-ecommerce'
+  - locale: 'en'
+    slug: 'intelligent-search-ecommerce'
+---
+
+La búsqueda es la funcionalidad más usada en e-commerces con catálogos de más de unos cientos de productos. Cuando funciona bien, es invisible — el cliente escribe, encuentra, compra. Cuando funciona mal, el cliente escribe "zapatillas blancas" y no encuentra las "Zapatillas Blancas Deportivas" que están en el catálogo, y se va a comprar a la competencia.
+
+El problema empieza cuando los e-commerces implementan búsqueda con `SQL LIKE '%zapatillas%'`. Funciona para casos exactos, falla para todo lo demás: acentuación, plural/singular, errores de tipeo, sinónimos, orden de palabras.
+
+## El Problema del SQL LIKE en Producción
+
+```sql
+-- Esto NO encuentra: "zapatilla", "zapatillas deportivas", "snickers" (error de tipeo)
+SELECT * FROM productos WHERE nombre LIKE '%zapatillas%'
+```
+
+Los fallos más comunes:
+- **Errores de tipeo:** "zapatias" no encuentra "zapatillas"
+- **Plural/singular:** "pantalón" no encuentra "pantalones"
+- **Acentuación:** "zapatillas" vs "zapatílllas" (con tilde incorrecta)
+- **Sinónimos:** "sneakers" no encuentra "zapatillas deportivas"
+- **Búsqueda multi-palabra desordenada:** "blancas zapatillas" no encuentra "zapatillas blancas"
+
+## Motores de Búsqueda Especializados
+
+Las tres opciones principales para e-commerce tienen perfiles distintos:
+
+**Algolia:** La solución más rápida de implementar. SaaS con SDK para React, Vue, Angular. Búsqueda en tiempo real (< 100ms) con tolerancia a errores incluida. Precio basado en operaciones — puede ser elevado para catálogos grandes y alta frecuencia de búsqueda. Ideal para startups que quieren velocidad de implementación.
+
+**Elasticsearch/OpenSearch:** La más potente y flexible. Self-hosted o managed (Elastic Cloud, AWS OpenSearch). Curva de aprendizaje empinada pero posibilidades casi ilimitadas: búsqueda semántica, facets complejos, análisis de búsquedas. Ideal cuando tienes catálogos muy grandes (100K+ productos) o requisitos de personalización avanzada.
+
+**Typesense:** El punto medio. Open-source, self-hosted, pero con experiencia de desarrollo mucho más simple que Elasticsearch. Tolerancia a errores de tipeo incluida por defecto. Sin licencia comercial. Buena opción para e-commerces medianos con equipo técnico que quiere control sin la complejidad de Elasticsearch.
+
+## Implementación con Algolia en Next.js
+
+```typescript
+import algoliasearch from 'algoliasearch/lite'
+import { InstantSearch, SearchBox, Hits, Configure } from 'react-instantsearch'
+
+const searchClient = algoliasearch('APP_ID', 'SEARCH_API_KEY')
+
+export function BuscadorProductos() {
+  return (
+    <InstantSearch searchClient={searchClient} indexName="productos">
+      <Configure hitsPerPage={12} />
+      <SearchBox
+        placeholder="Buscar productos..."
+        classNames={{
+          input: 'w-full border rounded-lg p-3',
+        }}
+      />
+      <Hits hitComponent={TarjetaProducto} />
+    </InstantSearch>
+  )
+}
+```
+
+La indexación se hace sincronizando el catálogo de productos a Algolia cuando hay cambios:
+
+```typescript
+const algoliaIndex = algoliasearchAdmin('APP_ID', 'ADMIN_API_KEY').initIndex('productos')
+
+// Indexar productos al actualizar el catálogo
+await algoliaIndex.saveObjects(productos.map(p => ({
+  objectID: p.id,
+  nombre: p.nombre,
+  descripcion: p.descripcion,
+  precio: p.precio,
+  categoria: p.categoria,
+  stock: p.stock,
+})))
+```
+
+## Búsqueda Semántica para Consultas Complejas
+
+Para e-commerces de cierta sofisticación, la búsqueda semántica (búsqueda por significado, no solo por palabras clave) mejora la relevancia para consultas como "regalo para niño de 8 años" o "prenda para lluvia de verano".
+
+Elasticsearch y Typesense soportan vectores de embedding para búsqueda semántica. El flujo: generar embeddings de las descripciones de productos con un modelo como OpenAI text-embedding-3-small, almacenarlos en el índice de búsqueda y en el momento de búsqueda generar el embedding de la consulta del usuario y buscar por similitud vectorial.
+
+## Métricas de Búsqueda que Importan
+
+Una búsqueda implementada pero no monitoreada es una búsqueda que no mejora. Métricas esenciales:
+
+- **Zero results rate:** Porcentaje de búsquedas que no devuelven resultados. Debe ser < 5%. Más alto indica problemas de sinónimos o catálogo incompleto.
+- **Click-through rate (CTR):** Porcentaje de búsquedas que resultan en un click. Bajo CTR indica que los resultados son irrelevantes.
+- **Búsquedas más frecuentes sin compra:** Señalan oportunidades de mejora en el catálogo o en el ranking de resultados.
+
+## Conclusión
+
+La búsqueda es uno de los mayores palancas de conversión en e-commerce. Invertir en un motor de búsqueda especializado — incluso una solución gestionada como Algolia — tiene ROI medible en semanas.
+
+¿Quieres mejorar la búsqueda de tu e-commerce? [Contacta con SystemForge](https://systemforge.es/contacto).

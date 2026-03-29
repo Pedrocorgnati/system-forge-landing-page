@@ -1,6 +1,6 @@
 /**
  * scripts/validate-hreflang-sitemaps.ts
- * Validação de reciprocidade hreflang entre os 3 sitemaps XML gerados.
+ * Validação de reciprocidade hreflang entre os 4 sitemaps XML gerados.
  *
  * Regras NEXT-005:
  *   1. Reciprocidade bidirecional: se BR → IT, então IT → BR
@@ -34,6 +34,7 @@ const SITEMAP_PATHS: Record<string, string> = {
   br: 'dist-br/sitemap.xml',
   it: 'dist-it/sitemap.xml',
   en: 'dist-en/sitemap.xml',
+  es: 'dist-es/sitemap.xml',
 }
 
 // ---------------------------------------------------------------------------
@@ -59,7 +60,7 @@ function validatePaths(): void {
   if (missing.length > 0) {
     console.error('❌ Sitemaps não encontrados. Execute os builds primeiro:')
     missing.forEach(m => console.error(m))
-    console.error('\nComandos: npm run build:br && npm run build:it && npm run build:en')
+    console.error('\nComandos: npm run build:br && npm run build:it && npm run build:en && npm run build:es')
     process.exit(2)
   }
 }
@@ -218,7 +219,7 @@ function checkNoSelfReference(
 
 async function main(): Promise<void> {
   console.log('═══════════════════════════════════════════════════')
-  console.log('  Hreflang Sitemap Validator — Triple Market')
+  console.log('  Hreflang Sitemap Validator — Quad Market')
   console.log('  Regras: NEXT-005 (INT-019, INT-072, INT-085)')
   console.log('═══════════════════════════════════════════════════\n')
 
@@ -245,7 +246,7 @@ async function main(): Promise<void> {
   if (violations.length === 0) {
     console.log(
       `✅ Hreflang reciprocidade verificada para ${totalUrls} URLs ` +
-      `(${sitemaps.br.length} BR + ${sitemaps.it.length} IT + ${sitemaps.en.length} EN)`,
+      `(${sitemaps.br.length} BR + ${sitemaps.it.length} IT + ${sitemaps.en.length} EN + ${sitemaps.es.length} ES)`,
     )
     process.exit(0)
   } else {

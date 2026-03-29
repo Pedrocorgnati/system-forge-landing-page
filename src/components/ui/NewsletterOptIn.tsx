@@ -233,8 +233,10 @@ export function NewsletterOptIn() {
       <form data-testid="newsletter-form" onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
         {/* Campo de email */}
         <div>
+          <label htmlFor="newsletter-email" className="sr-only">{msg.ariaLabel}</label>
           <input
             data-testid="newsletter-email-input"
+            id="newsletter-email"
             type="email"
             name="email"
             required
@@ -276,6 +278,7 @@ export function NewsletterOptIn() {
                   setFormData(prev => ({ ...prev, consent: e.target.checked }))
                 }
                 disabled={status === 'submitting'}
+                aria-invalid={consentError ? 'true' : 'false'}
                 aria-describedby={consentError ? 'newsletter-consent-error' : undefined}
                 className="mt-0.5 h-4 w-4 accent-primary flex-shrink-0 disabled:opacity-50"
               />
@@ -320,6 +323,7 @@ export function NewsletterOptIn() {
           type="submit"
           loading={status === 'submitting'}
           disabled={status === 'submitting'}
+          aria-busy={status === 'submitting'}
           className="w-full sm:w-auto"
         >
           {status === 'submitting' ? msg.loading : msg.submit}

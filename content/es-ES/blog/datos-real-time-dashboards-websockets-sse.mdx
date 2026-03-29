@@ -1,0 +1,91 @@
+---
+title: "Real-time en dashboards: WebSockets, SSE o polling"
+slug: "datos-real-time-dashboards-websockets-sse"
+date: "2024-08-28"
+description: "Cuándo usar WebSockets, Server-Sent Events o polling para actualización en tiempo real en dashboards — trade-offs de complejidad, escala y costes."
+tags: ["real-time", "websockets", "sse", "dashboard", "polling"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cuándo usar WebSockets, Server-Sent Events o polling para actualización en tiempo real en dashboards — trade-offs de complejidad, escala y costes.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'real-time-data-dashboards-websockets-sse'
+  - locale: 'it-IT'
+    slug: 'dati-real-time-dashboard-websockets-sse'
+  - locale: 'en'
+    slug: 'real-time-dashboards-websockets-sse-polling'
+---
+
+Imagina un dashboard de operaciones logísticas que muestra el estado de las entregas en tiempo real. Un gestor está monitoreando la operación y ve que todas las rutas están a tiempo. En realidad, cuatro rutas se han retrasado hace 12 minutos — pero el dashboard solo se actualiza cada 15 minutos. No interviene porque no ve el problema. Las entregas llegan tarde. El cliente se queja.
+
+Los datos estáticos en dashboards de operaciones no son solo inconvenientes — causan decisiones incorrectas basadas en información desactualizada. La cuestión no es si implementar real-time, sino qué mecanismo usar para cada escenario.
+
+## Polling: Simple pero Costoso a Escala
+
+Polling es el mecanismo más simple: el cliente hace una solicitud al servidor cada N segundos, independientemente de si hay datos nuevos.
+
+```typescript
+// Polling simple con setInterval
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const data = await fetchDashboardData();
+    setDashboardData(data);
+  }, 30_000); // cada 30 segundos
+
+  return () => clearInterval(interval);
+}, []);
+```
+
+Los problemas del polling se hacen evidentes a escala: con 500 usuarios activos en el dashboard haciendo polling cada 10 segundos, son 3.000 solicitudes por minuto al servidor, la mayoría de las cuales devuelven exactamente los mismos datos que la anterior. El coste de infraestructura crece lineal con el número de usuarios activos.
+
+Polling tiene sentido para: datos que cambian con poca frecuencia (cada 5-15 minutos), dashboards con pocos usuarios simultáneos, o como fallback cuando las tecnologías de push no están disponibles.
+
+## Server-Sent Events: Push Unidireccional Simple
+
+SSE es una API del navegador que mantiene una conexión HTTP persistente sobre la que el servidor puede enviar datos al cliente cuando hay novedades. Es unidireccional (servidor → cliente) y usa el protocolo HTTP estándar.
+
+```typescript
+// Backend Next.js con SSE
+export async function GET(request: Request) {
+  const encoder = new TextEncoder();
+
+  const stream = new ReadableStream({
+    start(controller) {
+      const interval = setInterval(async () => {
+        const metrics = await getDashboardMetrics();
+        const data = `data: ${JSON.stringify(metrics)}\n\n`;
+        controller.enqueue(encoder.encode(data));
+      }, 5_000);
+
+      request.signal.addEventListener('abort', () => {
+        clearInterval(interval);
+        controller.close();
+      });
+    },
+  });
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+    },
+  });
+}
+```
+
+SSE tiene ventajas claras sobre WebSockets para dashboards de solo lectura: funciona sobre HTTP/2 (múltiples streams en una sola conexión TCP), reconexión automática nativa en el navegador, compatible con proxies y CDNs sin configuración especial, y mucho más simple de implementar que WebSockets.
+
+## WebSockets: Bidireccional para Colaboración en Tiempo Real
+
+WebSockets son la elección correcta cuando el cliente también necesita enviar datos al servidor en tiempo real: edición colaborativa, chat, feeds de trading donde el usuario puede ejecutar acciones desde el dashboard, o control de dispositivos en tiempo real.
+
+Para dashboards de solo lectura — visualización de métricas, alertas, actualizaciones de estado — SSE es suficiente y más simple.
+
+## La Regla de Decisión
+
+¿El cliente solo lee datos en tiempo real? → **SSE**. ¿El cliente también envía datos en tiempo real (chat, colaboración, gaming)? → **WebSockets**. ¿Los datos cambian cada 5+ minutos y hay pocos usuarios? → **Polling**. ¿Necesitas escalar a miles de usuarios con baja latencia? → Evalúa servicios gestionados como Pusher, Ably o Supabase Realtime.

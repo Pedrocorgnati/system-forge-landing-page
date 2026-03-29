@@ -1,6 +1,6 @@
 /**
  * src/lib/i18n.ts
- * Funções de locale para a feature i18n-triple-market.
+ * Funções de locale para a feature i18n-quad-market.
  *
  * FAIL-FAST: getSiteConfig() lança erro imediato se o locale for inválido.
  * Nenhum fallback silencioso em produção — erros de config aparecem em build time.
@@ -14,11 +14,13 @@ import type { SiteConfig, SupportedLocale } from '@config/types'
 import { brConfig } from '@config/sites/br'
 import { itConfig } from '@config/sites/it'
 import { enConfig } from '@config/sites/en'
+import { esConfig } from '@config/sites/es'
 
 const SITE_CONFIGS: Record<SupportedLocale, SiteConfig> = {
   'pt-BR': brConfig,
   'it-IT': itConfig,
   'en': enConfig,
+  'es-ES': esConfig,
 }
 
 const SUPPORTED_LOCALES = Object.keys(SITE_CONFIGS) as SupportedLocale[]

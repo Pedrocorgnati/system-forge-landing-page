@@ -1,0 +1,107 @@
+---
+title: "Métricas SaaS: MRR, CAC y LTV en la práctica"
+slug: "metricas-saas-mrr-cac-ltv"
+date: "2024-10-02"
+description: "Cómo calcular e interpretar MRR, ARR, CAC, LTV y Payback Period en SaaS — con fórmulas, ejemplos numéricos y cómo usarlas para tomar decisiones de crecimiento."
+tags: ["metricas saas", "mrr", "cac", "ltv", "kpis saas"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Cómo calcular e interpretar MRR, ARR, CAC, LTV y Payback Period en SaaS — con fórmulas, ejemplos numéricos y cómo usarlas para tomar decisiones de crecimiento.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'metricas-saas-mrr-cac-ltv'
+  - locale: 'it-IT'
+    slug: 'metriche-saas-mrr-cac-ltv'
+  - locale: 'en'
+    slug: 'saas-metrics-mrr-cac-ltv'
+---
+
+Dirigir un SaaS sin seguir las métricas correctas es como pilotar un avión sin panel de instrumentos: puedes volar durante un tiempo, pero no notarás que estás bajando hasta que sea demasiado tarde. Las métricas de SaaS no son burocracia de inversor — son el lenguaje que el negocio usa para entenderse a sí mismo.
+
+El problema es que muchos founders calculan estas métricas de forma incorrecta, o las interpretan de forma aislada, perdiendo la señal que transmiten juntas. Esta guía cubre las cinco métricas más importantes del SaaS, con fórmulas precisas, ejemplos numéricos reales y — lo más importante — cómo usarlas para tomar decisiones de crecimiento.
+
+## MRR y ARR: La Base de Todo
+
+**MRR (Monthly Recurring Revenue)** es el ingreso recurrente mensual normalizado — es decir, el valor que entra cada mes de forma predecible, excluyendo pagos únicos y eventuales.
+
+```
+MRR = Suma de los ingresos mensuales recurrentes de todos los clientes activos
+```
+
+Si tienes 50 clientes pagando 99 €/mes y 10 pagando 299 €/mes, tu MRR es (50 × 99) + (10 × 299) = 4.950 + 2.990 = **7.940 €/mes**.
+
+**ARR (Annual Recurring Revenue)** es simplemente MRR × 12. Útil para comparaciones con benchmarks de la industria y para conversaciones con inversores.
+
+El MRR tiene cuatro componentes que deben monitorearse separadamente:
+- **New MRR**: ingresos de clientes nuevos este mes
+- **Expansion MRR**: upsells y upgrades de clientes existentes
+- **Churned MRR**: ingresos perdidos por cancelaciones
+- **Reactivation MRR**: clientes que volvieron tras cancelar
+
+Net New MRR = New MRR + Expansion MRR − Churned MRR
+
+## CAC: Cuánto Cuesta Adquirir un Cliente
+
+**CAC (Customer Acquisition Cost)** es el coste total de adquirir un cliente nuevo.
+
+```
+CAC = (Gasto en marketing + Gasto en ventas) / Número de clientes nuevos en el período
+```
+
+El error más común es incluir solo el gasto en anuncios y olvidar: salarios del equipo de ventas y marketing, herramientas (CRM, plataformas de anuncios, automatización de email), eventos y producción de contenido.
+
+Un CAC de 500 € calculado solo con el gasto en Google Ads puede ser en realidad 1.200 € cuando incluyes el tiempo del equipo comercial. Esta diferencia cambia completamente si el negocio es viable.
+
+## LTV: Cuánto Vale un Cliente a lo Largo del Tiempo
+
+**LTV (Lifetime Value)** es el ingreso total que genera un cliente durante toda su relación con la empresa.
+
+```
+LTV = ARPU (Ingreso medio mensual por usuario) / Churn Rate mensual
+```
+
+Si el ARPU es 120 €/mes y el churn mensual es 3%, el LTV = 120 / 0,03 = **4.000 €**.
+
+La fórmula del margen es más precisa:
+```
+LTV = (ARPU × Margen bruto %) / Churn Rate mensual
+```
+
+Con un margen bruto del 75%, el LTV real sería 120 × 0,75 / 0,03 = **3.000 €**.
+
+## La Relación LTV:CAC — El Número que Importa
+
+La métrica individual más importante en SaaS no es el MRR ni el churn — es la relación LTV:CAC.
+
+```
+LTV:CAC = LTV / CAC
+```
+
+**Interpretación:**
+- LTV:CAC < 1: estás perdiendo dinero en cada cliente adquirido. El modelo no es viable.
+- LTV:CAC entre 1 y 3: el modelo puede funcionar, pero el margen es estrecho.
+- LTV:CAC entre 3 y 5: el rango objetivo para SaaS saludable.
+- LTV:CAC > 5: o tienes una ventaja competitiva extraordinaria, o estás invirtiendo poco en crecimiento.
+
+## Payback Period: Cuándo Recuperas el CAC
+
+**Payback Period** es cuántos meses necesitas para recuperar el coste de adquirir un cliente.
+
+```
+Payback Period = CAC / (ARPU × Margen bruto %)
+```
+
+Con CAC = 1.200 €, ARPU = 120 €/mes y margen = 75%:
+Payback = 1.200 / (120 × 0,75) = 1.200 / 90 = **13,3 meses**
+
+El benchmark para SaaS B2B es un Payback Period inferior a 18 meses. Si supera 24 meses, necesitas efectivo para financiar el crecimiento, lo que te hace dependiente de rondas de inversión o líneas de crédito.
+
+## Cómo Usar las Métricas Juntas
+
+Las métricas aisladas pueden engañar. Un MRR creciendo al 20% mensual parece saludable — hasta que el churn también crece al 8% mensual y el Expansion MRR es cero. El crecimiento está adquiriendo clientes que se van al mes siguiente.
+
+El análisis correcto es: MRR neto creciendo, churn bajo y estable (< 2% mensual para B2B), LTV:CAC > 3 y Payback Period < 18 meses. Cuando todas estas métricas están en el rango correcto simultáneamente, tienes un negocio SaaS sostenible. Cuando alguna está fuera de rango, tienes una señal de dónde actuar.

@@ -38,9 +38,9 @@ describe('locale-slugs', () => {
       }
     })
 
-    it('has 3 locales with 8 routes each', () => {
+    it('has 4 locales with 8 routes each', () => {
       const localeKeys = Object.keys(ROUTE_SLUGS)
-      expect(localeKeys).toHaveLength(3)
+      expect(localeKeys).toHaveLength(4)
       for (const locale of localeKeys) {
         const routes = Object.keys(ROUTE_SLUGS[locale as SupportedLocale])
         expect(routes).toHaveLength(8)

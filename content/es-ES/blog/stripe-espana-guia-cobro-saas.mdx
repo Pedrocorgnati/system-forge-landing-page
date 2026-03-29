@@ -1,0 +1,82 @@
+---
+title: "Stripe en España: guía de cobro para SaaS"
+slug: "stripe-espana-guia-cobro-saas"
+date: "2024-09-18"
+description: "Cómo implementar Stripe en SaaS español: Stripe Billing para suscripciones recurrentes, facturación con SII, SEPA Direct Debit y comparativa con alternativas locales."
+tags: ["stripe", "cobro saas", "suscripcion recurrente", "billing", "pago espana"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar Stripe en SaaS español: Stripe Billing para suscripciones recurrentes, facturación con SII, SEPA Direct Debit y comparativa con alternativas locales."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'stripe-no-brasil-guia-cobranca-saas'
+  - locale: 'it-IT'
+    slug: 'stripe-italia-guida-saas-abbonamenti'
+  - locale: 'en'
+    slug: 'stripe-saas-billing-subscriptions-guide'
+---
+
+El cobro es donde el SaaS español más se complica. La combinación de tarjeta de crédito, SEPA Direct Debit, facturación electrónica con SII (para empresas obligadas), Bizum y las particularidades del mercado local crea una complejidad que retrasa lanzamientos, aumenta el churn involuntario y consume tiempo de ingeniería que debería estar en el producto. Stripe entró en España con la promesa de simplificar este escenario — y en gran medida lo cumple, aunque la implementación correcta exige conocer qué está disponible, qué tiene limitaciones y dónde otras plataformas locales siguen teniendo ventaja.
+
+Esta guía cubre lo que necesitas saber para implementar el cobro en un SaaS español usando Stripe como plataforma principal.
+
+## Stripe Billing: Planes, Precios y Upgrades
+
+Stripe Billing es el módulo de Stripe para suscripciones recurrentes. Gestiona: creación de productos y planes de precios, cobro automático en el ciclo configurado, renovaciones automáticas, upgrades y downgrades, períodos de prueba, y cupones y descuentos.
+
+```typescript
+// Crear una suscripción con prueba gratuita
+const subscription = await stripe.subscriptions.create({
+  customer: customerId,
+  items: [{ price: 'price_monthly_pro' }],
+  trial_period_days: 14,
+  payment_settings: {
+    payment_method_types: ['card', 'sepa_debit'],
+    save_default_payment_method: 'on_subscription',
+  },
+  expand: ['latest_invoice.payment_intent'],
+});
+```
+
+## SEPA Direct Debit: El Método Preferido en España para B2B
+
+Para SaaS B2B con clientes empresariales españoles, SEPA Direct Debit (domiciliación bancaria) es frecuentemente preferido a la tarjeta de crédito. Las empresas prefieren domiciliar los gastos recurrentes en su cuenta bancaria empresarial.
+
+Stripe soporta SEPA Direct Debit con el flujo de mandato SEPA: el cliente proporciona su IBAN, acepta el mandato y Stripe gestiona el proceso de domiciliación con el banco.
+
+```typescript
+// Setup de SEPA Direct Debit
+const setupIntent = await stripe.setupIntents.create({
+  customer: customerId,
+  payment_method_types: ['sepa_debit'],
+  usage: 'off_session', // Para cobros recurrentes sin presencia del cliente
+});
+```
+
+El SEPA Direct Debit tiene un plazo de devolución de hasta 8 semanas para pagos autorizados y hasta 13 meses para pagos no autorizados. Para SaaS con ciclos de facturación cortos, esto es un riesgo a gestionar.
+
+## Facturación y SII: El Problema del IVA Europeo
+
+Stripe puede generar facturas automáticamente, pero las facturas de Stripe no cumplen por defecto los requisitos de facturación electrónica española (Facturae) ni el SII para empresas obligadas a suministro inmediato de información.
+
+Para SaaS con clientes españoles (autónomos y empresas), las facturas deben incluir: NIF/CIF del cliente y del emisor, desglose de base imponible e IVA por tipo, y estar numeradas secuencialmente sin saltos.
+
+La solución más común es usar un módulo de facturación propio que genere las facturas con el formato correcto y use Stripe solo como procesador de pago. Alternativas como Stripe Tax (automatiza el cálculo y recaudación del IVA) simplifican el problema para SaaS con clientes en múltiples países europeos.
+
+## Bizum via Stripe
+
+Stripe soporta Bizum en España a través de Stripe Checkout y Payment Links. No está disponible directamente en el flujo de Elements (formulario embebido). Para añadir Bizum a un SaaS, la opción más sencilla es redirigir a Stripe Checkout para el pago inicial y usar SEPA/tarjeta para los renovaciones.
+
+## Comparativa: Stripe vs Redsys vs Braintree
+
+**Stripe:** la mejor experiencia de desarrollo, documentación excelente, soporte para la mayoría de métodos de pago europeos. Tarifas: 1,5% + 0,25 € para tarjetas europeas, 0,8% para SEPA (mínimo 0,25 €, máximo 6 €).
+
+**Redsys:** el procesador bancario español estándar. Obligatorio para Bizum nativo. Más complejo de integrar, pero con tarifas potencialmente mejores para alto volumen negociadas directamente con el banco.
+
+**Braintree (PayPal):** alternativa para quien ya usa PayPal como método de pago principal. Soporte para SEPA y tarjetas europeas comparable a Stripe.
+
+Para la mayoría de los SaaS en fase de lanzamiento, Stripe es la elección correcta por velocidad de integración y calidad de herramientas de desarrollo. Para volúmenes altos con equipo técnico maduro, la negociación directa con un adquirente bancario puede reducir costes.

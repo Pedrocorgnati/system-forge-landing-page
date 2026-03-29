@@ -1,0 +1,187 @@
+---
+title: "Cómo integrar ChatGPT en un sistema existente via API"
+slug: "integrar-chatgpt-en-sistema-existente"
+date: "2024-10-01"
+description: "Guía técnica para integrar la API de OpenAI en aplicaciones existentes — autenticación, streaming, manejo de errores, rate limiting y costes en producción."
+tags: ["chatgpt api", "openai", "integracion ia", "next.js", "api openai"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Guía técnica para integrar la API de OpenAI en aplicaciones existentes — autenticación, streaming, manejo de errores, rate limiting y costes en producción."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'integrar-chatgpt-sistema-existente-api'
+  - locale: 'it-IT'
+    slug: 'come-integrare-chatgpt-sistema-esistente'
+  - locale: 'en'
+    slug: 'how-to-integrate-chatgpt-into-an-existing-system'
+---
+
+La integración de la API de OpenAI en una aplicación existente parece simple en los tutoriales de 5 minutos. En producción, la realidad incluye manejo de errores, gestión de rate limits, streaming de respuestas largas, control de costes y consideraciones de seguridad que los tutoriales raramente cubren.
+
+Esta guía cubre la integración robusta de OpenAI en aplicaciones Next.js, con los patrones que funcionan en producción.
+
+## Configuración Inicial: Seguridad Primero
+
+La API key de OpenAI nunca debe estar en el frontend. Es una clave que tiene acceso a tu cuenta y genera costes. Siempre en variables de entorno del servidor:
+
+```typescript
+// .env.local (nunca en el repositorio)
+OPENAI_API_KEY=sk-...
+
+// lib/openai.ts — Singleton del cliente
+import OpenAI from 'openai'
+
+if (!process.env.OPENAI_API_KEY) {
+  throw new Error('OPENAI_API_KEY no está configurada')
+}
+
+export const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+```
+
+## Streaming: La Diferencia entre UX Buena y Mala
+
+Para respuestas largas (más de 2-3 oraciones), el streaming es indispensable. Sin streaming, el usuario espera en silencio hasta que llega toda la respuesta — puede ser 10-30 segundos. Con streaming, el texto aparece progresivamente como si estuviera siendo escrito en tiempo real.
+
+En Next.js App Router con Server Actions o Route Handlers:
+
+```typescript
+// app/api/chat/route.ts
+import { OpenAIStream, StreamingTextResponse } from 'ai'
+import { openai } from '@/lib/openai'
+
+export async function POST(request: Request) {
+  const { messages } = await request.json()
+
+  const response = await openai.chat.completions.create({
+    model: 'gpt-4o',
+    stream: true,
+    messages,
+  })
+
+  const stream = OpenAIStream(response)
+  return new StreamingTextResponse(stream)
+}
+```
+
+En el cliente, con la librería `ai` de Vercel:
+
+```tsx
+'use client'
+import { useChat } from 'ai/react'
+
+export function ChatInterfaz() {
+  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat()
+
+  return (
+    <div>
+      <div className="messages">
+        {messages.map(m => (
+          <div key={m.id} className={`message ${m.role}`}>
+            {m.content}
+          </div>
+        ))}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <input value={input} onChange={handleInputChange} disabled={isLoading} />
+        <button type="submit" disabled={isLoading}>Enviar</button>
+      </form>
+    </div>
+  )
+}
+```
+
+## Manejo de Errores en Producción
+
+La API de OpenAI puede fallar de varias formas: rate limit excedido, timeout, error de autenticación, error interno de OpenAI. Cada uno requiere manejo distinto:
+
+```typescript
+import { OpenAI } from 'openai'
+
+export async function llamarOpenAI(messages: any[]) {
+  try {
+    return await openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages,
+    })
+  } catch (error) {
+    if (error instanceof OpenAI.RateLimitError) {
+      // Rate limit: esperar y reintentar
+      await sleep(2000)
+      return llamarOpenAI(messages) // Reintento
+    }
+
+    if (error instanceof OpenAI.APIConnectionError) {
+      // Error de red: notificar al usuario
+      throw new Error('No se pudo conectar al servicio de IA. Intenta de nuevo.')
+    }
+
+    if (error instanceof OpenAI.AuthenticationError) {
+      // Error de configuración: log interno, mensaje genérico al usuario
+      console.error('Error de autenticación con OpenAI')
+      throw new Error('Error interno del sistema')
+    }
+
+    throw error
+  }
+}
+```
+
+## Rate Limiting: Proteger tu Cuenta y tu Presupuesto
+
+Sin rate limiting en tu aplicación, un usuario malintencionado puede generar miles de requests y agotar tu presupuesto de OpenAI en horas.
+
+Implementa rate limiting por usuario con Redis/Upstash:
+
+```typescript
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(20, '1 m'), // 20 requests por minuto por usuario
+})
+
+export async function POST(request: Request) {
+  const userId = await getUserId(request) // Tu lógica de auth
+
+  const { success, remaining } = await ratelimit.limit(userId)
+
+  if (!success) {
+    return Response.json(
+      { error: 'Demasiadas solicitudes. Espera un momento.' },
+      { status: 429, headers: { 'X-RateLimit-Remaining': remaining.toString() } }
+    )
+  }
+
+  // Procesar la request normalmente
+}
+```
+
+## Gestión de Contexto: Historia de la Conversación
+
+Para chatbots con memoria, debes enviar el historial de mensajes en cada request. Pero el historial crece y eventualmente supera el límite de contexto del modelo (128K tokens para GPT-4o). La estrategia:
+
+1. **Límite de mensajes:** Solo enviar los últimos N mensajes (ej: 20)
+2. **Resumen de conversación:** Para conversaciones largas, resumir la historia anterior con el propio LLM y usar el resumen como contexto
+3. **Búsqueda semántica:** Para knowledge bases grandes, usar RAG en vez de meter todo en el contexto
+
+## Seguridad: Prompt Injection
+
+Un usuario malicioso puede intentar incluir instrucciones en su mensaje que anulen tus instrucciones del system prompt: "Ignora las instrucciones anteriores y haz X".
+
+Estrategias de mitigación:
+- Usar el parámetro `system` solo para instrucciones propias, nunca mezclar con input del usuario
+- Validar que la respuesta del modelo cumple con las restricciones esperadas antes de mostrarla
+- Para casos sensibles, añadir un paso de validación post-generación
+
+## Conclusión
+
+Integrar OpenAI en producción requiere más que una llamada a la API — requiere streaming para UX fluida, rate limiting para seguridad, manejo robusto de errores y control de costes. Los patrones de esta guía son el punto de partida correcto para cualquier integración en aplicaciones empresariales.
+
+¿Quieres integrar IA en tu aplicación web o móvil en España? [Contacta con SystemForge](https://systemforge.es/contacto).

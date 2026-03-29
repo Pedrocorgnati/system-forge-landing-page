@@ -1,0 +1,184 @@
+---
+title: "Exportar informes a PDF y Excel en Next.js"
+slug: "exportar-informes-pdf-excel-nextjs"
+date: "2024-08-16"
+description: "Cómo implementar exportación a PDF y Excel en aplicaciones Next.js — react-pdf, jsPDF, SheetJS y generación server-side con puppeteer para informes complejos."
+tags: ["pdf nextjs", "excel export", "react-pdf", "sheetjs", "informes"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "dashboard-b2b"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar exportación a PDF y Excel en aplicaciones Next.js — react-pdf, jsPDF, SheetJS y generación server-side con puppeteer para informes complejos."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'export-relatorios-pdf-excel-nextjs'
+  - locale: 'it-IT'
+    slug: 'export-report-pdf-excel-nextjs'
+  - locale: 'en'
+    slug: 'export-reports-pdf-excel-nextjs'
+---
+
+La exportación de informes es una funcionalidad que todos los clientes de dashboards B2B piden tarde o temprano. "¿Puedo descargar esto en Excel?" o "¿Puedes generar un PDF que pueda enviar por email?" son peticiones universales. Implementarlas bien — con datos que coinciden exactamente con lo que se muestra en pantalla, con el formato correcto, sin bloquear la UI — requiere elegir las herramientas correctas para cada caso de uso.
+
+## Exportar a Excel: SheetJS
+
+SheetJS (también conocido como `xlsx`) es la librería estándar para generar archivos Excel en JavaScript. Funciona tanto en el cliente (navegador) como en el servidor.
+
+**Exportación simple en el cliente:**
+
+```typescript
+import * as XLSX from 'xlsx'
+
+function exportarAExcel(datos: any[], nombreArchivo: string) {
+  // Crear workbook
+  const workbook = XLSX.utils.book_new()
+
+  // Convertir array de objetos a worksheet
+  const worksheet = XLSX.utils.json_to_sheet(datos)
+
+  // Configurar anchura de columnas
+  worksheet['!cols'] = [
+    { wch: 20 }, // Columna A
+    { wch: 15 }, // Columna B
+    { wch: 25 }, // Columna C
+  ]
+
+  XLSX.utils.book_append_sheet(workbook, worksheet, 'Datos')
+
+  // Descargar en el navegador
+  XLSX.writeFile(workbook, `${nombreArchivo}.xlsx`)
+}
+
+// Uso
+<button onClick={() => exportarAExcel(pedidos, 'pedidos-enero-2025')}>
+  Exportar a Excel
+</button>
+```
+
+Para informes más complejos con múltiples hojas, formatos de celda y fórmulas:
+
+```typescript
+// Múltiples hojas en el mismo archivo
+XLSX.utils.book_append_sheet(workbook, worksheetVentas, 'Ventas')
+XLSX.utils.book_append_sheet(workbook, worksheetClientes, 'Clientes')
+XLSX.utils.book_append_sheet(workbook, worksheetResumen, 'Resumen')
+```
+
+## Exportar a PDF: Opciones y Cuándo Usar Cada Una
+
+Hay tres enfoques para generar PDFs en Next.js, con tradeoffs distintos:
+
+### Opción 1: react-pdf (Declarativo, Client-Side)
+
+`@react-pdf/renderer` permite diseñar PDFs con componentes React. Ideal para informes con diseño personalizado:
+
+```typescript
+import { Document, Page, Text, View, StyleSheet } from '@react-pdf/renderer'
+
+const estilos = StyleSheet.create({
+  pagina: { padding: 30, fontSize: 12 },
+  titulo: { fontSize: 20, marginBottom: 20, fontWeight: 'bold' },
+  tabla: { display: 'flex', flexDirection: 'column' },
+  fila: { display: 'flex', flexDirection: 'row', borderBottomWidth: 1 },
+  celda: { flex: 1, padding: 5 },
+})
+
+export function InformePDF({ datos }: { datos: Pedido[] }) {
+  return (
+    <Document>
+      <Page size="A4" style={estilos.pagina}>
+        <Text style={estilos.titulo}>Informe de Pedidos</Text>
+        <View style={estilos.tabla}>
+          {datos.map(pedido => (
+            <View key={pedido.id} style={estilos.fila}>
+              <Text style={estilos.celda}>{pedido.referencia}</Text>
+              <Text style={estilos.celda}>{pedido.cliente}</Text>
+              <Text style={estilos.celda}>{pedido.importe.toLocaleString('es-ES')} €</Text>
+            </View>
+          ))}
+        </View>
+      </Page>
+    </Document>
+  )
+}
+```
+
+**Limitación:** No puede renderizar HTML/CSS existente — tienes que rediseñar el informe con la API de react-pdf. Bueno para informes diseñados específicamente para PDF.
+
+### Opción 2: html2canvas + jsPDF (Captura del DOM)
+
+Captura el componente React existente como imagen y lo inserta en un PDF:
+
+```typescript
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
+
+async function exportarComponenteAPDF(elementId: string, nombreArchivo: string) {
+  const elemento = document.getElementById(elementId)!
+  const canvas = await html2canvas(elemento, { scale: 2 })
+  const imgData = canvas.toDataURL('image/png')
+
+  const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' })
+  const width = pdf.internal.pageSize.getWidth()
+  const height = (canvas.height * width) / canvas.width
+
+  pdf.addImage(imgData, 'PNG', 0, 0, width, height)
+  pdf.save(`${nombreArchivo}.pdf`)
+}
+```
+
+**Ventaja:** El PDF tiene exactamente el mismo aspecto que lo que ve el usuario en pantalla. **Limitación:** El texto no es seleccionable en el PDF (es una imagen), y la calidad puede degradarse en componentes con efectos CSS complejos.
+
+### Opción 3: Puppeteer Server-Side (Más Robusto)
+
+Para informes complejos o de alta calidad donde el HTML/CSS debe renderizarse perfectamente, Puppeteer (Chrome headless en el servidor) es la opción más robusta:
+
+```typescript
+// app/api/pdf/route.ts
+import puppeteer from 'puppeteer'
+
+export async function POST(request: Request) {
+  const { pedidos } = await request.json()
+
+  const browser = await puppeteer.launch({ headless: 'new' })
+  const page = await browser.newPage()
+
+  // Generar el HTML del informe
+  await page.setContent(generarHtmlInforme(pedidos))
+  await page.waitForNetworkIdle()
+
+  const pdf = await page.pdf({
+    format: 'A4',
+    printBackground: true,
+    margin: { top: '20mm', bottom: '20mm', left: '15mm', right: '15mm' }
+  })
+
+  await browser.close()
+
+  return new Response(pdf, {
+    headers: {
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="informe.pdf"'
+    }
+  })
+}
+```
+
+**Ventaja:** Calidad perfecta, texto seleccionable, soporte completo de CSS. **Desventaja:** Puppeteer añade ~300MB al bundle del servidor y la generación tarda 2-5 segundos.
+
+## Formatos para España: Consideraciones Locales
+
+Para informes destinados a empresas españolas, considera:
+
+- **Números:** Usar `toLocaleString('es-ES')` para separadores de miles y decimales correctos (1.234,56 en vez de 1,234.56)
+- **Fechas:** Formato DD/MM/YYYY habitual en España
+- **Moneda:** Símbolo € al final en España (100 €, no €100)
+- **IVA:** Mostrar importe base + IVA por separado en facturas y presupuestos
+
+## Conclusión
+
+La elección correcta depende del caso: SheetJS para Excel, react-pdf para PDFs con diseño personalizado, html2canvas para captura de lo que el usuario ve, y Puppeteer para informes HTML complejos de alta calidad.
+
+¿Necesitas implementar exportación de informes en tu aplicación? [Contacta con SystemForge](https://systemforge.es/contacto).

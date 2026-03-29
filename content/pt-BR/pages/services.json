@@ -7,7 +7,30 @@
     "category": "saas",
     "title": "Desenvolvimento de SaaS",
     "description": "Construímos plataformas SaaS escaláveis do zero até o deploy, com arquitetura moderna, autenticação robusta, billing integrado e painel de admin completo. Do MVP à escala enterprise.",
-    "features": ["Autenticação + billing integrado", "Painel de admin completo", "Deploy com CI/CD"]
+    "longDescription": "Transformamos sua ideia em uma plataforma SaaS completa pronta para escalar. Da concepção ao deploy, entregamos sistemas multi-tenant com autenticação robusta, billing com Stripe, onboarding guiado e painéis personalizados por role. Com a metodologia SystemForge você lança em semanas — não meses — com qualidade enterprise desde o primeiro commit. Você foca no produto; nós resolvemos arquitetura, performance e segurança.",
+    "features": ["Autenticação + billing integrado", "Painel de admin completo", "Deploy com CI/CD"],
+    "benefits": [
+      { "icon": "🚀", "title": "MVP em 4 a 8 semanas", "description": "Funcionalidades core em produção rapidamente, sem meses de planejamento." },
+      { "icon": "💳", "title": "Billing automatizado", "description": "Stripe configurado com planos, trials, upgrades e cobranças recorrentes." },
+      { "icon": "🔐", "title": "Auth enterprise-grade", "description": "Multi-tenant, RBAC, SSO e 2FA incluídos no projeto base." },
+      { "icon": "📈", "title": "Arquitetura para crescer", "description": "Suporta de 10 a 100.000 usuários sem refatoração de infraestrutura." }
+    ],
+    "process": [
+      { "step": 1, "title": "Discovery e Arquitetura", "description": "Mapeamos requisitos, definimos modelo de dados e escolhemos stack ideal para o seu caso de uso." },
+      { "step": 2, "title": "MVP em produção", "description": "Desenvolvemos as funcionalidades core e lançamos versão funcional para validação com usuários reais." },
+      { "step": 3, "title": "Iteração e expansão", "description": "Incorporamos feedback, adicionamos features e otimizamos performance conforme a base de usuários cresce." },
+      { "step": 4, "title": "Handoff documentado", "description": "Entregamos código documentado, CI/CD configurado e equipe treinada para evoluir o produto." }
+    ],
+    "useCases": [
+      "Startups validando produto com MVP e buscando primeiros clientes pagantes",
+      "Empresas B2B que querem transformar processo interno em produto comercializável",
+      "Negócios com produto analógico que precisam de versão digital escalável"
+    ],
+    "faq": [
+      { "q": "Qual a diferença entre SaaS e um sistema web comum?", "a": "Um SaaS é projetado para múltiplos clientes (multi-tenant), com billing automatizado e onboarding self-service. Um sistema web comum geralmente atende um único cliente com acesso manual." },
+      { "q": "Vocês entregam o código-fonte?", "a": "Sim, 100%. Todo o código é seu. Entregamos repositório completo, documentação técnica e CI/CD configurado para que você tenha total controle." },
+      { "q": "Em quanto tempo tenho um MVP funcionando?", "a": "Para escopo definido, o MVP core fica pronto em 4 a 8 semanas. Projetos com mais integrações e módulos ficam prontos em 8 a 16 semanas." }
+    ]
   },
   {
     "id": "aplicativo-mobile",
@@ -17,7 +40,30 @@
     "category": "aplicativo-mobile",
     "title": "Aplicativos Mobile",
     "description": "Desenvolvemos aplicativos mobile de alta qualidade para iOS e Android, usando React Native ou Flutter. Da prototipagem ao deploy nas lojas, com foco em performance e UX nativa.",
-    "features": ["App iOS + Android", "Push notifications", "Publicação nas lojas"]
+    "longDescription": "Desenvolvemos aplicativos mobile que os usuários realmente usam — com performance nativa em iOS e Android a partir de uma única base de código. Do protótipo à publicação nas lojas, cuidamos de push notifications, onboarding, autenticação biométrica e integrações com APIs. Cada app é projetado para retenção: UX limpa, carregamento rápido e fluxos que convertem. Suporte pós-publicação e atualizações contínuas incluídos.",
+    "features": ["App iOS + Android", "Push notifications", "Publicação nas lojas"],
+    "benefits": [
+      { "icon": "⚡", "title": "Performance nativa", "description": "React Native com otimizações específicas por plataforma. Sem lentidão de apps híbridos." },
+      { "icon": "🔔", "title": "Push notifications", "description": "Notificações configuradas com FCM e APNs, segmentadas por comportamento do usuário." },
+      { "icon": "👆", "title": "UX que retém", "description": "Fluxos de onboarding, gestos nativos e micro-interações que aumentam engajamento." },
+      { "icon": "🛍️", "title": "Publicação nas lojas", "description": "Cuidamos de todo o processo de submissão na App Store e Google Play." }
+    ],
+    "process": [
+      { "step": 1, "title": "Wireframes e protótipo", "description": "Definimos os fluxos principais e validamos a UX antes de escrever uma linha de código." },
+      { "step": 2, "title": "Desenvolvimento e testes", "description": "Codificamos, testamos em dispositivos reais e corrigimos antes da submissão." },
+      { "step": 3, "title": "Publicação nas lojas", "description": "Submetemos às lojas, gerenciamos o processo de revisão e acompanhamos até aprovação." },
+      { "step": 4, "title": "Monitoramento e updates", "description": "Acompanhamos crashes, coletamos feedback e lançamos atualizações de forma contínua." }
+    ],
+    "useCases": [
+      "Empresas com operação de campo que precisam de app para equipes externas",
+      "Startups B2C que precisam de presença nativa no celular dos usuários",
+      "Negócios com plataforma web que querem expandir para mobile"
+    ],
+    "faq": [
+      { "q": "React Native ou Flutter — qual vocês usam?", "a": "Usamos React Native como padrão pela maturidade do ecossistema e facilidade de integração com stack web. Flutter em projetos que exijam UI altamente customizada ou performance gráfica intensa." },
+      { "q": "O app funciona offline?", "a": "Sim, quando necessário. Implementamos cache local, sincronização em background e filas de ação offline com resolução automática de conflitos." },
+      { "q": "Quanto tempo leva a aprovação nas lojas?", "a": "Google Play leva em média 1 a 3 dias. App Store geralmente 2 a 7 dias na primeira submissão. Gerenciamos o processo e respondemos eventuais rejeições." }
+    ]
   },
   {
     "id": "landing-page",
@@ -27,7 +73,30 @@
     "category": "landing-page",
     "title": "Landing Pages e Sites",
     "description": "Criamos landing pages e sites institucionais de alta performance, otimizados para SEO, com design profissional e focados em conversão de visitantes em clientes.",
-    "features": ["Design responsivo mobile-first", "SEO técnico on-page", "Analytics + formulários"]
+    "longDescription": "Criamos landing pages que convertem visitantes em clientes — e clientes em fãs. Cada página é desenhada com copy persuasivo, hierarquia visual clara, CTAs testados e carregamento ultrarrápido (LCP < 2.5 s). Implementamos SEO técnico completo: Schema.org, sitemap, canonical e estrutura de headings otimizada para ranquear. Para blogs e sites institucionais, entregamos sistema de conteúdo integrado e painel de edição simples — sem dependência de desenvolvedor para cada atualização.",
+    "features": ["Design responsivo mobile-first", "SEO técnico on-page", "Analytics + formulários"],
+    "benefits": [
+      { "icon": "🎯", "title": "Focada em conversão", "description": "Copy e layout otimizados para transformar visitantes em leads e vendas." },
+      { "icon": "⚡", "title": "LCP < 2.5 s", "description": "Performance Lighthouse 90+ garantida. Sites lentos perdem clientes." },
+      { "icon": "🔍", "title": "SEO técnico completo", "description": "Schema.org, sitemap XML, canonical tags e meta estruturada para ranquear." },
+      { "icon": "✏️", "title": "Painel de edição fácil", "description": "Você atualiza textos e imagens sem precisar chamar o desenvolvedor." }
+    ],
+    "process": [
+      { "step": 1, "title": "Briefing e estratégia", "description": "Entendemos o público-alvo, a proposta de valor e os objetivos de conversão da página." },
+      { "step": 2, "title": "Design e copy", "description": "Criamos o layout visual e o texto persuasivo alinhados à identidade da marca." },
+      { "step": 3, "title": "Desenvolvimento e SEO", "description": "Codificamos com foco em performance, acessibilidade e otimização para buscadores." },
+      { "step": 4, "title": "Analytics e otimização", "description": "Configuramos rastreamento e entregamos relatório de primeiras semanas com sugestões de melhoria." }
+    ],
+    "useCases": [
+      "Lançamentos de produto ou serviço que precisam capturar leads rapidamente",
+      "Empresas sem presença digital profissional que perdem credibilidade",
+      "Negócios com site lento ou sem SEO que não aparecem no Google"
+    ],
+    "faq": [
+      { "q": "A landing page fica no meu domínio?", "a": "Sim. Publicamos no seu domínio, configuramos DNS e você tem controle total do servidor e dos arquivos." },
+      { "q": "Posso editar o conteúdo depois?", "a": "Sim. Entregamos com CMS integrado (ou painel simples) para que você edite textos, imagens e chamadas para ação sem precisar de ajuda técnica." },
+      { "q": "Como funciona o processo de revisões?", "a": "Incluímos 2 rodadas de revisão no escopo. Cada rodada cobre layout, texto e funcionalidade até aprovação completa." }
+    ]
   },
   {
     "id": "e-commerce",
@@ -37,7 +106,30 @@
     "category": "e-commerce",
     "title": "E-commerce",
     "description": "Desenvolvemos e-commerces completos com catálogo de produtos, carrinho de compras, gateway de pagamento (Stripe, Mercado Pago), gestão de estoque e painel de vendas.",
-    "features": ["Catálogo + carrinho + checkout", "Gateway de pagamento integrado", "Painel de vendas e estoque"]
+    "longDescription": "Desenvolvemos lojas virtuais que vendem de verdade. Construímos e-commerces customizados do zero com checkout otimizado para mobile, integração com os principais gateways do Brasil, controle de estoque e painel administrativo intuitivo. Aplicamos práticas de conversão em cada detalhe: do fluxo de compra ao e-mail de recuperação de carrinho. Você vende mais com menos fricção para o cliente — e menor dependência de plataformas genéricas que cobram comissão sobre cada venda.",
+    "features": ["Catálogo + carrinho + checkout", "Gateway de pagamento integrado", "Painel de vendas e estoque"],
+    "benefits": [
+      { "icon": "💰", "title": "Mais conversão", "description": "Checkout em 1 clique, frete em tempo real e recuperação de carrinho abandonado." },
+      { "icon": "📦", "title": "Gestão de estoque", "description": "Controle de SKUs, variações, alertas de reposição e histórico de movimentação." },
+      { "icon": "💳", "title": "Pagamentos brasileiros", "description": "Stripe, Mercado Pago, Pix e boleto — sem comissão extra além da taxa da operadora." },
+      { "icon": "📊", "title": "Dashboard de vendas", "description": "Ticket médio, produtos mais vendidos, abandono de carrinho e métricas de conversão." }
+    ],
+    "process": [
+      { "step": 1, "title": "Catálogo e UX", "description": "Estruturamos categorias, variações e fluxo de compra otimizado para conversão." },
+      { "step": 2, "title": "Integrações de pagamento", "description": "Configuramos gateways, anti-fraude e confirmações automáticas de pagamento." },
+      { "step": 3, "title": "Logística e notificações", "description": "Integramos com transportadoras, calculamos frete e automatizamos e-mails transacionais." },
+      { "step": 4, "title": "Painel e treinamento", "description": "Entregamos painel de gestão e treinamos o time para operar a loja de forma autônoma." }
+    ],
+    "useCases": [
+      "Lojistas físicos que querem expandir para o digital com loja própria",
+      "Marcas que vendem em marketplaces e querem canal direto sem comissão",
+      "Infoprodutores ou serviços que precisam de checkout próprio e recorrência"
+    ],
+    "faq": [
+      { "q": "Posso migrar minha loja do Shopify ou WooCommerce?", "a": "Sim. Migramos produtos, clientes e histórico de pedidos mantendo SEO e URLs. O processo inclui período de testes paralelos para garantir zero interrupção." },
+      { "q": "A loja aceita Pix?", "a": "Sim. Configuramos Pix, boleto, cartão de crédito e cartão de débito via Stripe, Mercado Pago ou ASAAS conforme sua preferência." },
+      { "q": "E se minha loja crescer muito?", "a": "A arquitetura é projetada para volume. Já entregamos lojas que suportam picos de Black Friday sem queda — com CDN, cache de catálogo e banco otimizado para consultas de produto." }
+    ]
   },
   {
     "id": "dashboard-b2b",
@@ -47,7 +139,30 @@
     "category": "dashboard-b2b",
     "title": "Dashboards e Painéis",
     "description": "Construímos dashboards e painéis administrativos intuitivos com gráficos em tempo real, relatórios exportáveis e KPIs customizados para a sua operação.",
-    "features": ["Charts em tempo real", "Relatórios exportáveis (PDF/CSV)", "KPIs customizados"]
+    "longDescription": "Transformamos dados brutos em insights acionáveis com dashboards B2B de alta performance. Desenvolvemos painéis com gráficos em tempo real, tabelas com filtros avançados, exports para Excel e PDF, e permissões granulares por role. Nossa abordagem conecta fontes diversas — banco de dados, APIs externas, planilhas — em uma interface unificada que a equipe realmente usa. O resultado: menos tempo em análise, decisões mais rápidas e clareza sobre onde focar os esforços.",
+    "features": ["Charts em tempo real", "Relatórios exportáveis (PDF/CSV)", "KPIs customizados"],
+    "benefits": [
+      { "icon": "📡", "title": "Dados em tempo real", "description": "Gráficos que atualizam automaticamente com WebSockets ou polling configurado." },
+      { "icon": "🔐", "title": "Permissões por role", "description": "Cada usuário vê apenas os dados relevantes para seu nível de acesso." },
+      { "icon": "📤", "title": "Exports automáticos", "description": "Relatórios em PDF e Excel gerados e enviados por e-mail em horários programados." },
+      { "icon": "🔗", "title": "Multi-fonte de dados", "description": "Conectamos banco de dados, APIs externas, planilhas e ERPs em uma visão unificada." }
+    ],
+    "process": [
+      { "step": 1, "title": "Mapeamento de KPIs", "description": "Identificamos as métricas que realmente importam para o negócio e os responsáveis por cada uma." },
+      { "step": 2, "title": "Modelagem e fontes", "description": "Estruturamos o modelo de dados e conectamos todas as fontes de informação." },
+      { "step": 3, "title": "Interface e visualizações", "description": "Desenvolvemos o painel com UX intuitiva, priorizando velocidade de leitura das informações." },
+      { "step": 4, "title": "Alertas e automação", "description": "Configuramos alertas para KPIs críticos e relatórios automáticos por e-mail." }
+    ],
+    "useCases": [
+      "Operações com grande volume de dados que precisam de visibilidade consolidada",
+      "Equipes de vendas e marketing que precisam de métricas em tempo real por canal",
+      "Gestores que hoje dependem de planilhas manuais para tomar decisões"
+    ],
+    "faq": [
+      { "q": "Vocês integram com meu banco de dados atual?", "a": "Sim. Conectamos com PostgreSQL, MySQL, MongoDB, BigQuery e outras fontes via API ou conexão direta — sem migrar seus dados." },
+      { "q": "O dashboard é em tempo real?", "a": "Depende do volume de dados. Para operações de alta frequência usamos WebSockets. Para relatórios gerenciais, polling a cada 30-60 segundos já atende com ótima performance." },
+      { "q": "Posso personalizar os gráficos depois?", "a": "Sim. Entregamos painel de configuração onde gestores podem criar visualizações, filtros e relatórios sem precisar de desenvolvimento adicional." }
+    ]
   },
   {
     "id": "api-integracoes",
@@ -57,7 +172,30 @@
     "category": "api-integracoes",
     "title": "APIs e Integrações",
     "description": "Desenvolvemos APIs REST e GraphQL robustas, integrações com ERPs, CRMs, gateways de pagamento e qualquer sistema externo. Automação de processos via webhook e event-driven.",
-    "features": ["Documentação OpenAPI completa", "Webhooks + autenticação", "Ambiente de sandbox"]
+    "longDescription": "Construímos a camada de integração que faz seus sistemas conversarem. Desenvolvemos APIs RESTful e GraphQL bem documentadas, webhooks confiáveis, middleware de transformação de dados e conectores para ERP, CRM e plataformas de terceiros. Cada API entregue tem autenticação robusta, rate limiting, logs de auditoria e documentação OpenAPI. Para integrações legadas, criamos adaptadores que modernizam a comunicação sem exigir refatoração do sistema existente.",
+    "features": ["Documentação OpenAPI completa", "Webhooks + autenticação", "Ambiente de sandbox"],
+    "benefits": [
+      { "icon": "📄", "title": "OpenAPI documentada", "description": "Toda API entregue com documentação interativa para que seu time integre sem suporte." },
+      { "icon": "🔒", "title": "Segurança por padrão", "description": "OAuth2, API keys, rate limiting e logs de auditoria incluídos em todo projeto." },
+      { "icon": "🧪", "title": "Sandbox de testes", "description": "Ambiente isolado para testes de integração sem risco de afetar dados de produção." },
+      { "icon": "⚙️", "title": "Conectores legados", "description": "Integramos com sistemas antigos via adapters, sem necessidade de refatoração." }
+    ],
+    "process": [
+      { "step": 1, "title": "Mapeamento de sistemas", "description": "Levantamos todos os sistemas envolvidos, formatos de dados e pontos de integração necessários." },
+      { "step": 2, "title": "Contrato de API", "description": "Definimos endpoints, schemas e contratos antes de escrever código — evitando retrabalho." },
+      { "step": 3, "title": "Desenvolvimento e testes", "description": "Implementamos com testes automatizados de contrato e integração em ambiente sandbox." },
+      { "step": 4, "title": "Monitoramento em produção", "description": "Configuramos alertas para falhas, latência e volume anormal de requisições." }
+    ],
+    "useCases": [
+      "Empresas com múltiplos sistemas (ERP, CRM, e-commerce) que não se comunicam",
+      "Negócios que precisam expor funcionalidades para parceiros ou clientes via API",
+      "Operações com processos manuais de transferência de dados entre plataformas"
+    ],
+    "faq": [
+      { "q": "Vocês integram com SAP, TOTVS ou outros ERPs grandes?", "a": "Sim. Temos experiência com SAP Business One, TOTVS Protheus e Bling. Usamos as APIs oficiais quando disponíveis ou conectores via banco de dados quando necessário." },
+      { "q": "Como garantem que a integração não vai quebrar?", "a": "Com testes automatizados de contrato, monitoramento de uptime e alertas proativos. Também implementamos circuit breakers para que a falha em um sistema não derrube os outros." },
+      { "q": "E se o sistema externo mudar a API?", "a": "Configuramos monitoramento de versão e você recebe alerta antes da mudança afetar produção. Atualizações de breaking changes estão cobertas no plano de manutenção." }
+    ]
   },
   {
     "id": "automacao-com-ia",
@@ -67,7 +205,30 @@
     "category": "automacao-com-ia",
     "title": "Automação com IA",
     "description": "Construímos agentes de IA, chatbots inteligentes e fluxos de automação usando OpenAI, Anthropic e modelos open-source. Aumentamos produtividade e reduzimos custos operacionais.",
-    "features": ["Agente de IA customizado", "Fluxos de automação", "Painel de monitoramento"]
+    "longDescription": "Integramos inteligência artificial à sua operação com ROI mensurável. Desenvolvemos agentes com GPT-4, Claude e modelos open-source para automação de atendimento, análise de documentos, geração de relatórios e classificação de dados. Não entregamos demos — entregamos soluções que rodam em produção, reduzem custo operacional e escalam com o negócio. Da prototipagem ao deploy em nuvem, acompanhamos cada etapa para garantir que a IA funcione no seu contexto real.",
+    "features": ["Agente de IA customizado", "Fluxos de automação", "Painel de monitoramento"],
+    "benefits": [
+      { "icon": "⏱️", "title": "Processos 10x mais rápidos", "description": "Tarefas que levam horas são resolvidas em segundos com agentes de IA bem treinados." },
+      { "icon": "📉", "title": "Redução de custo operacional", "description": "Menos horas de trabalho manual em tarefas repetitivas e de baixo valor agregado." },
+      { "icon": "🧠", "title": "IA com contexto do negócio", "description": "Modelos ajustados com seus dados, documentos e regras de negócio específicos." },
+      { "icon": "📊", "title": "Monitoramento em tempo real", "description": "Painel para acompanhar uso, qualidade das respostas e custos por modelo." }
+    ],
+    "process": [
+      { "step": 1, "title": "Diagnóstico de processos", "description": "Identificamos os processos com maior potencial de automação e ROI mais rápido." },
+      { "step": 2, "title": "Prototipagem e validação", "description": "Construímos protótipo funcional e validamos com dados reais antes de investir em produção." },
+      { "step": 3, "title": "Desenvolvimento e integração", "description": "Implementamos a solução integrada aos seus sistemas existentes com segurança e rastreabilidade." },
+      { "step": 4, "title": "Monitoramento e melhoria", "description": "Acompanhamos qualidade, custo e performance do modelo — ajustando continuamente." }
+    ],
+    "useCases": [
+      "Operações com alto volume de atendimento que precisam escalar sem contratar",
+      "Times que perdem horas diárias em análise e classificação de documentos",
+      "Empresas que querem oferecer experiências personalizadas em escala"
+    ],
+    "faq": [
+      { "q": "A IA vai substituir minha equipe?", "a": "Não — vai ampliar a capacidade dela. A IA assume tarefas repetitivas e de baixo valor para que as pessoas foquem em decisões, relacionamento e criatividade." },
+      { "q": "Meus dados ficam seguros?", "a": "Sim. Usamos APIs com contratos de confidencialidade, nunca treinamos modelos com seus dados sem consentimento e podemos hospedar modelos on-premise quando necessário." },
+      { "q": "Quanto custa para rodar um agente de IA?", "a": "Depende do volume. Um agente de suporte com 1.000 interações por mês custa tipicamente entre R$50 e R$300 em créditos de API. Apresentamos estimativa detalhada antes do desenvolvimento." }
+    ]
   },
   {
     "id": "marketplace",
@@ -77,7 +238,30 @@
     "category": "marketplace",
     "title": "Marketplace",
     "description": "Desenvolvemos marketplaces completos com cadastro de vendedores, split de pagamentos, gestão de pedidos, avaliações e painel de controle para operadores e vendedores.",
-    "features": ["Multi-vendor + split de pagamentos", "Painel para operadores", "Avaliações e gestão de pedidos"]
+    "longDescription": "Criamos marketplaces B2B e B2C completos, com onboarding de vendedores, pagamentos com split automático, gestão de pedidos, disputas e avaliações. Nossa arquitetura é desenhada para volume: suporta picos de tráfego sem queda de performance. Integramos com os principais gateways do Brasil e gerenciamos toda a complexidade fiscal e logística. Você lança um marketplace funcional — nós garantimos que a tecnologia não seja o gargalo do crescimento.",
+    "features": ["Multi-vendor + split de pagamentos", "Painel para operadores", "Avaliações e gestão de pedidos"],
+    "benefits": [
+      { "icon": "🏦", "title": "Split automático", "description": "Pagamentos divididos entre plataforma e vendedores sem intervenção manual." },
+      { "icon": "⭐", "title": "Sistema de reputação", "description": "Avaliações, reviews e selos de confiança que aumentam conversão dos vendedores." },
+      { "icon": "📋", "title": "Gestão de disputas", "description": "Fluxo estruturado para resolver problemas entre compradores e vendedores." },
+      { "icon": "🖥️", "title": "Painéis separados", "description": "Painel de operador com visão global e painel de vendedor com métricas próprias." }
+    ],
+    "process": [
+      { "step": 1, "title": "Modelo de negócio", "description": "Definimos estrutura de comissões, regras de onboarding e políticas de disputa." },
+      { "step": 2, "title": "Plataforma core", "description": "Desenvolvemos catálogo, carrinho, checkout com split e painéis de controle." },
+      { "step": 3, "title": "Onboarding de vendedores", "description": "Criamos fluxo de cadastro, verificação e ativação de novos vendedores." },
+      { "step": 4, "title": "Lançamento e analytics", "description": "Publicamos, monitoramos saúde da plataforma e iteramos com base nos dados." }
+    ],
+    "useCases": [
+      "Empreendedores que querem conectar compradores e prestadores em um nicho específico",
+      "Empresas com rede de distribuidores que querem centralizar vendas digitalmente",
+      "Cooperativas ou associações que querem uma plataforma de vendas coletiva"
+    ],
+    "faq": [
+      { "q": "Vocês usam Stripe Connect para o split?", "a": "Stripe Connect é nossa solução padrão para marketplaces internacionais. Para o Brasil, também trabalhamos com Zoop, ASAAS e Mercado Pago Marketplace dependendo do perfil do projeto." },
+      { "q": "Como funciona o onboarding de vendedores?", "a": "Criamos fluxo self-service com validação de documentos, conta bancária e configuração de loja. Vendedores ficam ativos em menos de 24 horas após aprovação." },
+      { "q": "E a parte fiscal e NF-e?", "a": "Integramos com soluções de emissão de NF-e (NFE.io, Plugnotas) para automatizar a nota fiscal por pedido. O compliance fiscal é definido caso a caso com seu contador." }
+    ]
   },
   {
     "id": "erp",
@@ -87,7 +271,30 @@
     "category": "erp",
     "title": "Sistemas ERP",
     "description": "Desenvolvemos ERPs sob medida adaptados ao seu processo de negócio: gestão financeira, RH, estoque, produção, CRM e relatórios gerenciais em uma única plataforma.",
-    "features": ["Módulos personalizados por setor", "Integração com fornecedores", "Relatórios gerenciais"]
+    "longDescription": "Construímos sistemas de gestão que entendem as regras do seu setor — não soluções genéricas que você precisa adaptar. Para saúde, educação, imobiliário, jurídico e indústria: desenvolvemos módulos específicos com lógica de negócio real, em parceria com quem opera o processo. O resultado é adoção natural pela equipe e ganhos de eficiência desde o primeiro dia de uso.",
+    "features": ["Módulos personalizados por setor", "Integração com fornecedores", "Relatórios gerenciais"],
+    "benefits": [
+      { "icon": "🎯", "title": "Lógica do seu setor", "description": "Regras, fluxos e terminologia específicos do seu negócio — sem adaptações forçadas." },
+      { "icon": "🔗", "title": "Integração com fornecedores", "description": "Conectamos com ERPs fiscais, bancos, transportadoras e sistemas legados." },
+      { "icon": "📊", "title": "Relatórios gerenciais", "description": "Visão consolidada para gestores com drill-down até o nível de transação." },
+      { "icon": "📦", "title": "Módulos que crescem", "description": "Começa com o essencial e vai expandindo conforme a operação cresce." }
+    ],
+    "process": [
+      { "step": 1, "title": "Imersão no processo", "description": "Mapeamos o fluxo operacional atual, gargalos e requisitos de cada departamento." },
+      { "step": 2, "title": "Modelagem e prototipagem", "description": "Desenhamos o sistema com quem vai usá-lo — validando antes de desenvolver." },
+      { "step": 3, "title": "Desenvolvimento por fases", "description": "Entregamos módulos em fases para que o time valide e use enquanto desenvolvemos o restante." },
+      { "step": 4, "title": "Migração e treinamento", "description": "Migramos dados do sistema anterior e treinamos cada perfil de usuário." }
+    ],
+    "useCases": [
+      "Indústrias com controle de produção, estoque e expedição em planilhas",
+      "Clínicas ou consultórios que precisam de gestão de pacientes e faturamento",
+      "Escritórios jurídicos ou contábeis com gestão de processos e prazos"
+    ],
+    "faq": [
+      { "q": "Por que construir ERP próprio em vez de usar SAP ou TOTVS?", "a": "ERPs genéricos cobram licenças caras e forçam adaptar seu processo ao software. Um ERP sob medida custa menos a longo prazo e é exatamente o que sua operação precisa." },
+      { "q": "Quanto tempo leva para ter o sistema funcionando?", "a": "Dependendo da complexidade, o primeiro módulo funcional fica pronto em 6 a 10 semanas. Entregamos em fases para que a operação não pare durante a transição." },
+      { "q": "Posso continuar usando meu sistema atual durante a transição?", "a": "Sim. Rodamos os sistemas em paralelo durante o período de validação. A migração é gradual por módulo, sem big bang." }
+    ]
   },
   {
     "id": "bots-automacoes",
@@ -97,7 +304,30 @@
     "category": "bots-automacoes",
     "title": "Chatbots e Atendimento",
     "description": "Criamos chatbots inteligentes para WhatsApp Business, Telegram e web com IA conversacional, integração ao seu CRM e handoff para atendentes humanos quando necessário.",
-    "features": ["Chatbot WhatsApp / Telegram / Web", "Handoff para atendentes humanos", "Dashboard de atendimentos"]
+    "longDescription": "Automatizamos o primeiro nível de suporte e qualificação de leads com chatbots que entendem contexto e se integram ao seu CRM. Disponíveis 24/7 no WhatsApp Business, Telegram e web, com handoff fluido para atendentes humanos quando a situação exige. Cada bot é treinado com sua base de conhecimento, tom de voz e regras de negócio — não um chatbot genérico. Você reduz custo de suporte e aumenta velocidade de resposta sem sacrificar qualidade.",
+    "features": ["Chatbot WhatsApp / Telegram / Web", "Handoff para atendentes humanos", "Dashboard de atendimentos"],
+    "benefits": [
+      { "icon": "🕐", "title": "Atendimento 24/7", "description": "Responde dúvidas e qualifica leads a qualquer hora, sem custo de plantão." },
+      { "icon": "🔄", "title": "Handoff inteligente", "description": "Transfere para humano com todo o contexto da conversa quando necessário." },
+      { "icon": "📋", "title": "Integração com CRM", "description": "Leads capturados e atualizados automaticamente no HubSpot, Pipedrive ou CRM próprio." },
+      { "icon": "📈", "title": "Analytics de conversas", "description": "Taxa de resolução, tópicos mais frequentes e gaps no conhecimento do bot." }
+    ],
+    "process": [
+      { "step": 1, "title": "Mapeamento de fluxos", "description": "Identificamos os principais motivos de contato e desenhamos os fluxos conversacionais." },
+      { "step": 2, "title": "Base de conhecimento", "description": "Alimentamos o bot com FAQs, políticas e contexto específico do negócio." },
+      { "step": 3, "title": "Integração e testes", "description": "Conectamos com CRM, WhatsApp Business API e testamos com cenários reais." },
+      { "step": 4, "title": "Go-live e otimização", "description": "Publicamos, monitoramos as primeiras semanas e ajustamos com base nos atendimentos." }
+    ],
+    "useCases": [
+      "E-commerces com alto volume de dúvidas sobre pedidos, frete e trocas",
+      "Empresas B2B que precisam qualificar leads antes de enviar para vendas",
+      "Negócios com suporte sobrecarregado por perguntas repetitivas"
+    ],
+    "faq": [
+      { "q": "O chatbot usa IA ou é baseado em fluxos?", "a": "Combinamos os dois: fluxos estruturados para processos previsíveis (status de pedido, FAQ) e IA conversacional para perguntas abertas. O resultado é mais confiável e barato que IA pura." },
+      { "q": "Preciso de WhatsApp Business API?", "a": "Sim para volume alto. A API oficial é necessária para contas business com mais de 1.000 mensagens por mês. Ajudamos no processo de aprovação com a Meta." },
+      { "q": "Como o bot aprende com o tempo?", "a": "Revisamos as conversas semanalmente nas primeiras semanas e atualizamos a base de conhecimento. Para volumes altos, implementamos fine-tuning automático com aprovação humana." }
+    ]
   },
   {
     "id": "consultoria",
@@ -107,7 +337,30 @@
     "category": "consultoria",
     "title": "Consultoria Técnica",
     "description": "Oferecemos consultoria técnica para definição de arquitetura, escolha de stack, code review, migração de sistemas legados e mentoria para equipes de desenvolvimento.",
-    "features": ["Relatório de arquitetura detalhado", "Code review com ações prioritizadas", "Plano de migração / roadmap"]
+    "longDescription": "Oferecemos consultoria técnica que produz decisões claras, não apenas recomendações verbais. Cada engajamento entrega um documento concreto: relatório de arquitetura, plano de migração priorizado ou roadmap tecnológico. Atuamos em diagnóstico de sistemas em crise, escolha de stack para novos produtos, code review de equipes internas e migração de legados. Experiência com projetos reais em produção — não metodologias teóricas.",
+    "features": ["Relatório de arquitetura detalhado", "Code review com ações prioritizadas", "Plano de migração / roadmap"],
+    "benefits": [
+      { "icon": "📋", "title": "Entregável concreto", "description": "Toda consultoria termina com documento acionável — não apenas reuniões e sugestões." },
+      { "icon": "🔍", "title": "Diagnóstico imparcial", "description": "Avaliação técnica sem viés de venda de horas — foco no que realmente precisa ser feito." },
+      { "icon": "🛠️", "title": "Experiência prática", "description": "Recomendações baseadas em projetos reais — não em livros de metodologia." },
+      { "icon": "🎓", "title": "Mentoria de equipe", "description": "Sessões de transferência de conhecimento para seu time executar de forma autônoma." }
+    ],
+    "process": [
+      { "step": 1, "title": "Assessment inicial", "description": "Levantamos o estado atual: código, infraestrutura, processos e dívida técnica acumulada." },
+      { "step": 2, "title": "Análise e diagnóstico", "description": "Identificamos riscos, gargalos e oportunidades com evidências técnicas concretas." },
+      { "step": 3, "title": "Recomendações prioritizadas", "description": "Entregamos plano de ação com ordem de execução baseada em impacto e esforço." },
+      { "step": 4, "title": "Acompanhamento opcional", "description": "Disponíveis para revisar a execução e ajustar o plano conforme surgem novas informações." }
+    ],
+    "useCases": [
+      "Times de desenvolvimento com dívida técnica crescente e medo de refatorar",
+      "Empresas prestes a escalar que precisam saber se a arquitetura aguenta",
+      "CTOs ou fundadores técnicos que precisam de segunda opinião antes de uma decisão crítica"
+    ],
+    "faq": [
+      { "q": "Qual o formato típico de uma consultoria?", "a": "Começa com 1 a 3 dias de assessment (entrevistas e análise de código), seguido de relatório entregue em até 5 dias úteis com recomendações priorizadas e estimativas de esforço." },
+      { "q": "Vocês executam as recomendações também?", "a": "Sim, quando faz sentido. Muitos clientes nos contratam primeiro para consultoria e depois para execução. Isso garante que o trabalho seja feito por quem entende profundamente o problema." },
+      { "q": "Atendem equipes remotas?", "a": "100% remoto. Trabalhamos com equipes no Brasil, Itália e EUA. Todas as entregas são documentadas em inglês ou português conforme preferência." }
+    ]
   },
   {
     "id": "desktop",
@@ -117,6 +370,29 @@
     "category": "desktop",
     "title": "Aplicações Desktop",
     "description": "Desenvolvemos aplicações desktop que rodam em Windows, macOS e Linux a partir de uma única base de código com Electron. Suporte offline, sincronização em background e integração com hardware local.",
-    "features": ["App Windows + macOS + Linux", "Modo offline + sincronização", "Atualizações automáticas (OTA)"]
+    "longDescription": "Desenvolvemos aplicações desktop robustas que rodam em Windows, macOS e Linux a partir de uma única base de código com Electron. Nossos apps suportam operação offline, sincronização em background, atualizações automáticas OTA e integração com periféricos locais como impressoras, scanners e balanças. Para sistemas internos e operações industriais que precisam de confiabilidade acima de conectividade, o desktop é a escolha certa — entregamos isso com velocidade de desenvolvimento web moderno.",
+    "features": ["App Windows + macOS + Linux", "Modo offline + sincronização", "Atualizações automáticas (OTA)"],
+    "benefits": [
+      { "icon": "🖨️", "title": "Hardware local", "description": "Integração com impressoras, scanners de código de barras, balanças e leitores de cartão." },
+      { "icon": "📡", "title": "Offline-first", "description": "Funciona sem internet e sincroniza automaticamente quando a conexão volta." },
+      { "icon": "🔄", "title": "Updates automáticos", "description": "Novas versões instaladas silenciosamente sem interrupção do usuário." },
+      { "icon": "💻", "title": "Uma base, três plataformas", "description": "Windows, macOS e Linux a partir do mesmo código — sem duplicar o desenvolvimento." }
+    ],
+    "process": [
+      { "step": 1, "title": "Requisitos de hardware", "description": "Mapeamos integrações com periféricos locais e necessidades de acesso ao sistema operacional." },
+      { "step": 2, "title": "Arquitetura offline-first", "description": "Projetamos o modelo de dados local, estratégia de sync e resolução de conflitos." },
+      { "step": 3, "title": "Desenvolvimento e testes", "description": "Desenvolvemos e testamos nas três plataformas em ambiente real antes da entrega." },
+      { "step": 4, "title": "Distribuição e updates", "description": "Configuramos pipeline de build, assinatura de código e distribuição de atualizações automáticas." }
+    ],
+    "useCases": [
+      "Operações industriais com leitores de código de barras ou balanças no chão de fábrica",
+      "Sistemas de ponto de venda (PDV) que precisam funcionar sem internet",
+      "Ferramentas internas para equipes que trabalham em ambientes com conectividade instável"
+    ],
+    "faq": [
+      { "q": "Por que Electron e não app nativo?", "a": "Electron permite reutilizar todo o conhecimento de desenvolvimento web, entregando na metade do tempo e custo. Para a maioria dos casos de uso corporativo, a performance é mais que suficiente." },
+      { "q": "Como funcionam as atualizações automáticas?", "a": "Usamos electron-updater com servidor de atualização configurado. O app verifica atualizações ao iniciar, baixa em segundo plano e instala na próxima reinicialização — transparente para o usuário." },
+      { "q": "O app precisa ser assinado digitalmente?", "a": "Sim, para distribuição sem alertas de segurança no Windows e macOS. Incluímos assinatura de código com certificado no processo de build e publicação." }
+    ]
   }
 ]

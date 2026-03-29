@@ -1,0 +1,69 @@
+---
+title: "Evaluación de LLMs: cómo elegir el modelo correcto"
+slug: "evaluacion-de-llms-como-elegir-el-modelo-correcto"
+date: "2024-11-07"
+description: "Cómo evaluar y elegir entre GPT-4o, Claude, Gemini y modelos open-source — benchmarks, coste por token, contexto, velocidad y casos de uso ideales."
+tags: ["evaluacion llm", "gpt-4", "claude", "gemini", "llama"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "automacao-com-ia"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo evaluar y elegir entre GPT-4o, Claude, Gemini y modelos open-source — benchmarks, coste por token, contexto, velocidad y casos de uso ideales."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'avaliacao-de-llms-como-escolher-o-modelo-certo'
+  - locale: 'it-IT'
+    slug: 'valutazione-llm-come-scegliere-modello'
+  - locale: 'en'
+    slug: 'llm-evaluation-how-to-choose-the-right-model'
+---
+
+"¿Cuál es el mejor LLM?" es una de las preguntas más frecuentes de quien empieza a construir sistemas con IA. Y es la pregunta equivocada. La respuesta correcta es siempre: depende de lo que estás haciendo, del volumen, del presupuesto y de la tolerancia a riesgos. No existe un modelo universalmente superior — existe el modelo correcto para el problema correcto.
+
+## El Framework de Evaluación Correcto
+
+Los benchmarks públicos (MMLU, HumanEval, MATH) son útiles como referencia general, pero no predicen el rendimiento en tu caso de uso específico. Un modelo que lidera en razonamiento matemático puede ser mediocre para extracción de información de documentos legales en español.
+
+El framework de evaluación que funciona:
+
+1. **Define 20-50 casos de prueba representativos de tu tarea real**
+2. **Ejecuta todos los modelos candidatos en esos casos**
+3. **Evalúa las respuestas con criterios explícitos** (correctitud, formato, completitud)
+4. **Añade coste y latencia** como factores ponderados
+
+El modelo que gana en tu evaluación es el modelo correcto para ti — independientemente del ranking en benchmarks públicos.
+
+## Los Modelos Principales en 2025
+
+**GPT-4o (OpenAI):** El más versátil. Excelente en razonamiento, coding y comprensión multimodal. Precio medio-alto. La API de OpenAI tiene la mayor cobertura de integraciones. Para empresas en España, los datos pueden procesarse en servidores europeos con el acuerdo de data processing adecuado.
+
+**Claude 3.5 Sonnet/Opus (Anthropic):** Destacado en tareas de análisis de documentos largos, redacción y seguimiento de instrucciones complejas. Ventana de contexto de 200K tokens — útil para procesar contratos o documentación extensa. Anthropic tiene menor cobertura de integraciones que OpenAI pero crece rápido.
+
+**Gemini 1.5 Pro (Google):** El mayor contexto del mercado (1M tokens). Excelente integración con el ecosistema Google (Drive, Workspace). Para empresas que ya usan Google Workspace en España, la integración es casi natural. Precio competitivo.
+
+**Llama 3 / Mistral (Open Source):** Los modelos open-source han cerrado significativamente la brecha con los propietarios. La ventaja principal: se pueden desplegar en infraestructura propia, lo que resuelve problemas de soberanía de datos para sectores regulados (banca, salud, administración pública en España).
+
+## Dimensiones de Evaluación por Caso de Uso
+
+| Caso de Uso | Dimensión Clave | Modelo Recomendado |
+|---|---|---|
+| Extracción de datos de documentos | Precisión en structured output | GPT-4o o Claude |
+| Generación de código | Correctitud funcional | GPT-4o |
+| Análisis de documentos legales | Contexto largo + fidelidad | Claude o Gemini |
+| Chatbot de atención al cliente (ES) | Comprensión idiomática | GPT-4o o Claude |
+| Procesamiento de alto volumen | Coste por token | Llama 3 self-hosted o Gemini Flash |
+| Datos sensibles (RGPD) | Soberanía de datos | Llama 3 self-hosted |
+
+## Coste: El Factor que Determina la Viabilidad
+
+Para aplicaciones con alto volumen de requests, el coste por token es determinante. Un chatbot que procesa 100.000 mensajes al día con GPT-4 a precio completo puede costar miles de euros al mes. Las mismas tareas con modelos más pequeños (GPT-4o-mini, Gemini Flash, Mistral 7B) cuestan entre 5x y 50x menos con calidad suficiente para muchos casos de uso.
+
+La estrategia de routing inteligente — usar el modelo más barato que puede resolver el problema, y escalar al modelo más potente solo para los casos complejos — puede reducir el coste total en un 60-80%.
+
+## Conclusión
+
+La evaluación correcta de LLMs empieza con tus datos y tus tareas, no con el ranking del mes. Para empresas en España que deben considerar RGPD y soberanía de datos, los modelos open-source self-hosted son una opción cada vez más viable técnica y económicamente.
+
+¿Necesitas ayuda para evaluar y seleccionar el LLM correcto para tu proyecto? [Contacta con SystemForge](https://systemforge.es/contacto).

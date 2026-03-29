@@ -1,0 +1,112 @@
+---
+title: "Actualización automática en apps desktop: Electron"
+slug: "actualizacion-automatica-apps-desktop-electron"
+date: "2024-09-28"
+description: "Cómo implementar auto-update en apps Electron con electron-updater y GitHub Releases — canales de release, staging, rollback y notificación al usuario."
+tags: ["electron", "auto-update", "electron-updater", "desktop app", "ci cd"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desktop"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo implementar auto-update en apps Electron con electron-updater y GitHub Releases — canales de release, staging, rollback y notificación al usuario."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'auto-update-apps-desktop-electron-forge'
+  - locale: 'it-IT'
+    slug: 'aggiornamento-automatico-app-desktop-electron'
+  - locale: 'en'
+    slug: 'auto-update-desktop-apps-electron-forge'
+---
+
+Distribuir una app desktop sin mecanismo de auto-update es firmar un contrato con el caos futuro. En seis meses tendrás usuarios en cinco versiones distintas de la app, cada una con bugs diferentes, comportamientos diferentes, pidiendo soporte por problemas resueltos hace semanas. Rastrear qué versión tiene cada cliente y convencerles de actualizar manualmente es trabajo que no debería existir.
+
+El auto-update bien implementado elimina ese problema de raíz. El usuario instala una vez. A partir de ahí, la app se mantiene actualizada silenciosamente en segundo plano — o con una notificación discreta cuando hay una actualización disponible.
+
+## electron-updater: La Solución Madura del Ecosistema
+
+`electron-updater` (parte de `electron-builder`) es la librería estándar para auto-update en Electron. Funciona con GitHub Releases como servidor de distribución — gratis, confiable, integrado con el flujo de release que ya tienes.
+
+Instalación y configuración básica:
+
+```bash
+npm install electron-updater
+```
+
+```javascript
+// main.js
+const { autoUpdater } = require('electron-updater')
+
+autoUpdater.checkForUpdatesAndNotify()
+
+autoUpdater.on('update-available', (info) => {
+  // Notificar al usuario que hay una actualización disponible
+  mainWindow.webContents.send('update-available', info.version)
+})
+
+autoUpdater.on('update-downloaded', (info) => {
+  // Actualización descargada, lista para instalar
+  mainWindow.webContents.send('update-ready', info.version)
+})
+```
+
+En `package.json`, el campo `publish` configura dónde publicar y desde dónde actualizar:
+
+```json
+{
+  "build": {
+    "publish": {
+      "provider": "github",
+      "owner": "tu-usuario",
+      "repo": "tu-repo"
+    }
+  }
+}
+```
+
+## Canales de Release: stable, beta y alpha
+
+Para empresas que necesitan validar actualizaciones antes de publicarlas a todos los usuarios, los canales de release son esenciales:
+
+- **stable:** La versión que llega a todos los usuarios por defecto
+- **beta:** Usuarios que optaron por actualizaciones anticipadas (early adopters, equipo interno)
+- **alpha:** Solo para pruebas internas
+
+En el nombre del archivo de release, el canal se indica con el sufijo: `app-1.2.0.exe` para stable, `app-1.2.0-beta.1.exe` para beta. `electron-updater` respeta automáticamente el canal del usuario.
+
+## UX de Actualización: No Interrumpir al Usuario
+
+El mayor error en implementaciones de auto-update es interrumpir el flujo de trabajo del usuario para instalar una actualización. La mejor práctica:
+
+1. **Descarga en background:** La actualización se descarga silenciosamente mientras el usuario trabaja
+2. **Notificación no intrusiva:** Al finalizar la descarga, una barra de información (no un modal bloqueante) indica que hay una actualización lista
+3. **Instalación al cerrar:** Si el usuario no acta, la actualización se instala la próxima vez que cierre y abra la app
+4. **Botón de "Actualizar ahora":** Para usuarios que quieren actualizar inmediatamente
+
+```typescript
+// renderer — notificación de actualización disponible
+ipcRenderer.on('update-ready', (_, version) => {
+  showUpdateBanner({
+    message: `Versión ${version} lista para instalar`,
+    action: 'Reiniciar ahora',
+    onAction: () => ipcRenderer.send('install-update'),
+    onDismiss: () => {/* se instalará al cerrar */}
+  })
+})
+```
+
+## Firma de Código: Obligatorio para Windows y macOS
+
+Sin firma de código, Windows muestra SmartScreen ("Windows protegió tu PC") y macOS bloquea completamente la app. Para distribución profesional en España, la firma es no negociable.
+
+Para Windows: certificado EV Code Signing (~300€/año de autoridades como DigiCert o Sectigo).
+Para macOS: Apple Developer Program (99€/año) + notarización automática en el proceso de build.
+
+`electron-builder` gestiona automáticamente la firma si tienes los certificados configurados como variables de entorno en tu CI/CD.
+
+## Conclusión
+
+El auto-update bien implementado es una de las inversiones técnicas con mejor ROI en apps desktop: reduce soporte, acelera la adopción de nuevas funcionalidades y profesionaliza la experiencia del usuario.
+
+¿Estás desarrollando una app desktop para tu empresa o clientes en España? [Contacta con SystemForge](https://systemforge.es/contacto).

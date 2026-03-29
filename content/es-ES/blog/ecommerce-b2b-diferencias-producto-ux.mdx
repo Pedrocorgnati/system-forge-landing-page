@@ -1,0 +1,109 @@
+---
+title: "E-commerce B2B: diferencias de producto y UX respecto al B2C"
+slug: "ecommerce-b2b-diferencias-producto-ux"
+date: "2024-09-23"
+description: "Cómo difieren los e-commerces B2B de los B2C — precios por cliente, pedidos masivos, aprobaciones internas, facturación y UX para compradores profesionales."
+tags: ["ecommerce b2b", "venta mayorista", "factura electronica", "ux b2b", "comercio electronico"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo difieren los e-commerces B2B de los B2C — precios por cliente, pedidos masivos, aprobaciones internas, facturación y UX para compradores profesionales."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ecommerce-b2b-diferencas-produto-ux'
+  - locale: 'it-IT'
+    slug: 'ecommerce-b2b-differenze-prodotto-ux'
+  - locale: 'en'
+    slug: 'b2b-ecommerce-product-and-ux-differences'
+---
+
+Un e-commerce B2B no es un e-commerce B2C con precios más bajos. Las diferencias son fundamentales en casi todas las dimensiones: cómo se muestran los precios, quién puede ver qué, cómo se gestiona el proceso de compra, cómo se factura y cómo se mide el éxito.
+
+En España, el comercio electrónico B2B supera en volumen al B2C — gran parte de las transacciones entre empresas (distribuidores, fabricantes, proveedores) se digitaliza progresivamente. Las empresas que no adaptan su plataforma a los requisitos reales del comprador profesional pierden este canal.
+
+## Precios por Cliente: La Diferencia Fundamental
+
+En B2C, todos los visitantes ven el mismo precio. En B2B, los precios son negociados por cliente — el cliente A tiene un 15% de descuento por volumen, el cliente B tiene precios especiales en una categoría específica, el cliente C tiene tarifas de distribuidor.
+
+Esto requiere una arquitectura de precios completamente distinta:
+
+```typescript
+// En B2B, el precio no está en el producto — está en la relación cliente-producto
+interface PrecioCliente {
+  clienteId: string
+  productoId: string
+  precio: number
+  descuento?: number
+  condicionMin?: number // Cantidad mínima para este precio
+}
+
+// La query de precio debe considerar la cuenta del cliente
+async function getPrecioParaCliente(productoId: string, clienteId: string) {
+  const precioEspecifico = await db.precioCliente.findFirst({
+    where: { productoId, clienteId }
+  })
+  if (precioEspecifico) return precioEspecifico.precio
+
+  const tarifaGrupo = await db.tarifaGrupo.findFirst({
+    where: { productoId, grupoId: await getGrupoCliente(clienteId) }
+  })
+  return tarifaGrupo?.precio ?? producto.precioBase
+}
+```
+
+## Pedidos Masivos y Listas de Compra
+
+El comprador B2B no llega a la tienda online sin saber qué quiere. Tiene una lista de materiales, una orden de compra interna, un reaprovisionamiento semanal. Las funcionalidades que esto requiere:
+
+**Importación de pedido desde CSV/Excel:** El comprador pega su lista de referencias con cantidades y las añade al carrito de golpe. Sin esto, los pedidos de 50+ líneas son insoportables.
+
+**Listas de compra guardadas:** El comprador B2B repite pedidos frecuentemente. Poder guardar la lista de la última compra y reordenar con un clic es una funcionalidad con alto impacto en retención.
+
+**Búsqueda por referencia interna:** Los compradores profesionales conocen el código SKU o referencia del proveedor. El buscador debe encontrar por referencia, no solo por nombre.
+
+## Proceso de Aprobación Interno
+
+Muchas empresas en España tienen procesos de aprobación para compras por encima de cierto importe: el comprador genera el carrito, lo envía a su director para aprobación, el director aprueba y el sistema envía la orden de compra.
+
+Este flujo de aprobación requiere:
+- Rol de "aprobador" con visibilidad de carritos pendientes
+- Notificaciones por email cuando hay un carrito pendiente de aprobación
+- Posibilidad de rechazar con comentario
+- Historial de aprobaciones para auditoría
+
+## Facturación: Requisitos B2B en España
+
+La facturación B2B tiene requisitos que el B2C no tiene:
+
+**Datos de factura completos:** NIF/CIF de la empresa, razón social, dirección fiscal. El comprador necesita que la factura sea correcta para la deducción del IVA.
+
+**Factura electrónica:** En España, la factura electrónica entre empresas es obligatoria progresivamente (Ley Crea y Crece). Tu plataforma B2B debe generarlas en formato FacturaE o integrar con soluciones como Edicom o Sage para cumplir la normativa.
+
+**Pago a 30/60/90 días:** El B2B raramente paga con tarjeta en el momento. El flujo de crédito comercial — con límites por cliente, facturación diferida y gestión de morosidad — es parte del producto.
+
+## UX para Compradores Profesionales
+
+El comprador B2B tiene características distintas al consumidor:
+
+**Velocidad sobre diseño:** El comprador profesional valora hacer el pedido rápido sobre una experiencia visualmente elaborada. La densidad de información es aceptable — incluso preferida — para usuarios expertos.
+
+**Búsqueda y filtros profesionales:** Filtrar por marca, referencia, disponibilidad, precio con y sin IVA, unidad de medida. El comprador B2B tiene criterios de búsqueda específicos de su sector.
+
+**Información técnica completa:** Fichas técnicas descargables, certificados de conformidad CE, hojas de seguridad. El comprador industrial necesita esta información para su proceso de compra.
+
+**Portal del cliente:** Historial de pedidos, facturas descargables, seguimiento de envíos, estado de cuenta. El portal reduce las llamadas al equipo comercial y aumenta la autonomía del cliente.
+
+## Métricas de Éxito: Distintas al B2C
+
+En B2C mides tasa de conversión de visitantes. En B2B, la tasa de conversión de cuentas registradas es más relevante — los clientes B2B se registran una vez y luego reordenan.
+
+Las métricas B2B que importan: frecuencia de recompra, ticket medio por pedido, porcentaje de clientes activos (con al menos un pedido en los últimos 90 días) y NPS del comprador profesional.
+
+## Conclusión
+
+Construir un e-commerce B2B requiere entender que el comprador profesional tiene necesidades fundamentalmente distintas al consumidor. Las diferencias no son opcionales — son requisitos de negocio que determinan si la plataforma es usable o no.
+
+¿Estás digitalizando un canal de ventas B2B en España? [Contacta con SystemForge](https://systemforge.es/contacto) — construimos e-commerces B2B con los requisitos correctos desde el día 1.

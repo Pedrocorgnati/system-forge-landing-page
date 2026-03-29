@@ -1,86 +1,398 @@
 [
   {
     "id": "saas",
+    "slug": "saas",
+    "label": "SaaS",
+    "icon": "☁️",
     "category": "saas",
     "title": "SaaS Development",
-    "description": "We build scalable SaaS platforms from zero to production, with modern maintainable architecture built to grow. Every project includes robust role-based authentication, integrated billing (Stripe), a complete admin dashboard, and automated CI/CD pipelines. Full technical documentation is included. We guide you from initial concept to a live, paying-customer-ready product — handling every phase of the build.",
-    "features": ["Authentication + integrated billing", "Complete admin dashboard", "CI/CD deployment pipeline"]
+    "description": "We build scalable SaaS platforms from zero to production, with modern architecture, robust authentication, integrated billing and a complete admin panel. From MVP to enterprise scale.",
+    "longDescription": "We turn your idea into a complete SaaS platform, ready to scale. From concept to deployment, we deliver multi-tenant systems with enterprise-grade authentication, Stripe billing, guided onboarding and role-based dashboards. With the SystemForge methodology you ship in weeks — not months — with enterprise quality from the first commit. You focus on the product; we solve architecture, performance and security.",
+    "features": ["Authentication + integrated billing", "Complete admin dashboard", "CI/CD deployment pipeline"],
+    "benefits": [
+      { "icon": "🚀", "title": "MVP in 4–8 weeks", "description": "Core features in production fast, without months of planning." },
+      { "icon": "💳", "title": "Automated billing", "description": "Stripe configured with plans, trials, upgrades and recurring charges." },
+      { "icon": "🔐", "title": "Enterprise-grade auth", "description": "Multi-tenant, RBAC, SSO and 2FA included in the base project." },
+      { "icon": "📈", "title": "Architecture built to scale", "description": "Supports 10 to 100,000 users without infrastructure refactoring." }
+    ],
+    "process": [
+      { "step": 1, "title": "Discovery & Architecture", "description": "We map requirements, define the data model and choose the ideal stack for your use case." },
+      { "step": 2, "title": "MVP to production", "description": "We build core features and ship a functional version for validation with real users." },
+      { "step": 3, "title": "Iteration & expansion", "description": "We incorporate feedback, add features and optimise performance as the user base grows." },
+      { "step": 4, "title": "Documented handoff", "description": "We deliver documented code, configured CI/CD and a trained team ready to evolve the product." }
+    ],
+    "useCases": [
+      "Startups validating a product with an MVP and looking for their first paying customers",
+      "B2B companies that want to turn an internal process into a marketable product",
+      "Businesses with an analogue product that need a scalable digital version"
+    ],
+    "faq": [
+      { "q": "What is the difference between SaaS and a regular web app?", "a": "A SaaS is designed for multiple customers (multi-tenant) with automated billing and self-service onboarding. A regular web app typically serves a single client with manual access." },
+      { "q": "Do you hand over the source code?", "a": "Yes, 100%. All code is yours. We deliver the complete repository, technical documentation and configured CI/CD so you have full control." },
+      { "q": "How long until I have a working MVP?", "a": "For a defined scope, the core MVP is ready in 4–8 weeks. Projects with more integrations and modules are ready in 8–16 weeks." }
+    ]
   },
   {
     "id": "aplicativo-mobile",
+    "slug": "aplicativo-mobile",
+    "label": "Mobile App",
+    "icon": "📱",
     "category": "aplicativo-mobile",
     "title": "Mobile Applications",
-    "description": "We develop high-quality iOS and Android apps using React Native or Flutter, sharing a single codebase to cut development time without sacrificing quality. From prototyping to store submission, every app is built for native performance, a polished UX, and seamless push notification delivery. All apps are tested on real devices before release to guarantee a smooth user experience from day one.",
-    "features": ["iOS + Android from a single codebase", "Push notifications", "App Store & Google Play submission"]
+    "description": "We develop high-quality iOS and Android apps using React Native or Flutter. From prototyping to store submission, with a focus on native performance and UX.",
+    "longDescription": "We build mobile apps that users actually use — with native performance on iOS and Android from a single codebase. From prototype to store publication, we handle push notifications, onboarding, biometric authentication and API integrations. Every app is designed for retention: clean UX, fast loading and flows that convert. Post-publication support and continuous updates included.",
+    "features": ["iOS + Android app", "Push notifications", "App Store & Google Play submission"],
+    "benefits": [
+      { "icon": "⚡", "title": "Native performance", "description": "React Native with platform-specific optimisations. No slowness of hybrid apps." },
+      { "icon": "🔔", "title": "Push notifications", "description": "Notifications configured with FCM and APNs, segmented by user behaviour." },
+      { "icon": "👆", "title": "UX that retains", "description": "Onboarding flows, native gestures and micro-interactions that increase engagement." },
+      { "icon": "🛍️", "title": "Store submission", "description": "We manage the entire submission process for the App Store and Google Play." }
+    ],
+    "process": [
+      { "step": 1, "title": "Wireframes & prototype", "description": "We define the main flows and validate the UX before writing a single line of code." },
+      { "step": 2, "title": "Development & testing", "description": "We code, test on real devices and fix issues before submission." },
+      { "step": 3, "title": "Store submission", "description": "We submit to the stores, manage the review process and follow through to approval." },
+      { "step": 4, "title": "Monitoring & updates", "description": "We track crashes, collect feedback and release updates continuously." }
+    ],
+    "useCases": [
+      "Companies with field operations that need an app for external teams",
+      "B2C startups that need native presence on users' phones",
+      "Businesses with a web platform that want to expand to mobile"
+    ],
+    "faq": [
+      { "q": "React Native or Flutter — which do you use?", "a": "We use React Native as standard for its ecosystem maturity and ease of integration with web stacks. Flutter for projects requiring highly custom UI or intensive graphical performance." },
+      { "q": "Does the app work offline?", "a": "Yes, when needed. We implement local caching, background sync and offline action queues with automatic conflict resolution." },
+      { "q": "How long does store approval take?", "a": "Google Play averages 1–3 days. App Store is usually 2–7 days on first submission. We manage the process and handle any rejections." }
+    ]
   },
   {
     "id": "landing-page",
+    "slug": "landing-page",
+    "label": "Landing Page",
+    "icon": "🌐",
     "category": "landing-page",
     "title": "Landing Pages & Websites",
-    "description": "We create high-performance landing pages and institutional websites designed to turn visitors into leads and customers. Every project is mobile-first, fast-loading, and SEO-optimized from the ground up. We handle professional design, lead capture forms, Google Analytics setup, and technical on-page SEO — so you get a website that doesn't just look good, but actively drives business results.",
-    "features": ["Mobile-first responsive design", "Technical on-page SEO", "Analytics + lead capture forms"]
+    "description": "We create high-performance landing pages and websites, SEO-optimised, with professional design focused on turning visitors into customers.",
+    "longDescription": "We build landing pages that turn visitors into customers — and customers into fans. Every page is crafted with persuasive copy, clear visual hierarchy, tested CTAs and ultra-fast load times (LCP < 2.5 s). We implement full technical SEO: Schema.org, sitemap, canonical tags and an optimised heading structure built to rank. For blogs and institutional sites, we deliver an integrated content system and a simple editing panel — no developer needed for every update.",
+    "features": ["Mobile-first responsive design", "Technical on-page SEO", "Analytics + contact forms"],
+    "benefits": [
+      { "icon": "🎯", "title": "Conversion-focused", "description": "Copy and layout optimised to turn visitors into leads and sales." },
+      { "icon": "⚡", "title": "LCP < 2.5 s", "description": "Lighthouse 90+ performance guaranteed. Slow sites lose customers." },
+      { "icon": "🔍", "title": "Full technical SEO", "description": "Schema.org, XML sitemap, canonical tags and structured meta to rank." },
+      { "icon": "✏️", "title": "Easy editing panel", "description": "Update text and images without calling a developer." }
+    ],
+    "process": [
+      { "step": 1, "title": "Brief & strategy", "description": "We understand the target audience, value proposition and conversion objectives of the page." },
+      { "step": 2, "title": "Design & copy", "description": "We create the visual layout and persuasive copy aligned with the brand identity." },
+      { "step": 3, "title": "Development & SEO", "description": "We code with focus on performance, accessibility and search engine optimisation." },
+      { "step": 4, "title": "Analytics & optimisation", "description": "We set up tracking and deliver a first-weeks report with improvement suggestions." }
+    ],
+    "useCases": [
+      "Product or service launches that need to capture leads quickly",
+      "Companies without a professional online presence that are losing credibility",
+      "Businesses with a slow or non-indexed site that don't show up on Google"
+    ],
+    "faq": [
+      { "q": "Will the landing page be on my domain?", "a": "Yes. We publish on your domain, configure DNS and you have full control of the server and files." },
+      { "q": "Can I edit the content later?", "a": "Yes. We deliver with an integrated CMS (or simple panel) so you can edit text, images and calls to action without technical help." },
+      { "q": "How do revisions work?", "a": "We include 2 revision rounds in the scope. Each round covers layout, text and functionality through to full approval." }
+    ]
   },
   {
     "id": "e-commerce",
+    "slug": "e-commerce",
+    "label": "E-commerce",
+    "icon": "🛒",
     "category": "e-commerce",
-    "title": "E-Commerce Stores",
-    "description": "We build complete e-commerce stores with product catalog, shopping cart, optimized checkout, and payment gateway integration (Stripe, PayPal). Inventory management, a sales dashboard, and automated order and shipping notifications are included out of the box. Every store is designed for conversion and built to scale as your business grows. Multi-currency and multi-language support available.",
-    "features": ["Catalog + cart + checkout", "Integrated payment gateway", "Sales and inventory dashboard"]
+    "title": "E-commerce",
+    "description": "We develop complete e-commerce stores with product catalogues, shopping cart, payment gateways (Stripe, PayPal), inventory management and a sales dashboard.",
+    "longDescription": "We build online stores that actually sell. We develop custom e-commerce from scratch with mobile-optimised checkout, integrations with leading payment gateways, inventory management and an intuitive admin panel. We apply conversion best practices in every detail: from the purchase flow to abandoned cart recovery emails. Sell more with less friction for the customer — and less dependency on generic platforms that take a cut of every sale.",
+    "features": ["Catalogue + cart + checkout", "Integrated payment gateway", "Sales and inventory dashboard"],
+    "benefits": [
+      { "icon": "💰", "title": "More conversions", "description": "1-click checkout, real-time shipping rates and abandoned cart recovery." },
+      { "icon": "📦", "title": "Inventory management", "description": "SKU control, variants, restock alerts and movement history." },
+      { "icon": "💳", "title": "Global payments", "description": "Stripe, PayPal, Klarna and local options — no extra commission beyond processor fees." },
+      { "icon": "📊", "title": "Sales dashboard", "description": "Average order value, top products, cart abandonment and conversion metrics." }
+    ],
+    "process": [
+      { "step": 1, "title": "Catalogue & UX", "description": "We structure categories, variants and the purchase flow optimised for conversion." },
+      { "step": 2, "title": "Payment integrations", "description": "We configure gateways, fraud prevention and automatic payment confirmations." },
+      { "step": 3, "title": "Logistics & notifications", "description": "We integrate with couriers, calculate shipping rates and automate transactional emails." },
+      { "step": 4, "title": "Panel & training", "description": "We deliver the management panel and train the team to operate the store independently." }
+    ],
+    "useCases": [
+      "Brick-and-mortar retailers that want to expand into digital with their own shop",
+      "Brands selling on marketplaces that want a direct channel without commissions",
+      "Info-product creators or service businesses that need their own checkout and subscriptions"
+    ],
+    "faq": [
+      { "q": "Can I migrate my store from Shopify or WooCommerce?", "a": "Yes. We migrate products, customers and order history while preserving SEO and URLs. The process includes a parallel testing period to guarantee zero downtime." },
+      { "q": "Does the store accept buy-now-pay-later?", "a": "Yes. We configure Klarna or Stripe Installments to offer instalment payments without managing credit risk." },
+      { "q": "What if my store grows a lot?", "a": "The architecture is designed for volume. We have delivered stores that handle Black Friday peaks without downtime — with CDN, catalogue caching and a database optimised for product queries." }
+    ]
   },
   {
     "id": "dashboard-b2b",
+    "slug": "dashboard-b2b",
+    "label": "B2B Dashboard",
+    "icon": "📊",
     "category": "dashboard-b2b",
-    "title": "Dashboards & Admin Panels",
-    "description": "We build intuitive B2B dashboards and admin panels that turn raw data into decisions. Real-time charts, exportable reports, and custom KPIs tailored to your operations give your team full visibility over business performance. Advanced filters, PDF and CSV exports, and automated alerts on critical metrics mean your team always knows what's happening — without digging through spreadsheets.",
-    "features": ["Real-time charts", "Exportable reports (PDF/CSV)", "Custom KPIs and automated alerts"]
+    "title": "Dashboards & Panels",
+    "description": "We build intuitive dashboards and admin panels with real-time charts, exportable reports and custom KPIs for your operation.",
+    "longDescription": "We transform raw data into actionable insights with high-performance B2B dashboards. We develop panels with real-time charts, tables with advanced filters, Excel and PDF exports, and granular role-based permissions. Our approach connects diverse sources — databases, external APIs, spreadsheets — into a unified interface that the team actually uses. The result: less time in analysis, faster decisions and clarity on where to focus efforts.",
+    "features": ["Real-time charts", "Exportable reports (PDF/CSV)", "Custom KPIs"],
+    "benefits": [
+      { "icon": "📡", "title": "Real-time data", "description": "Charts that update automatically with WebSockets or configured polling." },
+      { "icon": "🔐", "title": "Role-based permissions", "description": "Each user sees only the data relevant to their access level." },
+      { "icon": "📤", "title": "Automated exports", "description": "PDF and Excel reports generated and emailed on a scheduled basis." },
+      { "icon": "🔗", "title": "Multi-source data", "description": "We connect databases, external APIs, spreadsheets and ERPs into a single view." }
+    ],
+    "process": [
+      { "step": 1, "title": "KPI mapping", "description": "We identify the metrics that truly matter to the business and who is responsible for each." },
+      { "step": 2, "title": "Modelling & sources", "description": "We structure the data model and connect all information sources." },
+      { "step": 3, "title": "Interface & visualisations", "description": "We develop the panel with intuitive UX, prioritising information reading speed." },
+      { "step": 4, "title": "Alerts & automation", "description": "We configure alerts for critical KPIs and automatic email reports." }
+    ],
+    "useCases": [
+      "Operations with large data volumes that need consolidated visibility",
+      "Sales and marketing teams that need real-time channel metrics",
+      "Managers who currently rely on manual spreadsheets to make decisions"
+    ],
+    "faq": [
+      { "q": "Do you integrate with my current database?", "a": "Yes. We connect to PostgreSQL, MySQL, MongoDB, BigQuery and other sources via API or direct connection — without migrating your data." },
+      { "q": "Is the dashboard real-time?", "a": "It depends on data volume. For high-frequency operations we use WebSockets. For management reports, polling every 30–60 seconds already delivers excellent performance." },
+      { "q": "Can I customise the charts later?", "a": "Yes. We deliver a configuration panel where managers can create visualisations, filters and reports without additional development." }
+    ]
   },
   {
     "id": "api-integracoes",
+    "slug": "api-integracoes",
+    "label": "API & Integrations",
+    "icon": "🔌",
     "category": "api-integracoes",
     "title": "APIs & Integrations",
-    "description": "We design and build robust, well-documented REST and GraphQL APIs, and integrate your systems with ERPs, CRMs, payment gateways, and any external platform you rely on. Business process automation via webhooks and event-driven architecture reduces manual work at scale. All APIs include full OpenAPI documentation, a sandbox environment for safe testing, and OAuth2 or API key authentication.",
-    "features": ["Full OpenAPI documentation", "Webhooks + OAuth2 authentication", "Sandbox environment for safe testing"]
+    "description": "We develop robust REST and GraphQL APIs, integrations with ERPs, CRMs, payment gateways and any external system. Process automation via webhooks and event-driven architecture.",
+    "longDescription": "We build the integration layer that makes your systems talk to each other. We develop well-documented RESTful and GraphQL APIs, reliable webhooks, data transformation middleware and connectors for ERP, CRM and third-party platforms. Every API we deliver has robust authentication, rate limiting, audit logs and OpenAPI documentation. For legacy integrations, we create adapters that modernise communication without requiring refactoring of the existing system.",
+    "features": ["Complete OpenAPI documentation", "Webhooks + authentication", "Sandbox environment"],
+    "benefits": [
+      { "icon": "📄", "title": "OpenAPI documented", "description": "Every API delivered with interactive documentation so your team integrates without support." },
+      { "icon": "🔒", "title": "Security by default", "description": "OAuth2, API keys, rate limiting and audit logs included in every project." },
+      { "icon": "🧪", "title": "Testing sandbox", "description": "Isolated environment for integration tests with no risk of affecting production data." },
+      { "icon": "⚙️", "title": "Legacy connectors", "description": "We integrate with legacy systems via adapters, no refactoring required." }
+    ],
+    "process": [
+      { "step": 1, "title": "System mapping", "description": "We survey all systems involved, data formats and integration points needed." },
+      { "step": 2, "title": "API contract", "description": "We define endpoints, schemas and contracts before writing code — avoiding rework." },
+      { "step": 3, "title": "Development & testing", "description": "We implement with automated contract and integration tests in a sandbox environment." },
+      { "step": 4, "title": "Production monitoring", "description": "We configure alerts for failures, latency and abnormal request volumes." }
+    ],
+    "useCases": [
+      "Companies with multiple systems (ERP, CRM, e-commerce) that don't talk to each other",
+      "Businesses that need to expose functionality to partners or customers via API",
+      "Operations with manual data transfer processes between platforms"
+    ],
+    "faq": [
+      { "q": "Do you integrate with SAP, Salesforce or other large ERPs?", "a": "Yes. We have experience with SAP Business One, Salesforce and HubSpot. We use official APIs when available or database connectors when necessary." },
+      { "q": "How do you ensure the integration won't break?", "a": "With automated contract tests, uptime monitoring and proactive alerts. We also implement circuit breakers so a failure in one system doesn't bring down the others." },
+      { "q": "What if the external system changes its API?", "a": "We set up version monitoring and you receive an alert before the change affects production. Breaking change updates are covered under the maintenance plan." }
+    ]
   },
   {
     "id": "automacao-com-ia",
+    "slug": "automacao-com-ia",
+    "label": "AI Automation",
+    "icon": "🤖",
     "category": "automacao-com-ia",
     "title": "AI Automation",
-    "description": "We build custom AI agents, intelligent chatbots, and automation workflows powered by OpenAI, Anthropic Claude, and open-source models. The goal is concrete: increase team output, lower operational costs, and eliminate repetitive processes at scale. Every solution ships with a monitoring dashboard so you can track performance, catch edge cases, and continuously improve the system over time.",
-    "features": ["Custom AI agent for your workflow", "Automation at scale", "Monitoring and performance dashboard"]
+    "description": "We build AI agents, intelligent chatbots and automation flows using OpenAI, Anthropic and open-source models. We increase productivity and reduce operational costs.",
+    "longDescription": "We integrate artificial intelligence into your operation with measurable ROI. We develop agents with GPT-4, Claude and open-source models to automate customer support, document analysis, report generation and data classification. We don't deliver demos — we deliver solutions that run in production, reduce operational costs and scale with the business. From prototyping to cloud deployment, we accompany every step to ensure the AI works in your real context.",
+    "features": ["Custom AI agent", "Automation flows", "Monitoring dashboard"],
+    "benefits": [
+      { "icon": "⏱️", "title": "Processes 10x faster", "description": "Tasks that take hours are resolved in seconds with well-trained AI agents." },
+      { "icon": "📉", "title": "Reduced operational cost", "description": "Fewer hours of manual work on repetitive, low-value tasks." },
+      { "icon": "🧠", "title": "AI with business context", "description": "Models fine-tuned with your data, documents and specific business rules." },
+      { "icon": "📊", "title": "Real-time monitoring", "description": "Dashboard to track usage, response quality and cost per model." }
+    ],
+    "process": [
+      { "step": 1, "title": "Process diagnosis", "description": "We identify the processes with the greatest automation potential and fastest ROI." },
+      { "step": 2, "title": "Prototyping & validation", "description": "We build a functional prototype and validate with real data before investing in production." },
+      { "step": 3, "title": "Development & integration", "description": "We implement the solution integrated with your existing systems with security and traceability." },
+      { "step": 4, "title": "Monitoring & improvement", "description": "We track quality, cost and model performance — adjusting continuously." }
+    ],
+    "useCases": [
+      "Operations with high support volume that need to scale without hiring",
+      "Teams that lose hours daily analysing and classifying documents",
+      "Companies that want to offer personalised experiences at scale"
+    ],
+    "faq": [
+      { "q": "Will AI replace my team?", "a": "No — it will amplify their capabilities. AI handles repetitive, low-value tasks so people can focus on decisions, relationships and creativity." },
+      { "q": "Is my data safe?", "a": "Yes. We use APIs with confidentiality agreements, never train models on your data without consent and can host models on-premise when required." },
+      { "q": "How much does running an AI agent cost?", "a": "It depends on volume. A support agent with 1,000 interactions per month typically costs between $50 and $250 in API credits. We provide a detailed estimate before development." }
+    ]
   },
   {
     "id": "marketplace",
+    "slug": "marketplace",
+    "label": "Marketplace",
+    "icon": "🏪",
     "category": "marketplace",
-    "title": "Marketplace Platforms",
-    "description": "We develop complete two-sided marketplace platforms with vendor onboarding, configurable commission splits, order management, reviews, and separate control panels for operators and sellers. Everything you need to launch and grow: automated payouts, real-time analytics, fraud prevention hooks, and notifications for buyers and sellers at every step of the transaction flow.",
-    "features": ["Multi-vendor + configurable commission splits", "Operator and seller dashboards", "Order management and reviews"]
+    "title": "Marketplace",
+    "description": "We develop complete marketplaces with vendor registration, payment splitting, order management, reviews and control panels for operators and sellers.",
+    "longDescription": "We build complete B2B and B2C marketplaces with vendor onboarding, automatic payment splitting, order management, disputes and reviews. Our architecture is designed for volume: it handles traffic spikes without performance degradation. We integrate with leading payment gateways and manage all the fiscal and logistics complexity. You launch a functional marketplace — we ensure technology is never the bottleneck for growth.",
+    "features": ["Multi-vendor + payment splitting", "Operator control panel", "Reviews and order management"],
+    "benefits": [
+      { "icon": "🏦", "title": "Automatic split", "description": "Payments divided between platform and sellers without manual intervention." },
+      { "icon": "⭐", "title": "Reputation system", "description": "Reviews, ratings and trust badges that increase seller conversion." },
+      { "icon": "📋", "title": "Dispute management", "description": "Structured flow to resolve issues between buyers and sellers." },
+      { "icon": "🖥️", "title": "Separate panels", "description": "Operator panel with global view and seller panel with their own metrics." }
+    ],
+    "process": [
+      { "step": 1, "title": "Business model", "description": "We define commission structure, onboarding rules and dispute policies." },
+      { "step": 2, "title": "Core platform", "description": "We develop catalogue, cart, checkout with split and control panels." },
+      { "step": 3, "title": "Vendor onboarding", "description": "We create the registration, verification and activation flow for new vendors." },
+      { "step": 4, "title": "Launch & analytics", "description": "We publish, monitor platform health and iterate based on data." }
+    ],
+    "useCases": [
+      "Entrepreneurs who want to connect buyers and service providers in a specific niche",
+      "Companies with a distributor network that want to centralise sales digitally",
+      "Cooperatives or associations that want a collective sales platform"
+    ],
+    "faq": [
+      { "q": "Do you use Stripe Connect for the split?", "a": "Stripe Connect is our standard solution for international marketplaces. For region-specific needs, we also work with specialised marketplace PSPs." },
+      { "q": "How does vendor onboarding work?", "a": "We create a self-service flow with document validation, bank account setup and store configuration. Vendors are active within 24 hours of approval." },
+      { "q": "What about invoicing and tax compliance?", "a": "We integrate with invoice automation solutions (Taxjar, Avalara) to automate invoicing per order. Tax compliance is defined on a case-by-case basis with your accountant." }
+    ]
   },
   {
     "id": "erp",
+    "slug": "erp",
+    "label": "Sector Management",
+    "icon": "🏢",
     "category": "erp",
-    "title": "Custom ERP Systems",
-    "description": "We build ERP systems tailored to your actual business processes — not off-the-shelf software you need to adapt to. Financial management, HR, inventory, production, CRM, and executive reports in one integrated platform. The system is modular and scalable, growing with your company. Existing supplier integrations and team training are included in the delivery process.",
-    "features": ["Configurable modules by department", "Existing supplier integrations", "Executive reports and KPI dashboards"]
+    "title": "ERP Systems",
+    "description": "We develop custom ERPs tailored to your business process: financial management, HR, inventory, production, CRM and management reports in a single platform.",
+    "longDescription": "We build management systems that understand the rules of your industry — not generic solutions you have to adapt to. For healthcare, education, real estate, legal and manufacturing: we develop specific modules with real business logic, in partnership with those who run the processes. The result is natural team adoption and efficiency gains from day one.",
+    "features": ["Custom modules per sector", "Supplier integrations", "Management reports"],
+    "benefits": [
+      { "icon": "🎯", "title": "Your industry's logic", "description": "Rules, flows and terminology specific to your business — no forced adaptations." },
+      { "icon": "🔗", "title": "Supplier integrations", "description": "We connect with fiscal ERPs, banks, couriers and legacy systems." },
+      { "icon": "📊", "title": "Management reports", "description": "Consolidated view for managers with drill-down to the transaction level." },
+      { "icon": "📦", "title": "Modules that grow", "description": "Start with the essentials and expand as the operation grows." }
+    ],
+    "process": [
+      { "step": 1, "title": "Process immersion", "description": "We map the current operational flow, bottlenecks and requirements of each department." },
+      { "step": 2, "title": "Modelling & prototyping", "description": "We design the system with the people who will use it — validating before developing." },
+      { "step": 3, "title": "Phased development", "description": "We deliver modules in phases so the team validates and uses them while we build the rest." },
+      { "step": 4, "title": "Migration & training", "description": "We migrate data from the previous system and train each user profile." }
+    ],
+    "useCases": [
+      "Industries with production control, inventory and shipping managed in spreadsheets",
+      "Clinics or medical practices that need patient management and billing",
+      "Law firms or accounting offices with case and deadline management needs"
+    ],
+    "faq": [
+      { "q": "Why build a custom ERP instead of using SAP or Salesforce?", "a": "Generic ERPs have expensive licences and force you to adapt your process to the software. A custom ERP costs less long-term and is exactly what your operation needs." },
+      { "q": "How long until the system is running?", "a": "Depending on complexity, the first functional module is ready in 6–10 weeks. We deliver in phases so the operation doesn't stop during the transition." },
+      { "q": "Can I keep using my current system during the transition?", "a": "Yes. We run systems in parallel during the validation period. Migration is gradual by module, with no big bang cutover." }
+    ]
   },
   {
     "id": "bots-automacoes",
+    "slug": "bots-automacoes",
+    "label": "Bots & Automations",
+    "icon": "⚡",
     "category": "bots-automacoes",
     "title": "Chatbots & Customer Support",
-    "description": "We build intelligent chatbots for WhatsApp Business, Telegram, and web with conversational AI, CRM integration, and seamless human handoff when the situation calls for it. Automate first-line support, qualify inbound leads, and make sure no customer request goes unanswered — 24 hours a day. A conversation analytics dashboard lets you monitor interactions and refine responses over time.",
-    "features": ["WhatsApp / Telegram / Web chatbot", "Seamless human handoff", "Conversation analytics dashboard"]
+    "description": "We create intelligent chatbots for WhatsApp Business, Telegram and web with conversational AI, CRM integration and handoff to human agents when needed.",
+    "longDescription": "We automate first-line support and lead qualification with chatbots that understand context and integrate with your CRM. Available 24/7 on WhatsApp Business, Telegram and web, with a smooth handoff to human agents when the situation requires. Every bot is trained with your knowledge base, brand voice and business rules — not a generic chatbot. You reduce support costs and increase response speed without sacrificing quality.",
+    "features": ["Chatbot WhatsApp / Telegram / Web", "Handoff to human agents", "Support dashboard"],
+    "benefits": [
+      { "icon": "🕐", "title": "24/7 support", "description": "Answers questions and qualifies leads at any hour, without on-call costs." },
+      { "icon": "🔄", "title": "Intelligent handoff", "description": "Transfers to a human with full conversation context when needed." },
+      { "icon": "📋", "title": "CRM integration", "description": "Leads captured and updated automatically in HubSpot, Pipedrive or your own CRM." },
+      { "icon": "📈", "title": "Conversation analytics", "description": "Resolution rate, most frequent topics and knowledge gaps in the bot." }
+    ],
+    "process": [
+      { "step": 1, "title": "Flow mapping", "description": "We identify the main contact reasons and design the conversational flows." },
+      { "step": 2, "title": "Knowledge base", "description": "We feed the bot with FAQs, policies and business-specific context." },
+      { "step": 3, "title": "Integration & testing", "description": "We connect with CRM, WhatsApp Business API and test with real scenarios." },
+      { "step": 4, "title": "Go-live & optimisation", "description": "We publish, monitor the first weeks and adjust based on actual conversations." }
+    ],
+    "useCases": [
+      "E-commerce with high volumes of questions about orders, shipping and returns",
+      "B2B companies that need to qualify leads before sending them to sales",
+      "Businesses with support teams overloaded by repetitive questions"
+    ],
+    "faq": [
+      { "q": "Does the chatbot use AI or rule-based flows?", "a": "We combine both: structured flows for predictable processes (order status, FAQ) and conversational AI for open-ended questions. The result is more reliable and cheaper than pure AI." },
+      { "q": "Do I need the WhatsApp Business API?", "a": "Yes for high volume. The official API is required for business accounts with over 1,000 messages per month. We assist with the Meta approval process." },
+      { "q": "How does the bot learn over time?", "a": "We review conversations weekly in the first few weeks and update the knowledge base. For high volumes, we implement automatic fine-tuning with human approval." }
+    ]
   },
   {
     "id": "consultoria",
+    "slug": "consultoria",
+    "label": "Technical Consulting",
+    "icon": "💡",
     "category": "consultoria",
     "title": "Technical Consulting",
-    "description": "We provide technical consulting for software architecture design, technology stack selection, in-depth code reviews, legacy system migration, and developer team mentoring. Every engagement produces a concrete deliverable — a detailed architecture report, a migration plan, or a technology roadmap — so your team walks away with a clear path forward, not just verbal recommendations.",
-    "features": ["Detailed architecture report", "Code review with prioritized action items", "Migration plan / technology roadmap"]
+    "description": "We offer technical consulting for architecture definition, stack selection, code review, legacy system migration and mentoring for development teams.",
+    "longDescription": "We offer technical consulting that produces clear decisions, not just verbal recommendations. Every engagement delivers a concrete document: an architecture report, a prioritised migration plan or a technology roadmap. We work on diagnosing systems in crisis, stack selection for new products, internal team code reviews and legacy migrations. Experience from real projects in production — not theoretical methodologies.",
+    "features": ["Detailed architecture report", "Code review with prioritised actions", "Migration plan / roadmap"],
+    "benefits": [
+      { "icon": "📋", "title": "Concrete deliverable", "description": "Every engagement ends with an actionable document — not just meetings and suggestions." },
+      { "icon": "🔍", "title": "Impartial diagnosis", "description": "Technical assessment without commercial bias — focused on what really needs to be done." },
+      { "icon": "🛠️", "title": "Practical experience", "description": "Recommendations based on real projects — not methodology textbooks." },
+      { "icon": "🎓", "title": "Team mentoring", "description": "Knowledge transfer sessions so your team can execute independently." }
+    ],
+    "process": [
+      { "step": 1, "title": "Initial assessment", "description": "We survey the current state: code, infrastructure, processes and accumulated technical debt." },
+      { "step": 2, "title": "Analysis & diagnosis", "description": "We identify risks, bottlenecks and opportunities with concrete technical evidence." },
+      { "step": 3, "title": "Prioritised recommendations", "description": "We deliver an action plan with execution order based on impact and effort." },
+      { "step": 4, "title": "Optional follow-up", "description": "Available to review execution and adjust the plan as new information emerges." }
+    ],
+    "useCases": [
+      "Development teams with growing technical debt and fear of refactoring",
+      "Companies about to scale that need to know if their architecture can handle it",
+      "CTOs or technical founders who need a second opinion before a critical decision"
+    ],
+    "faq": [
+      { "q": "What is the typical format of a consulting engagement?", "a": "It starts with 1–3 days of assessment (interviews and code analysis), followed by a report delivered within 5 business days with prioritised recommendations and effort estimates." },
+      { "q": "Do you also execute the recommendations?", "a": "Yes, when it makes sense. Many clients engage us first for consulting and then for execution. This ensures the work is done by those who understand the problem deeply." },
+      { "q": "Do you work with remote teams?", "a": "100% remote. We work with teams in the US, UK, Brazil and Italy. All deliverables are documented in English or the client's preferred language." }
+    ]
   },
   {
     "id": "desktop",
+    "slug": "desktop",
+    "label": "Desktop",
+    "icon": "🖥️",
     "category": "desktop",
     "title": "Desktop Applications",
-    "description": "We build cross-platform desktop applications that run on Windows, macOS, and Linux from a single Electron codebase. Offline-first support with background synchronization, local hardware integration (printers, barcode scanners, card readers), and automatic over-the-air updates are standard. Ideal for enterprise tools that need direct access to operating system resources or work in environments with unreliable connectivity.",
-    "features": ["Windows + macOS + Linux from one codebase", "Offline mode + background sync", "Automatic OTA updates"]
+    "description": "We develop desktop applications that run on Windows, macOS and Linux from a single codebase with Electron. Offline support, background sync and local hardware integration.",
+    "longDescription": "We develop robust desktop applications that run on Windows, macOS and Linux from a single codebase with Electron. Our apps support offline operation, background synchronisation, automatic OTA updates and integration with local peripherals such as printers, barcode scanners and scales. For internal systems and industrial operations that require reliability over connectivity, desktop is the right choice — we deliver it with modern web development speed.",
+    "features": ["Windows + macOS + Linux app", "Offline mode + sync", "Automatic updates (OTA)"],
+    "benefits": [
+      { "icon": "🖨️", "title": "Local hardware", "description": "Integration with printers, barcode scanners, scales and card readers." },
+      { "icon": "📡", "title": "Offline-first", "description": "Works without internet and syncs automatically when the connection returns." },
+      { "icon": "🔄", "title": "Automatic updates", "description": "New versions installed silently without interrupting the user." },
+      { "icon": "💻", "title": "One codebase, three platforms", "description": "Windows, macOS and Linux from the same code — no duplicate development." }
+    ],
+    "process": [
+      { "step": 1, "title": "Hardware requirements", "description": "We map local peripheral integrations and OS access requirements." },
+      { "step": 2, "title": "Offline-first architecture", "description": "We design the local data model, sync strategy and conflict resolution." },
+      { "step": 3, "title": "Development & testing", "description": "We develop and test on all three platforms in a real environment before delivery." },
+      { "step": 4, "title": "Distribution & updates", "description": "We configure the build pipeline, code signing and automatic update distribution." }
+    ],
+    "useCases": [
+      "Industrial operations with barcode readers or scales on the factory floor",
+      "Point-of-sale (POS) systems that need to function without internet",
+      "Internal tools for teams working in environments with unreliable connectivity"
+    ],
+    "faq": [
+      { "q": "Why Electron and not native?", "a": "Electron lets us reuse all web development expertise, delivering in half the time and cost. For most enterprise use cases, the performance is more than sufficient." },
+      { "q": "How do automatic updates work?", "a": "We use electron-updater with a configured update server. The app checks for updates on launch, downloads in the background and installs on next restart — transparent to the user." },
+      { "q": "Does the app need to be digitally signed?", "a": "Yes, for distribution without security warnings on Windows and macOS. We include code signing with a certificate in the build and publishing process." }
+    ]
   }
 ]

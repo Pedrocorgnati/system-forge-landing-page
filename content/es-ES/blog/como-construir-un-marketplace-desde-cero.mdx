@@ -1,0 +1,123 @@
+---
+title: "Cómo construir un marketplace desde cero"
+slug: "como-construir-un-marketplace-desde-cero"
+date: "2024-07-22"
+description: "Arquitectura y decisiones técnicas para construir un marketplace: stack, modelo de datos multi-vendor, pagos y panel del vendedor."
+tags: ["marketplace", "arquitectura", "multi-vendor", "e-commerce", "desarrollo"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Arquitectura y decisiones técnicas para construir un marketplace: stack, modelo de datos multi-vendor, pagos y panel del vendedor."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'como-construir-marketplace-do-zero'
+  - locale: 'it-IT'
+    slug: 'come-costruire-marketplace-da-zero'
+  - locale: 'en'
+    slug: 'how-to-build-a-marketplace-from-scratch'
+---
+
+Un marketplace no es un e-commerce con más productos. Es una plataforma que conecta dos lados de un mercado — compradores y vendedores — y cobra por esa intermediación. Esta diferencia conceptual se traduce en complejidad técnica real: necesitas cuentas segregadas, reparto financiero automático, panel por vendedor, sistema de valoraciones dobles, reglas de calidad y, como mínimo, el doble de superficie de interfaz.
+
+Si estás considerando construir un marketplace en España — ya sea para servicios locales, productos artesanales, servicios profesionales o cualquier vertical — la complejidad técnica es aproximadamente tres veces mayor que la de un e-commerce simple.
+
+## Modelo de Datos: Sellers, Products y Orders
+
+El modelo de datos de un marketplace difiere del e-commerce en la capa de tenencia:
+
+```typescript
+// Cada producto pertenece a un seller
+interface Product {
+  id: string
+  sellerId: string          // FK a Seller
+  name: string
+  price: number
+  commission: number        // Comisión del marketplace (%)
+  status: 'active' | 'pending_review' | 'suspended'
+}
+
+// Un pedido puede tener items de múltiples sellers
+interface Order {
+  id: string
+  buyerId: string
+  items: OrderItem[]        // Items de distintos sellers
+  status: OrderStatus
+}
+
+interface OrderItem {
+  orderId: string
+  sellerId: string          // Para enrutar el reparto
+  productId: string
+  quantity: number
+  unitPrice: number
+  sellerAmount: number      // unitPrice - comisión marketplace
+  marketplaceAmount: number // La comisión retenida
+}
+```
+
+El campo clave que muchos olvidan: `sellerAmount` y `marketplaceAmount` en cada item. Sin esta segregación desde el momento del pedido, el reparto financiero posterior es un infierno.
+
+## Pagos: Stripe Connect o Adyen Marketplace
+
+El mayor diferenciador técnico de un marketplace vs e-commerce es cómo se gestionan los pagos. En España, el dinero no puede "pasar por" el marketplace y llegar al vendedor sin licencia de pago (o uso de un servicio con esa licencia).
+
+**Stripe Connect** es la solución más común. Existen dos modalidades:
+
+- **Express:** Onboarding rápido para vendedores, panel de Stripe gestionado por Stripe. Menos control, menos fricción de onboarding.
+- **Custom:** Total control de la UX, pero requieres más trabajo de implementación y gestión del KYC/AML.
+
+El reparto automático se hace en el momento del pago o en un ciclo programado:
+
+```typescript
+// Crear PaymentIntent con transferencia automática al seller
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: totalAmount,
+  currency: 'eur',
+  transfer_data: {
+    destination: seller.stripeAccountId,
+    amount: sellerAmount, // Después de la comisión del marketplace
+  },
+})
+```
+
+**Adyen Marketplace:** Alternativa más potente para marketplaces de alto volumen. Mejor para España dado su presencia en Europa y soporte completo de SEPA y Bizum.
+
+## Onboarding de Vendedores
+
+El proceso de alta de un vendedor en un marketplace incluye:
+
+1. **Registro básico:** Email, nombre, datos de contacto
+2. **Verificación de identidad (KYC):** Requerido por regulación para poder hacer pagos. Stripe/Adyen lo gestionan automáticamente
+3. **Datos bancarios:** IBAN para recibir transferencias (SEPA en España)
+4. **NIF/CIF:** Obligatorio para la facturación. Para vendedores con actividad económica, deben estar dados de alta como autónomos o empresa
+5. **Configuración de tienda:** Logo, descripción, política de devoluciones propia
+
+Para vendedores en España, la factura electrónica (obligatoria progresivamente desde 2024-2025) debe ser considerada desde el diseño.
+
+## Panel del Vendedor: Funcionalidades Mínimas
+
+El panel del vendedor es, en esencia, un backoffice simplificado. Las funcionalidades mínimas para lanzar:
+
+- Gestión de productos (CRUD) con aprobación del marketplace
+- Vista de pedidos recibidos y su estado
+- Gestión de inventario
+- Historial de pagos y liquidaciones
+- Métricas básicas (ventas, valoraciones medias)
+
+## Moderación y Calidad
+
+Un marketplace sin moderación se deteriora rápido. Mecanismos esenciales:
+
+- **Aprobación de productos nuevos:** Revisión antes de publicar (manual para bajos volúmenes, automatizada con IA para altos volúmenes)
+- **Sistema de valoraciones:** Comprador valora al vendedor, vendedor puede valorar al comprador
+- **Gestión de disputas:** Proceso claro cuando hay conflicto entre comprador y vendedor
+- **Política de suspensión:** Criterios objetivos y proceso de apelación para vendedores
+
+## Conclusión
+
+Construir un marketplace es una de las apuestas de negocio más atractivas — y técnicamente más exigentes. La complejidad no está en una sola área sino distribuida: datos multi-tenant, pagos regulados, panel dual para compradores y vendedores, moderación de contenido.
+
+¿Tienes un concepto de marketplace para el mercado español? [Contacta con SystemForge](https://systemforge.es/contacto) — construimos marketplaces de principio a fin.

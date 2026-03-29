@@ -1,6 +1,6 @@
 /**
  * scripts/validate-content.ts
- * Validates all 30 JSON content files (3 locales × 10 types) against Zod schemas.
+ * Validates all 40 JSON content files (4 locales × 10 types) against Zod schemas.
  * Run: npx tsx scripts/validate-content.ts
  * Exit code 0 = all pass, 1 = failures found.
  */
@@ -21,7 +21,7 @@ import {
 } from '../src/lib/content/schemas'
 import type { z } from 'zod'
 
-const LOCALES = ['pt-BR', 'it-IT', 'en'] as const
+const LOCALES = ['pt-BR', 'it-IT', 'en', 'es-ES'] as const
 
 const schemaMap: Record<string, z.ZodSchema> = {
   messages: MessagesSchema,
@@ -72,10 +72,10 @@ for (const locale of LOCALES) {
   }
 }
 
-// Placeholder check across it-IT and en
+// Placeholder check across non-BR locales
 const PLACEHOLDER_PATTERNS = /\bTODO\b|\bTRADUZIR\b|\blorem ipsum\b|\bTBD\b|\bPLACEHOLDER\b|\[\.\.\.\]/i
 
-for (const locale of ['it-IT', 'en'] as const) {
+for (const locale of ['it-IT', 'en', 'es-ES'] as const) {
   for (const type of CONTENT_TYPES) {
     const filePath = path.join(process.cwd(), 'content', locale, 'pages', `${type}.json`)
     if (!fs.existsSync(filePath)) continue

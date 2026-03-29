@@ -1,0 +1,107 @@
+---
+title: "Push notifications que convierten: estrategia y código"
+slug: "push-notifications-que-convierten"
+date: "2024-07-29"
+description: "Push notifications en React Native con Expo — permisos, segmentación, deep links y métricas de apertura para optimizar el engagement."
+tags: ["push notifications", "react native", "expo", "engagement app", "mobile marketing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Push notifications en React Native con Expo — permisos, segmentación, deep links y métricas de apertura para optimizar el engagement.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'push-notifications-que-convertem'
+  - locale: 'it-IT'
+    slug: 'push-notification-che-convertono'
+  - locale: 'en'
+    slug: 'push-notifications-that-convert'
+---
+
+Una notificación push mal enviada es peor que ninguna notificación. El usuario recibe un mensaje irrelevante a las 23h, va directamente a los ajustes y desactiva todo — o desinstala la app. Esta decisión ocurre en segundos y rara vez se revierte. Por otro lado, una notificación bien pensada, enviada en el momento correcto, con el contexto adecuado, puede ser el detonante que transforma un usuario dormido en un usuario activo.
+
+La diferencia entre ambos escenarios está en cómo implementas el sistema, no solo en cómo redactas el texto.
+
+## Permisos: Cómo Pedir sin Asustar al Usuario
+
+El primer error es pedir permiso de notificaciones en el onboarding, antes de que el usuario haya experimentado ningún valor del producto. La tasa de rechazo en este punto ronda el 60-70%.
+
+El momento correcto para pedir permisos es después del primer "momento aha" — cuando el usuario acaba de experimentar el valor central del producto. Una app de seguimiento de pedidos debe pedir permisos después de que el usuario vea por primera vez el mapa en tiempo real de su entrega. En ese momento, la utilidad de las notificaciones es obvia.
+
+En React Native con Expo:
+
+```typescript
+import * as Notifications from 'expo-notifications';
+
+async function requestNotificationPermissions() {
+  const { status: existingStatus } = await Notifications.getPermissionsAsync();
+
+  if (existingStatus === 'granted') return true;
+
+  // Mostrar primero un modal explicando el beneficio
+  const userConsented = await showPermissionExplanationModal();
+  if (!userConsented) return false;
+
+  const { status } = await Notifications.requestPermissionsAsync();
+  return status === 'granted';
+}
+```
+
+## Segmentación: El Factor que Determina si Abren o Desinstalan
+
+Una notificación sobre el carrito abandonado enviada a usuarios que nunca han añadido nada al carrito, o una notificación de "¡Nueva oferta!" enviada a usuarios que solo buscan contenido gratuito, generan unsubscribes, no conversiones.
+
+La segmentación mínima viable para un e-commerce: usuarios que han añadido productos al carrito en las últimas 24h, usuarios que compraron hace más de 30 días (reactivación), usuarios que nunca completaron una compra (conversión), usuarios activos con historial de compra reciente (cross-sell).
+
+Con Expo y un backend Node.js, el targeting por segmento se implementa guardando el Expo Push Token junto con el perfil de usuario:
+
+```typescript
+// Backend: guardar token con perfil
+await db.userPushTokens.upsert({
+  userId: user.id,
+  token: expoPushToken,
+  platform: devicePlatform,
+  lastActiveAt: new Date(),
+});
+
+// Enviar a segmento específico
+const abandonedCartUsers = await db.users.findMany({
+  where: {
+    cartUpdatedAt: { gte: subHours(new Date(), 24) },
+    ordersLast30Days: 0,
+  },
+  include: { pushTokens: true },
+});
+```
+
+## Deep Links: Llevar al Usuario al Lugar Correcto
+
+Una notificación que lleva a la pantalla de inicio de la app es una oportunidad perdida. La notificación de carrito abandonado debe abrir el carrito. La notificación de pedido enviado debe abrir el tracking del pedido.
+
+Los deep links en React Native + Expo Router se configuran en `app.json`:
+
+```json
+{
+  "expo": {
+    "scheme": "miapp",
+    "plugins": ["expo-router"]
+  }
+}
+```
+
+Y se navegan en el handler de notificaciones:
+
+```typescript
+Notifications.addNotificationResponseReceivedListener(response => {
+  const { screen, params } = response.notification.request.content.data;
+  router.push({ pathname: screen, params });
+});
+```
+
+## Métricas: Lo que Debes Medir
+
+Las métricas de notificaciones push que importan: tasa de entrega (porcentaje de notificaciones enviadas que llegaron al dispositivo), tasa de apertura (porcentaje que fueron tocadas), tasa de conversión (acciones completadas tras abrir), y tasa de opt-out (desactivaciones de notificaciones).
+
+Una tasa de apertura saludable varía por categoría: e-commerce 3-8%, apps de contenido 5-15%, apps de utilidad 10-20%. Si estás por debajo, el problema es de segmentación o timing. Si la tasa de opt-out supera el 0,5% semanal, estás enviando demasiadas notificaciones o son irrelevantes.

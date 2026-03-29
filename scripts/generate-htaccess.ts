@@ -9,6 +9,7 @@
  *   npx tsx scripts/generate-htaccess.ts --locale=br
  *   npx tsx scripts/generate-htaccess.ts --locale=it
  *   npx tsx scripts/generate-htaccess.ts --locale=en
+ *   npx tsx scripts/generate-htaccess.ts --locale=es
  *   npx tsx scripts/generate-htaccess.ts --all
  *
  * Output: dist/{locale}/.htaccess
@@ -65,6 +66,20 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
     "connect-src 'self' https://api.resend.com https://en-worker.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join('; '),
+
+  // ES: sem GTM por padrão (GDPR — Espanha é EU — GTM só carrega após consentimento explícito via CMP)
+  // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
+  es: [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https: blob:",
+    "font-src 'self'",
+    "connect-src 'self' https://api.resend.com https://es-worker.workers.dev",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -162,7 +177,7 @@ function generateHtaccess(locale: string): string {
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 
   # Content Security Policy — locale: ${locale.toUpperCase()}
-${locale === 'it' ? '  # GDPR: GTM ausente — carregado somente após consentimento explícito (module-11 CMP)\n' : ''}  Header always set Content-Security-Policy "${csp}"
+${(locale === 'it' || locale === 'es') ? '  # GDPR: GTM ausente — carregado somente após consentimento explícito (module-11 CMP)\n' : ''}  Header always set Content-Security-Policy "${csp}"
 
   # HSTS — 1 ano, includeSubDomains
   # Nota: preload requer registro em hstspreload.org — ativar após validação
@@ -260,7 +275,7 @@ function main(): void {
   const locale = localeArg.replace('--locale=', '').toLowerCase()
 
   if (!VALID_LOCALES.includes(locale)) {
-    console.error(`❌ Unknown locale: ${locale}. Use br, it or en`)
+    console.error(`❌ Unknown locale: ${locale}. Use br, it, en or es`)
     process.exit(1)
   }
 

@@ -1,0 +1,96 @@
+---
+title: "A/B test en landing pages: guía técnica"
+slug: "ab-test-landing-pages-guia-tecnico"
+date: "2024-10-11"
+description: "Cómo configurar y ejecutar A/B tests en landing pages con Vercel Edge Middleware sin impactar el SEO — flicker effect, tamaño de muestra y análisis estadístico."
+tags: ["ab test", "landing page", "cro", "vercel", "split testing"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "landing-page"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Cómo configurar y ejecutar A/B tests en landing pages con Vercel Edge Middleware sin impactar el SEO — flicker effect, tamaño de muestra y análisis estadístico."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'ab-test-landing-pages-guia-tecnico'
+  - locale: 'it-IT'
+    slug: 'ab-test-landing-page-guida-tecnica'
+  - locale: 'en'
+    slug: 'ab-test-landing-pages-technical-guide'
+---
+
+El A/B test mal implementado empeora el SEO y distorsiona el análisis. No es exageración: existe una forma específica de implementar split testing que Google detecta y puede penalizar como cloaking. Y existe la forma de declarar ganador antes de tener muestra suficiente, lo que lleva a decisiones basadas en ruido estadístico, no en datos.
+
+La mayoría de los tutoriales de A/B test cubren el lado de marketing: qué testear, cómo formular hipótesis, cómo interpretar resultados. Pocos entran en la implementación técnica — que es donde ocurren los errores. Este artículo cubre la implementación correcta de A/B tests en landing pages modernas.
+
+## Flicker Effect: Cómo Evitar el Flash de Contenido
+
+El flicker effect (también llamado FOOC — Flash of Original Content) es el fenómeno visual donde el usuario ve brevemente la versión original de la página antes de ser redirigido a la variante. Ocurre cuando el split test se implementa del lado del cliente (JavaScript ejecutándose en el navegador después de la carga inicial).
+
+Google recomienda explícitamente evitar A/B tests con flicker: además de degradar la experiencia del usuario, el bot puede indexar la variante incorrecta.
+
+La solución es implementar el split en el servidor o en el edge — antes de que cualquier HTML sea enviado al navegador. Con Vercel Edge Middleware esto es directo:
+
+```typescript
+// middleware.ts
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+
+const EXPERIMENT_COOKIE = 'ab-lp-headline'
+const VARIANTS = ['control', 'variant-a', 'variant-b']
+
+export function middleware(request: NextRequest) {
+  const url = request.nextUrl.clone()
+  if (url.pathname !== '/landing-page-servicio') return NextResponse.next()
+
+  let variant = request.cookies.get(EXPERIMENT_COOKIE)?.value
+  if (!variant || !VARIANTS.includes(variant)) {
+    variant = VARIANTS[Math.floor(Math.random() * VARIANTS.length)]
+  }
+
+  url.pathname = `/landing-page-servicio/${variant}`
+  const response = NextResponse.rewrite(url)
+  response.cookies.set(EXPERIMENT_COOKIE, variant, {
+    maxAge: 60 * 60 * 24 * 30,
+    sameSite: 'strict',
+  })
+  return response
+}
+```
+
+Con esta implementación, el usuario recibe directamente el HTML de la variante correcta — sin flicker, sin JavaScript para el split, y el bot de Google siempre recibe la variante "control" con la canonical tag correcta.
+
+## Calculando el Tamaño de Muestra Necesario
+
+Antes de iniciar el test, calcula el tamaño de muestra necesario para detectar el efecto mínimo relevante para tu negocio.
+
+| Tasa de Conversión Actual | MDE | Muestra por Variante |
+|---|---|---|
+| 2% | 20% relativo (→ 2,4%) | ~20.000 visitantes |
+| 2% | 50% relativo (→ 3,0%) | ~6.400 visitantes |
+| 5% | 20% relativo (→ 6,0%) | ~8.000 visitantes |
+| 5% | 50% relativo (→ 7,5%) | ~2.600 visitantes |
+| 10% | 20% relativo (→ 12%) | ~3.800 visitantes |
+
+*Calculado para 95% de confianza y 80% de potencia estadística con dos variantes.*
+
+Si tu sitio no tiene tráfico suficiente para completar un A/B test en tiempo razonable (menos de 4-6 semanas), considera testear cambios más grandes o usar análisis cualitativo (session recordings, entrevistas con usuarios).
+
+## Cuándo Declarar Ganador
+
+El error más común es el "peaking" — revisar los resultados durante el test e interrumpirlo cuando una variante parece ganadora. Esto infla artificialmente la tasa de falsos positivos.
+
+La regla correcta: define antes de iniciar el test cuál será la duración y cúmplela independientemente de lo que muestren los datos intermedios.
+
+Para interpretar el resultado final, verifica:
+- **P-valor < 0,05:** La probabilidad de que el resultado sea aleatorio es menor al 5%
+- **Intervalo de confianza no incluye cero:** El intervalo del lift debe ser completamente positivo o negativo
+- **Dos semanas completas mínimo:** Garantiza la eliminación del sesgo por día de la semana
+- **Distribución 50/50:** Verifica que el tráfico se distribuyó equitativamente entre variantes
+
+## Conclusión
+
+El A/B test bien implementado es una de las herramientas más potentes de mejora de conversión. La implementación con Vercel Edge Middleware resuelve los problemas técnicos estructuralmente: sin flicker, sin impacto en el SEO, con seguimiento correcto de variantes.
+
+¿Quieres implementar una arquitectura de experimentación en tu landing page? [Contáctanos en SystemForge](https://systemforge.es/contacto) y construimos la infraestructura de tests lista para que tu equipo de marketing iterate sin depender de un desarrollador para cada cambio.

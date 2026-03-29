@@ -1,0 +1,84 @@
+---
+title: "Sistema de gestión para ópticas: del registro al stock"
+slug: "sistema-gestion-para-opticas"
+date: "2024-10-05"
+description: "Requisitos de software de gestión para ópticas en España: fichas de graduación, historial del cliente, control de monturas/lentes e integración con laboratorios."
+tags: ["optica", "gestion sectorial", "software optica", "stock", "graduacion optica"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Requisitos de software de gestión para ópticas en España: fichas de graduación, historial del cliente, control de monturas/lentes e integración con laboratorios."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-gestao-para-oticas'
+  - locale: 'it-IT'
+    slug: 'sistema-gestionale-per-ottici'
+  - locale: 'en'
+    slug: 'management-system-for-optical-stores'
+---
+
+Cuando una óptica intenta usar un sistema genérico de gestión — sea un ERP de comercio o una herramienta de control financiero — inevitablemente choca con un problema fundamental: los sistemas genéricos no saben qué es una graduación óptica. No entienden esferas, cilindros, ejes, adiciones y DIP. No saben que una montura talla 52 no sirve con cualquier lente, que un pedido de lente progresiva tiene un plazo de entrega distinto al de una lente simple, o que el historial de prescripción de un cliente es tan importante como su historial de compras.
+
+El resultado es la proliferación de hojas de cálculo paralelas, recetas en papel que se pierden, control de stock impreciso y pedidos a laboratorios gestionados por WhatsApp. El coste invisible de estas ineficiencias supera con frecuencia la inversión en un sistema especializado.
+
+## Modelo de Datos de la Graduación Óptica
+
+La ficha de graduación es el núcleo del software para ópticas. Debe capturar todos los parámetros que un óptico-optometrista registra en la consulta:
+
+```typescript
+interface GraduacionOptica {
+  clienteId: string;
+  fecha: Date;
+  optometristaId: string;
+
+  // Ojo derecho
+  od_esfera: number;      // Rango: -20.00 a +20.00 en pasos de 0.25
+  od_cilindro: number;    // Rango: -8.00 a +8.00 en pasos de 0.25
+  od_eje: number;         // 0 a 180 grados
+  od_adicion: number;     // Para progresivas: +0.75 a +3.50
+
+  // Ojo izquierdo
+  oi_esfera: number;
+  oi_cilindro: number;
+  oi_eje: number;
+  oi_adicion: number;
+
+  // Parámetros de adaptación
+  dip: number;           // Distancia interpupilar total
+  dip_od: number;        // DIP ojo derecho
+  dip_oi: number;        // DIP ojo izquierdo
+  altura_od?: number;    // Para progresivas
+  altura_oi?: number;
+
+  // Observaciones
+  notas: string;
+  tipoLente: 'monofocal' | 'progresiva' | 'bifocal' | 'ocupacional';
+}
+```
+
+La validación de rangos es crítica: una esfera de +25.00 no es un valor posible en oftalmología convencional y debe rechazarse en el formulario de entrada.
+
+## Gestión de Stock de Monturas y Lentes
+
+El inventario de una óptica tiene dos categorías radicalmente distintas:
+
+**Monturas:** productos físicos en stock, identificados por marca, modelo, color y talla. El sistema debe gestionar: stock real vs stock en exposición, alertas de mínimo de stock por modelo, y el historial de qué montura lleva cada cliente para facilitar la venta de recambios.
+
+**Lentes:** en su mayoría no se tienen en stock — se piden al laboratorio para cada graduación específica. El catálogo de lentes incluye: tipo (monofocal, progresiva, bifocal), material (CR39, policarbonato, Trivex, alto índice 1.60/1.67/1.74), tratamiento (endurecido, antirreflejante, fotocromático, polarizado), y los rangos de graduación que fabrica cada laboratorio.
+
+## Integración con Laboratorios Ópticos
+
+La integración con laboratorios (Indo, Essilor, Rodenstock, Zeiss) es la funcionalidad que mayor ahorro operativo genera. En lugar de llamar por teléfono o enviar un email con la graduación, el software envía el pedido directamente al sistema del laboratorio via API o EDI.
+
+Los datos que debe transmitir el pedido al laboratorio: graduación completa, montura (referencia, talla, medidas de montaje), tipo de lente y tratamientos, plazo de entrega requerido, y datos de facturación del óptico.
+
+El sistema debe recibir la confirmación del pedido, el número de albarán y la fecha estimada de entrega, actualizando automáticamente el estado del pedido del cliente.
+
+## Cumplimiento de la LOCA y Registro de Ópticos
+
+En España, las ópticas están reguladas por la LOCA (Ley de Ordenación del Comercio Óptico) y el personal debe estar inscrito en los Colegios de Ópticos-Optometristas. El software debe registrar qué óptico-optometrista realizó cada examen visual y mantener el historial disponible para inspecciones del Colegio.
+
+Los datos de graduación son datos de salud a efectos del RGPD, lo que implica: acceso restringido (solo el personal sanitario autorizado), log de accesos, cifrado en reposo, y plazo de conservación mínimo de 5 años.

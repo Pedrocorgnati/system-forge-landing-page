@@ -1,0 +1,67 @@
+---
+title: "Publicar app en App Store y Google Play: guía completa"
+slug: "publicar-app-app-store-google-play-guia"
+date: "2024-07-15"
+description: "Paso a paso para publicar una app en App Store y Google Play — cuentas de desarrollador, review guidelines, ASO básico y errores que causan rechazo."
+tags: ["app store", "google play", "publicar app", "aso", "react native"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativo-mobile"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: Paso a paso para publicar una app en App Store y Google Play — cuentas de desarrollador, review guidelines, ASO básico y errores que causan rechazo.
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'publicar-app-app-store-google-play-guia'
+  - locale: 'it-IT'
+    slug: 'pubblicare-app-store-google-play-guida'
+  - locale: 'en'
+    slug: 'publish-app-on-app-store-and-google-play'
+---
+
+Pasaste meses desarrollando tu app. El código funciona, los tests pasan, el equipo aprobó. Ahora es solo publicar y ver llegar las descargas, ¿verdad? No exactamente. La etapa de publicación tiene más capas de lo que la mayoría de los founders espera, y saltarse cualquiera de ellas cuesta tiempo — a veces semanas de retraso en el lanzamiento.
+
+Esta guía cubre el proceso completo: desde la creación de las cuentas de desarrollador hasta las prácticas de ASO que aumentan la visibilidad orgánica de tu app.
+
+## Cuentas de Desarrollador: Apple y Google — Costes y Requisitos
+
+**Apple Developer Program:** 99 USD/año (precio fijo, no hay plan gratuito). Permite publicar en App Store para iOS, iPadOS, macOS, watchOS y tvOS. El registro requiere Apple ID, datos de empresa o datos personales verificados, y puede tardar 24-48 horas en ser aprobado.
+
+Para empresas españolas: si publicas como empresa (no como individual), Apple requiere el D-U-N-S Number de Dun & Bradstreet. Obtenerlo puede tardar 5-7 días laborables si tu empresa no está ya registrada.
+
+**Google Play Developer Account:** 25 USD de pago único. Más rápido de configurar, generalmente aprobado en horas. Requiere verificación de identidad (DNI/pasaporte) y para cuentas de empresa, verificación de empresa.
+
+## Process de Review de Apple: Expectativas Reales
+
+El review de Apple tarda entre 24 y 72 horas para apps nuevas. Las actualizaciones suelen ser más rápidas (12-24 horas). Para fechas críticas de lanzamiento, Apple tiene un sistema de "expedited review" por circunstancias especiales.
+
+Los motivos más frecuentes de rechazo en App Store:
+
+**Guideline 2.1 (Performance):** la app tiene bugs, crashes o el rendimiento es inaceptable. Apple revisa en dispositivos reales, no en simulador.
+
+**Guideline 4.0 (Design):** UX que no cumple los Human Interface Guidelines. Interfaces confusas, buttons sin acción clara, o replicación de la UI del sistema operativo.
+
+**Guideline 5.1 (Privacy):** la app accede a datos del usuario (localización, contactos, cámara) sin justificación clara o sin el correspondiente string de descripción en `Info.plist`.
+
+**Guideline 3.1 (In-app purchase):** si la app tiene funcionalidades de pago, Apple exige usar IAP (In-App Purchase) para compras digitales y cobrar el 15-30% de comisión. Intentar bypasear esto es el rechazo más seguro.
+
+## Google Play Review: Más Flexible pero con Sus Reglas
+
+Google Play también tiene un proceso de review, pero históricamente ha sido más permisivo que Apple. Sin embargo, en los últimos años Google ha endurecido las políticas, especialmente para apps nuevas de publishers desconocidos.
+
+Para apps nuevas, Google puede requerir un período de prueba cerrada con al menos 20 testers antes de poder pasar a producción. Este requisito aplica para publishers nuevos sin historial.
+
+Las políticas más importantes a conocer: política de datos personales (Privacy Policy obligatoria si la app recopila cualquier dato), política de aplicaciones de préstamo (restricciones para apps financieras), y política de contenido (clasificación de contenido obligatoria mediante cuestionario).
+
+## ASO: App Store Optimization Básico
+
+ASO es el equivalente del SEO para apps. Los factores que más impactan la visibilidad orgánica:
+
+**Título y subtítulo:** incluye la keyword principal en el título (sin hacerlo spam). El campo de subtítulo en iOS y la descripción corta en Android son también relevantes para indexación.
+
+**Palabras clave (iOS):** el campo de keywords de App Store Connect tiene 100 caracteres. Úsalos todos, sin repetir palabras ya en el título, separados por comas.
+
+**Screenshots y preview vídeo:** el 60-70% de la decisión de descarga se toma mirando los screenshots. Muestra el flujo principal del producto, no la pantalla de bienvenida. Los primeros 2-3 screenshots son los más vistos.
+
+**Valoraciones y reseñas:** las apps con más valoraciones tienen mejor visibilidad. Implementa un prompt de valoración en el momento correcto: después de una acción exitosa, no al abrir la app por primera vez.
