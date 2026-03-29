@@ -1,0 +1,168 @@
+---
+title: "Marketplace API Integration: Amazon, eBay and Etsy"
+slug: "marketplace-integration-amazon-ebay-etsy-api"
+date: "2026-01-20"
+description: "How to integrate your store with the major US and international marketplaces via API — catalog, inventory, orders, and hub integrations, with technical pitfalls to avoid."
+tags: ["marketplace", "amazon", "ebay", "etsy", "e-commerce integration"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to integrate your store with the major US and international marketplaces via API — catalog, inventory, orders, and hub integrations, with technical pitfalls to avoid."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "integracao-marketplaces-ml-shopee-amazon"
+---
+
+Selling only on your own store limits reach to people who already know you or find you via SEO. Marketplaces — Amazon, eBay, Etsy, Walmart Marketplace — already have the traffic. Hundreds of millions of active buyers searching for products every day. Being present on these channels can multiply order volume without the customer acquisition cost of an independent store.
+
+The challenge is integration: each marketplace has its own API, specific quirks, rate limits, and different authentication models. Doing this manually for each channel is unworkable at scale. Doing it wrong results in stale listings, overselling, and orders arriving with no stock to fulfill.
+
+## Amazon SP-API: Powerful but Complex
+
+Amazon is the dominant US marketplace and has strong presence in the UK, Germany, France, Japan, and beyond. The Amazon SP-API (Selling Partner API) is the most powerful and the most complex. Complexity comes partly from the variety of supported scenarios (FBA, FBM, multiple international marketplaces) and partly from the credential bureaucracy — the API approval process can take weeks.
+
+The authentication model uses AWS IAM + LWA (Login With Amazon). For each API call, you need to sign the request with AWS Signature V4 using temporary IAM credentials, plus include the LWA token. This is substantially more complex than standard OAuth 2.0.
+
+```python
+import httpx
+from datetime import datetime, timedelta, timezone
+
+class AmazonSPClient:
+    # US: https://sellingpartnerapi-na.amazon.com
+    # EU: https://sellingpartnerapi-eu.amazon.com
+    # FE: https://sellingpartnerapi-fe.amazon.com
+    BASE_URL = "https://sellingpartnerapi-na.amazon.com"
+
+    def __init__(self, lwa_client_id: str, lwa_client_secret: str,
+                 refresh_token: str, aws_access_key: str, aws_secret_key: str):
+        self.lwa_client_id = lwa_client_id
+        self.lwa_client_secret = lwa_client_secret
+        self.refresh_token = refresh_token
+        self._access_token: str | None = None
+        self._token_expiry: datetime | None = None
+
+    async def get_lwa_token(self) -> str:
+        if self._token_expiry and datetime.now(timezone.utc) < self._token_expiry - timedelta(minutes=5):
+            return self._access_token
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post("https://api.amazon.com/auth/o2/token", data={
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_token,
+                "client_id": self.lwa_client_id,
+                "client_secret": self.lwa_client_secret,
+            })
+            resp.raise_for_status()
+            data = resp.json()
+            self._access_token = data["access_token"]
+            self._token_expiry = datetime.now(timezone.utc) + timedelta(seconds=data["expires_in"])
+            return self._access_token
+```
+
+What makes Amazon valuable is the FBA (Fulfillment by Amazon) program: you send stock to an Amazon fulfillment center and they handle storage, picking, packing, and delivery. For products with sufficient margin, FBA eliminates your entire logistics operation.
+
+| Dimension | Amazon | eBay | Etsy | Walmart |
+|---|---|---|---|---|
+| Integration complexity | High | Medium | Low-Medium | Medium |
+| API approval time | 1-4 weeks | Immediate | Immediate | Weeks |
+| Own logistics | FBA (optional) | No | No | WFS optional |
+| Average commission (US) | 8-15% | 10-13% | 6.5% + listing | 8-15% |
+| Best categories | Everything | Used + electronics | Handmade + vintage | Everyday goods |
+
+## eBay API: Mature and Reliable
+
+eBay has a mature, well-documented API. The integration flow uses OAuth 2.0 with access tokens that can last up to 18 months (User Access Token) for selling operations or 2 hours (Application Token) for catalog operations.
+
+```python
+class EbayClient:
+    PROD_URL = "https://api.ebay.com"
+
+    async def update_inventory_quantity(self, sku: str, quantity: int) -> None:
+        token = await self.get_valid_token()
+        async with httpx.AsyncClient() as client:
+            response = await client.put(
+                f"{self.PROD_URL}/sell/inventory/v1/inventory_item/{sku}",
+                headers={"Authorization": f"Bearer {token}",
+                         "Content-Language": "en-US"},
+                json={
+                    "availability": {
+                        "shipToLocationAvailability": {
+                            "quantity": quantity
+                        }
+                    }
+                },
+            )
+            response.raise_for_status()
+```
+
+Orders on eBay arrive via webhooks (real-time notifications) or can be polled. The recommendation is webhook with polling as a fallback for missed orders. eBay guarantees "at least once" webhook delivery, so your integration must be idempotent.
+
+## Etsy API: The Craft and Vintage Specialist
+
+Etsy is the dominant marketplace for handmade, vintage, and craft products. Its API v3 uses OAuth 2.0 and is straightforward compared to Amazon. The key limitation: Etsy does not support bulk listing creation — listings must be created individually, which can be a bottleneck for large catalogs.
+
+```typescript
+// Etsy API v3 — update inventory quantity
+async function updateEtsyListingInventory(
+  listingId: number,
+  quantity: number,
+  accessToken: string
+): Promise<void> {
+  const response = await fetch(
+    `https://openapi.etsy.com/v3/application/listings/${listingId}/inventory`,
+    {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'x-api-key': process.env.ETSY_API_KEY!,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        products: [{
+          property_values: [],
+          sku: `SKU-${listingId}`,
+          offerings: [{
+            price: { amount: 0, divisor: 100, currency_code: 'USD' },
+            quantity,
+            is_enabled: true,
+          }],
+        }],
+      }),
+    }
+  );
+
+  if (!response.ok) throw new Error(`Etsy API error: ${response.status}`);
+}
+```
+
+## Integration Hubs: ChannelAdvisor, Linnworks, and Skubana
+
+For most operations, building direct integrations with every marketplace does not make sense. Integration hubs like **ChannelAdvisor**, **Linnworks**, and **Skubana** act as a middleware layer: you connect your store to the hub and the hub communicates with the marketplaces.
+
+The advantages are clear: a single integration point, dedicated technical support for each marketplace's quirks, category mapping already resolved, and inventory synchronization managed by the hub.
+
+The downsides appear when you need fine-grained control: the hub abstracts details that are sometimes important (like dynamic pricing strategies per marketplace or specific shipping rules). There is also a per-order cost or monthly fee on GMV.
+
+The decision depends on volume and customization needs. Up to 500 orders/month per marketplace, a well-configured hub is more efficient. Above that, or when business rules are very specific, direct API integration can be justified.
+
+## Real-Time Inventory Sync: The Critical Challenge
+
+The biggest technical challenge in multi-marketplace integration is inventory synchronization. If you have 10 units of a product and receive simultaneous orders from Amazon and eBay, you risk overselling.
+
+The recommended architecture uses an event-driven approach:
+
+1. **Central inventory service** maintains the authoritative stock count
+2. **Marketplace adapters** publish order events when orders arrive
+3. **Inventory consumer** atomically decrements stock and publishes updates back to all channels
+4. **Marketplace sync workers** propagate the updated quantities to each marketplace API
+
+This architecture, combined with marketplace-level buffer stock (e.g., only expose 8 of 10 units to each channel), effectively eliminates overselling even under high concurrent load.
+
+## Conclusion
+
+Getting marketplace integration right is the difference between a sales channel that grows by itself and one that consumes team time with sync errors, suspended listings, and orders without stock. The technical foundation must be solid: robust authentication, idempotency in order processing, real-time inventory synchronization, and proper handling of each platform's quirks.
+
+At SystemForge, we build marketplace integrations using event-driven architecture that guarantees consistency even under partial failures. If you're expanding to marketplaces or need to replace a fragile integration, [talk to our team](/contact).

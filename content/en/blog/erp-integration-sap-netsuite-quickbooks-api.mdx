@@ -1,0 +1,218 @@
+---
+title: "ERP Integration: SAP, NetSuite and QuickBooks APIs"
+slug: "erp-integration-sap-netsuite-quickbooks-api"
+date: "2026-01-22"
+description: "How to integrate modern systems with SAP S/4HANA, Oracle NetSuite and QuickBooks Online via API — authentication, entity mapping, and synchronization strategies."
+tags: ["sap", "netsuite", "quickbooks", "erp integration", "api"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to integrate modern systems with SAP S/4HANA, Oracle NetSuite and QuickBooks Online via API — authentication, entity mapping, and synchronization strategies."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "integracoes-erps-brasileiros-sap-totvs-omie"
+---
+
+The ERP is the system of record for any business: where orders are invoiced, where inventory officially lives, where accounting happens. Every modern system a company builds — e-commerce, B2B portal, management platform, delivery app — eventually needs to talk to the ERP. And that conversation is almost always harder than it looks.
+
+The complexity is not in the technology. It is in entity mapping: what you call a "product" has dozens of fields in SAP, half of them optional, most with cryptic names from 1990s accounting terminology. This guide covers the three most common ERP platforms in the US and global enterprise market — SAP S/4HANA, Oracle NetSuite, and QuickBooks Online — and how to integrate with each one sustainably.
+
+## SAP S/4HANA: OData APIs and the Modern Approach
+
+SAP is the ERP of large enterprises. SAP installations cost hundreds of thousands of dollars, run on dedicated infrastructure, and are so customized that two SAP customers rarely have the same effective API surface.
+
+**SAP integration mechanisms:**
+
+**OData API (SAP Gateway / SAP Business Accelerator Hub):** The modern approach. SAP Gateway exposes SAP entities as REST/OData APIs consumable via standard HTTP. This is the preferred approach for S/4HANA and ECC installations with SAP Gateway configured.
+
+**BAPIs (Business Application Programming Interfaces):** RFC functions exposed by SAP for standard business operations. `BAPI_SALESORDER_CREATEFROMDAT2` creates sales orders. Stable and available in most SAP installations, but require direct RFC network access (usually via VPN).
+
+```typescript
+// Querying SAP S/4HANA via OData API
+const sapConfig = {
+  baseUrl: "https://my-sap-instance.s4hana.cloud.sap/sap/opu/odata/sap",
+  service: "API_SALES_ORDER_SRV",
+};
+
+async function getSAPSalesOrders(createdAfter: string): Promise<SAPOrder[]> {
+  const url = new URL(`${sapConfig.baseUrl}/${sapConfig.service}/A_SalesOrder`);
+  url.searchParams.set("$filter", `CreationDate ge datetime'${createdAfter}'`);
+  url.searchParams.set("$expand", "to_Item,to_Partner");
+  url.searchParams.set("$format", "json");
+  url.searchParams.set("$top", "100");
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${process.env.SAP_USER}:${process.env.SAP_PASS}`).toString('base64')}`,
+      Accept: "application/json",
+    },
+  });
+
+  const data = await response.json();
+  return data.d.results.map(mapSAPOrderToInternal);
+}
+
+function mapSAPOrderToInternal(sapOrder: SAPOrderRaw): InternalOrder {
+  return {
+    id: sapOrder.SalesOrder,
+    status: mapSAPStatus(sapOrder.OverallSDProcessStatus),
+    customerCode: sapOrder.to_Partner?.results?.find(p => p.PartnerFunction === "AG")?.Customer ?? '',
+    items: sapOrder.to_Item?.results?.map(item => ({
+      materialCode: item.Material,
+      quantity: parseFloat(item.RequestedQuantity),
+      unit: item.RequestedQuantityUnit,
+      netAmount: parseFloat(item.NetAmount),
+    })) ?? [],
+    currency: sapOrder.TransactionCurrency,
+    createdAt: parseSAPDate(sapOrder.CreationDate),
+  };
+}
+```
+
+**Key SAP challenge:** authentication and connectivity. SAP is rarely exposed directly on the internet — you will need VPN, SAP Cloud Connector, or an API management gateway. Coordinate with the client's Basis/IT team from day one of the project.
+
+## Oracle NetSuite: SuiteQL and REST Record API
+
+NetSuite is the dominant cloud ERP for mid-market companies globally. Its modern integration surface has two main options:
+
+**SuiteQL**: SQL-like query language for NetSuite data. More powerful than REST for complex queries with joins across multiple record types.
+
+**REST Record API**: Standard REST endpoints for creating, reading, updating, and deleting NetSuite records.
+
+```typescript
+// NetSuite REST API with OAuth 2.0 Machine Credentials
+class NetSuiteClient {
+  private baseUrl: string;
+
+  constructor(accountId: string) {
+    // Account ID format: 12345 or 12345_SB1 for sandbox
+    this.baseUrl = `https://${accountId}.suitetalk.api.netsuite.com/services/rest`;
+  }
+
+  async query(suiteQL: string): Promise<any[]> {
+    const response = await fetch(`${this.baseUrl}/query/v1/suiteql`, {
+      method: 'POST',
+      headers: {
+        Authorization: await this.getOAuthHeader('POST', `${this.baseUrl}/query/v1/suiteql`),
+        'Content-Type': 'application/json',
+        Prefer: 'transient',
+      },
+      body: JSON.stringify({ q: suiteQL }),
+    });
+
+    const data = await response.json();
+    return data.items ?? [];
+  }
+
+  async getOrders(createdAfter: string): Promise<NetSuiteOrder[]> {
+    return this.query(`
+      SELECT
+        t.id, t.trandate, t.tranid, t.status,
+        c.entityid AS customer_id, c.companyname AS customer_name,
+        SUM(tl.amount) AS total_amount
+      FROM transaction t
+      JOIN customer c ON t.entity = c.id
+      JOIN transactionline tl ON t.id = tl.transaction
+      WHERE t.type = 'SalesOrd'
+        AND t.trandate >= TO_DATE('${createdAfter}', 'YYYY-MM-DD')
+      GROUP BY t.id, t.trandate, t.tranid, t.status, c.entityid, c.companyname
+      ORDER BY t.trandate DESC
+    `);
+  }
+}
+```
+
+**NetSuite's key advantage:** it is a true cloud ERP with no VPN requirements. The REST API and SuiteQL are accessible over the internet with proper OAuth credentials. This dramatically simplifies the integration architecture compared to on-premise SAP.
+
+## QuickBooks Online: The SMB Standard
+
+QuickBooks Online (Intuit) is the dominant accounting software for small and medium businesses in the US (and widely used in the UK and Canada). Its REST API is developer-friendly, well-documented, and uses standard OAuth 2.0.
+
+```typescript
+// QuickBooks Online API via intuit-oauth
+import OAuthClient from 'intuit-oauth';
+
+const oauthClient = new OAuthClient({
+  clientId: process.env.QBO_CLIENT_ID!,
+  clientSecret: process.env.QBO_CLIENT_SECRET!,
+  environment: 'production',
+  redirectUri: `${process.env.BASE_URL}/auth/quickbooks/callback`,
+});
+
+// After OAuth flow, use the access token
+async function createQBOInvoice(invoice: InvoiceData, realmId: string, accessToken: string) {
+  const response = await fetch(
+    `https://quickbooks.api.intuit.com/v3/company/${realmId}/invoice`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+      body: JSON.stringify({
+        Line: invoice.lines.map((line, idx) => ({
+          Id: String(idx + 1),
+          Amount: line.amount,
+          DetailType: 'SalesItemLineDetail',
+          SalesItemLineDetail: {
+            ItemRef: { value: line.itemId, name: line.itemName },
+            Qty: line.quantity,
+            UnitPrice: line.unitPrice,
+          },
+        })),
+        CustomerRef: { value: invoice.customerId },
+        DueDate: invoice.dueDate,
+        CurrencyRef: { value: 'USD' },
+      }),
+    }
+  );
+
+  return response.json();
+}
+```
+
+**QuickBooks Online caveat:** the multi-user OAuth flow requires each QuickBooks company to authorize your app separately. This means your integration needs a credential management flow for each client company — plan for this in the onboarding design.
+
+## Synchronization Strategies: Polling, Webhooks, and CDC
+
+Regardless of the ERP, you need to define how data moves between the ERP and your system.
+
+| Strategy | How it works | When to use | Latency |
+|---|---|---|---|
+| Polling | Your system queries the ERP periodically | ERPs without webhooks (legacy SAP, older QBO features) | Minutes |
+| Webhooks | ERP notifies your system when data changes | QuickBooks Online, NetSuite SuiteScript events | Seconds |
+| CDC (Change Data Capture) | Captures changes directly from ERP database | Direct DB access, DBZ/Kafka available | Seconds |
+| Message queue | ERP publishes to a queue, your system consumes | Critical integrations, high volume | Seconds |
+
+For most projects involving on-premise SAP, polling with a synchronization cursor is the only viable option:
+
+```typescript
+async function syncOrdersFromERP(): Promise<void> {
+  const cursor = await getSyncCursor("erp_orders");
+  const orders = await fetchERPOrders({ createdAfter: cursor.lastSync });
+
+  for (const order of orders) {
+    await upsertOrder(mapERPOrderToInternal(order));
+  }
+
+  if (orders.length > 0) {
+    await updateSyncCursor("erp_orders", new Date());
+  }
+}
+
+setInterval(syncOrdersFromERP, 5 * 60 * 1000);
+```
+
+Always use a synchronization cursor rather than fetching all records. For ERPs with years of data, an unfiltered query can lock the server.
+
+## Conclusion
+
+ERP integrations are one of the most underestimated projects in complexity and most overestimated in delivery speed. Entity mapping, each installation's quirks, connectivity limitations, and access approval processes on the client side can easily double or triple the estimated timeline.
+
+The golden rule: start the technical conversation with the client's IT team on day one of the project, not when development is nearly complete. Discovering that the client's SAP instance does not have the correct module enabled on the eve of go-live is an avoidable problem.
+
+At SystemForge, ERP integrations are documented during the LLD phase with complete entity mapping, synchronization strategy, and contingency plan for ERP failures. [Contact our team](/contact) if you have an ERP integration ahead of you.

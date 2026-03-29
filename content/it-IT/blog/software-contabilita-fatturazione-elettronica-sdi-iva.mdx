@@ -1,0 +1,206 @@
+---
+title: "Software di contabilità: fatturazione elettronica e SDI in Italia"
+slug: "software-contabilita-fatturazione-elettronica-sdi-iva"
+date: "2026-02-18"
+description: "Come costruire software contabile in Italia: fatturazione elettronica B2B/B2C obbligatoria tramite SDI, dichiarazione IVA, Certificazione Unica e integrazione con firme digitali."
+tags: ["fatturazione elettronica", "sdi", "dichiarazione iva", "software contabilità", "compliance fiscale italia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "gestao-setorial"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come costruire software contabile in Italia: fatturazione elettronica B2B/B2C tramite SDI, dichiarazione IVA, CU e gestione delle anomalie."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "software-contabilidade-sped-nfe"
+---
+
+L'Italia ha uno dei sistemi di fatturazione elettronica più avanzati d'Europa. Dal 2019, la fatturazione elettronica B2B è **obbligatoria** per quasi tutte le partite IVA italiane — con le ultime estensioni che hanno incluso anche i forfettari sotto i 25.000€ di ricavi e le associazioni sportive dilettantistiche. Il Sistema di Interscambio (SDI) dell'Agenzia delle Entrate gestisce milioni di fatture al giorno, ed ogni software contabile o gestionale italiano deve integrarsi con esso.
+
+Per chi sta sviluppando un sistema con obblighi fiscali italiani, questo articolo copre i pilastri tecnici: la trasmissione via SDI, la gestione dei codici IVA, le notifiche di ricevuta/rifiuto e le strategie di contingenza quando il sistema dell'AdE è in manutenzione.
+
+## Fatturazione Elettronica in Italia: Il Ciclo SDI
+
+La fattura elettronica italiana ha un ciclo di vita preciso e vincolante:
+
+**Emissione** → il cedente/prestatore crea il file XML nel formato **FatturaPA** (schema fatturaordinaria_v1.2.2) e lo firma digitalmente (opzionale ma consigliato) → **trasmissione allo SDI** (via PEC, servizio web SDICoop, o intermediario) → **elaborazione SDI** (validazione schema, CF/P.IVA, codice SDI destinatario) → **consegna al destinatario** (via PEC, codice SDI, portale AdE).
+
+| Tipo | Formato | Canale | Risposta |
+|------|---------|--------|----------|
+| FatturaPA (PA) | XML FatturaPA | Canale SDI | Ricevuta consegna/impossibilità |
+| Fattura B2B | XML FatturaPA | SDI via intermediario | Ricevuta consegna |
+| Fattura B2C | XML FatturaPA | SDI (archivio AdE) | Ricevuta consegna |
+
+La peculiarità italiana rispetto ad altri sistemi europei è che **lo SDI verifica in tempo quasi reale** la correttezza formale della fattura. Una fattura con P.IVA errata del destinatario, un codice fiscale non valido o un codice SDI inesistente viene rifiutata dallo SDI con un file di notifica XML entro pochi secondi/minuti.
+
+```typescript
+// Struttura XML FatturaPA semplificata
+interface FatturaPA {
+  FatturaElettronica: {
+    FatturaElettronicaHeader: {
+      DatiTrasmissione: {
+        IdTrasmittente: { IdPaese: 'IT'; IdCodice: string }; // P.IVA mittente
+        ProgressivoInvio: string;
+        FormatoTrasmissione: 'FPR12';  // B2B/B2C
+        CodiceDestinatario: string;    // 7 caratteri per B2B, '0000000' per B2C
+        PECDestinatario?: string;      // Per B2C/PA con PEC
+      };
+      CedentePrestatore: {
+        DatiAnagrafici: {
+          IdFiscaleIVA: { IdPaese: 'IT'; IdCodice: string };
+          Denominazione: string;
+          RegimeFiscale: 'RF01' | 'RF19'; // Ordinario, Forfettario...
+        };
+        Sede: { Indirizzo: string; CAP: string; Comune: string; Provincia: string; Nazione: 'IT' };
+      };
+      CessionarioCommittente: { /* dati cliente */ };
+    };
+    FatturaElettronicaBody: Array<{
+      DatiGenerali: {
+        DatiGeneraliDocumento: {
+          TipoDocumento: 'TD01' | 'TD04' | 'TD06'; // Fattura, NC, Parcella
+          Valuta: 'EUR';
+          Data: string; // YYYY-MM-DD
+          Numero: string;
+          ImportoTotaleDocumento: number;
+        };
+      };
+      DatiBeniServizi: {
+        DettaglioLinee: Array<{
+          NumeroLinea: number;
+          Descrizione: string;
+          Quantita?: number;
+          PrezzoUnitario: number;
+          AliquotaIVA: number; // 22, 10, 4, 0...
+          Natura?: 'N1' | 'N2.1' | 'N2.2' | 'N3.1' | 'N4' | 'N5' | 'N6.1'; // Per esenti/escluse
+        }>;
+        DatiRiepilogo: Array<{
+          AliquotaIVA: number;
+          ImponibileImporto: number;
+          Imposta: number;
+          EsigibilitaIVA: 'I' | 'D' | 'S'; // Immediata, Differita, Scissione
+        }>;
+      };
+    }>;
+  };
+}
+```
+
+## Intermediari SDI: API e Servizi
+
+Costruire l'integrazione diretta con lo SDI tramite il protocollo **SDICoop** (webservice SOAP con firma XML) è tecnicamente impegnativo. Per la maggior parte dei sistemi, l'approccio più pratico è usare un intermediario accreditato:
+
+- **Aruba PEC/Fatturazione**: API REST semplice, buona per PMI, prezzi competitivi per volumi bassi
+- **Fattura24/FattureInCloud**: API REST, sistema completo, adatto a chi vuole anche gestione contabile
+- **DocuSign Italy / InfoCert**: per volumi elevati e necessità di firma elettronica qualificata integrata
+- **SDI diretto via SOAP**: per chi ha volumi molto alti (>50.000 fatture/mese) e vuole eliminare i costi per transazione
+
+```typescript
+// Esempio integrazione con intermediario via REST
+async function inviiFatturaSDI(fatturaXml: string, nomeFile: string): Promise<SDIRisposta> {
+  // La maggior parte degli intermediari accetta il file XML come base64
+  const xmlBase64 = Buffer.from(fatturaXml).toString('base64');
+
+  const response = await fetch(`${process.env.SDI_INTERMEDIARIO_URL}/fatture`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.SDI_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      nomefile: nomeFile,    // es: "IT01234567890_FPA12_00001.xml"
+      file: xmlBase64,
+    }),
+  });
+
+  const data = await response.json();
+
+  // Salvare l'identificativo per tracciare la ricevuta
+  await db.fattureElettroniche.create({
+    idSdi: data.identificativo_sdi,
+    nomeFile,
+    statoTrasmissione: 'INVIATA',
+    inviatail: new Date(),
+  });
+
+  return data;
+}
+
+// Webhook per ricevere notifiche di consegna/rifiuto dall'intermediario
+app.post('/webhooks/sdi-notifiche', async (req, res) => {
+  res.status(200).send('OK'); // Rispondere subito
+
+  const { identificativo_sdi, tipo_notifica, data_notifica } = req.body;
+
+  const fattura = await db.fattureElettroniche.findByIdSdi(identificativo_sdi);
+  if (!fattura) return;
+
+  // Tipi: RC (Ricevuta Consegna), NS (Notifica Scarto), MC (Mancata Consegna)
+  await fattura.aggiornaStato(tipo_notifica, data_notifica);
+
+  if (tipo_notifica === 'NS') {
+    // Notifica Scarto: la fattura è stata rifiutata, occorre correggere e riemettere
+    await alertaResponsabileContabilità(fattura, req.body.errori);
+  }
+});
+```
+
+## Dichiarazione IVA e Liquidazioni Periodiche
+
+Oltre alla fatturazione elettronica, il software contabile deve gestire le **liquidazioni IVA periodiche** (mensili o trimestrali) e la **Dichiarazione IVA annuale**. Questi obblighi richiedono:
+
+1. **Registro IVA vendite e acquisti**: tutte le fatture emesse e ricevute classificate per aliquota e natura
+2. **Calcolo del debito/credito IVA**: aliquota standard 22%, ridotta 10% e super-ridotta 4%, con casi speciali per regime del margine, IVA per cassa, ecc.
+3. **Trasmissione telematica**: la Dichiarazione IVA annuale si trasmette tramite i servizi dell'Agenzia delle Entrate (Entratel/Fisconline) o tramite intermediario abilitato
+
+La **Certificazione Unica (CU)** è l'equivalente italiano del modello 730 per redditi da lavoro dipendente e assimilati — il sistema paghe deve generare e trasmettere la CU entro il 31 marzo di ogni anno.
+
+## Contingenza: Cosa Fare Quando lo SDI è Indisponibile
+
+Lo SDI non è sempre disponibile. Il sistema dell'Agenzia delle Entrate ha finestre di manutenzione programmate (solitamente nelle prime ore del mattino) e, più raramente, interruzioni non pianificate.
+
+A differenza di altri sistemi, **non esiste un protocollo di contingenza formale per la fatturazione B2B** come esiste per la PA (dove si può emettere in modalità differita). Per le fatture B2B, la strategia è:
+
+- **Coda di invio**: le fatture create vengono messe in coda e inviate appena lo SDI torna disponibile
+- **Monitoraggio attivo**: ping periodico all'endpoint SDI per rilevare la disponibilità
+- **Dashboard fatture in coda**: visualizzazione per il responsabile contabile di quante fatture attendono l'invio
+
+```python
+from enum import Enum
+
+class StatoFattura(Enum):
+    BOZZA = "bozza"
+    IN_ATTESA_INVIO = "in_attesa_invio"
+    INVIATA = "inviata"
+    CONSEGNATA = "consegnata"
+    SCARTATA = "scartata"
+    IMPOSSIBILITATA = "impossibilitata"
+
+def reinvia_fatture_in_attesa(session, max_tentativi: int = 3):
+    fatture = session.query(FatturaElettronica).filter(
+        FatturaElettronica.stato == StatoFattura.IN_ATTESA_INVIO,
+        FatturaElettronica.tentativi < max_tentativi
+    ).all()
+
+    for fattura in fatture:
+        try:
+            risultato = invia_a_sdi(fattura)
+            fattura.stato = StatoFattura.INVIATA
+            fattura.id_sdi = risultato.identificativo_sdi
+        except SDIUnavailableError:
+            fattura.tentativi += 1
+        except SDIValidationError as e:
+            fattura.stato = StatoFattura.SCARTATA
+            fattura.errore = str(e)
+
+    session.commit()
+```
+
+## Conclusione
+
+Il software contabile e fiscale italiano richiede un livello di specializzazione tecnica che va ben oltre lo sviluppo web convenzionale. Ogni aggiornamento dello schema FatturaPA, ogni nuova proroga per categorie di contribuenti escluse e ogni variazione nelle aliquote IVA è un punto di attenzione che richiede un monitoraggio continuo.
+
+Per le aziende che costruiscono sistemi con obblighi fiscali italiani, la decisione critica è dove investire nell'implementazione propria e dove usare servizi di terzi per astrarre la complessità. Non esiste una risposta universale — dipende dal volume delle emissioni, dalla varietà dei casi d'uso fiscali e dalla criticità dell'operazione.
+
+Nella SystemForge abbiamo esperienza nella costruzione di sistemi con integrazioni fiscali complete, dalla configurazione del canale SDI alla generazione di liquidazioni IVA verificabili. [Contattateci](/contatto) prima di iniziare il vostro scope tecnico.

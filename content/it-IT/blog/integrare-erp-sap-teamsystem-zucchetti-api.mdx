@@ -1,0 +1,207 @@
+---
+title: "Integrare SAP, TeamSystem e Zucchetti: guida pratica"
+slug: "integrare-erp-sap-teamsystem-zucchetti-api"
+date: "2026-01-22"
+description: "Come integrare sistemi moderni con SAP, TeamSystem e Zucchetti via API — autenticazione, mappatura delle entità e strategie di sincronizzazione."
+tags: ["sap", "teamsystem", "zucchetti", "erp", "integrazione sistemi"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "api-integracoes"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come integrare sistemi moderni con SAP, TeamSystem e Zucchetti via API — autenticazione, mappatura delle entità e strategie di sincronizzazione."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "integracoes-erps-brasileiros-sap-totvs-omie"
+---
+
+L'ERP è il sistema di registrazione dell'azienda: dove gli ordini vengono fatturati, dove gli stock esistono ufficialmente, dove avviene la contabilità. Qualsiasi sistema moderno che un cliente sviluppa — e-commerce, app di delivery, portale B2B, piattaforma di gestione — alla fine deve comunicare con l'ERP. E questa comunicazione è quasi sempre più difficile di quanto sembri.
+
+La complessità non sta nella tecnologia. Sta nella mappatura delle entità: quello che chiami "prodotto" ha decine di campi in SAP, metà opzionali, la maggior parte con nomi enigmatici derivati dalla terminologia contabile degli anni '90. Questa guida copre i tre ERP più diffusi nel mercato italiano delle PMI — SAP, TeamSystem e Zucchetti — e come integrarsi con ciascuno in modo sostenibile.
+
+## SAP: BAPI, RFC e OData API
+
+SAP è l'ERP delle grandi aziende. Le installazioni SAP costano centinaia di migliaia di euro, girano su data center dedicati e hanno configurazioni così personalizzate che due clienti SAP raramente hanno la stessa API.
+
+**Meccanismi di integrazione SAP:**
+
+**BAPI (Business Application Programming Interfaces):** Funzioni RFC esposte da SAP per operazioni di business standard. `BAPI_SALESORDER_CREATEFROMDAT2` crea ordini di vendita. `BAPI_MATERIAL_GETLIST` elenca i materiali. Sono stabili, documentate e disponibili nella maggior parte delle installazioni SAP.
+
+**OData API (SAP Gateway):** L'approccio moderno. SAP Gateway espone le entità SAP come API REST/OData, consumibili tramite HTTP standard. Presente in S/4HANA e nelle installazioni ECC con SAP Gateway configurato.
+
+```typescript
+// Esempio: recuperare ordini tramite SAP OData API
+const sapConfig = {
+  baseUrl: "https://erp.azienda.it:8000/sap/opu/odata/sap",
+  service: "API_SALES_ORDER_SRV",
+  auth: Buffer.from(`${process.env.SAP_USER}:${process.env.SAP_PASS}`).toString("base64"),
+};
+
+async function getSalesOrders(dateFrom: string): Promise<SAPOrder[]> {
+  const url = new URL(`${sapConfig.baseUrl}/${sapConfig.service}/A_SalesOrder`);
+  url.searchParams.set("$filter", `CreationDate ge datetime'${dateFrom}'`);
+  url.searchParams.set("$expand", "to_Item,to_Partner");
+  url.searchParams.set("$format", "json");
+
+  const response = await fetch(url.toString(), {
+    headers: {
+      Authorization: `Basic ${sapConfig.auth}`,
+      Accept: "application/json",
+    },
+  });
+
+  const data = await response.json();
+  return data.d.results.map(mapSAPOrderToInternal);
+}
+
+function mapSAPOrderToInternal(sapOrder: SAPOrderRaw): Order {
+  return {
+    id: sapOrder.SalesOrder,
+    status: mapSAPStatus(sapOrder.OverallSDProcessStatus),
+    customer: {
+      id: sapOrder.to_Partner?.results?.find(p => p.PartnerFunction === "AG")?.Customer,
+    },
+    items: sapOrder.to_Item?.results?.map(item => ({
+      productCode: item.Material,
+      quantity: parseFloat(item.RequestedQuantity),
+      price: parseFloat(item.NetAmount),
+    })) ?? [],
+    currency: sapOrder.TransactionCurrency,
+    createdAt: parseSAPDate(sapOrder.CreationDate),
+  };
+}
+```
+
+**Sfida principale con SAP:** autenticazione e connettività. SAP raramente è esposto direttamente su internet — avrete bisogno di VPN o SAP Cloud Connector. Coordinatevi con il team IT del cliente dall'inizio del progetto.
+
+## TeamSystem: REST API per le PMI Italiane
+
+TeamSystem è uno degli ERP più diffusi tra le PMI italiane, con prodotti come TeamSystem Enterprise, TeamSystem HR e le soluzioni cloud come TeamSystem Cloud. L'integrazione avviene principalmente tramite **TeamSystem API**, disponibile per le versioni cloud.
+
+```typescript
+// TeamSystem API — autenticazione OAuth 2.0
+class TeamSystemClient {
+  private baseUrl = 'https://api.teamsystem.com';
+  private accessToken: string | null = null;
+
+  async authenticate(): Promise<void> {
+    const response = await fetch(`${this.baseUrl}/oauth/token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        client_id: process.env.TS_CLIENT_ID,
+        client_secret: process.env.TS_CLIENT_SECRET,
+        grant_type: 'client_credentials',
+        scope: 'api',
+      }),
+    });
+    const data = await response.json();
+    this.accessToken = data.access_token;
+  }
+
+  async getInvoices(dateFrom: string): Promise<TSInvoice[]> {
+    const response = await fetch(
+      `${this.baseUrl}/v1/fatture?dataFrom=${dateFrom}&pageSize=50`,
+      { headers: { Authorization: `Bearer ${this.accessToken}` } }
+    );
+    return (await response.json()).data;
+  }
+
+  async createCustomer(customer: CustomerData): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/v1/clienti`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${this.accessToken}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        ragioneSociale: customer.name,
+        partitaIva: customer.vatNumber,
+        codiceFiscale: customer.fiscalCode,
+        email: customer.email,
+        indirizzo: customer.address,
+      }),
+    });
+    return (await response.json()).id;
+  }
+}
+```
+
+**Peculiarità TeamSystem:** le versioni on-premise più datate (Enterprise su Windows Server) non hanno API REST native. In questi casi, l'integrazione avviene tramite database diretto (SQL Server) con stored procedure personalizzate, o tramite file di scambio XML/CSV — un approccio meno elegante ma ancora molto diffuso in Italia.
+
+## Zucchetti: Il Mercato delle Micro-imprese
+
+Zucchetti è particolarmente diffusa nel segmento contabile e HR, con prodotti come **Ad Hoc Enterprise**, **Infinity** e **Paghe**. L'integrazione varia molto per prodotto.
+
+Per **Zucchetti Ad Hoc** (gestionale PMI), l'integrazione REST è disponibile nelle versioni recenti:
+
+```typescript
+async function zucchettiRequest(endpoint: string, method: string, body?: object) {
+  const response = await fetch(`https://${process.env.ZUC_TENANT}.zucchetti.it/api/v1${endpoint}`, {
+    method,
+    headers: {
+      'Authorization': `Bearer ${process.env.ZUC_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  if (!response.ok) throw new Error(`Zucchetti API error: ${response.status}`);
+  return response.json();
+}
+
+// Recuperare listino prezzi
+const pricelist = await zucchettiRequest('/articoli?tipoListino=VENDITA', 'GET');
+
+// Creare ordine di vendita
+const order = await zucchettiRequest('/ordini-vendita', 'POST', {
+  cliente: { codice: 'CLI001' },
+  righe: [{ articolo: 'PROD001', quantita: 5, prezzoUnitario: 49.90 }],
+  dataOrdine: new Date().toISOString().split('T')[0],
+});
+```
+
+Per le versioni più datate di Zucchetti, lo scambio dati avviene tramite file XML o CSV depositati in cartelle condivise (FTP/SMB) — ancora molto comune nelle PMI italiane con sistemi legacy.
+
+## Strategie di Sincronizzazione: Polling, Webhook e CDC
+
+Indipendentemente dall'ERP, bisogna definire come i dati si muovono tra l'ERP e il sistema esterno.
+
+| Strategia | Come funziona | Quando usare | Latenza |
+|---|---|---|---|
+| Polling | Il sistema consulta l'ERP periodicamente | ERP senza webhook (SAP legacy, Zucchetti vecchio) | Minuti |
+| Webhook | L'ERP notifica il sistema quando c'è un cambiamento | TeamSystem cloud, SAP Gateway event mesh | Secondi |
+| File exchange | L'ERP esporta file, il sistema li importa | ERP legacy on-premise | Minuti-Ore |
+| Database diretto | Lettura diretta del DB dell'ERP | Accesso al database, alta lettura | Secondi |
+
+Per la maggior parte dei progetti con SAP on-premise o Zucchetti datato, il polling è l'unica opzione praticabile:
+
+```typescript
+// Polling robusto con cursore di ultima sincronizzazione
+async function syncOrdersFromERP(): Promise<void> {
+  const cursor = await getSyncCursor("erp_orders");
+  const orders = await fetchERPOrders({ createdAfter: cursor.lastSync });
+
+  for (const order of orders) {
+    await upsertOrder(mapERPOrderToInternal(order));
+  }
+
+  if (orders.length > 0) {
+    await updateSyncCursor("erp_orders", new Date());
+  }
+}
+
+// Schedula il polling ogni 5 minuti
+setInterval(syncOrdersFromERP, 5 * 60 * 1000);
+```
+
+Usate sempre il cursore di sincronizzazione invece di recuperare tutti i record. Per ERP con anni di dati, una query senza filtro può bloccare il server.
+
+## Conclusione
+
+Le integrazioni con ERP sono tra i progetti più sottovalutati in termini di complessità. La mappatura delle entità, le peculiarità di ogni installazione, i limiti di connettività e i processi di approvazione accessi sul lato cliente possono facilmente raddoppiare o triplicare la stima iniziale.
+
+La regola d'oro: iniziate la conversazione tecnica con il team IT del cliente dal primo giorno del progetto. Scoprire che l'ERP del cliente non ha il modulo corretto abilitato alla vigilia del go-live è un problema evitabile.
+
+Nella SystemForge, le integrazioni con ERP vengono documentate in fase di LLD con la mappatura completa delle entità, la strategia di sincronizzazione e il piano di contingenza per i guasti dell'ERP. [Contatta il nostro team](/contatto) se hai un'integrazione ERP in programma.

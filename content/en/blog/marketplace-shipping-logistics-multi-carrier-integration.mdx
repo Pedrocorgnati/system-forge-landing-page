@@ -1,0 +1,194 @@
+---
+title: "Marketplace Shipping: Multi-Carrier Integration and Returns"
+slug: "marketplace-shipping-logistics-multi-carrier-integration"
+date: "2026-02-05"
+description: "How to integrate USPS, FedEx, UPS and EasyPost in a marketplace — automatic rate quoting, unified tracking, and a scalable returns management process."
+tags: ["marketplace logistics", "shipping integration", "easypost", "returns management", "multi-carrier"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to integrate USPS, FedEx, UPS and EasyPost in a marketplace — automatic rate quoting, unified tracking, and a scalable returns management process."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "logistica-marketplace-transportadoras-brasil"
+---
+
+Logistics is where most marketplaces lose the customer experience battle. The product was great, the payment was smooth, but the shipment took twice as long as promised, the tracking code didn't work, and the return turned into an email nightmare. This is not the carrier's fault alone — it is the result of a poorly built integration, with poorly defined SLAs and non-existent exception processes.
+
+The good news is that the logistics ecosystem for US and EU marketplaces has matured significantly. Today there are mature shipping aggregators, reliable tracking APIs, and reverse logistics solutions that can be integrated in weeks. The secret is understanding the layers of the problem before choosing the tools.
+
+## EasyPost: Multi-Carrier Rate Shopping
+
+Integrating each carrier individually is a decision that will cost heavily in maintenance. Each carrier has its own API quirks, undocumented changes, and different rate limits. For most marketplaces, the correct solution is using a shipping aggregator that abstracts these differences.
+
+**EasyPost** is the most popular aggregator for US marketplaces. It connects USPS, FedEx, UPS, DHL, and over 100 regional carriers through a single API. Rate shopping returns multiple options sorted by price and delivery time.
+
+```typescript
+import EasyPost from '@easypost/api';
+
+const client = new EasyPost(process.env.EASYPOST_API_KEY!);
+
+async function getMarketplaceShippingRates(
+  sellerAddress: Address,
+  buyerAddress: Address,
+  parcel: ParcelDetails
+): Promise<ShippingOption[]> {
+  const shipment = await client.Shipment.create({
+    from_address: {
+      name: sellerAddress.name,
+      street1: sellerAddress.line1,
+      city: sellerAddress.city,
+      state: sellerAddress.state,
+      zip: sellerAddress.zipCode,
+      country: 'US',
+    },
+    to_address: {
+      name: buyerAddress.name,
+      street1: buyerAddress.line1,
+      city: buyerAddress.city,
+      state: buyerAddress.state,
+      zip: buyerAddress.zipCode,
+      country: 'US',
+      phone: buyerAddress.phone,
+    },
+    parcel: {
+      weight: parcel.weightOz,
+      length: parcel.lengthIn,
+      width: parcel.widthIn,
+      height: parcel.heightIn,
+    },
+  });
+
+  return shipment.rates
+    .filter(rate => rate.delivery_days !== null && parseFloat(rate.rate) > 0)
+    .map(rate => ({
+      rateId: rate.id,
+      shipmentId: shipment.id,
+      carrier: rate.carrier,
+      service: rate.service,
+      priceCents: Math.round(parseFloat(rate.rate) * 100),
+      deliveryDays: rate.delivery_days,
+      deliveryDate: rate.delivery_date,
+    }))
+    .sort((a, b) => a.priceCents - b.priceCents);
+}
+```
+
+**ShipStation** is an alternative with additional order management capabilities, useful for marketplaces that want a unified dashboard for label printing and shipping workflow management in addition to the API.
+
+## Carrier Comparison for US Marketplace Sellers
+
+| Carrier | Strengths | Best for |
+|---|---|---|
+| USPS Priority Mail | Cost-effective; national coverage | Packages 1-70 lbs, general merchandise |
+| USPS Ground Advantage | Budget option; no size surcharges | Slower deliveries, low-margin products |
+| FedEx Ground | Reliable 1-5 day ground | Heavier packages, B2B addresses |
+| UPS Ground | Strong rural coverage | National distribution |
+| USPS First-Class | Cheapest for under 16 oz | Lightweight items, small accessories |
+
+For EU marketplace operations, **Sendcloud** is the equivalent aggregator, covering DHL, DPD, UPS, GLS, and national postal services across 15+ European countries through a single API.
+
+## Unified Tracking: Normalizing Carrier Events
+
+Tracking is where the customer experience suffers most in poorly built logistics integrations. Each carrier has its own status formats, its own webhooks (when they offer them), and its own update delays.
+
+The solution is an abstraction layer that normalizes statuses from all carriers into a single model:
+
+| Internal status | Description | USPS equivalent | FedEx equivalent |
+|---|---|---|---|
+| `label_created` | Label generated, awaiting pickup | Pre-Shipment | Label Created |
+| `in_transit` | In transit | In Transit | In Transit |
+| `out_for_delivery` | Out for delivery | Out for Delivery | On FedEx vehicle |
+| `delivered` | Delivered | Delivered | Delivered |
+| `failed_delivery` | Delivery attempt failed | Available for Pickup | Delivery Exception |
+| `returned` | Returned to sender | Return to Sender | Return to Shipper |
+
+```typescript
+// EasyPost provides normalized tracking events via webhooks
+app.post('/webhooks/easypost', async (req, res) => {
+  const event = req.body;
+  res.status(200).send('OK'); // Respond immediately
+
+  if (event.object !== 'Event') return;
+  if (!event.description.startsWith('tracker.')) return;
+
+  const tracker = event.result;
+  const order = await db.orders.findByTrackingCode(tracker.tracking_code);
+  if (!order) return;
+
+  // EasyPost normalizes status across all carriers
+  const normalizedStatus = mapEasyPostStatus(tracker.status);
+  await order.updateShippingStatus(normalizedStatus, tracker.tracking_details);
+
+  if (['out_for_delivery', 'delivered', 'delivery_failed'].includes(normalizedStatus)) {
+    await notifyParties(order, normalizedStatus);
+  }
+});
+
+function mapEasyPostStatus(easyPostStatus: string): TrackingStatus {
+  const statusMap: Record<string, TrackingStatus> = {
+    'pre_transit': 'label_created',
+    'in_transit': 'in_transit',
+    'out_for_delivery': 'out_for_delivery',
+    'delivered': 'delivered',
+    'return_to_sender': 'returned',
+    'failure': 'failed_delivery',
+    'unknown': 'unknown',
+  };
+  return statusMap[easyPostStatus] ?? 'unknown';
+}
+```
+
+For carriers without webhooks, implement periodic polling with frequency proportional to expected urgency: every 4 hours for packages in processing, every hour for packages "out for delivery."
+
+## Returns and Reverse Logistics: The Forgotten Process
+
+Returns management is the most neglected part of most marketplace projects. Teams focus 90% of their energy on the outbound flow (sale → delivery) and treat returns as a manual process to "handle later."
+
+The result is predictable: when volume grows, the operations team is buried in unprocessed returns, customers go without responses, and the dispute rate explodes.
+
+A minimum viable returns process for a US marketplace (compliant with FTC regulations and state-level return laws) has four stages:
+
+**Request:** the buyer opens a return request within the stated window (typically 30 days for remorse, indefinite for defective items). The platform collects the reason, photos if applicable, and validates the request eligibility.
+
+**Approval:** the seller (or platform, depending on the reason) approves or disputes. For remorse returns within the stated policy window, approval should be automatic — fighting legitimate returns destroys trust. For defective claims, there may be an investigation period.
+
+**Collection:** automatic generation of a return shipping label. EasyPost supports return label creation tied to the original shipment:
+
+```typescript
+async function createReturnLabel(originalShipmentId: string): Promise<ReturnLabel> {
+  // EasyPost supports return labels linked to original shipments
+  const returnShipment = await client.Shipment.create({
+    // Swap from/to addresses for the return
+    from_address: originalShipment.to_address,
+    to_address: originalShipment.from_address,
+    parcel: originalShipment.parcel,
+    is_return: true,
+  });
+
+  const returnLabel = await client.Shipment.buy(
+    returnShipment.id,
+    returnShipment.lowestRate(['USPS'], ['First', 'Priority']) // Choose economical return rate
+  );
+
+  return {
+    trackingCode: returnLabel.tracking_code,
+    labelUrl: returnLabel.postage_label.label_url,
+  };
+}
+```
+
+**Refund:** after seller confirms receipt of the returned item (or after the dispute window expires), the refund is processed automatically. This must be automated — processing refunds manually does not scale.
+
+The SLA for each step should be communicated to the buyer at the time of the return request: "Your request will be reviewed within 24 hours. Once approved, you will receive the return label within 2 hours. The refund will be processed within 5 business days after we receive the item."
+
+## Conclusion
+
+Well-implemented logistics is a competitive advantage most marketplaces underestimate. Buyers who had a good delivery experience — clear tracking, on-time delivery, hassle-free returns — come back. Those who had a poor experience do not return and tell others.
+
+Integrating carriers correctly requires architectural decisions that affect the data model, notification flows, cost structure, and seller experience. These decisions are much easier to make before development than to correct afterward.
+
+At SystemForge, we document all these flows in a structured way — from the shipment data model to tracking webhooks and return flows — creating the technical foundation the development team needs to build the logistics integration correctly on the first attempt. [Contact our team](/contact).

@@ -1,0 +1,142 @@
+---
+title: "Integrare Amazon, eBay e Zalando: guida tecnica alle API"
+slug: "integrare-marketplace-amazon-ebay-zalando-api"
+date: "2026-01-20"
+description: "Come integrare il tuo negozio con i principali marketplace italiani ed europei via API — catalogo, stock, ordini e hub di integrazione, con i trabocchetti tecnici da evitare."
+tags: ["marketplace", "amazon", "ebay", "zalando", "integrazione e-commerce"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come integrare il tuo negozio con i principali marketplace italiani ed europei via API — catalogo, stock, ordini e hub di integrazione, con i trabocchetti tecnici da evitare."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "integracao-marketplaces-ml-shopee-amazon"
+---
+
+Vendere solo sul proprio sito limita la visibilità a chi già ti conosce o ti trova via SEO. I marketplace — Amazon.it, eBay Italia, Zalando — hanno già il traffico. Milioni di acquirenti attivi che cercano prodotti ogni giorno. Essere presenti su questi canali può moltiplicare il volume degli ordini senza i costi di acquisizione traffico di un negozio indipendente.
+
+La sfida è l'integrazione: ogni marketplace ha la propria API, le proprie peculiarità, i propri rate limit e modelli di autenticazione diversi. Farlo manualmente per ogni canale è impraticabile in scala. Farlo male porta ad annunci non aggiornati, overselling e ordini che arrivano senza stock disponibile.
+
+## Amazon SP-API: Il Più Potente e il Più Complesso
+
+Amazon.it fa parte del marketplace europeo unificato di Amazon (Amazon Europe Core). L'Amazon SP-API (Selling Partner API) è la più potente e la più complessa delle tre. La complessità deriva in parte dalla varietà di scenari supportati (FBA, FBM, marketplace multipli internazionali) e in parte dalla burocrazia delle credenziali.
+
+Il modello di autenticazione usa AWS IAM + LWA (Login With Amazon). Per ogni chiamata, è necessario firmare la richiesta con AWS Signature V4 usando credenziali IAM temporanee, oltre a includere il token LWA.
+
+```python
+import boto3
+import hashlib
+import hmac
+import httpx
+from datetime import datetime, timezone
+
+class AmazonSPClient:
+    SP_API_BASE = "https://sellingpartnerapi-eu.amazon.com"
+
+    def __init__(self, lwa_client_id: str, lwa_client_secret: str,
+                 refresh_token: str, aws_access_key: str, aws_secret_key: str):
+        self.lwa_client_id = lwa_client_id
+        self.lwa_client_secret = lwa_client_secret
+        self.refresh_token = refresh_token
+        self.aws_access_key = aws_access_key
+        self.aws_secret_key = aws_secret_key
+        self._access_token: str | None = None
+
+    async def get_lwa_token(self) -> str:
+        async with httpx.AsyncClient() as client:
+            resp = await client.post("https://api.amazon.com/auth/o2/token", data={
+                "grant_type": "refresh_token",
+                "refresh_token": self.refresh_token,
+                "client_id": self.lwa_client_id,
+                "client_secret": self.lwa_client_secret,
+            })
+            resp.raise_for_status()
+            return resp.json()["access_token"]
+
+    async def get_orders(self, marketplace_id: str = "APJ6JRA9NG5V4") -> list:
+        # APJ6JRA9NG5V4 = Amazon.it
+        token = await self.get_lwa_token()
+        # ... implementazione firma AWS Signature V4
+        pass
+```
+
+Il programma FBA (Fulfillment by Amazon) è il vero differenziatore di Amazon: invii lo stock a un centro di distribuzione Amazon e loro gestiscono stoccaggio, picking, imballaggio e consegna. Per prodotti con margine sufficiente, FBA elimina l'intera operazione logistica interna.
+
+| Dimensione | Amazon | eBay | Zalando |
+|---|---|---|---|
+| Complessità integrazione | Alta | Media | Media-Alta |
+| Tempo approvazione API | 1-4 settimane | Immediato | Su richiesta |
+| Logistica integrata | FBA (opzionale) | No | ZFS opzionale |
+| Commissione media (IT) | 8-15% | 10-12% | 20-35% |
+| Categorie forti | Tutto | Usato + elettronica | Moda + lifestyle |
+
+## eBay API: Matura e Affidabile
+
+eBay Italia ha un'API matura e ben documentata. Il flusso di integrazione usa OAuth 2.0 con token di accesso che possono durare fino a 18 mesi (User Access Token) o 2 ore (Application Token).
+
+```python
+class EbayClient:
+    SANDBOX_URL = "https://api.sandbox.ebay.com"
+    PROD_URL = "https://api.ebay.com"
+
+    async def get_valid_token(self) -> str:
+        if self._token_expiry and datetime.now(timezone.utc) < self._token_expiry:
+            return self._access_token
+
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{self.base_url}/identity/v1/oauth2/token",
+                headers={"Authorization": f"Basic {self._encode_credentials()}"},
+                data={
+                    "grant_type": "refresh_token",
+                    "refresh_token": self._refresh_token,
+                    "scope": "https://api.ebay.com/oauth/api_scope/sell.inventory",
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            self._access_token = data["access_token"]
+            return self._access_token
+
+    async def update_inventory(self, sku: str, quantity: int) -> None:
+        token = await self.get_valid_token()
+        async with httpx.AsyncClient() as client:
+            await client.put(
+                f"{self.base_url}/sell/inventory/v1/inventory_item/{sku}",
+                headers={"Authorization": f"Bearer {token}"},
+                json={"availability": {"shipToLocationAvailability": {"quantity": quantity}}},
+            )
+```
+
+Un vantaggio di eBay rispetto ad Amazon è la minore burocrazia per l'approvazione dell'API — l'accesso è quasi immediato per i merchant verificati.
+
+## Zalando Partner API: Moda con Requisiti Specifici
+
+Zalando è il marketplace dominante per la moda in Europa. L'integrazione via Zalando Partner API richiede prima l'approvazione come partner ufficiale — un processo che può richiedere settimane. Una volta approvati, l'API usa OAuth 2.0 con endpoint specifici per articoli, stock e ordini.
+
+Le peculiarità di Zalando da tenere in conto:
+
+**Requisiti di contenuto rigidi**: descrizioni prodotto, immagini e taglie devono rispettare gli standard Zalando. Foto con sfondo bianco, attributi di taglia normalizzati per paese (IT, DE, FR usano convenzioni diverse), descrizioni in lingua locale.
+
+**Zalando Fulfillment Solutions (ZFS)**: simile all'FBA di Amazon, Zalando offre la gestione logistica centralizzata. Obbligatorio per alcuni brand.
+
+**Commissioni elevate**: 20-35% di commissione è la norma per Zalando, il che richiede una strategia di pricing dedicata per il canale.
+
+## Hub di Integrazione: ChannelAdvisor, Tradebyte e Channable
+
+Per la maggior parte delle operazioni, costruire un'integrazione diretta con ogni marketplace non ha senso. Hub di integrazione come **ChannelAdvisor**, **Tradebyte** e **Channable** funzionano come livello intermedio: colleghi il tuo negozio all'hub e l'hub comunica con i marketplace.
+
+I vantaggi sono chiari: un unico punto di integrazione, supporto tecnico dedicato per le particolarità di ogni marketplace, mappatura delle categorie già risolta e sincronizzazione dello stock gestita dall'hub.
+
+Gli svantaggi emergono quando serve controllo granulare: l'hub astrae dettagli che a volte sono importanti (come strategie di pricing dinamico per marketplace o regole di spedizione specifiche). C'è anche un costo per ordine o mensile sul GMV.
+
+La decisione dipende dal volume e dal bisogno di personalizzazione. Fino a 500 ordini/mese per marketplace, un hub ben configurato è più efficiente. Sopra questa soglia, o quando le regole di business sono molto specifiche, l'integrazione diretta con le API può essere giustificata.
+
+## Conclusione
+
+Integrare i marketplace in modo corretto è la differenza tra un canale di vendita che cresce da solo e uno che consuma il tempo del team con errori di sincronizzazione, annunci sospesi e ordini senza stock. La base tecnica deve essere solida: autenticazione robusta, idempotenza nel processamento degli ordini, sincronizzazione dello stock in tempo reale e gestione adeguata delle peculiarità di ogni piattaforma.
+
+Il team di SystemForge sviluppa integrazioni con Amazon, eBay e Zalando usando un'architettura ad eventi che garantisce consistenza anche in caso di guasti parziali. Se stai espandendo sui marketplace o hai bisogno di sostituire un'integrazione fragile, [contatta il nostro team](/contatto).

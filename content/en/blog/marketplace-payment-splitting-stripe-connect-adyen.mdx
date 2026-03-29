@@ -1,0 +1,192 @@
+---
+title: "Marketplace Payment Splitting: Stripe Connect and Adyen"
+slug: "marketplace-payment-splitting-stripe-connect-adyen"
+date: "2026-02-22"
+description: "How to implement payment splitting in a marketplace: Stripe Connect, Adyen Marketplace, and PayPal — technical comparison with practical examples, KYC requirements and PSD2 compliance."
+tags: ["payment splitting", "marketplace payments", "stripe connect", "adyen", "psd2 compliance"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to implement payment splitting in a marketplace: Stripe Connect, Adyen Marketplace, and PayPal — technical comparison with KYC requirements and PSD2 compliance."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "split-pagamentos-marketplace-brasil"
+---
+
+Payment splitting is the mechanism that transforms an e-commerce store into a marketplace. It guarantees that when a customer pays $300 for products from three different sellers, each seller automatically receives their portion, minus the platform's commission. Simple to describe, complex to implement — and this is exactly where most marketplace projects stall.
+
+The good news is that there are mature solutions in the market. The bad news is that each one has its own limitations, costs, and compliance requirements that need to be evaluated before writing any code.
+
+## Stripe Connect vs Adyen Marketplace vs PayPal Marketplace
+
+These are the three most commonly used options for automatic payment splitting in US and global marketplaces. Each serves a different project profile.
+
+| Criterion | Stripe Connect | Adyen Marketplace | PayPal Marketplace |
+|---|---|---|---|
+| Global coverage | Excellent (45+ countries) | Excellent (150+ countries) | Very good |
+| US market support | Native | Native | Native |
+| EU/UK PSD2 compliance | Automatic SCA | Automatic SCA | Automatic SCA |
+| Average MDR (US) | 2.9% + $0.30 | Negotiated by volume | 2.9% + $0.30 |
+| Seller KYC | Automated (Express/Custom) | Automated (Hosted Onboarding) | Automated |
+| Holdback period | 2–7 days | Configurable | 1–21 days |
+| Minimum volume | None | High | None |
+| Documentation | Excellent | Good | Good |
+| Multi-party payments | Yes | Yes | Yes |
+
+**Stripe Connect** is the best choice for teams already familiar with the Stripe ecosystem or that need to internationalize the marketplace in the future. The documentation is superior and the API is consistent. For US-focused marketplaces, Stripe's coverage of ACH, cards, and local payment methods is comprehensive.
+
+**Adyen Marketplace** is indicated for high-volume marketplaces ($5M+/month) that need negotiated rates and require deep localization of payment methods across multiple countries. The onboarding process for Adyen itself is more bureaucratic, but the transaction economics at scale are typically better.
+
+**PayPal Marketplace Payments** remains important because of PayPal's buyer trust factor — many US shoppers prefer paying with PayPal on unfamiliar marketplaces. The integration with Braintree (PayPal's developer platform) provides clean APIs.
+
+## Settlement Schedules and Holdback Periods
+
+Beyond the MDR, marketplaces need to understand the settlement schedule — when money reaches the seller's account after a purchase.
+
+The most common model:
+
+1. Customer pays with credit card
+2. Payment gateway approves the transaction and holds the funds
+3. The marketplace retains the commission (e.g., 15%)
+4. After the holdback period (protection against chargebacks), the net amount is transferred to the seller
+
+The holdback period varies by gateway and configuration. In Stripe Connect, the default is 7 days for new sellers. It is critical to align this schedule with sellers during onboarding — many arrive expecting D+1 and are surprised by D+7.
+
+Payouts can be automatic (the gateway transfers to the seller's sub-account and pays out on schedule) or manual (your platform controls the balance and transfers periodically). Automatic is preferable at scale.
+
+## Stripe Connect: Implementation for US Marketplace
+
+The split flow with Stripe Connect uses the "Express Accounts" model for most marketplaces. In this model, the seller creates a sub-account on Stripe linked to your platform:
+
+```typescript
+// 1. Create seller sub-account at onboarding
+async function createSellerAccount(seller: SellerData): Promise<string> {
+  const account = await stripe.accounts.create({
+    type: 'express',
+    country: seller.countryCode, // 'US', 'GB', 'CA', etc.
+    email: seller.email,
+    capabilities: {
+      transfers: { requested: true },
+      card_payments: { requested: true },
+      us_bank_account_ach_payments: { requested: true }, // ACH for US sellers
+    },
+    business_type: seller.businessType, // 'individual' or 'company'
+    settings: {
+      payouts: {
+        schedule: {
+          interval: 'weekly',
+          weekly_anchor: 'friday',
+        },
+      },
+    },
+  });
+
+  await db.sellers.update({
+    where: { id: seller.id },
+    data: { stripeAccountId: account.id },
+  });
+
+  return account.id;
+}
+
+// 2. Generate onboarding link for seller KYC
+async function getSellerOnboardingUrl(stripeAccountId: string): Promise<string> {
+  const link = await stripe.accountLinks.create({
+    account: stripeAccountId,
+    refresh_url: `${process.env.BASE_URL}/seller/onboarding/retry`,
+    return_url: `${process.env.BASE_URL}/seller/onboarding/complete`,
+    type: 'account_onboarding',
+  });
+  return link.url;
+}
+
+// 3. Create PaymentIntent with automatic split on purchase
+async function createMarketplacePaymentIntent(
+  orderTotalCents: number,
+  commissionCents: number,
+  sellerStripeAccountId: string,
+  metadata: Record<string, string>
+): Promise<{ clientSecret: string }> {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: orderTotalCents,
+    currency: 'usd',
+    automatic_payment_methods: { enabled: true },
+    application_fee_amount: commissionCents,  // Platform keeps this
+    transfer_data: {
+      destination: sellerStripeAccountId,     // Goes to seller
+    },
+    metadata,
+  });
+
+  return { clientSecret: paymentIntent.client_secret! };
+}
+
+// 4. For multi-seller orders: single payment, multiple transfers after capture
+async function splitMultiSellerOrder(
+  paymentIntentId: string,
+  sellerSplits: Array<{ accountId: string; amount: number; orderId: string }>
+): Promise<void> {
+  for (const split of sellerSplits) {
+    await stripe.transfers.create({
+      amount: split.amount,
+      currency: 'usd',
+      destination: split.accountId,
+      source_transaction: paymentIntentId,
+      metadata: { order_id: split.orderId },
+    });
+  }
+}
+```
+
+## KYC and Compliance: Know Your Seller
+
+If your marketplace handles financial intermediation — which applies to virtually all marketplaces — you are subject to financial regulation. In the US, this typically falls under FinCEN's AML/KYC requirements. In the EU/UK, it falls under AMLD (Anti-Money Laundering Directive) and PSD2.
+
+Payment gateways like Stripe and Adyen handle much of the regulatory burden as licensed payment institutions. However, you are still responsible for the seller KYC within your platform.
+
+Minimum KYC for sellers should include:
+
+- Government ID verification (SSN for individuals, EIN + articles of incorporation for businesses)
+- Bank account verification (name on account matches registration)
+- Address verification
+- Sanctions screening (OFAC, EU, UN lists)
+
+Stripe's identity verification handles most of this automatically for Express accounts. For Custom accounts, you can control more of the flow:
+
+```typescript
+// Verify seller bank account via Stripe
+async function verifySellerBankAccount(
+  sellerStripeAccountId: string,
+  accountNumber: string,
+  routingNumber: string
+): Promise<void> {
+  const externalAccount = await stripe.accounts.createExternalAccount(
+    sellerStripeAccountId,
+    {
+      external_account: {
+        object: 'bank_account',
+        country: 'US',
+        currency: 'usd',
+        routing_number: routingNumber,
+        account_number: accountNumber,
+      },
+    }
+  );
+
+  // Stripe will initiate micro-deposits for verification if required
+  // or use Plaid instant verification for supported banks
+}
+```
+
+Avoid the temptation to skip KYC at MVP stage. Beyond regulatory risk, marketplaces without proper KYC attract fraudulent sellers and experience chargebacks at high rates.
+
+## Conclusion
+
+Well-implemented payment splitting is a real competitive advantage — it ensures sellers receive timely payments, reduces financial disputes, and makes the platform professional from day one.
+
+The wrong gateway choice, a poorly communicated settlement schedule, or superficial KYC can be costly in chargebacks, regulatory fines, and seller churn. This decision deserves careful attention before any implementation.
+
+At SystemForge, we help teams document and architect these decisions in a structured way, with detailed LLD, API contracts, and integration flows defined before implementation. [Contact us](/contact) to discuss your marketplace payment architecture.

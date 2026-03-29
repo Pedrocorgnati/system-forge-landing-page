@@ -1,0 +1,200 @@
+---
+title: "Stripe for SaaS: Complete Billing and Subscriptions Guide"
+slug: "stripe-saas-billing-subscriptions-guide"
+date: "2026-03-01"
+description: "How to implement Stripe Billing for SaaS: subscriptions, metered billing, dunning, international payment methods and comparison with Paddle and LemonSqueezy for EU tax compliance."
+tags: ["stripe billing", "saas subscriptions", "recurring billing", "dunning", "payment methods"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "How to implement Stripe for SaaS: subscriptions, metered billing, dunning, international payment methods and comparison with Paddle and LemonSqueezy."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "stripe-no-brasil-guia-cobranca-saas"
+---
+
+Billing is where SaaS products most commonly stall. The combination of credit cards, bank debits, international VAT compliance, invoicing requirements, and local payment method expectations creates a complexity that delays launches, increases involuntary churn, and consumes engineering time that should be spent on the product. Stripe handles most of this well — but a correct implementation requires understanding what is available, what has limitations, and where alternative platforms might serve you better.
+
+This guide covers what you need to know to implement billing in a SaaS product using Stripe as the primary platform.
+
+## Stripe Billing: Plans, Prices, and Upgrade Flows
+
+Stripe Billing is Stripe's subscription management module — and this is where the greatest value lies for SaaS. It manages the complete lifecycle of a subscription: creation, recurring billing, upgrades, downgrades, trial periods, prorated charges, and cancellations.
+
+The central data model of Stripe Billing revolves around three concepts:
+
+- **Product**: What you are selling (e.g., "Pro Plan")
+- **Price**: The billing conditions for a product (e.g., $199/month, billed on the 1st of each month)
+- **Subscription**: The link between a Customer and a Price
+
+```javascript
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+
+// 1. Create product and price
+const product = await stripe.products.create({
+  name: 'Pro Plan',
+  description: 'Full access with up to 20 users',
+});
+
+const price = await stripe.prices.create({
+  product: product.id,
+  unit_amount: 19900, // $199.00 in cents
+  currency: 'usd',
+  recurring: { interval: 'month' },
+});
+
+// 2. Create subscription for an existing customer
+const subscription = await stripe.subscriptions.create({
+  customer: 'cus_XXXXXXXXXX',
+  items: [{ price: price.id }],
+  trial_period_days: 14,
+  payment_settings: {
+    payment_method_types: ['card'],
+    save_default_payment_method: 'on_subscription',
+  },
+  expand: ['latest_invoice.payment_intent'],
+});
+```
+
+Upgrades and downgrades are managed via `subscription.update` with the `proration_behavior` parameter. Stripe automatically calculates the proportional value of the remaining days in the cycle and charges or credits the difference on the next invoice.
+
+## Metered Billing: Usage-Based Pricing
+
+Many modern SaaS products use usage-based or hybrid pricing (base fee + usage). Stripe supports this via metered billing:
+
+```typescript
+// Create a metered price for API calls
+const meteredPrice = await stripe.prices.create({
+  product: product.id,
+  currency: 'usd',
+  recurring: {
+    interval: 'month',
+    usage_type: 'metered',
+    aggregate_usage: 'sum',
+  },
+  unit_amount: 1, // $0.01 per API call
+  billing_scheme: 'per_unit',
+});
+
+// Report usage throughout the billing period
+async function reportAPIUsage(subscriptionItemId: string, quantity: number): Promise<void> {
+  await stripe.subscriptionItems.createUsageRecord(subscriptionItemId, {
+    quantity,
+    timestamp: Math.floor(Date.now() / 1000),
+    action: 'increment',
+  });
+}
+
+// For tiered usage (cheaper per unit at higher volumes)
+const tieredPrice = await stripe.prices.create({
+  product: product.id,
+  currency: 'usd',
+  recurring: { interval: 'month', usage_type: 'metered' },
+  billing_scheme: 'tiered',
+  tiers_mode: 'graduated',
+  tiers: [
+    { up_to: 1000, unit_amount: 5 },        // First 1k: $0.05 each
+    { up_to: 10000, unit_amount: 3 },       // Next 9k: $0.03 each
+    { up_to: 'inf', unit_amount: 1 },       // Over 10k: $0.01 each
+  ],
+});
+```
+
+## International Payment Methods
+
+For SaaS with global customers, Stripe's `automatic_payment_methods` feature automatically enables the right payment methods based on the customer's location:
+
+```typescript
+// Payment Intent with automatic method selection
+const paymentIntent = await stripe.paymentIntents.create({
+  amount: 19900,
+  currency: 'eur', // Currency determines available methods
+  automatic_payment_methods: { enabled: true },
+  // For EUR: enables cards, SEPA Direct Debit, iDEAL (NL), Bancontact (BE),
+  //          SOFORT (DE), Giropay (DE), etc.
+});
+```
+
+Key payment methods by market:
+
+| Market | Preferred recurring methods | Notes |
+|--------|----------------------------|-------|
+| US | Credit/debit cards, ACH | Cards dominate; ACH for B2B |
+| EU | Cards, SEPA Direct Debit | SEPA DD: lower cost, 3-5 day settlement |
+| UK | Cards, BACS Direct Debit | BACS: 3 day settlement, very low chargeback |
+| Germany | SEPA DD, Cards | German users skeptical of cards for SaaS |
+| Netherlands | iDEAL + SEPA DD | iDEAL for initial payment; SEPA DD for recurring |
+
+## Dunning: Reducing Involuntary Churn
+
+Involuntary churn — subscribers who are lost not because they want to cancel but because their payment fails — is one of the most underestimated SaaS problems. On average, 20-30% of churn is involuntary.
+
+Stripe Billing has a configurable dunning system: it automatically retries failed charges after 3, 5, and 7 days (configurable), sends emails to the customer with a link to update their payment method, and suspends or cancels the subscription after N failed attempts.
+
+```javascript
+// Webhook handlers for dunning flow
+app.post('/webhooks/stripe', express.raw({ type: 'application/json' }), async (req, res) => {
+  const event = stripe.webhooks.constructEvent(
+    req.body,
+    req.headers['stripe-signature'],
+    process.env.STRIPE_WEBHOOK_SECRET
+  );
+
+  switch (event.type) {
+    case 'invoice.payment_failed':
+      // First failure: send friendly reminder email
+      await sendPaymentFailedEmail(event.data.object.customer_email, {
+        updateUrl: `${process.env.APP_URL}/billing/update-payment`,
+        attemptCount: event.data.object.attempt_count,
+      });
+      break;
+
+    case 'customer.subscription.updated':
+      const sub = event.data.object;
+      if (sub.status === 'past_due') {
+        // Degrade service but don't fully cut off — show banner in app
+        await user.setSubscriptionStatus('past_due');
+      }
+      break;
+
+    case 'customer.subscription.deleted':
+      // Final cancellation after max retries
+      await user.deactivateAccount();
+      await sendCancellationEmail(event.data.object.customer);
+      break;
+  }
+
+  res.json({ received: true });
+});
+```
+
+Enabling Stripe's **Smart Retries** (which uses ML to optimize the retry timing based on card network signals) reduces involuntary churn by up to 38% compared to fixed retry schedules, according to Stripe's own data.
+
+## Stripe vs Paddle vs LemonSqueezy: When to Use Each
+
+For SaaS that sell primarily to individuals or small businesses and want to eliminate international VAT complexity, Merchant of Record (MoR) platforms like Paddle and LemonSqueezy are worth evaluating:
+
+| Criterion | Stripe | Paddle | LemonSqueezy |
+|-----------|--------|--------|--------------|
+| Merchant of Record | No (you are) | Yes | Yes |
+| EU VAT handling | Via Stripe Tax | Automatic | Automatic |
+| UK VAT compliance | Via Stripe Tax | Automatic | Automatic |
+| Transaction cost | 2.9% + $0.30 | 5% + $0.50 | 8% + $0.50 |
+| Customization | Maximum | Medium | Limited |
+| B2B invoicing | Manual integration | Included | Included |
+| Refund flexibility | Full control | Platform-managed | Platform-managed |
+
+**Choose Paddle or LemonSqueezy when:** your SaaS sells primarily to individuals or small businesses internationally, you want to completely eliminate VAT registration and filing in each country, and the higher per-transaction cost is justified by the operational simplicity.
+
+**Choose Stripe when:** you sell primarily to B2B customers who need proper invoices, you need granular control over payment flows, you are building complex payment workflows (marketplaces, multi-party, custom checkout), or you have international expansion plans that require fine-grained local payment method support.
+
+## Conclusion
+
+SaaS billing is not a problem solved by a single tool. Stripe Billing handles subscription management excellently, but the combination with international payment methods, VAT compliance, proper invoicing for B2B customers, and dunning logic requires careful integration of multiple services.
+
+Getting this right from the start — with robust webhooks, involuntary churn handling, automatic retry for failed charges, and proper invoicing — saves months of refactoring and avoids tax problems that surface too late.
+
+At SystemForge, the billing layer is one of the standard deliverables in the SaaS products we build: Stripe Billing with support for cards and SEPA/BACS, dunning logic to reduce involuntary churn, and VAT-compliant invoicing. [Talk to us](/contact) to see how we structure this for your product.

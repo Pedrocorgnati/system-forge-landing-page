@@ -1,0 +1,217 @@
+---
+title: "Split dei pagamenti per marketplace: Stripe Connect e Mangopay"
+slug: "split-pagamenti-marketplace-stripe-connect-mangopay"
+date: "2026-02-22"
+description: "Come implementare lo split dei pagamenti in un marketplace europeo: Stripe Connect, Mangopay e PSD2 — comparativo tecnico con esempi pratici e requisiti KYC."
+tags: ["split pagamento", "marketplace", "stripe connect", "mangopay", "psd2"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "marketplace"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come implementare lo split dei pagamenti in un marketplace europeo: Stripe Connect, Mangopay e requisiti KYC — comparativo tecnico con esempi pratici."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "split-pagamentos-marketplace-brasil"
+---
+
+Lo split dei pagamenti è il meccanismo che trasforma un e-commerce in marketplace. È lui che garantisce che, quando un cliente paga €300 per prodotti di tre venditori diversi, ciascuno riceva automaticamente la propria quota, già detratta la commissione della piattaforma. Semplice a descriversi, complesso da implementare — ed è esattamente qui che la maggior parte dei progetti marketplace si blocca.
+
+La buona notizia è che esistono soluzioni mature per il mercato europeo. La cattiva notizia è che ciascuna ha le proprie limitazioni, costi e requisiti di compliance che vanno valutati prima di scrivere una riga di codice.
+
+## Stripe Connect vs Mangopay: Il Confronto
+
+Queste sono le due opzioni più usate in Europa per lo split automatico. Servono profili diversi di progetto.
+
+| Criterio | Stripe Connect | Mangopay |
+|---|---|---|
+| Presenza in Europa | Ottima (30+ paesi) | Ottima (focus UE) |
+| SEPA Direct Debit | Sì | Sì |
+| Carte locali EU | Sì (Bancontact, iDEAL, ecc.) | Sì |
+| Satispay | No | No (tramite wallet Mangopay) |
+| MDR carte EU | 1,5% + €0,25 (SCA compliant) | 1,8% + €0,18 |
+| KYC venditori | Automatizzato via Stripe | Processo documentale + automatico |
+| Holdback standard | 2–7 giorni | 0–5 giorni (configurabile) |
+| Volume minimo | No | No |
+| Documentazione | Eccellente | Buona |
+| Wallet venditori | Sì (Express/Custom) | Sì (E-wallet nativo) |
+| Marketplace fintech/crowdfunding | Supportato con restrizioni | Ottimo supporto nativo |
+
+**Stripe Connect** è la scelta migliore per team che conoscono già l'ecosistema Stripe o che devono internazionalizzare il marketplace in futuro. La documentazione è superiore e l'API è consistente. Stripe è pienamente conforme a PSD2/SCA per i pagamenti europei.
+
+**Mangopay** è particolarmente popolare nei marketplace europei di tipo fintech, crowdfunding, noleggio tra privati e servizi. Il modello a e-wallet nativo (ogni venditore ha un wallet virtuale su Mangopay) è più adatto a piattaforme dove i fondi vengono trattenuti prima del rilascio — tipicamente marketplace con logistica gestita dalla piattaforma o con escrow.
+
+## PSD2 e SCA: Compliance Obbligatoria in Europa
+
+In Europa, i pagamenti online sono soggetti alla **PSD2** (Payment Services Directive 2) e alla **Strong Customer Authentication (SCA)**. Per i marketplace, questo significa:
+
+- Ogni pagamento con carta da parte di un consumatore richiede l'autenticazione a 2 fattori (3D Secure 2)
+- L'esenzione MIT (Merchant Initiated Transaction) si applica per i pagamenti ricorrenti preautorizzati
+- La responsabilità del chargeback si sposta sull'emittente quando SCA viene applicata correttamente
+
+Sia Stripe che Mangopay gestiscono SCA automaticamente. Stripe usa Payment Intents con `automatic_payment_methods` per applicare 3DS2 solo quando necessario (riduce l'attrito per le transazioni a basso rischio):
+
+```typescript
+// Stripe Connect — Pagamento con split automatico (marketplace europeo)
+
+// 1. Creare il sub-account del venditore all'onboarding
+async function createVendorAccount(vendor: VendorData): Promise<string> {
+  const account = await stripe.accounts.create({
+    type: 'express',
+    country: vendor.countryCode, // 'IT', 'DE', 'FR', ecc.
+    email: vendor.email,
+    capabilities: {
+      transfers: { requested: true },
+      card_payments: { requested: true },
+      sepa_debit_payments: { requested: true },
+    },
+    business_type: vendor.isCompany ? 'company' : 'individual',
+    settings: {
+      payouts: {
+        schedule: { interval: 'weekly', weekly_anchor: 'monday' },
+      },
+    },
+  });
+
+  await db.vendors.update({
+    where: { id: vendor.id },
+    data: { stripeAccountId: account.id },
+  });
+
+  return account.id;
+}
+
+// 2. Generare link di onboarding per il KYC del venditore
+async function getVendorOnboardingLink(stripeAccountId: string): Promise<string> {
+  const link = await stripe.accountLinks.create({
+    account: stripeAccountId,
+    refresh_url: `${process.env.BASE_URL}/vendor/onboarding/retry`,
+    return_url: `${process.env.BASE_URL}/vendor/onboarding/complete`,
+    type: 'account_onboarding',
+  });
+  return link.url;
+}
+
+// 3. Creare PaymentIntent con split automatico e SCA
+async function createMarketplacePayment(
+  orderTotal: number,
+  commissionAmount: number,
+  vendorStripeAccountId: string
+): Promise<{ clientSecret: string; paymentIntentId: string }> {
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: Math.round(orderTotal * 100), // in centesimi
+    currency: 'eur',
+    automatic_payment_methods: { enabled: true }, // Gestisce SCA automaticamente
+    application_fee_amount: Math.round(commissionAmount * 100), // Rimane alla piattaforma
+    transfer_data: {
+      destination: vendorStripeAccountId, // Va al venditore
+    },
+    metadata: {
+      orderId: String(order.id),
+    },
+  });
+
+  return {
+    clientSecret: paymentIntent.client_secret!,
+    paymentIntentId: paymentIntent.id,
+  };
+}
+```
+
+## Mangopay: Il Modello E-Wallet
+
+Mangopay funziona con un modello diverso da Stripe. Ogni venditore ha un **E-Wallet** su Mangopay. Quando il cliente paga, il denaro entra nel wallet della piattaforma, poi viene distribuito ai wallet dei venditori tramite trasferimenti, e infine i venditori richiedono il payout verso il proprio conto bancario.
+
+```typescript
+// Mangopay — Flusso di split con e-wallet
+import { MangoPay } from 'mangopay2-nodejs-sdk';
+
+const mangopay = new MangoPay({
+  clientId: process.env.MANGOPAY_CLIENT_ID!,
+  clientApiKey: process.env.MANGOPAY_API_KEY!,
+  baseUrl: 'https://api.mangopay.com',
+});
+
+// 1. Creare un utente venditore (Legal o Natural)
+async function createMangopayVendor(vendor: VendorData): Promise<string> {
+  const user = await mangopay.Users.create({
+    PersonType: vendor.isCompany ? 'LEGAL' : 'NATURAL',
+    Email: vendor.email,
+    // ... altri campi KYC
+  });
+
+  // Creare il wallet del venditore
+  const wallet = await mangopay.Wallets.create({
+    Owners: [user.Id],
+    Description: `Wallet venditore ${vendor.name}`,
+    Currency: 'EUR',
+    Tag: `vendor_${vendor.id}`,
+  });
+
+  await db.vendors.update({
+    where: { id: vendor.id },
+    data: { mangopayUserId: user.Id, mangopayWalletId: wallet.Id },
+  });
+
+  return user.Id;
+}
+
+// 2. Trasferire dal wallet piattaforma ai wallet venditori dopo il pagamento
+async function splitPaymentToVendors(
+  platformWalletId: string,
+  vendorSplits: Array<{ vendorWalletId: string; amount: number; orderId: string }>
+): Promise<void> {
+  for (const split of vendorSplits) {
+    await mangopay.Transfers.create({
+      AuthorId: process.env.MANGOPAY_PLATFORM_USER_ID!,
+      DebitedWalletId: platformWalletId,
+      CreditedWalletId: split.vendorWalletId,
+      DebitedFunds: { Currency: 'EUR', Amount: Math.round(split.amount * 100) },
+      Fees: { Currency: 'EUR', Amount: 0 },
+      Tag: `order_${split.orderId}`,
+    });
+  }
+}
+```
+
+## KYC dei Venditori: Obblighi AML/KYC in Europa
+
+In Europa, i marketplace che trattano pagamenti sono soggetti alla **Quarta Direttiva Antiriciclaggio (AMLD4)** e alla sua quinta versione. I requisiti KYC minimi per i venditori includono:
+
+- Verifica dell'identità (documento d'identità valido per persone fisiche)
+- Per persone giuridiche: visura camerale, identificazione dei titolari effettivi (>25% del capitale)
+- Verifica del conto bancario (IBAN associato al titolare verificato)
+- Screening su liste di sanzioni internazionali (EU, OFAC, ONU)
+
+Sia Stripe che Mangopay gestiscono parte del KYC automaticamente. Mangopay richiede il caricamento esplicito dei documenti tramite API per le verifiche più approfondite:
+
+```typescript
+// Mangopay — Upload documento KYC
+async function uploadKYCDocument(
+  userId: string,
+  documentType: 'IDENTITY_PROOF' | 'REGISTRATION_PROOF' | 'ARTICLES_OF_ASSOCIATION',
+  documentBase64: string
+): Promise<string> {
+  const kycDoc = await mangopay.KycDocuments.create(userId, {
+    Type: documentType,
+    Tag: `kyc_${Date.now()}`,
+  });
+
+  await mangopay.KycDocuments.createPage(userId, kycDoc.Id, {
+    File: documentBase64,
+  });
+
+  await mangopay.KycDocuments.submit(userId, kycDoc.Id);
+
+  return kycDoc.Id;
+}
+```
+
+## Conclusione
+
+Lo split dei pagamenti ben implementato è un vantaggio competitivo reale — garantisce che i venditori ricevano puntualmente, riduce le dispute finanziarie e rende la piattaforma professionale fin dal primo giorno.
+
+La scelta sbagliata del gateway, un calendario di liquidazione mal comunicato o un KYC superficiale possono costare caro in chargeback, sanzioni normative e perdita di venditori. Questa decisione merita attenzione prima di qualsiasi implementazione.
+
+Nella SystemForge aiutiamo i team a documentare e architettare queste decisioni in modo strutturato, con LLD dettagliato, contratti API e flussi di integrazione definiti prima dell'implementazione. [Contattateci](/contatto) per discutere del vostro marketplace.

@@ -1,0 +1,209 @@
+---
+title: "Logistica per e-commerce in Italia: integrare Poste Italiane, BRT e GLS"
+slug: "logistica-ecommerce-italia-poste-italiane-brt-gls"
+date: "2026-02-01"
+description: "Come integrare Poste Italiane, BRT (GLS Italy), SDA e Nexive nel tuo e-commerce — cotazione automatica, generazione etichette e tracciamento unificato."
+tags: ["logistica ecommerce", "poste italiane", "brt", "gls", "spedizioni italia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "e-commerce"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Come integrare Poste Italiane, BRT (GLS Italy), SDA e Nexive nel tuo e-commerce — cotazione automatica, generazione etichette e tracciamento unificato."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: "logistica-ecommerce-correios-jadlog"
+---
+
+Le spedizioni sono il principale motivo di abbandono del carrello nell'e-commerce italiano. Non è il prezzo del prodotto, non è la mancanza di Satispay, non è il sito lento — è il momento in cui il cliente arriva al checkout, vede il costo di spedizione e chiude la finestra. Le ricerche del settore mostrano che le spese di spedizione percepite come eccessive sono responsabili del 40-60% degli abbandoni nelle categorie di ticket medio.
+
+La logistica efficiente nell'e-commerce ha tre pilastri: cotazione precisa al momento giusto, generazione automatica dell'etichetta senza lavoro manuale e tracciamento trasparente per il cliente. Ogni pilastro ha uno strato tecnico specifico che deve funzionare in modo integrato.
+
+## Poste Italiane: Posta1, Pacco Ordinario e API Business
+
+Poste Italiane è il corriere di riferimento per molti e-commerce italiani, specialmente per le regioni meno servite dai corrieri privati. Il servizio **Paccocelere** per i privati e i servizi **Business** per i merchant offrono tariffe negoziate per chi ha volumi.
+
+L'accesso all'API avviene tramite il portale **Poste Delivery Business**, che espone endpoint per:
+- Creazione e stampa etichette
+- Tracking delle spedizioni
+- Gestione dei resi (logistica inversa)
+
+```typescript
+interface PosteShipmentRequest {
+  mittente: {
+    ragioneSociale: string;
+    indirizzo: string;
+    cap: string;
+    citta: string;
+    provincia: string;
+  };
+  destinatario: {
+    nome: string;
+    indirizzo: string;
+    cap: string;
+    citta: string;
+    provincia: string;
+    telefono?: string;
+    email?: string;
+  };
+  prodotto: 'PACCOCELERE3' | 'PACCOCELERE1' | 'ESPRESSO';
+  peso: number;     // in grammi
+  altezza: number;  // in cm
+  larghezza: number;
+  lunghezza: number;
+  valoreContrassegno?: number;
+}
+
+async function createPosteShipment(request: PosteShipmentRequest): Promise<PosteShipmentResult> {
+  const response = await fetch('https://api.postebusiness.poste.it/v2/spedizioni', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${await getPosteToken()}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  const data = await response.json();
+  return {
+    idSpedizione: data.idSpedizione,
+    codiceTracking: data.codiceTracking,
+    etichettaPdf: data.etichetta, // base64 PDF
+  };
+}
+```
+
+**Limitazioni API Poste:** l'API ha una storia di instabilità maggiore rispetto ai corrieri privati. Implementate retry con backoff esponenziale e cache delle cotazioni (le cotazioni con gli stessi parametri tendono ad essere stabili per ore).
+
+## Sendcloud: Hub Multi-corriere per l'Italia
+
+Sendcloud è il principale aggregatore di spedizioni per l'e-commerce europeo (con forte presenza in Italia, Germania, Francia e Benelux). Collega Poste Italiane, BRT/GLS, SDA, DHL, UPS, TNT e altri in un'unica API.
+
+```typescript
+async function calculateShippingRates(params: ShippingParams): Promise<ShippingRate[]> {
+  const response = await fetch('https://panel.sendcloud.sc/api/v2/shipping-price', {
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${process.env.SENDCLOUD_KEY}:${process.env.SENDCLOUD_SECRET}`).toString('base64')}`,
+    },
+  });
+
+  const data = await response.json();
+
+  return data.shipping_methods
+    .filter((method: any) => {
+      const weightKg = params.weightGrams / 1000;
+      return weightKg >= method.min_weight && weightKg <= method.max_weight;
+    })
+    .map((method: any) => ({
+      carrierId: method.id,
+      carrierName: method.carrier,
+      serviceName: method.name,
+      priceEuros: parseFloat(method.price),
+      deliveryDays: method.lead_time_hours / 24,
+    }))
+    .sort((a: ShippingRate, b: ShippingRate) => a.priceEuros - b.priceEuros);
+}
+
+async function createSendcloudShipment(
+  orderId: string,
+  methodId: number,
+  recipient: RecipientData
+): Promise<SendcloudParcel> {
+  const response = await fetch('https://panel.sendcloud.sc/api/v2/parcels', {
+    method: 'POST',
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${process.env.SENDCLOUD_KEY}:${process.env.SENDCLOUD_SECRET}`).toString('base64')}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      parcel: {
+        name: recipient.name,
+        address: recipient.address,
+        city: recipient.city,
+        postal_code: recipient.postalCode,
+        country: recipient.country,
+        telephone: recipient.phone,
+        email: recipient.email,
+        order_number: orderId,
+        shipment: { id: methodId },
+        weight: recipient.weightKg.toString(),
+      },
+    }),
+  });
+
+  return (await response.json()).parcel;
+}
+```
+
+Il modello di business di Sendcloud è simile a un marketplace delle spedizioni: ha tariffe negoziate con i corrieri e le trasmette al merchant. In molti casi, il prezzo via Sendcloud è inferiore al contratto diretto con i singoli corrieri per merchant con volumi medi.
+
+| Corriere | Punti di forza | Limitazioni |
+|---|---|---|
+| Poste Italiane | Copertura nazionale totale | Pratica meno affidabile; API instabile |
+| BRT (GLS Italy) | Ottima rete Nord/Centro; prezzi competitivi | Copertura Sud limitata |
+| SDA | Parte del gruppo Poste; buona copertura | Più costosa di BRT per stesse zone |
+| DHL Express | Velocità; affidabilità internazionale | Costo elevato per domestico |
+| UPS | Forte presenza B2B | Prezzi meno competitivi per PMI |
+
+## Generazione Automatica dell'Etichetta
+
+La generazione manuale dell'etichetta è impraticabile sopra i 30-40 ordini al giorno. Il processo automatizzato funziona così: alla conferma del pagamento, il sistema genera automaticamente l'etichetta del corriere scelto (tramite regola di instradamento — peso, CAP di destinazione, prazo promesso, costo) e mette a disposizione il PDF per la stampa nell'area di picking.
+
+```typescript
+async function generateShippingLabel(order: Order): Promise<ShippingLabel> {
+  // 1. Selezionare il corriere tramite regola di business
+  const rates = await calculateShippingRates({
+    destinationPostalCode: order.shippingAddress.postalCode,
+    weightGrams: order.totalWeightGrams,
+    valueEuros: order.totalEuros,
+  });
+
+  const selectedRate = selectBestRate(rates, {
+    maxDeliveryDays: order.promisedDeliveryDays,
+    preferCheaper: true,
+  });
+
+  // 2. Creare la spedizione nell'hub
+  const parcel = await createSendcloudShipment(
+    String(order.id),
+    selectedRate.carrierId,
+    {
+      name: order.shippingAddress.fullName,
+      address: order.shippingAddress.street,
+      city: order.shippingAddress.city,
+      postalCode: order.shippingAddress.postalCode,
+      country: order.shippingAddress.countryCode,
+      phone: order.customer.phone,
+      email: order.customer.email,
+      weightKg: order.totalWeightGrams / 1000,
+    }
+  );
+
+  // 3. Recuperare l'etichetta PDF
+  const labelUrl = parcel.label?.normal_printer?.[0];
+
+  await db.orders.updateShipping(order.id, {
+    carrier: selectedRate.carrierName,
+    trackingCode: parcel.tracking_number,
+    labelUrl,
+    parcelId: parcel.id,
+  });
+
+  return { trackingCode: parcel.tracking_number, labelUrl };
+}
+```
+
+## Tracciamento Unificato e Notifiche al Cliente
+
+Il tracciamento è la fase più visibile della logistica per il cliente — ed è anche la più trascurata tecnicamente. Il cliente segue lo stato dell'ordine con più ansia di qualsiasi altra fase. Un'esperienza di tracciamento scadente (link che rimanda al sito del corriere senza contesto, status in gergo tecnico, nessuna notifica proattiva) è un'opportunità mancata di fidelizzazione.
+
+Il tracciamento unificato centralizza gli eventi di tutti i corrieri in un modello di dati coerente. Invece di mostrare "CAF IN LAVORAZIONE" (gergo BRT), mostrate "In lavorazione presso il centro di smistamento — consegna prevista domani". La trasformazione degli eventi grezzi in linguaggio comprensibile è un differenziale di UX sostanziale.
+
+La notifica proattiva via email o SMS nei momenti critici (ordine spedito, uscito per la consegna, consegnato, tentativo fallito) riduce il volume dei ticket di supporto "Dov'è il mio ordine?" — che rappresentano il 40-60% del servizio clienti degli e-commerce senza tracciamento proattivo.
+
+## Conclusione
+
+La logistica efficiente si costruisce a strati: cotazione precisa che non sorprende il cliente al checkout, generazione automatica dell'etichetta che elimina il collo di bottiglia operativo, tracciamento unificato che trasforma il gergo del corriere in comunicazione chiara, e notifica proattiva che riduce l'ansia e i ticket di supporto.
+
+Ogni strato ha le sue complessità tecniche — API instabili, modelli di dati divergenti tra corrieri, regole di instradamento che cambiano con la crescita del business. Nella SystemForge, sviluppiamo moduli di logistica integrati all'e-commerce che coprono l'intero flusso, dalla cotazione al checkout alla consegna confermata. [Contatta il nostro team](/contatto) per vedere come possiamo migliorare l'operazione logistica del tuo negozio.
