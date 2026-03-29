@@ -33,7 +33,7 @@ jobs:
     name: Deploy BR (forjadesistemas.com.br)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout (scripts only)
@@ -127,7 +127,7 @@ jobs:
     name: Deploy IT (systemforge.it)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout (scripts only)
@@ -220,7 +220,7 @@ jobs:
     name: Deploy EN (systemforgesoftware.com)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout (scripts only)
