@@ -93,7 +93,7 @@ jobs:
             -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
                 set net:max-retries 3; \
                 set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_HOST; \
+                open sftp://$SFTP_USER@$SFTP_HOST; \
                 mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
                 quit"
 
@@ -180,7 +180,7 @@ jobs:
             -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
                 set net:max-retries 3; \
                 set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_HOST; \
+                open sftp://$SFTP_USER@$SFTP_HOST; \
                 mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
                 quit"
 
@@ -267,7 +267,7 @@ jobs:
             -e "set sftp:connect-program 'sshpass -e ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
                 set net:max-retries 3; \
                 set net:reconnect-interval-base 5; \
-                open sftp://$SFTP_HOST; \
+                open sftp://$SFTP_USER@$SFTP_HOST; \
                 mirror --reverse --delete --parallel=5 --no-perms --no-umask out/ $SFTP_PATH/; \
                 quit"
 
