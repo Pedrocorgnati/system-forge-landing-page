@@ -10,7 +10,7 @@ import { blog as allArticles } from '@/.velite'
 import { getSiteConfig } from '@config'
 
 // output: 'export' — static site, não há revalidação em runtime.
-// Cache HTTP controlado via Cache-Control header na resposta GET.
+export const dynamic = 'force-static'
 
 export async function GET() {
   const config = getSiteConfig()
