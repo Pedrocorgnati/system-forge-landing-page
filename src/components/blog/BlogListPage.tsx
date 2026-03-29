@@ -9,6 +9,7 @@ import { CategoryFilter } from './CategoryFilter'
 import { Pagination } from './Pagination'
 import { ROUTES } from '@/lib/constants/routes'
 import type { ArticleFrontmatter } from '@/lib/types'
+import { loadMessages } from '@config/content'
 
 interface BlogListPageProps {
   articles: ArticleFrontmatter[]
@@ -31,6 +32,9 @@ export function BlogListPage({
   allCategories = [],
   searchSlot,
 }: BlogListPageProps) {
+  const m = loadMessages()
+  const blogList = m.blog.list
+
   return (
     <div data-testid="blog-list" className="flex flex-col gap-8">
       {/* Search slot */}
@@ -47,7 +51,7 @@ export function BlogListPage({
       {/* Tag filter indicator */}
       {tagFilter && (
         <p className="text-sm text-muted-foreground">
-          Artigos com a tag: <span className="font-medium text-foreground">{tagFilter}</span>
+          {blogList.tagFilter} <span className="font-medium text-foreground">{tagFilter}</span>
         </p>
       )}
 
@@ -62,14 +66,14 @@ export function BlogListPage({
           </div>
           <div className="flex flex-col gap-2 text-center">
             <h2 className="text-xl font-semibold text-foreground">
-              Nenhum artigo encontrado
+              {blogList.emptyTitle}
             </h2>
             <p className="text-muted-foreground max-w-sm">
               {categoryFilter
-                ? `Ainda não há artigos na categoria "${categoryFilter}".`
+                ? blogList.emptyCategory.replace('{cat}', categoryFilter)
                 : tagFilter
-                  ? `Ainda não há artigos com a tag "${tagFilter}".`
-                  : 'Nenhum artigo publicado ainda. Volte em breve!'}
+                  ? blogList.emptyTag.replace('{tag}', tagFilter)
+                  : blogList.emptyDefault}
             </p>
           </div>
         </div>

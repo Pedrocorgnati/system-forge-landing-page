@@ -7,6 +7,8 @@ import Link from 'next/link'
 import { OptimizedImage } from '@/components/ui/OptimizedImage'
 import { ROUTES } from '@/lib/constants/routes'
 import type { ArticleFrontmatter } from '@/lib/types'
+import { formatDate } from '@/lib/utils'
+import { loadMessages } from '@config/content'
 
 interface ArticleCardProps {
   article: ArticleFrontmatter
@@ -15,14 +17,11 @@ interface ArticleCardProps {
 }
 
 export function ArticleCard({ article, variant = 'default', index = 0 }: ArticleCardProps) {
+  const m = loadMessages()
   const coverSrc = article.coverImage || '/images/blog/default-cover.png'
   const primaryTag = article.tags[0]
   const isFeatured = variant === 'featured'
-  const formattedDate = new Date(article.date).toLocaleDateString('pt-BR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
+  const formattedDate = formatDate(article.date)
 
   return (
     <article
@@ -61,10 +60,10 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
         isFeatured ? 'p-6 md:p-7' : 'p-5',
       ].join(' ')}>
 
-        {/* Em destaque label — somente no featured */}
+        {/* Featured label — somente no featured */}
         {isFeatured && (
           <span className="text-[11px] font-bold text-primary uppercase tracking-[0.15em] leading-none">
-            Em destaque
+            {m.blog.featured}
           </span>
         )}
 
@@ -85,7 +84,7 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
           <Link
             href={ROUTES.BLOG_POST(article.slug)}
             className={[
-              'hover:text-primary transition-colors focus:outline-none focus:ring-1 focus:ring-primary rounded',
+              'hover:text-primary transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded',
               isFeatured ? '' : 'line-clamp-2',
             ].join(' ')}
           >

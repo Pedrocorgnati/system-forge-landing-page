@@ -68,9 +68,21 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
 
 export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
   const config = getSiteConfig()
-  const message = context
-    ? `Olá! Tenho interesse em ${context}.`
-    : 'Olá! Vi o site da SystemForge e gostaria de saber mais.'
+  const locale = config.locale
+  let message: string
+  if (locale === 'it-IT') {
+    message = context
+      ? `Ciao! Sono interessato a ${context}.`
+      : 'Ciao! Ho visto il sito di SystemForge e vorrei saperne di più.'
+  } else if (locale === 'en') {
+    message = context
+      ? `Hi! I'm interested in ${context}.`
+      : "Hi! I saw SystemForge's website and would like to learn more."
+  } else {
+    message = context
+      ? `Olá! Tenho interesse em ${context}.`
+      : 'Olá! Vi o site da SystemForge e gostaria de saber mais.'
+  }
 
   return {
     action: ConversionAction.WHATSAPP,

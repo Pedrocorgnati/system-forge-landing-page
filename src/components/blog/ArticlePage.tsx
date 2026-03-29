@@ -8,6 +8,8 @@ import { ArticleCard } from '@/components/blog/ArticleCard'
 import { NewsletterOptIn } from '@/components/ui/NewsletterOptIn'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
 import { ROUTES } from '@/lib/constants'
+import { formatDate } from '@/lib/utils'
+import { loadMessages } from '@config/content'
 
 /**
  * ArticlePage — layout completo de artigo individual.
@@ -37,15 +39,9 @@ interface ArticlePageProps {
   relatedArticles: ArticleFrontmatter[]
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('pt-BR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  })
-}
 
 export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
+  const m = loadMessages()
   const breadcrumbItems = [
     { label: 'Blog', href: ROUTES.BLOG },
     {
@@ -108,7 +104,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
                 <span aria-hidden="true">·</span>
                 <time dateTime={article.date}>{formatDate(article.date)}</time>
                 <span aria-hidden="true">·</span>
-                <span>{article.readingTime} min de leitura</span>
+                <span>{article.readingTime} {m.blog.readingTime}</span>
               </div>
             </header>
 
@@ -134,7 +130,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
             {/* 5. Artigos relacionados */}
             <section data-testid="article-page-related" className="mt-10" aria-labelledby="related-articles-heading">
               <h2 id="related-articles-heading" className="text-xl font-bold text-foreground mb-4">
-                Artigos Relacionados
+                {m.blog.relatedArticles}
               </h2>
               {relatedArticles.length > 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -145,7 +141,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
               ) : (
                 <p className="text-muted-foreground">
                   <a href={ROUTES.BLOG} className="text-primary hover:underline">
-                    Confira outros artigos do blog →
+                    {m.blog.viewMoreArticles}
                   </a>
                 </p>
               )}

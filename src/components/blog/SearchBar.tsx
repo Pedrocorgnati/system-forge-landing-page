@@ -4,6 +4,9 @@ import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { useArticleSearch } from '@/hooks/useArticleSearch'
 import { sanitizeSearchQuery } from '@/lib/search'
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
 
 // GA4 tracking (EVT-011 search_performed)
 function trackSearch(sanitizedQuery: string) {
@@ -46,22 +49,27 @@ export function SearchBar() {
       <input
         data-testid="blog-search-input"
         type="search"
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={showDropdown}
+        aria-controls="search-listbox"
+        aria-autocomplete="list"
         value={inputValue}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
-        placeholder="Buscar artigos..."
-        aria-label="Buscar artigos no blog"
+        placeholder={m.blog.search.placeholder}
+        aria-label={m.blog.search.ariaLabel}
         className="w-full px-4 py-2.5 min-h-[44px] border border-border rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
       />
 
       {isLoading && (
         <div className="absolute right-3 top-2.5">
-          <span className="text-muted-foreground text-sm">Carregando...</span>
+          <span className="text-muted-foreground text-sm">{m.blog.search.loading}</span>
         </div>
       )}
 
       {isSearching && !isLoading && (
-        <div data-testid="blog-search-spinner" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label="Buscando..." role="status">
+        <div data-testid="blog-search-spinner" className="absolute right-3 top-1/2 -translate-y-1/2" aria-label={m.blog.search.searching} role="status">
           <svg
             className="w-4 h-4 text-muted-foreground animate-spin"
             viewBox="0 0 24 24"
@@ -71,21 +79,22 @@ export function SearchBar() {
             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
-          <span className="sr-only">Buscando...</span>
+          <span className="sr-only">{m.blog.search.searching}</span>
         </div>
       )}
 
       {showDropdown && (
         <div
+          id="search-listbox"
           data-testid="blog-search-results"
           className="absolute top-full left-0 right-0 z-50 bg-background border border-border rounded-lg shadow-lg mt-1 max-h-80 overflow-y-auto"
           role="listbox"
-          aria-label="Resultados da busca"
+          aria-label={m.blog.search.resultsAriaLabel}
         >
           {hasError ? (
             <div className="px-4 py-3" role="alert">
               <p className="text-sm text-destructive">
-                Não foi possível carregar a busca. Tente novamente.
+                {m.blog.search.error}
               </p>
             </div>
           ) : hasResults ? (
@@ -106,12 +115,12 @@ export function SearchBar() {
           ) : (
             <div className="px-4 py-3">
               <p className="text-sm text-muted-foreground">
-                Nenhum artigo encontrado para &ldquo;{query}&rdquo;
+                {m.blog.search.noResults.replace('{query}', query ?? '')}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Tente termos diferentes ou{' '}
+                {m.blog.search.tryDifferent}{' '}
                 <Link href="/blog" className="text-primary hover:underline">
-                  navegue pelo blog
+                  {m.blog.search.browseBlog}
                 </Link>
               </p>
             </div>
