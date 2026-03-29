@@ -22,13 +22,13 @@ echo ""
 echo "▶ Blog listing pages..."
 
 declare -a BLOG_URLS=(
-  "https://forjadesistemas.com.br/blog:BR"
-  "https://systemforge.it/blog:IT"
-  "https://systemforgesoftware.com/blog:EN"
+  "https://forjadesistemas.com.br/blog|BR"
+  "https://systemforge.it/blog|IT"
+  "https://systemforgesoftware.com/blog|EN"
 )
 
 for url_locale in "${BLOG_URLS[@]}"; do
-  IFS=: read -r url locale <<< "$url_locale"
+  IFS=| read -r url locale <<< "$url_locale"
   STATUS=$(curl -s -o /dev/null -w "%{http_code}" -L --max-time 15 "$url" 2>/dev/null || echo "000")
   if [ "$STATUS" == "200" ]; then
     echo "  ✅ Blog ($locale): $url — HTTP 200"
