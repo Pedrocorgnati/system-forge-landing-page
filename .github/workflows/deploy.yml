@@ -77,16 +77,19 @@ jobs:
           grep -q "googletagmanager" out/.htaccess && echo "✅ GTM in CSP (expected for BR)" || (echo "❌ GTM missing from BR CSP" && exit 1)
 
       - name: Deploy to forjadesistemas.com.br
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SFTP_BR_HOST }}
-          username: ${{ secrets.SFTP_BR_USER }}
-          password: ${{ secrets.SFTP_BR_PASS }}
-          port: ${{ secrets.SFTP_BR_PORT }}
-          local_path: ./out/*
-          remote_path: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
-          sftp_only: true
-          delete_remote_files: true
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_BR_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_BR_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
+        run: |
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          lftp -u "$SFTP_USER,$SFTP_PASS" \
+            -e "set sftp:connect-program 'ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
+                open sftp://$SFTP_HOST; \
+                mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
+                quit"
 
       - name: Purge Cloudflare cache (BR)
         if: success()
@@ -158,16 +161,19 @@ jobs:
           ! grep -q "googletagmanager" out/.htaccess && echo "✅ GTM absent from IT CSP (GDPR compliant)" || (echo "❌ GTM must NOT be in IT CSP" && exit 1)
 
       - name: Deploy to systemforge.it
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SFTP_IT_HOST }}
-          username: ${{ secrets.SFTP_IT_USER }}
-          password: ${{ secrets.SFTP_IT_PASS }}
-          port: ${{ secrets.SFTP_IT_PORT }}
-          local_path: ./out/*
-          remote_path: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
-          sftp_only: true
-          delete_remote_files: true
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_IT_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_IT_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_IT_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_IT_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
+        run: |
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          lftp -u "$SFTP_USER,$SFTP_PASS" \
+            -e "set sftp:connect-program 'ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
+                open sftp://$SFTP_HOST; \
+                mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
+                quit"
 
       - name: Purge Cloudflare cache (IT)
         if: success()
@@ -239,16 +245,19 @@ jobs:
           grep -q "googletagmanager" out/.htaccess && echo "✅ GTM in CSP (expected for EN)" || (echo "❌ GTM missing from EN CSP" && exit 1)
 
       - name: Deploy to systemforgesoftware.com
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
-        with:
-          server: ${{ secrets.SFTP_EN_HOST }}
-          username: ${{ secrets.SFTP_EN_USER }}
-          password: ${{ secrets.SFTP_EN_PASS }}
-          port: ${{ secrets.SFTP_EN_PORT }}
-          local_path: ./out/*
-          remote_path: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
-          sftp_only: true
-          delete_remote_files: true
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_EN_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_EN_USER }}
+          SFTP_PASS: ${{ secrets.SFTP_EN_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_EN_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
+        run: |
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          lftp -u "$SFTP_USER,$SFTP_PASS" \
+            -e "set sftp:connect-program 'ssh -p $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'; \
+                open sftp://$SFTP_HOST; \
+                mirror --reverse --delete --no-perms --no-umask out/ $SFTP_PATH; \
+                quit"
 
       - name: Purge Cloudflare cache (EN)
         if: success()
