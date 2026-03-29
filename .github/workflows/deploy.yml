@@ -80,11 +80,17 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
           SFTP_USER: ${{ secrets.SFTP_BR_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_BR_PASS }}
+          SSHPASS: ${{ secrets.SFTP_BR_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
           sudo apt-get install -y sshpass > /dev/null 2>&1
+          # Test connectivity first
+          echo "quit" | sshpass -e sftp -P "$SFTP_PORT" \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -o PreferredAuthentications=password \
+            "$SFTP_USER@$SFTP_HOST" && echo "✅ SFTP connection OK"
           BATCH=$(mktemp)
           find out -type d | sort | while IFS= read -r dir; do
             remote="${dir/#out/$SFTP_PATH}"
@@ -95,10 +101,11 @@ jobs:
             echo "put $file $remote"
           done >> "$BATCH"
           echo "quit" >> "$BATCH"
-          echo "=== SFTP batch (first 10 lines) ===" && head -10 "$BATCH"
-          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+          echo "=== SFTP batch (first 5 lines) ===" && head -5 "$BATCH"
+          sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
+            -o PreferredAuthentications=password \
             -b "$BATCH" \
             "$SFTP_USER@$SFTP_HOST"
 
@@ -175,7 +182,7 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_IT_HOST }}
           SFTP_USER: ${{ secrets.SFTP_IT_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_IT_PASS }}
+          SSHPASS: ${{ secrets.SFTP_IT_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_IT_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
         run: |
@@ -190,9 +197,10 @@ jobs:
             echo "put $file $remote"
           done >> "$BATCH"
           echo "quit" >> "$BATCH"
-          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+          sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
+            -o PreferredAuthentications=password \
             -b "$BATCH" \
             "$SFTP_USER@$SFTP_HOST"
 
@@ -269,7 +277,7 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_EN_HOST }}
           SFTP_USER: ${{ secrets.SFTP_EN_USER }}
-          SFTP_PASS: ${{ secrets.SFTP_EN_PASS }}
+          SSHPASS: ${{ secrets.SFTP_EN_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_EN_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
         run: |
@@ -284,9 +292,10 @@ jobs:
             echo "put $file $remote"
           done >> "$BATCH"
           echo "quit" >> "$BATCH"
-          sshpass -p "$SFTP_PASS" sftp -P "$SFTP_PORT" \
+          sshpass -e sftp -P "$SFTP_PORT" \
             -o StrictHostKeyChecking=no \
             -o UserKnownHostsFile=/dev/null \
+            -o PreferredAuthentications=password \
             -b "$BATCH" \
             "$SFTP_USER@$SFTP_HOST"
 
