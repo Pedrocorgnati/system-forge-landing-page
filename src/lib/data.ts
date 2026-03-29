@@ -1,152 +1,51 @@
 import { ServiceCategory, TechTag, ProjectStatus, DeliveryCountry } from './types'
-import type { Service, PortfolioProject, Testimonial } from './types'
+import type { Service, PortfolioProject, Testimonial, ServiceFilterGroup } from './types'
+import { loadServicesContent } from '@config/content'
 
-export const services: Service[] = [
-  {
-    slug: 'saas',
-    name: 'Desenvolvimento de SaaS',
-    description: 'Plataformas SaaS escaláveis do zero, com foco em performance, escalabilidade e UX.',
-    longDescription: 'Construímos plataformas SaaS escaláveis do zero até o deploy, com arquitetura moderna, autenticação robusta, billing integrado e painel de admin completo. Do MVP à escala enterprise.',
-    icon: '🚀',
-    category: ServiceCategory.SAAS,
-    deliverables: ['Autenticação + billing integrado', 'Painel de admin completo', 'Deploy com CI/CD'],
-    techHints: ['Next.js', 'Stripe', 'PostgreSQL'],
-    deliveryWeeks: '8–16 semanas',
-    filterGroup: 'produto',
-  },
-  {
-    slug: 'mobile',
-    name: 'Aplicativos Mobile',
-    description: 'Apps iOS e Android nativos ou multiplataforma com React Native e Flutter.',
-    longDescription: 'Desenvolvemos aplicativos mobile de alta qualidade para iOS e Android, usando React Native ou Flutter. Da prototipagem ao deploy nas lojas, com foco em performance e UX nativa.',
-    icon: '📱',
-    category: ServiceCategory.MOBILE,
-    deliverables: ['App iOS + Android', 'Push notifications', 'Publicação nas lojas'],
-    techHints: ['React Native', 'Expo'],
-    deliveryWeeks: '10–18 semanas',
-    filterGroup: 'mobile-ia',
-  },
-  {
-    slug: 'landing-page',
-    name: 'Landing Pages e Sites',
-    description: 'Sites institucionais e landing pages otimizados para SEO e conversão.',
-    longDescription: 'Criamos landing pages e sites institucionais de alta performance, otimizados para SEO, com design profissional e focados em conversão de visitantes em clientes.',
-    icon: '🌐',
-    category: ServiceCategory.LANDING,
-    deliverables: ['Design responsivo mobile-first', 'SEO técnico on-page', 'Analytics + formulários'],
-    techHints: ['Next.js', 'Tailwind'],
-    deliveryWeeks: '2–4 semanas',
-    filterGroup: 'produto',
-  },
-  {
-    slug: 'ecommerce',
-    name: 'E-commerce',
-    description: 'Lojas virtuais completas com gateway de pagamento, estoque e painel de vendas.',
-    longDescription: 'Desenvolvemos e-commerces completos com catálogo de produtos, carrinho de compras, gateway de pagamento (Stripe, Mercado Pago), gestão de estoque e painel de vendas.',
-    icon: '🛒',
-    category: ServiceCategory.ECOMMERCE,
-    deliverables: ['Catálogo + carrinho + checkout', 'Gateway de pagamento integrado', 'Painel de vendas e estoque'],
-    techHints: ['Next.js', 'Stripe'],
-    deliveryWeeks: '8–14 semanas',
-    filterGroup: 'produto',
-  },
-  {
-    slug: 'dashboard',
-    name: 'Dashboards e Painéis',
-    description: 'Dashboards analíticos e painéis administrativos para gestão de negócios.',
-    longDescription: 'Construímos dashboards e painéis administrativos intuitivos com gráficos em tempo real, relatórios exportáveis e KPIs customizados para a sua operação.',
-    icon: '📊',
-    category: ServiceCategory.DASHBOARD,
-    deliverables: ['Charts em tempo real', 'Relatórios exportáveis (PDF/CSV)', 'KPIs customizados'],
-    techHints: ['Next.js', 'Recharts'],
-    deliveryWeeks: '6–12 semanas',
-    filterGroup: 'dados',
-  },
-  {
-    slug: 'api',
-    name: 'APIs e Integrações',
-    description: 'APIs REST e GraphQL robustas, integrações com sistemas externos e automações.',
-    longDescription: 'Desenvolvemos APIs REST e GraphQL robustas, integrações com ERPs, CRMs, gateways de pagamento e qualquer sistema externo. Automação de processos via webhook e event-driven.',
-    icon: '🔌',
-    category: ServiceCategory.API,
-    deliverables: ['Documentação OpenAPI completa', 'Webhooks + autenticação', 'Ambiente de sandbox'],
-    techHints: ['Node.js', 'REST / GraphQL'],
-    deliveryWeeks: '3–8 semanas',
-    filterGroup: 'dados',
-  },
-  {
-    slug: 'automacao-com-ia',
-    name: 'Automação com IA',
-    description: 'Agentes de IA, chatbots inteligentes e automação de processos com LLMs.',
-    longDescription: 'Construímos agentes de IA, chatbots inteligentes e fluxos de automação usando OpenAI, Anthropic e modelos open-source. Aumentamos produtividade e reduzimos custos operacionais.',
-    icon: '🤖',
-    category: ServiceCategory.AI,
-    deliverables: ['Agente de IA customizado', 'Fluxos de automação', 'Painel de monitoramento'],
-    techHints: ['Claude AI', 'OpenAI', 'Python'],
-    deliveryWeeks: '4–10 semanas',
-    filterGroup: 'mobile-ia',
-  },
-  {
-    slug: 'marketplace',
-    name: 'Marketplace',
-    description: 'Plataformas marketplace com multi-vendor, split de pagamentos e gestão de pedidos.',
-    longDescription: 'Desenvolvemos marketplaces completos com cadastro de vendedores, split de pagamentos, gestão de pedidos, avaliações e painel de controle para operadores e vendedores.',
-    icon: '🏪',
-    category: ServiceCategory.MARKETPLACE,
-    deliverables: ['Multi-vendor + split de pagamentos', 'Painel para operadores', 'Avaliações e gestão de pedidos'],
-    techHints: ['Next.js', 'Stripe Connect'],
-    deliveryWeeks: '12–20 semanas',
-    filterGroup: 'produto',
-  },
-  {
-    slug: 'erp',
-    name: 'Sistemas ERP',
-    description: 'Sistemas de gestão empresarial sob medida para otimizar sua operação.',
-    longDescription: 'Desenvolvemos ERPs sob medida adaptados ao seu processo de negócio: gestão financeira, RH, estoque, produção, CRM e relatórios gerenciais em uma única plataforma.',
-    icon: '⚙️',
-    category: ServiceCategory.ERP,
-    deliverables: ['Módulos personalizados por setor', 'Integração com fornecedores', 'Relatórios gerenciais'],
-    techHints: ['Next.js', 'Prisma', 'PostgreSQL'],
-    deliveryWeeks: '16–30 semanas',
-    filterGroup: 'dados',
-  },
-  {
-    slug: 'chatbot',
-    name: 'Chatbots e Atendimento',
-    description: 'Chatbots para WhatsApp, Telegram e web com IA para atendimento 24/7.',
-    longDescription: 'Criamos chatbots inteligentes para WhatsApp Business, Telegram e web com IA conversacional, integração ao seu CRM e handoff para atendentes humanos quando necessário.',
-    icon: '💬',
-    category: ServiceCategory.CHATBOT,
-    deliverables: ['Chatbot WhatsApp / Telegram / Web', 'Handoff para atendentes humanos', 'Dashboard de atendimentos'],
-    techHints: ['Node.js', 'LLMs'],
-    deliveryWeeks: '3–6 semanas',
-    filterGroup: 'mobile-ia',
-  },
-  {
-    slug: 'consultoria',
-    name: 'Consultoria Técnica',
-    description: 'Arquitetura de sistemas, code review, tech stack e mentoria para sua equipe.',
-    longDescription: 'Oferecemos consultoria técnica para definição de arquitetura, escolha de stack, code review, migração de sistemas legados e mentoria para equipes de desenvolvimento.',
-    icon: '🎯',
-    category: ServiceCategory.CONSULTORIA,
-    deliverables: ['Relatório de arquitetura detalhado', 'Code review com ações prioritizadas', 'Plano de migração / roadmap'],
-    techHints: ['Stack agnóstico'],
-    deliveryWeeks: '1–3 semanas',
-    filterGroup: 'dados',
-  },
-  {
-    slug: 'desktop',
-    name: 'Aplicações Desktop',
-    description: 'Apps desktop multiplataforma com Electron, suporte offline e atualizações automáticas.',
-    longDescription: 'Desenvolvemos aplicações desktop que rodam em Windows, macOS e Linux a partir de uma única base de código com Electron. Suporte offline, sincronização em background e integração com hardware local.',
-    icon: '🖥️',
-    category: ServiceCategory.DESKTOP,
-    deliverables: ['App Windows + macOS + Linux', 'Modo offline + sincronização', 'Atualizações automáticas (OTA)'],
-    techHints: ['Electron', 'SQLite'],
-    deliveryWeeks: '8–14 semanas',
-    filterGroup: 'produto',
-  },
+// ── Non-translatable service base config ──────────────────────────────────────
+// contentId maps to the id in content/{locale}/pages/services.json
+const SERVICE_BASE: {
+  slug: string
+  contentId: string
+  icon: string
+  category: ServiceCategory
+  techHints: string[]
+  deliveryRange: string
+  filterGroup: ServiceFilterGroup
+}[] = [
+  { slug: 'saas', contentId: 'saas', icon: '🚀', category: ServiceCategory.SAAS, techHints: ['Next.js', 'Stripe', 'PostgreSQL'], deliveryRange: '8–16', filterGroup: 'produto' },
+  { slug: 'mobile', contentId: 'aplicativo-mobile', icon: '📱', category: ServiceCategory.MOBILE, techHints: ['React Native', 'Expo'], deliveryRange: '10–18', filterGroup: 'mobile-ia' },
+  { slug: 'landing-page', contentId: 'landing-page', icon: '🌐', category: ServiceCategory.LANDING, techHints: ['Next.js', 'Tailwind'], deliveryRange: '2–4', filterGroup: 'produto' },
+  { slug: 'ecommerce', contentId: 'e-commerce', icon: '🛒', category: ServiceCategory.ECOMMERCE, techHints: ['Next.js', 'Stripe'], deliveryRange: '8–14', filterGroup: 'produto' },
+  { slug: 'dashboard', contentId: 'dashboard-b2b', icon: '📊', category: ServiceCategory.DASHBOARD, techHints: ['Next.js', 'Recharts'], deliveryRange: '6–12', filterGroup: 'dados' },
+  { slug: 'api', contentId: 'api-integracoes', icon: '🔌', category: ServiceCategory.API, techHints: ['Node.js', 'REST / GraphQL'], deliveryRange: '3–8', filterGroup: 'dados' },
+  { slug: 'automacao-com-ia', contentId: 'automacao-com-ia', icon: '🤖', category: ServiceCategory.AI, techHints: ['Claude AI', 'OpenAI', 'Python'], deliveryRange: '4–10', filterGroup: 'mobile-ia' },
+  { slug: 'marketplace', contentId: 'marketplace', icon: '🏪', category: ServiceCategory.MARKETPLACE, techHints: ['Next.js', 'Stripe Connect'], deliveryRange: '12–20', filterGroup: 'produto' },
+  { slug: 'erp', contentId: 'erp', icon: '⚙️', category: ServiceCategory.ERP, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '16–30', filterGroup: 'dados' },
+  { slug: 'chatbot', contentId: 'bots-automacoes', icon: '💬', category: ServiceCategory.CHATBOT, techHints: ['Node.js', 'LLMs'], deliveryRange: '3–6', filterGroup: 'mobile-ia' },
+  { slug: 'consultoria', contentId: 'consultoria', icon: '🎯', category: ServiceCategory.CONSULTORIA, techHints: ['Stack agnóstico'], deliveryRange: '1–3', filterGroup: 'dados' },
+  { slug: 'desktop', contentId: 'desktop', icon: '🖥️', category: ServiceCategory.DESKTOP, techHints: ['Electron', 'SQLite'], deliveryRange: '8–14', filterGroup: 'produto' },
 ]
+
+// Build locale-aware services at module load time (locale is fixed per build)
+const _servicesContent = loadServicesContent()
+const _contentMap = new Map(_servicesContent.map(s => [s.id, s]))
+
+export const services: Service[] = SERVICE_BASE.map(base => {
+  const content = _contentMap.get(base.contentId)
+  return {
+    slug: base.slug,
+    name: content?.title ?? base.slug,
+    description: content?.description ?? '',
+    longDescription: content?.description ?? '',
+    icon: base.icon,
+    category: base.category,
+    deliverables: content?.features ?? [],
+    techHints: base.techHints,
+    deliveryWeeks: base.deliveryRange,
+    filterGroup: base.filterGroup,
+  }
+})
 
 export const portfolioProjects: PortfolioProject[] = [
   { slug: 'servizipercasa', name: 'ServiziPerCasa', title: 'ServiziPerCasa', description: 'Marketplace italiano conectando proprietários a profissionais de serviços domésticos. Booking, Stripe payments e dashboard analytics.', categories: [ServiceCategory.MARKETPLACE], techs: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], technologies: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], status: ProjectStatus.COMPLETED, featured: true, videoUrl: '/video/servizipercasa.mp4', countries: [DeliveryCountry.ITALIA] },

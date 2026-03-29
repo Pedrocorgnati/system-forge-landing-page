@@ -67,7 +67,7 @@ export function BlogPreview() {
                 Blog
               </span>
               <h2 className="text-3xl sm:text-4xl font-extrabold text-foreground leading-[1.15] tracking-[-0.02em]">
-                Conteúdo sobre tecnologia e negócios
+                {messages.sections.blogPreview.title}
               </h2>
             </div>
             <Link

@@ -29,9 +29,10 @@ import * as path from 'node:path'
 
 const CSP_BY_LOCALE: Record<string, string> = {
   // BR: GTM habilitado (LGPD permite com aviso de cookies)
+  // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   br: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
@@ -42,9 +43,10 @@ const CSP_BY_LOCALE: Record<string, string> = {
   ].join('; '),
 
   // IT: sem GTM por padrão (GDPR — GTM só carrega após consentimento explícito via CMP)
+  // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   it: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
@@ -55,9 +57,10 @@ const CSP_BY_LOCALE: Record<string, string> = {
   ].join('; '),
 
   // EN: GTM habilitado (CAN-SPAM/CCPA permite com opt-out)
+  // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   en: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
@@ -206,7 +209,7 @@ ${locale === 'it' ? '  # GDPR: GTM ausente — carregado somente após consentim
 # ----------------------------------------------------------------
 # Proteção de arquivos sensíveis
 # ----------------------------------------------------------------
-<FilesMatch "\\.(env|json|md|ts|tsx|lock|log)$">
+<FilesMatch "\\.(env|md|ts|tsx|lock|log)$">
   Require all denied
 </FilesMatch>
 

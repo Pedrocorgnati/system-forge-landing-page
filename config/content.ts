@@ -14,6 +14,10 @@ import ptBRPageMessages from '@content/pt-BR/pages/messages.json'
 import itITPageMessages from '@content/it-IT/pages/messages.json'
 import enPageMessages from '@content/en/pages/messages.json'
 
+import ptBRServices from '@content/pt-BR/pages/services.json'
+import itITServices from '@content/it-IT/pages/services.json'
+import enServices from '@content/en/pages/services.json'
+
 const MESSAGES_MAP: Record<SupportedLocale, typeof ptBRMessages> = {
   'pt-BR': ptBRMessages,
   'it-IT': itITMessages,
@@ -46,6 +50,21 @@ export function loadMessagesFor(locale: SupportedLocale) {
  */
 export function loadPageMessages() {
   return PAGE_MESSAGES_MAP[getLocale()]
+}
+
+type ServiceContentItem = { id: string; title: string; description: string; features: string[] }
+
+const SERVICES_CONTENT_MAP: Record<SupportedLocale, ServiceContentItem[]> = {
+  'pt-BR': ptBRServices as ServiceContentItem[],
+  'it-IT': itITServices as ServiceContentItem[],
+  'en': enServices as ServiceContentItem[],
+}
+
+/**
+ * Carrega conteúdo de serviços para o locale atual do build.
+ */
+export function loadServicesContent(): ServiceContentItem[] {
+  return SERVICES_CONTENT_MAP[getLocale()]
 }
 
 /**
