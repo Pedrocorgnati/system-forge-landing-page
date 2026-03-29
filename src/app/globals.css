@@ -226,6 +226,135 @@ body {
 }
 
 /* ============================================
+   PORTFOLIO CAROUSEL
+   ============================================ */
+
+.portfolio-carousel__wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.portfolio-carousel__viewport {
+  overflow: hidden;
+  width: 100%;
+}
+
+.portfolio-carousel__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  gap: 24px;
+  padding: 8px 2px;
+}
+
+.portfolio-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.portfolio-carousel__slide {
+  flex: 0 0 calc((100% - 48px) / 3);
+  scroll-snap-align: start;
+  min-width: 0;
+}
+
+.portfolio-carousel__card {
+  height: 300px;
+}
+
+/* Arrows */
+.portfolio-carousel__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--foreground);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 200ms ease, color 200ms ease, border-color 200ms ease, opacity 200ms ease;
+  box-shadow: var(--shadow-md);
+}
+
+.portfolio-carousel__arrow:hover:not(:disabled) {
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border-color: var(--primary);
+}
+
+.portfolio-carousel__arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.portfolio-carousel__arrow--prev {
+  left: -56px;
+}
+
+.portfolio-carousel__arrow--next {
+  right: -56px;
+}
+
+/* Dots */
+.portfolio-carousel__dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.portfolio-carousel__dot {
+  height: 6px;
+  width: 6px;
+  border-radius: 999px;
+  background: var(--border);
+  border: none;
+  cursor: pointer;
+  transition: background 200ms ease, width 200ms ease;
+  padding: 0;
+}
+
+.portfolio-carousel__dot:hover {
+  background: var(--muted-foreground);
+}
+
+.portfolio-carousel__dot.is-active {
+  background: var(--primary);
+  width: 20px;
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .portfolio-carousel__slide {
+    flex: 0 0 calc((100% - 24px) / 2);
+  }
+
+  .portfolio-carousel__arrow--prev {
+    left: -44px;
+  }
+
+  .portfolio-carousel__arrow--next {
+    right: -44px;
+  }
+}
+
+@media (max-width: 700px) {
+  .portfolio-carousel__slide {
+    flex: 0 0 min(400px, 90vw);
+  }
+
+  .portfolio-carousel__arrow {
+    display: none;
+  }
+}
+
+/* ============================================
    PROSE — Blog Content
    ============================================ */
 

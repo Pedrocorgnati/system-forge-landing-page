@@ -2,11 +2,12 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
-import { ChevronLeft, ChevronRight, Quote } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Quote, Pause, Play } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { testimonials } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import { loadMessages } from '@config/content'
+import { TIMING } from '@/lib/constants/timing'
 
 const messages = loadMessages()
 
@@ -20,7 +21,7 @@ function StarRating({ animate = false }: { animate?: boolean }) {
             'w-4 h-4 text-warning fill-current',
             animate && 'star-animate',
           )}
-          style={animate ? { animationDelay: `${i * 60}ms` } : undefined}
+          style={animate ? { animationDelay: `${i * TIMING.STAR_ANIMATION_STEP}ms` } : undefined}
           viewBox="0 0 24 24"
           aria-hidden="true"
         >
@@ -79,6 +80,7 @@ function Avatar({ name, avatarUrl, isActive = false }: { name: string; avatarUrl
 
 export function TestimonialsSection() {
   const [active, setActive] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const gridRef = useRef<HTMLDivElement>(null)
   const total = testimonials.length
@@ -92,10 +94,18 @@ export function TestimonialsSection() {
 
   const resetTimer = useCallback(() => {
     if (timerRef.current) clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => goTo(active + 1), 5000)
-  }, [active, goTo])
+    if (!isPaused) {
+      timerRef.current = setTimeout(() => goTo(active + 1), TIMING.CAROUSEL_AUTOPLAY)
+    }
+  }, [active, goTo, isPaused])
 
   useEffect(() => {
+    // Respect prefers-reduced-motion: start paused
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setIsPaused(true)
+      return
+    }
     resetTimer()
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current)
@@ -167,11 +177,14 @@ export function TestimonialsSection() {
           {/* Carousel — MC-3: quote mark + MC-4: cross-fade + MC-6: avatar ring */}
           <div className="relative">
             <div
+              id="testimonial-panel"
               key={active}
               data-testid="testimonial-card-active"
               className="testimonial-active-card relative flex flex-col gap-6 p-8 md:p-10 rounded-2xl border border-border bg-card overflow-hidden"
-              role="article"
+              role="tabpanel"
               aria-label={`${messages.sections.testimonials.eyebrow} — ${current.author}`}
+              aria-live="polite"
+              tabIndex={0}
             >
               {/* MC-3: Oversized gradient quote mark */}
               <Quote
@@ -209,6 +222,7 @@ export function TestimonialsSection() {
                     key={t.id}
                     role="tab"
                     aria-selected={i === active}
+                    aria-controls="testimonial-panel"
                     aria-label={`${messages.sections.testimonials.eyebrow} — ${t.author}`}
                     onClick={() => {
                       goTo(i)
@@ -222,7 +236,7 @@ export function TestimonialsSection() {
                 ))}
               </div>
 
-              {/* Prev/Next */}
+              {/* Prev/Next + Pause */}
               <div className="flex gap-2">
                 <button
                   data-testid="testimonial-prev-button"
@@ -235,6 +249,23 @@ export function TestimonialsSection() {
                   )}
                 >
                   <ChevronLeft className="w-4 h-4 text-foreground" aria-hidden="true" />
+                </button>
+                <button
+                  data-testid="testimonial-pause-button"
+                  onClick={() => setIsPaused((p) => !p)}
+                  aria-label={isPaused
+                    ? messages.sections.testimonials.resumeLabel
+                    : messages.sections.testimonials.pauseLabel}
+                  aria-pressed={isPaused}
+                  className={cn(
+                    'w-10 h-10 rounded-lg border border-border bg-card flex items-center justify-center',
+                    'hover:border-primary/40 hover:bg-accent hover:-translate-y-0.5 transition-all duration-200',
+                    'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
+                  )}
+                >
+                  {isPaused
+                    ? <Play className="w-4 h-4 text-foreground" aria-hidden="true" />
+                    : <Pause className="w-4 h-4 text-foreground" aria-hidden="true" />}
                 </button>
                 <button
                   data-testid="testimonial-next-button"

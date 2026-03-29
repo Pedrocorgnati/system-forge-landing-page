@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useCallback } from 'react'
+import { useRef, useCallback, useState, useEffect } from 'react'
 import Link from 'next/link'
 import { ROUTES } from '@/lib/constants'
 import { Container } from '@/components/ui/Container'
@@ -15,7 +15,6 @@ const projects = [
     tags: ['Next.js', 'Prisma', 'Stripe'],
     videoUrl: '/video/servizipercasa.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: true,
   },
   {
     name: 'Piemontech',
@@ -24,7 +23,6 @@ const projects = [
     tags: ['Next.js', 'Claude AI', 'Stripe'],
     videoUrl: '/video/piemontech.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Sistema Garantido',
@@ -33,7 +31,6 @@ const projects = [
     tags: ['Next.js', 'Claude AI', 'Twilio'],
     videoUrl: '/video/sistema-garantido.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'BicoJá',
@@ -42,7 +39,6 @@ const projects = [
     tags: ['Next.js', 'React Native', 'Prisma'],
     videoUrl: '/video/bicoja.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Stork Logistics',
@@ -51,7 +47,6 @@ const projects = [
     tags: ['Next.js', 'Recharts', 'Inngest'],
     videoUrl: '/video/stork-logistics.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: true,
   },
   {
     name: 'Divulga Fácil Dashboard',
@@ -60,7 +55,6 @@ const projects = [
     tags: ['Next.js', 'PostgreSQL', 'Stripe'],
     videoUrl: '/video/divulga-facil-dashboard.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'QuackCoin Platform',
@@ -69,7 +63,6 @@ const projects = [
     tags: ['Next.js', 'Prisma', 'Go'],
     videoUrl: '/video/Quackcoin.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Abitare Holding',
@@ -78,7 +71,6 @@ const projects = [
     tags: ['Astro', 'Tailwind CSS'],
     videoUrl: '/video/abitare-holding.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Health Technologies',
@@ -87,7 +79,6 @@ const projects = [
     tags: ['Next.js', 'TypeScript'],
     videoUrl: '/video/HealthTechnologies.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'SiteBaratoBR',
@@ -96,7 +87,6 @@ const projects = [
     tags: ['Next.js', 'Stripe', 'AWS S3'],
     videoUrl: '/video/site-barato.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Dove Abitare Bene',
@@ -105,7 +95,6 @@ const projects = [
     tags: ['Astro', 'Pagefind'],
     videoUrl: '/video/doveabitarebene.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Calculadora Motoristas',
@@ -114,7 +103,6 @@ const projects = [
     tags: ['Next.js', 'Recharts'],
     videoUrl: '/video/calculadora-motoristas.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Thamy Shoes',
@@ -123,7 +111,6 @@ const projects = [
     tags: ['Next.js', 'Prisma', 'Bling API'],
     videoUrl: '/video/thamy-shoes.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Design System Showroom',
@@ -132,7 +119,6 @@ const projects = [
     tags: ['Next.js', 'Zustand'],
     videoUrl: '/video/showroom.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Corgnati Platform',
@@ -141,7 +127,6 @@ const projects = [
     tags: ['Next.js', 'Prisma', 'Stripe'],
     videoUrl: '/video/corgnati-platform.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'TechSkillsThatPay',
@@ -150,7 +135,6 @@ const projects = [
     tags: ['Next.js', 'MDX'],
     videoUrl: '/video/techskillsthatpay.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'ApexCrypto',
@@ -159,7 +143,6 @@ const projects = [
     tags: ['Next.js', 'Sass'],
     videoUrl: '/video/Apexcrypto-website.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'ApexSwift Dashboard',
@@ -168,7 +151,6 @@ const projects = [
     tags: ['Next.js', 'Go', 'Tailwind'],
     videoUrl: '/video/ApexSwift-dashboard.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'ScoreTube Landing',
@@ -177,7 +159,6 @@ const projects = [
     tags: ['Next.js', 'Tailwind CSS'],
     videoUrl: '/video/Scoretube-landing.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'NineKeys',
@@ -186,7 +167,6 @@ const projects = [
     tags: ['HTML', 'CSS', 'TypeScript'],
     videoUrl: '/video/Ninekeys.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'QuackCoin Landing',
@@ -195,7 +175,6 @@ const projects = [
     tags: ['HTML', 'CSS', 'TypeScript'],
     videoUrl: '/video/quack-coin-landing-page.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'C4ts',
@@ -204,7 +183,6 @@ const projects = [
     tags: ['Markdown', 'TypeScript', 'AI'],
     videoUrl: '/video/c4ts.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'SuppleSeller',
@@ -213,7 +191,6 @@ const projects = [
     tags: ['Next.js', 'Go'],
     videoUrl: '/video/Suppleseller.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Passkey Dashboard',
@@ -222,7 +199,6 @@ const projects = [
     tags: ['Next.js', 'TypeScript', 'Sass'],
     videoUrl: '/video/Passkey-dashboard.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'ZenMinder',
@@ -231,7 +207,6 @@ const projects = [
     tags: ['React', 'Firebase', 'Sass'],
     videoUrl: '/video/Zenminder.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Personal Website',
@@ -240,7 +215,6 @@ const projects = [
     tags: ['Next.js', 'Bootstrap'],
     videoUrl: '/video/Personal-Resume-Website.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
   {
     name: 'Cognuscraft',
@@ -249,39 +223,37 @@ const projects = [
     tags: ['HTML', 'CSS', 'JavaScript'],
     videoUrl: '/video/Cognuscraft.mp4',
     href: ROUTES.PORTFOLIO,
-    hero: false,
   },
 ]
 
-function BentoCard({
+function ProjectCard({
   project,
 }: {
   project: (typeof projects)[number]
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const handleMouseEnter = useCallback(() => {
     videoRef.current?.play()
+    setIsPlaying(true)
   }, [])
 
   const handleMouseLeave = useCallback(() => {
     if (videoRef.current) {
       videoRef.current.pause()
     }
+    setIsPlaying(false)
   }, [])
 
   return (
     <article
       aria-label={`Projeto ${project.name} — ${project.category}`}
-      className={[
-        'group relative overflow-hidden rounded-2xl border border-border bg-card',
-        'shadow-lg cursor-pointer',
-        project.hero ? 'md:col-span-2 md:row-span-2' : '',
-      ].join(' ')}
+      className="portfolio-carousel__card group relative overflow-hidden rounded-2xl border border-border bg-card shadow-lg cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      {/* Vídeo — parado por padrão, toca no hover */}
+      {/* Vídeo */}
       <video
         ref={videoRef}
         className="absolute inset-0 h-full w-full object-cover"
@@ -294,8 +266,27 @@ function BentoCard({
         <source src={project.videoUrl} type="video/mp4" />
       </video>
 
-      {/* Overlay escuro fixo (base) */}
-      <div className="absolute inset-0 bg-black/10" aria-hidden="true" />
+      {/* Overlay escuro fixo */}
+      <div className="absolute inset-0 bg-black/20" aria-hidden="true" />
+
+      {/* Play icon — visível enquanto parado, some no hover */}
+      {!isPlaying && (
+        <div
+          className="absolute inset-0 flex items-center justify-center pointer-events-none transition-opacity duration-200 md:opacity-100 md:group-hover:opacity-0"
+          aria-hidden="true"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/40 backdrop-blur-sm ring-1 ring-white/20">
+            <svg
+              viewBox="0 0 24 24"
+              fill="white"
+              className="h-5 w-5 translate-x-0.5"
+              aria-hidden="true"
+            >
+              <path d="M8 5v14l11-7z" />
+            </svg>
+          </div>
+        </div>
+      )}
 
       {/* Overlay info — mobile: sempre visível; desktop: aparece no hover */}
       <div
@@ -308,14 +299,16 @@ function BentoCard({
         ].join(' ')}
         aria-hidden="true"
       >
-        <div className="w-full p-5 md:p-6">
+        <div className="w-full p-5">
           <p className="text-[10px] uppercase tracking-widest text-white/60 font-medium">
             {project.category}
           </p>
-          <h3 className="mt-1.5 text-lg font-semibold text-white">
+          <h3 className="mt-1.5 text-base font-semibold text-white leading-snug">
             {project.name}
           </h3>
-          {/* Tags */}
+          <p className="mt-1.5 text-[11px] text-white/70 line-clamp-2 leading-relaxed">
+            {project.description}
+          </p>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {project.tags.map((tag) => (
               <span
@@ -328,7 +321,7 @@ function BentoCard({
           </div>
           <Link
             href={project.href}
-            className="mt-3 inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-white transition-colors"
+            className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-white transition-colors"
             tabIndex={0}
           >
             Ver projeto →
@@ -339,7 +332,55 @@ function BentoCard({
   )
 }
 
+const CARDS_PER_VIEW = 3
+const PAGE_COUNT = Math.ceil(projects.length / CARDS_PER_VIEW)
+
 export function PortfolioBento() {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [currentPage, setCurrentPage] = useState(0)
+
+  const scrollToPage = useCallback((page: number) => {
+    const track = trackRef.current
+    if (!track) return
+    const targetIndex = page * CARDS_PER_VIEW
+    const slide = track.children[targetIndex] as HTMLElement
+    if (!slide) return
+    track.scrollTo({ left: slide.offsetLeft, behavior: 'smooth' })
+    setCurrentPage(page)
+  }, [])
+
+  const prev = useCallback(() => {
+    scrollToPage(Math.max(0, currentPage - 1))
+  }, [currentPage, scrollToPage])
+
+  const next = useCallback(() => {
+    scrollToPage(Math.min(PAGE_COUNT - 1, currentPage + 1))
+  }, [currentPage, scrollToPage])
+
+  // Sync page indicator on manual scroll
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    const handler = () => {
+      const slideWidth = (track.children[0] as HTMLElement)?.offsetWidth ?? 0
+      if (slideWidth <= 0) return
+      const cardIndex = Math.round(track.scrollLeft / (slideWidth + 24))
+      setCurrentPage(Math.floor(cardIndex / CARDS_PER_VIEW))
+    }
+    track.addEventListener('scroll', handler, { passive: true })
+    return () => track.removeEventListener('scroll', handler)
+  }, [])
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prev()
+      if (e.key === 'ArrowRight') next()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [prev, next])
+
   const cta = buildWhatsAppCTA('Agendar conversa', 'portfólio de projetos')
 
   return (
@@ -370,13 +411,55 @@ export function PortfolioBento() {
             </Link>
           </div>
 
-          {/* Bento grid */}
-          <div
-            data-testid="portfolio-bento"
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:auto-rows-[220px]"
-          >
-            {projects.map((project) => (
-              <BentoCard key={project.name} project={project} />
+          {/* Carousel */}
+          <div className="portfolio-carousel__wrapper">
+            {/* Prev arrow */}
+            <button
+              onClick={prev}
+              disabled={currentPage === 0}
+              className="portfolio-carousel__arrow portfolio-carousel__arrow--prev"
+              aria-label="Projetos anteriores"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+
+            {/* Viewport */}
+            <div className="portfolio-carousel__viewport">
+              <div ref={trackRef} className="portfolio-carousel__track">
+                {projects.map((project) => (
+                  <div key={project.name} className="portfolio-carousel__slide">
+                    <ProjectCard project={project} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Next arrow */}
+            <button
+              onClick={next}
+              disabled={currentPage >= PAGE_COUNT - 1}
+              className="portfolio-carousel__arrow portfolio-carousel__arrow--next"
+              aria-label="Próximos projetos"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M9 18l6-6-6-6" />
+              </svg>
+            </button>
+          </div>
+
+          {/* Dots */}
+          <div className="portfolio-carousel__dots" role="tablist" aria-label="Navegação do carrossel">
+            {Array.from({ length: PAGE_COUNT }).map((_, i) => (
+              <button
+                key={i}
+                role="tab"
+                aria-selected={i === currentPage}
+                onClick={() => scrollToPage(i)}
+                className={`portfolio-carousel__dot${i === currentPage ? ' is-active' : ''}`}
+                aria-label={`Página ${i + 1} de ${PAGE_COUNT}`}
+              />
             ))}
           </div>
 

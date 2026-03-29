@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { getSiteConfig } from '@config'
 import type { ConsentDecision, ComplianceFramework, ConsentState } from '@/types/consent.types'
+import { STORAGE_KEYS } from '@/lib/constants/storage-keys'
 
 export interface UseConsentManager {
   hasConsented: boolean
@@ -20,7 +21,7 @@ export interface UseConsentManager {
 /*  Constants                                                          */
 /* ------------------------------------------------------------------ */
 
-const STORAGE_KEY = 'sf-cookie-consent'
+const STORAGE_KEY = STORAGE_KEYS.COOKIE_CONSENT
 
 /** GDPR Art. 7 — consent expires after 13 months (395 days). */
 const EXPIRATION_MS = 395 * 24 * 60 * 60 * 1000

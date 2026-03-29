@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 
 /**
  * LanguageSuggestionBanner — unit tests
@@ -107,9 +107,11 @@ function getStorageKey(domain: string): string {
   return `sf-lang-dismissed-${domain}`
 }
 
+type LocalStorageMock = { getItem: (k: string) => string | null; setItem: (k: string, v: string) => void; removeItem?: (k: string) => void }
+
 function readDismissed(key: string): boolean {
   try {
-    return (global as any).localStorage?.getItem(key) === 'true'
+    return (global as unknown as { localStorage: LocalStorageMock }).localStorage?.getItem(key) === 'true'
   } catch {
     return false
   }
@@ -117,7 +119,7 @@ function readDismissed(key: string): boolean {
 
 function writeDismissed(key: string): void {
   try {
-    ;(global as any).localStorage?.setItem(key, 'true')
+    ;(global as unknown as { localStorage: LocalStorageMock }).localStorage?.setItem(key, 'true')
   } catch {
     // silent
   }
@@ -126,7 +128,7 @@ function writeDismissed(key: string): void {
 describe('useLanguageDetection — storage helpers', () => {
   beforeEach(() => {
     const store: Record<string, string> = {}
-    ;(global as any).localStorage = {
+    ;(global as unknown as { localStorage: LocalStorageMock }).localStorage = {
       getItem: (k: string) => store[k] ?? null,
       setItem: (k: string, v: string) => { store[k] = v },
       removeItem: (k: string) => { delete store[k] },
@@ -150,7 +152,7 @@ describe('useLanguageDetection — storage helpers', () => {
   })
 
   it('readDismissed returns false when localStorage throws', () => {
-    ;(global as any).localStorage = {
+    ;(global as unknown as { localStorage: LocalStorageMock }).localStorage = {
       getItem: () => { throw new Error('quota') },
       setItem: () => {},
     }

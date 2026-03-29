@@ -5,17 +5,15 @@ import Link from 'next/link'
 import { useArticleSearch } from '@/hooks/useArticleSearch'
 import { sanitizeSearchQuery } from '@/lib/search'
 import { loadMessages } from '@config/content'
+import { ROUTES } from '@/lib/constants/routes'
+import { trackEvent } from '@/lib/analytics'
+import { GA4_EVENTS } from '@/lib/constants/analytics'
 
 const m = loadMessages()
 
 // GA4 tracking (EVT-011 search_performed)
 function trackSearch(sanitizedQuery: string) {
-  if (typeof window !== 'undefined' && 'gtag' in window) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(window as any).gtag('event', 'search', { // any: gtag não tem typings nativos no browser global; acesso pontual via type assertion
-      search_term: sanitizedQuery,
-    })
-  }
+  trackEvent(GA4_EVENTS.SEARCH, { search_term: sanitizedQuery })
 }
 
 export function SearchBar() {
@@ -119,7 +117,7 @@ export function SearchBar() {
               </p>
               <p className="text-xs text-muted-foreground mt-1">
                 {m.blog.search.tryDifferent}{' '}
-                <Link href="/blog" className="text-primary hover:underline">
+                <Link href={ROUTES.BLOG} className="text-primary hover:underline">
                   {m.blog.search.browseBlog}
                 </Link>
               </p>

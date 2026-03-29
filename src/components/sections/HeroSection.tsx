@@ -5,7 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CTAButton } from '@/components/ui/CTAButton'
 import { Container } from '@/components/ui/Container'
-import { buildDefaultCTAs, buildWhatsAppCTA } from '@/lib/cta'
+import { buildDefaultCTAs } from '@/lib/cta'
 import { getSiteConfig } from '@config'
 import { loadMessages, loadPageMessages } from '@config/content'
 

@@ -9,6 +9,7 @@ import { loadMessages } from '@config/content'
 import { MobileNav } from './MobileNav'
 import { useTheme } from './ThemeProvider'
 import { cn } from '@/lib/utils'
+import { ROUTES } from '@/lib/constants/routes'
 
 const config = getSiteConfig()
 const messages = loadMessages()
@@ -54,7 +55,7 @@ export function Header() {
           <div className="flex items-center justify-between h-full">
             {/* Logo */}
             <Link
-              href="/"
+              href={ROUTES.HOME}
               data-testid="header-logo"
               className={cn(
                 'flex items-center gap-2 text-xl font-bold text-primary',

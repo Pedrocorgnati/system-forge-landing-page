@@ -32,6 +32,9 @@
     "test:integration": "vitest run --config vitest.integration.config.ts",
     "test:integration:watch": "vitest --config vitest.integration.config.ts",
     "test:all": "vitest run && vitest run --config vitest.integration.config.ts",
+    "test:mutation": "stryker run",
+    "test:mutation:incremental": "stryker run --incremental",
+    "test:mutation:quick": "stryker run --mutate 'src/lib/i18n.ts'",
     "analyze": "ANALYZE=true npm run build:br",
     "optimize:og-images": "bash scripts/optimize-og-images.sh",
     "lighthouse:br": "npx serve dist-br/ -p 3001 & sleep 3 && npx lighthouse http://localhost:3001 --output=json",
@@ -45,7 +48,14 @@
     "docker:build:it": "docker build --build-arg LOCALE=it -t system-forge-landing-page:it .",
     "docker:build:en": "docker build --build-arg LOCALE=en -t system-forge-landing-page:en .",
     "setup": "./scripts/bootstrap.sh",
-    "reset": "./scripts/bootstrap.sh --reset"
+    "reset": "./scripts/bootstrap.sh --reset",
+    "test:load:smoke": "k6 run --env SCENARIO=smoke tests/load/run-all.js",
+    "test:load": "k6 run tests/load/run-all.js",
+    "test:load:stress": "k6 run --env SCENARIO=stress tests/load/run-all.js",
+    "test:load:i18n:smoke": "k6 run --env SCENARIO=smoke tests/load/run-all-i18n.js",
+    "test:load:i18n": "k6 run tests/load/run-all-i18n.js",
+    "test:load:i18n:it": "k6 run --env MARKET=it tests/load/run-all-i18n.js",
+    "test:load:i18n:en": "k6 run --env MARKET=en tests/load/run-all-i18n.js"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",
@@ -66,7 +76,11 @@
   },
   "devDependencies": {
     "@next/bundle-analyzer": "^15.5.14",
+    "@stryker-mutator/core": "^9.6.0",
+    "@stryker-mutator/typescript-checker": "^9.6.0",
+    "@stryker-mutator/vitest-runner": "^9.6.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",

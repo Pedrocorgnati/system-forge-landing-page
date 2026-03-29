@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
+import { JsonLdService } from '@/components/seo/JsonLdService'
 import { CTASection } from '@/components/sections/CTASection'
 import { services } from '@/lib/data'
 import { getSiteConfig } from '@config'
@@ -24,11 +26,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const service = services.find((s) => s.slug === slug)
   if (!service) return {}
-  return {
+
+  const { generatePageMetadata } = await import('@/lib/seo')
+  return generatePageMetadata({
     title: service.name,
     description: service.longDescription,
-    alternates: { canonical: config.routes.service(slug) },
-  }
+    path: config.routes.service(slug),
+  })
 }
 
 export default async function ServicoPage({ params }: Props) {
@@ -48,6 +52,17 @@ export default async function ServicoPage({ params }: Props) {
 
   return (
     <>
+      <JsonLdBreadcrumb
+        items={breadcrumbs.map(b => ({ label: b.label, url: b.href }))}
+      />
+      <JsonLdService
+        name={service.name}
+        description={service.longDescription}
+        provider={{ name: config.siteName, url: config.url }}
+        areaServed={["BR", "IT", "US"]}
+        url={`${config.url}${config.routes.service(slug)}`}
+        priceRange="Variable"
+      />
       <div data-testid="page-servico-detalhe" className="py-12 md:py-16 bg-background">
         <Container>
           <div className="flex flex-col gap-8 max-w-3xl">

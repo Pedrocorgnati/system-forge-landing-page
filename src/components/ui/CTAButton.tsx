@@ -3,6 +3,9 @@
 import { type CTAConfig, ConversionAction } from '@/lib/types'
 import { isAllowedCTAHref } from '@/lib/cta'
 import { cn } from '@/lib/utils'
+import { logger } from '@/lib/logger'
+import { trackEvent } from '@/lib/analytics'
+import { GA4_EVENTS } from '@/lib/constants/analytics'
 
 interface CTAButtonProps {
   config: CTAConfig
@@ -12,25 +15,20 @@ interface CTAButtonProps {
   fullWidth?: boolean
 }
 
-type Gtag = (command: string, eventName: string, params?: Record<string, unknown>) => void
-
 export function CTAButton({ config, size = 'md', variant, className, fullWidth }: CTAButtonProps) {
   const resolvedConfig = variant ? { ...config, variant } : config
 
   function handleClick() {
     if (!isAllowedCTAHref(resolvedConfig.href)) {
-      console.error('ENV_004: CTA href inválido ou não permitido', resolvedConfig.href)
+      logger.warn('ENV_004: CTA href inválido ou não permitido', { action: 'cta-click' })
       return
     }
 
-    // GA4 tracking (se disponível)
-    const gtag = (window as Window & { gtag?: Gtag }).gtag
-    if (typeof window !== 'undefined' && typeof gtag === 'function') {
-      gtag('event', 'cta_clicked', {
-        action: resolvedConfig.action,
-        label: resolvedConfig.label,
-      })
-    }
+    // GA4 tracking
+    trackEvent(GA4_EVENTS.CTA_CLICKED, {
+      action: resolvedConfig.action,
+      label: resolvedConfig.label,
+    })
 
     window.open(resolvedConfig.href, '_blank', 'noopener,noreferrer')
   }
@@ -45,7 +43,7 @@ export function CTAButton({ config, size = 'md', variant, className, fullWidth }
       className={cn(
         'inline-flex items-center justify-center font-medium transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
         // sizes
-        size === 'sm' && 'px-3 py-1.5 text-sm rounded-lg gap-1.5 min-h-[32px]',
+        size === 'sm' && 'px-3 py-1.5 text-sm rounded-lg gap-1.5 min-h-[44px]',
         size === 'md' && 'px-5 py-2.5 text-base rounded-xl gap-2 min-h-[44px]',
         size === 'lg' && 'px-7 py-3.5 text-lg rounded-xl gap-2.5 min-h-[56px]',
         // variants

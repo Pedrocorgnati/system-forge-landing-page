@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
 import { cn } from '@/lib/utils'
+import { TIMING } from '@/lib/constants/timing'
 
 const config = getSiteConfig()
 const messages = loadMessages()
@@ -28,7 +29,11 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
-      setTimeout(() => firstLinkRef.current?.focus(), 50)
+      const focusTimer = setTimeout(() => firstLinkRef.current?.focus(), TIMING.FOCUS_DELAY)
+      return () => {
+        clearTimeout(focusTimer)
+        document.body.style.overflow = ''
+      }
     } else {
       document.body.style.overflow = ''
     }
@@ -38,12 +43,36 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
   }, [isOpen])
 
   useEffect(() => {
+    if (!isOpen) return
+
     function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape') {
         onClose()
         triggerRef.current?.focus()
+        return
+      }
+
+      if (e.key !== 'Tab') return
+
+      const drawer = document.querySelector('[data-testid="mobile-nav-drawer"]') as HTMLElement | null
+      if (!drawer) return
+
+      const focusableSelectors = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      const focusable = Array.from(drawer.querySelectorAll<HTMLElement>(focusableSelectors))
+      if (focusable.length === 0) return
+
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
       }
     }
+
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [isOpen, onClose, triggerRef])

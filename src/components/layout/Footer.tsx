@@ -3,10 +3,8 @@ import Image from 'next/image'
 import { Container } from '@/components/ui/Container'
 import { CookiePreferencesButton } from '@/components/ui/CookiePreferencesButton'
 import { getSiteConfig } from '@config'
-import { loadMessages } from '@config/content'
 
 const config = getSiteConfig()
-const messages = loadMessages()
 
 const FOOTER_TEXT = (() => {
   const locale = config.locale

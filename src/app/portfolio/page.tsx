@@ -1,19 +1,19 @@
-import type { Metadata } from 'next'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PortfolioGallery } from '@/components/sections/PortfolioGallery'
 import { CTASection } from '@/components/sections/CTASection'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
+import { generatePageMetadata } from '@/lib/seo'
 
 const config = getSiteConfig()
 const messages = loadMessages()
 
-export const metadata: Metadata = {
+export const metadata = generatePageMetadata({
   title: messages.breadcrumb.portfolio,
   description: `${messages.breadcrumb.portfolio} — ${config.siteName}`,
-  alternates: { canonical: config.routes.portfolio },
-}
+  path: config.routes.portfolio,
+})
 
 const breadcrumbs = [
   { label: messages.breadcrumb.home, href: config.routes.home },

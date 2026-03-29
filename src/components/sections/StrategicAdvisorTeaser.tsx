@@ -6,6 +6,7 @@ import { Container } from '@/components/ui/Container'
 import { CTAButton } from '@/components/ui/CTAButton'
 import { buildWhatsAppCTA } from '@/lib/cta'
 import { loadMessages } from '@config/content'
+import { ROUTES } from '@/lib/constants/routes'
 
 const messages = loadMessages()
 
@@ -65,7 +66,7 @@ export function StrategicAdvisorTeaser() {
 
           {/* Back to home */}
           <Link
-            href="/"
+            href={ROUTES.HOME}
             className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-md"
           >
             <ArrowLeft className="w-4 h-4" aria-hidden="true" />

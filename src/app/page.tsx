@@ -27,7 +27,7 @@ export default function HomePage() {
 
   return (
     <>
-      <JsonLdFaq items={faqItems.map((item: any) => ({ question: item.question, answer: item.answer }))} />
+      <JsonLdFaq items={faqItems.map((item) => ({ question: item.question, answer: item.answer }))} />
       <HeroSection />
       <ServicesGrid />
       <PortfolioBento />

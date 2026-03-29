@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import type { SupportedLocale } from '@config'
+import { STORAGE_KEYS } from '@/lib/constants/storage-keys'
 
 /**
  * Mapa de prefixos de locale do navegador para SupportedLocale.
@@ -51,7 +52,7 @@ function detectLocaleFromBrowser(): SupportedLocale | null {
 }
 
 function getStorageKey(domain: string): string {
-  return `sf-lang-dismissed-${domain}`
+  return STORAGE_KEYS.langDismissed(domain)
 }
 
 function readDismissed(key: string): boolean {
@@ -91,6 +92,7 @@ export function useLanguageDetection(
 
   useEffect(() => {
     const dismissed = readDismissed(storageKey)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDismissed(dismissed)
 
     if (!dismissed) {

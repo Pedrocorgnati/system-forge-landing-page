@@ -1,9 +1,13 @@
 {
-  "_comment": "SLOs derivados dos RNFs do PRD (SLO-SPEC.md não encontrado). Site estático com Cloudflare CDN.",
+  "_comment": "SLOs derivados dos RNFs do PRD (SLO-SPEC.md não encontrado). Site estático com Cloudflare CDN. Triple-market: BR/IT/EN.",
   "_source": "PRD.md seção Performance: TTFB < 200ms (cache), load time < 2s, LCP < 2.5s",
   "global": {
     "error_rate_max": 0.01,
-    "base_url": "https://forjadesistemas.com.br"
+    "markets": {
+      "br": "https://forjadesistemas.com.br",
+      "it": "https://systemforge.it",
+      "en": "https://systemforgesoftware.com"
+    }
   },
   "scenarios": {
     "home": {
@@ -50,6 +54,96 @@
     },
     "conselheiro": {
       "description": "Página do Conselheiro",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "home-it": {
+      "description": "Página inicial — mercado italiano (systemforge.it)",
+      "market": "it",
+      "locale": "it-IT",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "servizi": {
+      "description": "Listagem de serviços — mercado italiano (/servizi)",
+      "market": "it",
+      "locale": "it-IT",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "servizi-detalhe": {
+      "description": "Página individual de serviço italiano (/servizi/{slug})",
+      "market": "it",
+      "locale": "it-IT",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "blog-artigo-it": {
+      "description": "Artigo MDX italiano — conteúdo pesado",
+      "market": "it",
+      "locale": "it-IT",
+      "type": "pagina-conteudo",
+      "p95_ms": 800,
+      "p99_ms": 1500,
+      "error_rate_max": 0.01
+    },
+    "consulente": {
+      "description": "Página do Consulente — equivalente italiano do Conselheiro",
+      "market": "it",
+      "locale": "it-IT",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "home-en": {
+      "description": "Página inicial — mercado americano (systemforgesoftware.com)",
+      "market": "en",
+      "locale": "en",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "services": {
+      "description": "Listagem de serviços — mercado americano (/services)",
+      "market": "en",
+      "locale": "en",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "service-detail": {
+      "description": "Página individual de serviço americano (/services/{slug})",
+      "market": "en",
+      "locale": "en",
+      "type": "pagina-estatica",
+      "p95_ms": 500,
+      "p99_ms": 1000,
+      "error_rate_max": 0.01
+    },
+    "blog-artigo-en": {
+      "description": "Artigo MDX inglês — conteúdo pesado",
+      "market": "en",
+      "locale": "en",
+      "type": "pagina-conteudo",
+      "p95_ms": 800,
+      "p99_ms": 1500,
+      "error_rate_max": 0.01
+    },
+    "advisor": {
+      "description": "Página do Advisor — equivalente inglês do Conselheiro",
+      "market": "en",
+      "locale": "en",
       "type": "pagina-estatica",
       "p95_ms": 500,
       "p99_ms": 1000,

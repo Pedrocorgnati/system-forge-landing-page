@@ -178,7 +178,7 @@ export function ContactSection() {
           </div>
 
           {/* Email fallback — glassmorphic pill */}
-          <div className="contact-stagger-6 flex justify-center" aria-hidden="false">
+          <div className="contact-stagger-6 flex justify-center">
             <a
               href={`mailto:${SITE.email}`}
               data-testid="contact-email-link"

@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import React from 'react'
 import { Container } from '@/components/ui/Container'
+import { useCounter } from '@/hooks/useCounter'
+import { useIntersectionObserver } from '@/hooks/useIntersectionObserver'
 import { loadMessages } from '@config/content'
 
 const messages = loadMessages()
@@ -12,29 +14,6 @@ const stats = [
   { target: 5, suffix: '', label: 'Anos de experiência', sub: 'em software sob medida' },
   { target: 2, suffix: 'h', label: 'Tempo de resposta', sub: 'para qualquer demanda' },
 ]
-
-function useCounter(target: number, active: boolean) {
-  const [count, setCount] = useState(0)
-  useEffect(() => {
-    if (!active) return
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const id = requestAnimationFrame(() => setCount(target))
-      return () => cancelAnimationFrame(id)
-    }
-    const duration = 1400
-    let rafId: number
-    const step = (timestamp: number, startTime: number) => {
-      const elapsed = timestamp - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.floor(eased * target))
-      if (progress < 1) rafId = requestAnimationFrame((t) => step(t, startTime))
-    }
-    rafId = requestAnimationFrame((t) => step(t, t))
-    return () => cancelAnimationFrame(rafId)
-  }, [active, target])
-  return count
-}
 
 function StatItem({ stat, active }: { stat: (typeof stats)[number]; active: boolean }) {
   const count = useCounter(stat.target, active)
@@ -56,26 +35,11 @@ function StatItem({ stat, active }: { stat: (typeof stats)[number]; active: bool
 }
 
 export function StatsSection() {
-  const ref = useRef<HTMLElement>(null)
-  const [active, setActive] = useState(false)
-
-  useEffect(() => {
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setActive(true)
-          obs.disconnect()
-        }
-      },
-      { threshold: 0.3 },
-    )
-    if (ref.current) obs.observe(ref.current)
-    return () => obs.disconnect()
-  }, [])
+  const { ref, hasIntersected: active } = useIntersectionObserver({ threshold: 0.3 })
 
   return (
     <section
-      ref={ref}
+      ref={ref as React.RefObject<HTMLElement>}
       data-testid="section-stats"
       aria-label={messages.sections.stats.ariaLabel}
       className="w-full bg-card border-y border-border py-4 md:py-0"

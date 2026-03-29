@@ -1,21 +1,16 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { getSiteConfig } from '@config'
 import { loadMessages, interpolate } from '@config/content'
+import { subscribeNewsletter } from '@/lib/services/newsletter'
 
 // Local interfaces — NOT exported to lib/types.ts (ARCH-001: types.ts FROZEN after module-2/TASK-1)
 interface NewsletterFormData {
   email: string
   consent: boolean
   website: string // honeypot
-}
-
-interface NewsletterApiResponse {
-  success: boolean
-  message: string
-  error?: string
 }
 
 type FormStatus = 'idle' | 'submitting' | 'success' | 'pending-confirmation' | 'error'
@@ -68,8 +63,6 @@ export function NewsletterOptIn() {
     consent: false,
     website: '',
   })
-  const abortRef = useRef<AbortController | null>(null)
-
   function validateForm(): boolean {
     let valid = true
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -104,58 +97,35 @@ export function NewsletterOptIn() {
 
     setStatus('submitting')
 
-    const workerUrl = config.newsletter?.workerUrl
+    const result = await subscribeNewsletter({
+      email: formData.email,
+      consent: requiresCheckbox ? formData.consent : true,
+      website: formData.website,
+    })
 
-    if (!workerUrl) {
-      setErrorMessage(msg.error)
+    if (!result.success) {
+      const isInternalError =
+        !result.error ||
+        result.error === 'NETWORK_ERROR' ||
+        result.error === 'NEWSLETTER_NOT_CONFIGURED' ||
+        result.error.startsWith('HTTP ')
+      setErrorMessage(
+        result.error === 'TIMEOUT'
+          ? (msg.timeoutError ?? msg.error)
+          : isInternalError
+            ? msg.error
+            : (result.error ?? msg.error),
+      )
       setStatus('error')
       return
     }
 
-    const subscribeUrl = workerUrl.endsWith('/subscribe')
-      ? workerUrl
-      : `${workerUrl.replace(/\/$/, '')}/subscribe`
-
-    // AbortController com timeout de 10 segundos
-    const controller = new AbortController()
-    abortRef.current = controller
-    const timeoutId = setTimeout(() => controller.abort(), 10000)
-
-    try {
-      const response = await fetch(subscribeUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: formData.email,
-          consent: requiresCheckbox ? formData.consent : true,
-          website: formData.website,
-        }),
-        signal: controller.signal,
-      })
-
-      if (!response.ok) {
-        const json = (await response.json().catch(() => ({}))) as NewsletterApiResponse
-        setErrorMessage(json.error ?? msg.error)
-        setStatus('error')
-        return
-      }
-
-      // GDPR: show pending-confirmation state (double opt-in — Worker retorna 202)
-      if (isGDPR || response.status === 202) {
-        setSubmittedEmail(formData.email)
-        setStatus('pending-confirmation')
-      } else {
-        setStatus('success')
-      }
-    } catch (err) {
-      if (err instanceof Error && err.name === 'AbortError') {
-        setErrorMessage(msg.timeoutError ?? msg.error)
-      } else {
-        setErrorMessage(msg.error)
-      }
-      setStatus('error')
-    } finally {
-      clearTimeout(timeoutId)
+    // GDPR: show pending-confirmation state (double opt-in — Worker retorna 202)
+    if (isGDPR || result.status === 202) {
+      setSubmittedEmail(formData.email)
+      setStatus('pending-confirmation')
+    } else {
+      setStatus('success')
     }
   }
 

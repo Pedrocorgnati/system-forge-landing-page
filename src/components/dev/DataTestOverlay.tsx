@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect, useRef } from 'react'
+import { TIMING } from '@/lib/constants/timing'
 
 /**
  * DevDataTestOverlay — Overlay visual de debug para data-testid
@@ -48,7 +49,7 @@ export function DevDataTestOverlay() {
     try {
       await navigator.clipboard.writeText(copyText)
       setCopiedId(testId)
-      setTimeout(() => setCopiedId(null), 1500)
+      setTimeout(() => setCopiedId(null), TIMING.COPY_FEEDBACK)
     } catch {
       const textArea = document.createElement('textarea')
       textArea.value = copyText
@@ -59,7 +60,7 @@ export function DevDataTestOverlay() {
       document.execCommand('copy')
       document.body.removeChild(textArea)
       setCopiedId(testId)
-      setTimeout(() => setCopiedId(null), 1500)
+      setTimeout(() => setCopiedId(null), TIMING.COPY_FEEDBACK)
     }
   }, [])
 

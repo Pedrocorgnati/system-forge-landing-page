@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useCounter } from '@/hooks/useCounter'
 import { FileText, SearchCheck, Blocks, Zap, ShieldCheck, Headphones } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
@@ -68,32 +69,6 @@ const metrics = METRICS[locale] ?? METRICS['pt-BR']
 
 const pipelineSteps = ['PRD', 'WIRE', 'DEV']
 
-function useCounter(target: number, active: boolean) {
-  const [count, setCount] = useState(0)
-
-  useEffect(() => {
-    if (!active) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      const id = requestAnimationFrame(() => setCount(target))
-      return () => cancelAnimationFrame(id)
-    }
-    const duration = target >= 50 ? 1400 : 1000
-    let rafId = 0
-    const step = (timestamp: number, startTime: number) => {
-      const elapsed = timestamp - startTime
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.floor(eased * target))
-      if (progress < 1) {
-        rafId = requestAnimationFrame((t) => step(t, startTime))
-      }
-    }
-    rafId = requestAnimationFrame((t) => step(t, t))
-    return () => cancelAnimationFrame(rafId)
-  }, [active, target])
-
-  return count
-}
 
 function MetricCounter({
   metric,

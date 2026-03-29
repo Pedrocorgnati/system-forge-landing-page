@@ -71,7 +71,8 @@ describe('PostFrontmatterSchema', () => {
   // Caso 4: title ausente
   // -------------------------------------------------------------------------
   it('rejeita frontmatter sem title', () => {
-    const { title: _omitted, ...data } = validBase
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { title: _title, ...data } = validBase
     const result = PostFrontmatterSchema.safeParse(data)
     expect(result.success).toBe(false)
     if (!result.success) {

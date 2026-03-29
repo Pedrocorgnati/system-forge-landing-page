@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { blog as allArticles } from '@/.velite'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { BlogListPage } from '@/components/blog/BlogListPage'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
@@ -78,8 +79,15 @@ export default async function BlogPaginatedPage({ params }: PageProps) {
     { label: `${pageLabel} ${pageNum}`, href: '' },
   ]
 
+  const breadcrumbSchemaItems = [
+    { label: 'Home', url: config.routes.home },
+    { label: 'Blog', url: config.routes.blog },
+    { label: `${pageLabel} ${pageNum}`, url: ROUTES.BLOG_PAGE(pageNum) },
+  ]
+
   return (
     <div data-testid={`page-blog-${pageNum}`} className="py-12 md:py-16 bg-background">
+      <JsonLdBreadcrumb items={breadcrumbSchemaItems} />
       <Container>
         <div className="flex flex-col gap-8">
           <Breadcrumb items={breadcrumbs} />

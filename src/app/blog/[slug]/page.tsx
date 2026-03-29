@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { blog as articles } from '@/.velite'
 import { JsonLdBlogPosting } from '@/components/seo/JsonLdBlogPosting'
+import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { ArticlePage } from '@/components/blog/ArticlePage'
 import { generatePageMetadata } from '@/lib/seo'
 import { getRelatedArticles } from '@/lib/cross-links'
@@ -101,9 +102,15 @@ export default async function BlogPostPage({ params }: PageProps) {
     : []
 
   const siteConfig = getSiteConfig()
+  const breadcrumbItems = [
+    { label: 'Home', url: siteConfig.routes.home },
+    { label: 'Blog', url: siteConfig.routes.blog },
+    { label: article.title, url: `${siteConfig.routes.blog}/${article.slug}` },
+  ]
 
   return (
     <>
+      <JsonLdBreadcrumb items={breadcrumbItems} />
       <JsonLdBlogPosting
         post={{
           title: article.title,

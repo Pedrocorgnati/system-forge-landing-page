@@ -32,7 +32,7 @@ export function ScrollableChips({ options, selected, onSelect, className }: Scro
           data-testid={`chip-${option.value}`}
           className={cn(
             'snap-start shrink-0 px-4 py-2 rounded-full text-sm font-medium',
-            'min-h-[40px] min-w-[80px]',
+            'min-h-[44px] min-w-[80px]',
             'transition-colors touch-manipulation',
             'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
             selected === option.value

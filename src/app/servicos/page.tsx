@@ -1,4 +1,3 @@
-import type { Metadata } from 'next'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { ServiceCard } from '@/components/shared/ServiceCard'
@@ -6,15 +5,16 @@ import { CTASection } from '@/components/sections/CTASection'
 import { services } from '@/lib/data'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
+import { generatePageMetadata } from '@/lib/seo'
 
 const config = getSiteConfig()
 const messages = loadMessages()
 
-export const metadata: Metadata = {
+export const metadata = generatePageMetadata({
   title: messages.breadcrumb.services,
   description: `${messages.breadcrumb.services} — ${config.siteName}`,
-  alternates: { canonical: config.routes.services },
-}
+  path: config.routes.services,
+})
 
 const breadcrumbs = [
   { label: messages.breadcrumb.home, href: config.routes.home },

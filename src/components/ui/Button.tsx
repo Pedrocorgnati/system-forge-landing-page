@@ -36,7 +36,7 @@ export function buttonVariants({
       'hover:opacity-90',
       'focus-visible:outline-destructive',
     ],
-    size === 'sm' && 'px-3 py-1.5 text-sm rounded-lg gap-1.5 min-h-[32px]',
+    size === 'sm' && 'px-3 py-1.5 text-sm rounded-lg gap-1.5 min-h-[44px]',
     size === 'md' && 'px-5 py-2.5 text-base rounded-xl gap-2 min-h-[44px]',
     size === 'lg' && 'px-7 py-3.5 text-lg rounded-xl gap-2.5 min-h-[56px]',
     className,

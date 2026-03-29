@@ -1,15 +1,13 @@
-import type { Metadata } from 'next'
 import { Suspense } from 'react'
+import { generatePageMetadata } from '@/lib/seo'
 import { NewsletterConfirmadoContent } from './content'
 
-export const metadata: Metadata = {
+export const metadata = generatePageMetadata({
   title: 'Newsletter — SystemForge',
   description: 'Status da sua inscrição na newsletter SystemForge.',
-  robots: {
-    index: false,
-    follow: false,
-  },
-}
+  path: '/newsletter/confirmado',
+  noIndex: true,
+})
 
 export default function NewsletterConfirmadoPage() {
   return (

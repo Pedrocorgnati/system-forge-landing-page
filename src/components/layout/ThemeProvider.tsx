@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
+import { STORAGE_KEYS } from '@/lib/constants/storage-keys'
 
 type Theme = 'light' | 'dark'
 
@@ -19,7 +20,7 @@ interface ThemeContextValue {
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null)
-const THEME_STORAGE_KEY = 'theme'
+const THEME_STORAGE_KEY = STORAGE_KEYS.THEME
 
 function applyTheme(theme: Theme) {
   document.documentElement.classList.remove('light', 'dark')

@@ -8,6 +8,7 @@ import type { Metadata } from 'next'
 import { blog as allArticles } from '@/.velite'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
+import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { BlogListPage } from '@/components/blog/BlogListPage'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { generatePageMetadata } from '@/lib/seo'
@@ -84,9 +85,16 @@ export default async function BlogCategoryPage({ params }: PageProps) {
     },
   }
 
+  const breadcrumbSchemaItems = [
+    { label: 'Home', url: config.routes.home },
+    { label: 'Blog', url: config.routes.blog },
+    { label: decoded, url: ROUTES.BLOG_CATEGORY(cat) },
+  ]
+
   return (
     <>
       <JsonLd schema={categorySchema} />
+      <JsonLdBreadcrumb items={breadcrumbSchemaItems} />
       <div data-testid={`page-blog-category-${cat}`} className="py-12 md:py-16 bg-background">
       <Container>
         <div className="flex flex-col gap-8">

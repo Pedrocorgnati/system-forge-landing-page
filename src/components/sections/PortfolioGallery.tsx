@@ -96,11 +96,12 @@ export function PortfolioGallery() {
                 role="tab"
                 data-testid={`portfolio-filter-${cat}`}
                 aria-selected={activeFilter === cat}
+                aria-controls="portfolio-filter-panel"
                 onClick={() => setActiveFilter(cat)}
                 className={cn(
                   'shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-150',
                   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]',
-                  'min-h-[36px]',
+                  'min-h-[44px]',
                   activeFilter === cat
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'bg-card border border-border text-foreground hover:border-primary/40',
@@ -113,7 +114,12 @@ export function PortfolioGallery() {
 
           {/* Grid */}
           {filtered.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              id="portfolio-filter-panel"
+              role="tabpanel"
+              aria-label={locale === 'it-IT' ? 'Progetti filtrati' : locale === 'en' ? 'Filtered projects' : 'Projetos filtrados'}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            >
               {filtered.slice(0, 9).map((project) => (
                 <PortfolioCard key={project.slug} project={project} />
               ))}

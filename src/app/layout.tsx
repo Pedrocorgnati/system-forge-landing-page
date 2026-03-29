@@ -77,6 +77,10 @@ export const metadata: Metadata = {
     languages: Object.fromEntries(
       SUPPORTED_LOCALES.map(locale => [locale, LOCALE_URLS[locale]])
     ),
+    types: {
+      'application/rss+xml': `${config.url}blog/feed.xml`,
+      'application/feed+json': `${config.url}blog/feed.json`,
+    },
   },
   manifest: '/manifest.json',
   icons: {

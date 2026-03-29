@@ -1,21 +1,20 @@
-import type { Metadata } from 'next'
 import { Container } from '@/components/ui/Container'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { PrivacySections } from '@/components/privacy/PrivacySections'
 import { getSiteConfig, getLocale } from '@config'
 import { loadMessages } from '@config/content'
 import { loadContent } from '@/lib/content/content-loader'
+import { generatePageMetadata } from '@/lib/seo'
 
 const config = getSiteConfig()
 const messages = loadMessages()
 const privacyContent = loadContent('privacy', getLocale())
 
-export const metadata: Metadata = {
+export const metadata = generatePageMetadata({
   title: privacyContent.title,
   description: `${privacyContent.title} — ${config.siteName}`,
-  robots: { index: true, follow: true },
-  alternates: { canonical: `${config.url}${config.routes.privacy}` },
-}
+  path: config.routes.privacy,
+})
 
 const breadcrumbs = [
   { label: messages.breadcrumb.home, href: config.routes.home },

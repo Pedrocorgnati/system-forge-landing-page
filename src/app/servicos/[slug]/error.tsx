@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { logger } from '@/lib/logger'
 import { loadMessages } from '@config/content'
+import { ROUTES } from '@/lib/constants/routes'
 
 const m = loadMessages()
 
@@ -47,7 +48,7 @@ export default function ServicoError({ error, reset }: ErrorProps) {
           {m.pages.error.retry}
         </button>
         <Link
-          href="/servicos"
+          href={ROUTES.SERVICES}
           data-testid="servico-error-back"
           className="inline-flex items-center justify-center rounded-xl border border-border bg-background px-5 py-2.5 text-sm font-medium text-foreground transition-all hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
         >

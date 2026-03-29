@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { ArticleFrontmatter } from '@/lib/types'
 import { ROUTES } from '@/lib/constants'
-import { cn } from '@/lib/utils'
+import { cn, formatDate } from '@/lib/utils'
 
 interface ArticleCardProps {
   article: ArticleFrontmatter
@@ -9,11 +9,7 @@ interface ArticleCardProps {
 }
 
 export function ArticleCard({ article, className }: ArticleCardProps) {
-  const date = new Date(article.date).toLocaleDateString('pt-BR', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  })
+  const date = formatDate(article.date)
 
   return (
     <article data-testid={`shared-article-card-${article.slug}`} className={cn('flex flex-col gap-3', className)}>

@@ -2,6 +2,9 @@
 
 import { useEffect } from 'react'
 import { loadMessages } from '@config/content'
+import { logger } from '@/lib/logger'
+import { trackEvent } from '@/lib/analytics'
+import { GA4_EVENTS } from '@/lib/constants/analytics'
 
 const messages = loadMessages()
 
@@ -12,14 +15,8 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    console.error('[Error Boundary]', error)
-    if (typeof window !== 'undefined' && 'gtag' in window) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ;(window as any).gtag('event', 'exception', {
-        description: error.message,
-        fatal: false,
-      })
-    }
+    logger.error('[Error Boundary]', { digest: error.digest, action: 'root-error-boundary' })
+    trackEvent(GA4_EVENTS.EXCEPTION, { description: error.message, fatal: false })
   }, [error])
 
   return (
