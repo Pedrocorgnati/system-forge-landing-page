@@ -76,7 +76,7 @@ jobs:
           grep -q "Content-Security-Policy" out/.htaccess && echo "✅ CSP present" || (echo "❌ CSP missing" && exit 1)
           grep -q "googletagmanager" out/.htaccess && echo "✅ GTM in CSP (expected for BR)" || (echo "❌ GTM missing from BR CSP" && exit 1)
 
-      - name: Deploy to forjadesistemas.com.br
+      - name: Probe SFTP directory layout (debug)
         env:
           SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
           SFTP_USER: ${{ secrets.SFTP_BR_USER }}
@@ -85,6 +85,20 @@ jobs:
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
           sudo apt-get install -y sshpass > /dev/null 2>&1
+          printf 'pwd\nls\nls domains\nls domains/forjadesistemas.com.br\nquit\n' | \
+            sshpass -e sftp -P "$SFTP_PORT" \
+              -o StrictHostKeyChecking=no \
+              -o UserKnownHostsFile=/dev/null \
+              "$SFTP_USER@$SFTP_HOST"
+
+      - name: Deploy to forjadesistemas.com.br
+        env:
+          SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
+          SFTP_USER: ${{ secrets.SFTP_BR_USER }}
+          SSHPASS: ${{ secrets.SFTP_BR_PASS }}
+          SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
+          SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
+        run: |
           BATCH=$(mktemp)
           find out -type d | sort | while IFS= read -r dir; do
             remote="${dir/#out/$SFTP_PATH}"
