@@ -111,6 +111,15 @@ export function loadPortfolioDescriptions(): Map<string, string> {
 }
 
 /**
+ * Carrega nome e descrição de portfólio para o locale atual do build.
+ * Retorna um Map de id -> { name, description } para merge com portfolioProjects.
+ */
+export function loadPortfolioItems(): Map<string, { name: string; description: string }> {
+  const items = PORTFOLIO_CONTENT_MAP[getLocale()]
+  return new Map(items.map(p => [p.id, { name: p.title ?? p.id, description: p.description }]))
+}
+
+/**
  * Helper para substituir placeholders em mensagens.
  * Ex: interpolate("Olá {name}", { name: "Pedro" }) → "Olá Pedro"
  */

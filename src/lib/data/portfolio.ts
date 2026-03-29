@@ -15,12 +15,10 @@ import {
   ProjectStatus,
 } from '../types'
 import type { PortfolioProject } from '../types'
-import portfolioJson from '../../../content/pt-BR/pages/portfolio.json'
+import { loadPortfolioItems } from '@config/content'
 
-/** Lookup map: slug → {name, description} — fonte: content/pt-BR/pages/portfolio.json */
-const _portfolioStrings = new Map(
-  portfolioJson.map(p => [p.id, { name: p.title, description: p.description }])
-)
+/** Lookup map: slug → {name, description} — locale-aware via NEXT_PUBLIC_LOCALE */
+const _portfolioStrings = loadPortfolioItems()
 
 function _str(slug: string): { name: string; description: string } | undefined {
   return _portfolioStrings.get(slug)

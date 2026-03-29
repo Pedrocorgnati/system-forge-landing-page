@@ -6,231 +6,79 @@ import { ROUTES } from '@/lib/constants'
 import { Container } from '@/components/ui/Container'
 import { buildWhatsAppCTA } from '@/lib/cta'
 import { CTAButton } from '@/components/ui/CTAButton'
+import { portfolioProjects } from '@/lib/data'
+import { loadMessages } from '@config/content'
 
-const projects = [
-  {
-    name: 'ServiziPerCasa',
-    category: 'Marketplace Italiano',
-    description: 'Italian marketplace connecting homeowners with domestic service professionals. Booking, Stripe payments, and analytics dashboard.',
-    tags: ['Next.js', 'Prisma', 'Stripe'],
-    videoUrl: '/video/servizipercasa.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Piemontech',
-    category: 'SaaS + IA para PMEs',
-    description: 'B2B platform with automated landing page builder, AI diagnostics, prospecting engine, and affiliate system.',
-    tags: ['Next.js', 'Claude AI', 'Stripe'],
-    videoUrl: '/video/piemontech.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Sistema Garantido',
-    category: 'SaaS + IA de Garantias',
-    description: 'Warranty management with 2FA, Stripe billing, Claude AI, and full lifecycle tracking via Twilio.',
-    tags: ['Next.js', 'Claude AI', 'Twilio'],
-    videoUrl: '/video/sistema-garantido.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'BicoJá',
-    category: 'Marketplace de Serviços',
-    description: 'On-demand services marketplace with web + React Native app, virtual currency, premium subscriptions.',
-    tags: ['Next.js', 'React Native', 'Prisma'],
-    videoUrl: '/video/bicoja.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Stork Logistics',
-    category: 'Plataforma Logística',
-    description: 'End-to-end logistics with real-time tracking, Recharts analytics, event-driven automation via Inngest.',
-    tags: ['Next.js', 'Recharts', 'Inngest'],
-    videoUrl: '/video/stork-logistics.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Divulga Fácil Dashboard',
-    category: 'SaaS · Telegram Bots',
-    description: 'SaaS dashboard powering 4 Telegram bots with Kiwify webhooks, usage limits, and real-time analytics.',
-    tags: ['Next.js', 'PostgreSQL', 'Stripe'],
-    videoUrl: '/video/divulga-facil-dashboard.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'QuackCoin Platform',
-    category: 'Plataforma Crypto',
-    description: 'Full-stack crypto ecosystem with 2FA, daily rewards, USDC staking, education CMS, and affiliate cashback.',
-    tags: ['Next.js', 'Prisma', 'Go'],
-    videoUrl: '/video/Quackcoin.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Abitare Holding',
-    category: 'Site Institucional',
-    description: 'Corporate website for Italian real estate holding with smooth animations, video backgrounds, and conversion focus.',
-    tags: ['Astro', 'Tailwind CSS'],
-    videoUrl: '/video/abitare-holding.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Health Technologies',
-    category: 'Site Institucional · IA na Saúde',
-    description: 'Healthcare AI company site showcasing surgical robotics, diagnostics, and smart pharmacy solutions.',
-    tags: ['Next.js', 'TypeScript'],
-    videoUrl: '/video/HealthTechnologies.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'SiteBaratoBR',
-    category: 'Website Builder',
-    description: 'Platform where users design custom sites and receive full source code — single payment, no subscriptions.',
-    tags: ['Next.js', 'Stripe', 'AWS S3'],
-    videoUrl: '/video/site-barato.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Dove Abitare Bene',
-    category: 'Blog Editorial',
-    description: 'Italian lifestyle blog with blazing-fast Astro performance, Pagefind search, and Giscus comments.',
-    tags: ['Astro', 'Pagefind'],
-    videoUrl: '/video/doveabitarebene.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Calculadora Motoristas',
-    category: 'Ferramenta Web',
-    description: 'Smart cost calculator for ride-share drivers with interactive charts and real-time profitability insights.',
-    tags: ['Next.js', 'Recharts'],
-    videoUrl: '/video/calculadora-motoristas.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Thamy Shoes',
-    category: 'Sistema Industrial',
-    description: 'Production management for shoe factory integrating Bling ERP with auto-import and PDF generation.',
-    tags: ['Next.js', 'Prisma', 'Bling API'],
-    videoUrl: '/video/thamy-shoes.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Design System Showroom',
-    category: 'Ferramenta Dev',
-    description: 'Interactive design system preview with real-time theme composition, WCAG validation, and token export.',
-    tags: ['Next.js', 'Zustand'],
-    videoUrl: '/video/showroom.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Corgnati Platform',
-    category: 'SaaS Completo',
-    description: 'Full-featured platform with CRM, project management, invoicing, and client dashboard.',
-    tags: ['Next.js', 'Prisma', 'Stripe'],
-    videoUrl: '/video/corgnati-platform.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'TechSkillsThatPay',
-    category: 'Blog Multi-idioma',
-    description: 'Tech education blog in EN, PT-BR, ES, IT with MDX content, SEO hreflang, sitemaps, and RSS.',
-    tags: ['Next.js', 'MDX'],
-    videoUrl: '/video/techskillsthatpay.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'ApexCrypto',
-    category: 'Website Crypto',
-    description: 'Conversion-focused landing page for crypto education platform with bold visuals and video hero.',
-    tags: ['Next.js', 'Sass'],
-    videoUrl: '/video/Apexcrypto-website.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'ApexSwift Dashboard',
-    category: 'Dashboard Financeiro',
-    description: 'Data-heavy finance dashboard with interactive charts, user management, and scalable interface.',
-    tags: ['Next.js', 'Go', 'Tailwind'],
-    videoUrl: '/video/ApexSwift-dashboard.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'ScoreTube Landing',
-    category: 'Landing Page IA',
-    description: 'AI-powered platform landing page for YouTube video evaluation, designed for conversion.',
-    tags: ['Next.js', 'Tailwind CSS'],
-    videoUrl: '/video/Scoretube-landing.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'NineKeys',
-    category: 'Landing Page Premium',
-    description: 'Property management landing page with crisp typography, immersive video sections, and smooth flow.',
-    tags: ['HTML', 'CSS', 'TypeScript'],
-    videoUrl: '/video/Ninekeys.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'QuackCoin Landing',
-    category: 'Landing Page Crypto',
-    description: 'High-conversion page for utility token ecosystem with tokenomics breakdown and waitlist signup.',
-    tags: ['HTML', 'CSS', 'TypeScript'],
-    videoUrl: '/video/quack-coin-landing-page.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'C4ts',
-    category: 'Knowledge Base IA',
-    description: 'AI-first knowledge base with problem-oriented guidance across 15 frontend domains.',
-    tags: ['Markdown', 'TypeScript', 'AI'],
-    videoUrl: '/video/c4ts.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'SuppleSeller',
-    category: 'E-commerce',
-    description: 'Complete e-commerce for sports nutrition with storefront, admin dashboard, and smooth shopping flows.',
-    tags: ['Next.js', 'Go'],
-    videoUrl: '/video/Suppleseller.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Passkey Dashboard',
-    category: 'Dashboard Marketing',
-    description: 'Campaign management dashboard with workspaces, creative assets, and advanced filtering.',
-    tags: ['Next.js', 'TypeScript', 'Sass'],
-    videoUrl: '/video/Passkey-dashboard.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'ZenMinder',
-    category: 'Plataforma Produtividade',
-    description: 'Productivity platform with auth, reminders, phone verification, rewards marketplace.',
-    tags: ['React', 'Firebase', 'Sass'],
-    videoUrl: '/video/Zenminder.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Personal Website',
-    category: 'Portfolio Pessoal',
-    description: 'Interactive developer portfolio with animated sections, project showcase, and contact form.',
-    tags: ['Next.js', 'Bootstrap'],
-    videoUrl: '/video/Personal-Resume-Website.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-  {
-    name: 'Cognuscraft',
-    category: 'Landing Page IA',
-    description: 'Brand-focused landing page for AI company, highlighting mission and flagship products.',
-    tags: ['HTML', 'CSS', 'JavaScript'],
-    videoUrl: '/video/Cognuscraft.mp4',
-    href: ROUTES.PORTFOLIO,
-  },
-]
+const messages = loadMessages()
 
-function ProjectCard({
-  project,
-}: {
-  project: (typeof projects)[number]
-}) {
+/** Maps ServiceCategory enum values to universal display labels */
+const CATEGORY_DISPLAY: Record<string, string> = {
+  'saas': 'SaaS',
+  'aplicativo-mobile': 'Mobile',
+  'marketplace': 'Marketplace',
+  'automacao-com-ia': 'AI',
+  'bots-automacoes': 'Bots',
+  'landing-page': 'Landing Page',
+  'e-commerce': 'E-commerce',
+  'dashboard-b2b': 'Dashboard',
+  'api-integracoes': 'API',
+  'desktop': 'Desktop',
+  'gestao-setorial': 'ERP / Mgmt',
+  'erp': 'ERP',
+  'consultoria': 'Consultoria',
+}
+
+/** Display-ready tech tag capitalizations */
+function formatTag(tag: string): string {
+  const caps: Record<string, string> = {
+    'next.js': 'Next.js',
+    'react': 'React',
+    'typescript': 'TypeScript',
+    'node.js': 'Node.js',
+    'python': 'Python',
+    'supabase': 'Supabase',
+    'tailwind': 'Tailwind',
+    'prisma': 'Prisma',
+    'react-native': 'React Native',
+    'stripe': 'Stripe',
+    'claude': 'Claude AI',
+    'chart.js': 'Chart.js',
+    'recharts': 'Recharts',
+    'twilio': 'Twilio',
+    'inngest': 'Inngest',
+    'go': 'Go',
+    'html/css': 'HTML/CSS',
+    'astro': 'Astro',
+    'mdx': 'MDX',
+    'aws s3': 'AWS S3',
+    'firebase': 'Firebase',
+    'zustand': 'Zustand',
+    'postgresql': 'PostgreSQL',
+  }
+  return caps[tag] ?? tag
+}
+
+type Project = {
+  name: string
+  category: string
+  description: string
+  tags: string[]
+  videoUrl: string
+  href: string
+}
+
+const projects: Project[] = portfolioProjects
+  .filter(p => Boolean(p.videoUrl))
+  .map(p => ({
+    name: p.name ?? p.slug,
+    category: CATEGORY_DISPLAY[p.categories[0] ?? ''] ?? (p.categories[0] ?? ''),
+    description: p.description,
+    tags: (p.technologies ?? []).slice(0, 3).map(formatTag),
+    videoUrl: p.videoUrl as string,
+    href: ROUTES.PORTFOLIO,
+  }))
+
+function ProjectCard({ project }: { project: Project }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
 
@@ -248,7 +96,7 @@ function ProjectCard({
 
   return (
     <article
-      aria-label={`Projeto ${project.name} — ${project.category}`}
+      aria-label={`${project.name} — ${project.category}`}
       className="portfolio-carousel__card group relative overflow-hidden rounded-2xl border border-border bg-card shadow-lg cursor-pointer"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -324,7 +172,7 @@ function ProjectCard({
             className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary hover:text-white transition-colors"
             tabIndex={0}
           >
-            Ver projeto →
+            {messages.cta.portfolio} →
           </Link>
         </div>
       </div>
@@ -381,13 +229,13 @@ export function PortfolioBento() {
     return () => window.removeEventListener('keydown', handler)
   }, [prev, next])
 
-  const cta = buildWhatsAppCTA('Agendar conversa', 'portfólio de projetos')
+  const cta = buildWhatsAppCTA(messages.cta.calendly, messages.sections.portfolio.label)
 
   return (
     <section
       id="portfolio"
       data-testid="section-portfolio"
-      aria-label="Portfólio de projetos"
+      aria-label={messages.sections.portfolio.ariaLabel}
       className="w-full bg-background py-20 md:py-28"
     >
       <Container>
@@ -396,10 +244,10 @@ export function PortfolioBento() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-col gap-2">
               <h2 className="text-[28px] sm:text-[36px] font-semibold text-foreground leading-tight tracking-tight">
-                Projetos que entregamos
+                {messages.sections.portfolio.title}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {projects.length} projetos reais — de MVPs a plataformas escaláveis
+                {projects.length} {messages.sections.portfolio.countSuffix}
               </p>
             </div>
             <Link
@@ -407,7 +255,7 @@ export function PortfolioBento() {
               data-testid="portfolio-view-all-link"
               className="text-sm font-medium text-primary hover:underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)] rounded-sm"
             >
-              Ver portfólio completo →
+              {messages.cta.portfolio} →
             </Link>
           </div>
 
@@ -418,7 +266,7 @@ export function PortfolioBento() {
               onClick={prev}
               disabled={currentPage === 0}
               className="portfolio-carousel__arrow portfolio-carousel__arrow--prev"
-              aria-label="Projetos anteriores"
+              aria-label={messages.cta.viewAllProjects}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <path d="M15 18l-6-6 6-6" />
@@ -441,7 +289,7 @@ export function PortfolioBento() {
               onClick={next}
               disabled={currentPage >= PAGE_COUNT - 1}
               className="portfolio-carousel__arrow portfolio-carousel__arrow--next"
-              aria-label="Próximos projetos"
+              aria-label={messages.cta.viewAllProjects}
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                 <path d="M9 18l6-6-6-6" />
@@ -450,7 +298,7 @@ export function PortfolioBento() {
           </div>
 
           {/* Dots */}
-          <div className="portfolio-carousel__dots" role="tablist" aria-label="Navegação do carrossel">
+          <div className="portfolio-carousel__dots" role="tablist" aria-label={messages.sections.portfolio.ariaLabel}>
             {Array.from({ length: PAGE_COUNT }).map((_, i) => (
               <button
                 key={i}
@@ -458,7 +306,7 @@ export function PortfolioBento() {
                 aria-selected={i === currentPage}
                 onClick={() => scrollToPage(i)}
                 className={`portfolio-carousel__dot${i === currentPage ? ' is-active' : ''}`}
-                aria-label={`Página ${i + 1} de ${PAGE_COUNT}`}
+                aria-label={`${i + 1} / ${PAGE_COUNT}`}
               />
             ))}
           </div>
