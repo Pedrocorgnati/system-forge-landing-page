@@ -18,7 +18,7 @@ export const enConfig: SiteConfig = {
     'We build custom software: SaaS, mobile apps, landing pages, e-commerce, dashboards and AI automations. Specialized team, delivery in weeks.',
   author: 'SystemForge',
   email: 'hello@systemforgesoftware.com',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+14155552671',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
   calendly: process.env.NEXT_PUBLIC_CALENDLY_URL ?? 'https://calendly.com/systemforge-en',
   budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.corgnati.com/quote'}?locale=en-US`,
   address: 'Remote, United States',
