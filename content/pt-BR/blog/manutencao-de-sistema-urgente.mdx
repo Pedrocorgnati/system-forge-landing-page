@@ -1,0 +1,184 @@
+---
+title: "Manutencao de Sistema Urgente: O Que Fazer Quando Seu Software Para de Funcionar"
+slug: "manutencao-de-sistema-urgente"
+date: "2026-03-31"
+description: "Sistema fora do ar? Estabilizacao emergencial em 2-6 horas por R$ 2k-8k. Atendimento com resposta em 2h e manutencao mensal com SLA a partir de R$ 1k."
+excerpt: "Sistema caiu na sexta? Desenvolvedor nao responde? Checklist de emergencia em 15 minutos e protocolo de estabilizacao para as 6 causas mais comuns de downtime."
+tags: ["manutencao de sistema", "sistema fora do ar", "bug em producao", "manutencao urgente", "suporte tecnico", "urgente"]
+coverImage: "/images/blog/manutencao-de-sistema-urgente.webp"
+author: "Pedro Corgnati"
+relatedService: "manutencao-sistemas"
+locale: 'pt-BR'
+published: true
+exclusive: false
+---
+
+# Manutencao de Sistema Urgente: O Que Fazer Quando Seu Software Para de Funcionar
+
+Se voce precisa de manutencao de sistema urgente, classifique a situacao agora: (1) sistema fora do ar — precisa de intervencao em horas, nao dias; (2) bug critico em producao — dados corrompidos ou funcionalidade bloqueada; (3) desenvolvedor saiu — sistema rodando mas sem ninguem para manter. Para os dois primeiros cenarios, contrate atendimento emergencial (R$ 2.000-8.000 para estabilizacao). Para o terceiro, contrate manutencao mensal (R$ 1.000-5.000/mes) com SLA definido. A diferenca entre resolver em horas e resolver em semanas esta na triagem inicial.
+
+Lido com emergencias de sistemas toda semana na SystemForge. E-commerce fora do ar na sexta-feira, clinica sem sistema de agendamento, ERP que parou apos atualizacao. Em todos os casos, o padrao e o mesmo: o dono do negocio nao sabe por onde comecar, cada hora que passa custa dinheiro, e o desenvolvedor original nao responde. Vou te mostrar exatamente o que fazer em cada cenario.
+
+## Seu Sistema Caiu — O Que Fazer Agora
+
+Antes de ligar para qualquer fornecedor, execute este checklist de emergencia em 15 minutos:
+
+**Passo 1: Confirme que o problema e do sistema, nao da infraestrutura.** Acesse o servidor (SSH, painel de hosting, ou ligue para a hospedagem). Verifique se o servidor esta online. Muitas vezes o "sistema caiu" e um servidor sem espaco em disco ou com certificado SSL vencido.
+
+**Passo 2: Verifique se ha backup recente.** Se o sistema funcionava ontem e parou hoje, restaurar o backup pode resolver em minutos enquanto voce investiga a causa raiz. Pergunte ao seu hosting se ha backup automatico (a maioria oferece snapshots diarios).
+
+**Passo 3: Documente o que aconteceu.** Antes de qualquer intervencao, anote: quando parou, o que estava sendo feito, qual a mensagem de erro, e quem mais foi afetado. Essas informacoes economizam horas de diagnostico para o profissional que vai te atender.
+
+**Passo 4: Isole o problema.** Se possivel, coloque uma pagina de manutencao no ar. Isso evita que usuarios vejam erros brutos e protege a reputacao do negocio. Um HTML simples com "Voltamos em breve" resolve.
+
+**Passo 5: Acione suporte tecnico especializado.** Se voce nao tem equipe interna, este e o momento de contratar atendimento emergencial. Com as informacoes dos passos anteriores, o especialista consegue comecar a diagnosticar imediatamente.
+
+### O Sistema Esta Fora do Ar: As Causas Mais Comuns
+
+Depois de atender dezenas de chamados de emergencia, as causas se repetem:
+
+- **Servidor sem espaco em disco** (35% dos casos) — logs que crescem sem rotacao, uploads sem limite, backups locais acumulados
+- **Banco de dados travado** (25%) — queries mal otimizadas que travam sob carga, conexoes esgotadas, deadlocks
+- **Atualizacao que quebrou dependencias** (20%) — atualizar PHP, Node ou framework sem testar em staging
+- **Certificado SSL expirado** (10%) — site aparece como "nao seguro" e navegador bloqueia acesso
+- **Ataque ou abuso de recursos** (10%) — brute force no login, bot consumindo API, DDoS
+
+## Os 6 Tipos de Manutencao Urgente e Como Identificar o Seu Caso
+
+Nem toda urgencia e igual. Identificar o tipo correto direciona a solucao:
+
+**1. Sistema fora do ar (downtime total).** Ninguem consegue acessar. Prioridade maxima. Acao: estabilizacao emergencial em horas. Custo: R$ 2.000-5.000.
+
+**2. Bug critico em producao.** Sistema funciona, mas uma funcionalidade essencial esta quebrada (pagamento nao processa, relatorio sai errado, dados estao corrompidos). Acao: hotfix direcionado. Custo: R$ 1.500-4.000.
+
+**3. Performance degradada.** Sistema lento demais para usar. Paginas que levavam 2 segundos agora levam 30. Acao: auditoria de performance + otimizacao. Custo: R$ 2.000-6.000.
+
+**4. Desenvolvedor sumiu.** Sistema funciona mas ninguem sabe manter. Proximo bug sera um desastre. Acao: documentacao do sistema + assumir manutencao. Custo: R$ 3.000-8.000 para onboarding.
+
+**5. Vulnerabilidade de seguranca.** Invasao, dados expostos, ou vulnerabilidade critica descoberta. Acao: incident response + correcao + auditoria. Custo: R$ 3.000-10.000.
+
+**6. Incompatibilidade apos atualizacao.** Servidor atualizou PHP, banco migrou de versao, API de terceiro mudou. Sistema quebrou. Acao: compatibilizacao ou rollback. Custo: R$ 1.500-5.000.
+
+### Desenvolvedor Sumiu: Como Assumir um Sistema Sem Documentacao
+
+Esse cenario e mais comum do que deveria. O freelancer entregou, sumiu, e agora voce tem um sistema rodando que ninguem entende. O processo para assumir:
+
+1. **Garanta acesso completo:** servidor, banco de dados, repositorio de codigo, DNS, contas de servicos (email, pagamento, APIs). Se voce nao tem, recupere antes de qualquer coisa.
+2. **Auditoria de codigo (2-3 dias):** um profissional senior consegue mapear a arquitetura, identificar riscos e documentar o basico em 2-3 dias. Custa R$ 2.000-4.000 mas e investimento essencial.
+3. **Estabilizacao:** configure monitoramento, alertas e backups automaticos. O sistema precisa parar de ser bomba-relogio.
+4. **Contrato de manutencao:** a partir dai, manutencao mensal com SLA evita futuras emergencias.
+
+## Manutencao Corretiva vs Preventiva vs Evolutiva: O Que Voce Precisa
+
+| Tipo | Quando | Exemplo | Custo Medio | Frequencia |
+|------|--------|---------|-------------|------------|
+| Corretiva | Algo quebrou | Bug em producao, sistema fora do ar | R$ 1.500-8.000/chamado | Reativa |
+| Preventiva | Antes de quebrar | Atualizacoes de seguranca, monitoramento | R$ 1.000-3.000/mes | Mensal |
+| Evolutiva | Precisa melhorar | Nova funcionalidade, integracao | R$ 3.000-15.000/feature | Sob demanda |
+| Adaptativa | Ambiente mudou | Migracao de servidor, nova versao de API | R$ 2.000-8.000/projeto | Conforme necessidade |
+
+Se voce esta lendo este artigo, provavelmente precisa de manutencao corretiva agora. Mas o objetivo e migrar para preventiva — custa menos e evita crises. Segundo o Gartner, 60% das PMEs nao tem plano de contingencia para falha de sistema. Sao essas que pagam mais caro quando o problema aparece.
+
+## Quanto Custa Manutencao de Sistema Urgente
+
+Valores reais praticados no mercado brasileiro em 2026:
+
+**Atendimento emergencial (avulso):**
+- Diagnostico + estabilizacao: R$ 2.000-5.000
+- Correcao de bug critico: R$ 1.500-4.000
+- Recuperacao de sistema comprometido: R$ 3.000-10.000
+- Hora tecnica de emergencia: R$ 250-500/hora
+
+**Contrato de manutencao mensal:**
+- Basico (8h/mes, SLA 24h): R$ 1.000-2.000/mes
+- Intermediario (16h/mes, SLA 4h para criticos): R$ 2.000-3.500/mes
+- Premium (horas ilimitadas, SLA 2h, monitoramento 24/7): R$ 3.500-5.000/mes
+
+| Modelo | Custo Anual | Tempo de Resposta | Conhecimento do Sistema | Previsibilidade | Risco |
+|--------|-------------|-------------------|------------------------|-----------------|-------|
+| Avulso (por chamado) | R$ 5.000-30.000 | 4-24h (sem garantia) | Baixo | Nenhuma | Alto |
+| Contrato mensal | R$ 12.000-60.000 | 2-4h (garantido) | Alto (cresce com o tempo) | Total | Baixo |
+| Equipe interna | R$ 80.000-150.000 | Imediato | Maximo | Total | Medio |
+
+Para a maioria das PMEs, contrato mensal e o melhor custo-beneficio. Voce paga por experiencia sob demanda, nao por ociosidade. Um dev junior interno custa R$ 4.000-6.000/mes mais encargos. Um contrato com profissionais seniors custa R$ 1.000-5.000/mes com SLA.
+
+O custo medio de downtime para PME brasileira fica entre R$ 5.000 e R$ 30.000 por hora, dependendo do setor. Um e-commerce com faturamento de R$ 200.000/mes perde cerca de R$ 280/hora fora do ar so em vendas diretas — sem contar reputacao e clientes que nao voltam.
+
+## Erros Que Transformam Manutencao Simples em Desastre
+
+**Mexer no sistema em producao sem backup.** Parece obvio, mas acontece toda semana. Antes de qualquer alteracao, backup completo (codigo + banco de dados). Sempre.
+
+**Contratar pelo menor preco na urgencia.** Na emergencia, barato sai caro. Um profissional inexperiente que tenta resolver e piora o problema transforma um chamado de R$ 2.000 em um projeto de R$ 15.000. Verifique portfolio e referencias mesmo com pressa.
+
+**Nao documentar a correcao.** O bug foi corrigido, todo mundo comemora, e ninguem anota o que foi feito. Tres meses depois, o mesmo problema volta e ninguem lembra da solucao. Exija relatorio tecnico de toda intervencao.
+
+**Ignorar a causa raiz.** O sistema voltou? Otimo. Mas se voce so tratou o sintoma (reiniciou o servidor) sem corrigir a causa (memory leak, query pesada), o problema vai voltar. Exija analise de causa raiz alem da estabilizacao.
+
+### Bugs em Producao: Triagem e Hotfix Sem Quebrar Mais Coisas
+
+O processo correto de hotfix em producao:
+
+1. Reproduza o bug em ambiente de teste (nunca teste em producao)
+2. Isole a correcao — altere o minimo possivel de codigo
+3. Teste a correcao no ambiente de teste com dados reais
+4. Aplique em producao com rollback preparado
+5. Monitore por 24-48h apos o deploy
+
+## Quando Migrar de Manutencao Para Reconstrucao
+
+Manutencao faz sentido ate o ponto em que custa mais manter do que reconstruir. Sinais de que e hora de reconstruir:
+
+- Custo de manutencao mensal ultrapassa 30% do valor de reconstrucao
+- Cada correcao gera 2-3 novos bugs (efeito cascata)
+- Tecnologia obsoleta sem suporte da comunidade (PHP 5, Angular 1, Python 2)
+- Tempo de resposta de paginas acima de 5 segundos sem melhoria possivel
+- Impossivel adicionar funcionalidades novas sem reescrever modulos inteiros
+
+Quando esses sinais aparecem juntos, a [refatoracao de sistema](/blog/refatoracao-de-sistema-urgente) passa a ser mais economica. Mas atencao: reconstrucao nao e decisao de emergencia. Estabilize primeiro, planeje a migracao depois.
+
+Para uma visao completa das opcoes de manutencao e quando cada abordagem se aplica, veja nosso [guia completo de manutencao de sistema](/blog/guia-completo-manutencao-de-sistema).
+
+### Backup e Disaster Recovery: O Que Voce Deveria Ter Feito Ontem
+
+Se voce nao tem backup automatizado, configure hoje — nao amanha:
+
+- Backup diario do banco de dados (automatico, externo ao servidor)
+- Backup semanal do codigo e arquivos de upload
+- Teste de restauracao mensal (backup que nao foi testado nao e backup)
+- Plano de disaster recovery documentado (quem faz o que quando o sistema cai)
+
+Essas 4 acoes custam entre R$ 500-1.500 para configurar e evitam perdas de dezenas de milhares de reais.
+
+## Conclusao
+
+Manutencao de sistema urgente exige acao rapida e metodica: classifique a urgencia, execute o checklist de emergencia, e acione suporte especializado com as informacoes certas. O custo de agir rapido (R$ 2.000-8.000) e uma fracao do custo de ficar parado. E depois da crise resolvida, migre para manutencao preventiva com contrato mensal — e o que separa empresas que vivem apagando incendio das que dormem tranquilas.
+
+Se voce precisa de ajuda agora, a SystemForge oferece atendimento emergencial com resposta em 2 horas. Tambem trabalhamos com [suporte de software continuo](/blog/suporte-de-software-urgente) para quem quer evitar futuras emergencias. Fale com a gente pelo WhatsApp e resolva hoje.
+
+## Perguntas Frequentes
+
+### Quanto tempo leva para estabilizar um sistema fora do ar?
+
+Na maioria dos casos, entre 2 e 6 horas. Depende da causa: servidor sem espaco em disco resolve em 30 minutos, banco de dados corrompido pode levar 4-6 horas. A estabilizacao coloca o sistema no ar; a correcao definitiva pode levar mais 24-72h.
+
+### Posso confiar acesso ao servidor para alguem que nao conheco?
+
+Sim, com protecoes: NDA (acordo de confidencialidade) e contrato formal sao o minimo. Comece com acesso read-only para diagnostico. Solicite portfolio e referencias. Confianca se constroi aos poucos, mas emergencia nao espera — use protecoes contratuais e comece com escopo limitado.
+
+### Manutencao por terceiro nao e mais lenta que o dev original?
+
+Na emergencia, qualquer profissional competente resolve mais rapido que um dev que nao responde. Com acesso ao servidor e codigo, um especialista senior consegue diagnosticar e estabilizar em horas. O conhecimento profundo do sistema vem com o contrato mensal, nao com o chamado de emergencia.
+
+### Nao sai mais barato contratar um dev fixo para manter o sistema?
+
+Para sistemas pequenos e medios, nao. Um dev junior custa R$ 4.000-6.000/mes mais encargos trabalhistas. Um contrato de manutencao com profissionais seniors custa R$ 1.000-5.000/mes com SLA garantido. Voce paga por experiencia sob demanda, nao por ociosidade.
+
+### Qual a diferenca entre manutencao e suporte de software?
+
+Manutencao e reativa — algo quebrou, precisa consertar. [Suporte de software](/blog/suporte-de-software-urgente) e continuo — contrato com SLA, acompanhamento proativo, monitoramento. Na pratica, o ideal e ter contrato de suporte que inclui manutencao corretiva, preventiva e evolutiva.
+
+### Como evitar emergencias de sistema no futuro?
+
+Tres acoes: backup automatizado diario testado mensalmente, monitoramento com alertas (uptime, performance, erros), e contrato de manutencao preventiva com atualizacoes de seguranca regulares. Essas tres acoes juntas custam R$ 1.500-3.000/mes e eliminam 90% das emergencias.
+
+*Atualizado em marco/2026*
