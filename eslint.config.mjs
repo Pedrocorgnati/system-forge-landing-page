@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Multi-locale static builds (generated locally, not present in CI)
+    "dist-br/**",
+    "dist-it/**",
+    "dist-en/**",
+    "dist-es/**",
   ]),
 ]);
 
