@@ -15,14 +15,20 @@ const SERVICE_BASE: {
 }[] = [
   { slug: 'saas', contentId: 'saas', icon: '🚀', category: ServiceCategory.SAAS, techHints: ['Next.js', 'Stripe', 'PostgreSQL'], deliveryRange: '8–16', filterGroup: 'produto' },
   { slug: 'mobile', contentId: 'aplicativo-mobile', icon: '📱', category: ServiceCategory.MOBILE, techHints: ['React Native', 'Expo'], deliveryRange: '10–18', filterGroup: 'mobile-ia' },
+  { slug: 'aplicativo-mobile', contentId: 'aplicativo-mobile', icon: '📱', category: ServiceCategory.MOBILE, techHints: ['React Native', 'Expo'], deliveryRange: '10–18', filterGroup: 'mobile-ia' }, // RESOLVED: /servicos/aplicativo-mobile
   { slug: 'landing-page', contentId: 'landing-page', icon: '🌐', category: ServiceCategory.LANDING, techHints: ['Next.js', 'Tailwind'], deliveryRange: '2–4', filterGroup: 'produto' },
   { slug: 'ecommerce', contentId: 'e-commerce', icon: '🛒', category: ServiceCategory.ECOMMERCE, techHints: ['Next.js', 'Stripe'], deliveryRange: '8–14', filterGroup: 'produto' },
+  { slug: 'e-commerce', contentId: 'e-commerce', icon: '🛒', category: ServiceCategory.ECOMMERCE, techHints: ['Next.js', 'Stripe'], deliveryRange: '8–14', filterGroup: 'produto' },
   { slug: 'dashboard', contentId: 'dashboard-b2b', icon: '📊', category: ServiceCategory.DASHBOARD, techHints: ['Next.js', 'Recharts'], deliveryRange: '6–12', filterGroup: 'dados' },
+  { slug: 'dashboard-b2b', contentId: 'dashboard-b2b', icon: '📊', category: ServiceCategory.DASHBOARD, techHints: ['Next.js', 'Recharts'], deliveryRange: '6–12', filterGroup: 'dados' },
   { slug: 'api', contentId: 'api-integracoes', icon: '🔌', category: ServiceCategory.API, techHints: ['Node.js', 'REST / GraphQL'], deliveryRange: '3–8', filterGroup: 'dados' },
+  { slug: 'api-integracoes', contentId: 'api-integracoes', icon: '🔌', category: ServiceCategory.API, techHints: ['Node.js', 'REST / GraphQL'], deliveryRange: '3–8', filterGroup: 'dados' }, // RESOLVED: /servicos/api-integracoes
   { slug: 'automacao-com-ia', contentId: 'automacao-com-ia', icon: '🤖', category: ServiceCategory.AI, techHints: ['Claude AI', 'OpenAI', 'Python'], deliveryRange: '4–10', filterGroup: 'mobile-ia' },
   { slug: 'marketplace', contentId: 'marketplace', icon: '🏪', category: ServiceCategory.MARKETPLACE, techHints: ['Next.js', 'Stripe Connect'], deliveryRange: '12–20', filterGroup: 'produto' },
   { slug: 'erp', contentId: 'erp', icon: '⚙️', category: ServiceCategory.ERP, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '16–30', filterGroup: 'dados' },
   { slug: 'chatbot', contentId: 'bots-automacoes', icon: '💬', category: ServiceCategory.CHATBOT, techHints: ['Node.js', 'LLMs'], deliveryRange: '3–6', filterGroup: 'mobile-ia' },
+  { slug: 'bots-automacoes', contentId: 'bots-automacoes', icon: '💬', category: ServiceCategory.CHATBOT, techHints: ['Node.js', 'n8n', 'WhatsApp API'], deliveryRange: '3–6', filterGroup: 'mobile-ia' }, // RESOLVED: /servicos/bots-automacoes
+  { slug: 'gestao-setorial', contentId: 'gestao-setorial', icon: '🏭', category: ServiceCategory.GESTAO, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '8–20', filterGroup: 'dados' }, // RESOLVED: /servicos/gestao-setorial
   { slug: 'consultoria', contentId: 'consultoria', icon: '🎯', category: ServiceCategory.CONSULTORIA, techHints: ['Stack agnóstico'], deliveryRange: '1–3', filterGroup: 'dados' },
   { slug: 'desktop', contentId: 'desktop', icon: '🖥️', category: ServiceCategory.DESKTOP, techHints: ['Electron', 'SQLite'], deliveryRange: '8–14', filterGroup: 'produto' },
 ]
