@@ -129,6 +129,8 @@ Il limite della RLS è la performance: policy complesse possono degradare le que
 
 ## Conclusione
 
+Prima di scegliere il modello di multi-tenancy, è utile avere una stima chiara dei costi complessivi: leggi la guida su [quanto costa sviluppare un SaaS B2B in Italia](/blog/quanto-costa-sviluppare-saas-b2b-italia) per un quadro aggiornato al 2026.
+
 La scelta del modello di multi-tenancy non è permanente, ma migrare tra modelli in produzione senza downtime è laborioso. La strategia più comune è iniziare con database condiviso + RLS, migrare a schema per tenant quando la base clienti raggiunge qualche centinaio, e offrire database dedicato come opzione premium per il segmento enterprise.
 
 Ciò che non va mai rimandato è la definizione del `tenant_id` come colonna obbligatoria fin dal primo commit — e l'adozione della RLS fin dall'MVP. Fare refactoring di questo aspetto dopo, con dati in produzione, è una delle operazioni più costose nell'ingegneria SaaS.
