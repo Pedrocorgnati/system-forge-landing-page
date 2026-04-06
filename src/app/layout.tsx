@@ -82,8 +82,8 @@ export const metadata: Metadata = {
       SUPPORTED_LOCALES.map(locale => [locale, LOCALE_URLS[locale]])
     ),
     types: {
-      'application/rss+xml': `${config.url}blog/feed.xml`,
-      'application/feed+json': `${config.url}blog/feed.json`,
+      'application/rss+xml': `${config.url}/blog/feed.xml`,
+      'application/feed+json': `${config.url}/blog/feed.json`,
     },
   },
   manifest: '/manifest.json',
@@ -113,7 +113,7 @@ export default function RootLayout({
           <link
             key={locale}
             rel="alternate"
-            hrefLang={locale === 'pt-BR' ? 'pt-BR' : locale === 'it-IT' ? 'it' : 'en'}
+            hrefLang={locale === 'pt-BR' ? 'pt-BR' : locale === 'it-IT' ? 'it' : locale === 'es-ES' ? 'es' : 'en'}
             href={LOCALE_URLS[locale]}
           />
         ))}

@@ -8,36 +8,17 @@ import { CTAButton } from '@/components/ui/CTAButton'
 import { loadMessages } from '@config/content'
 
 const messages = loadMessages()
+const proc = messages.sections.process
 
-const steps = [
-  {
-    number: '01',
-    title: 'Diagnóstico e estratégia',
-    description:
-      'Mapeamos seu negócio, objetivos e processos atuais. Entregamos um roadmap de produto priorizado por ROI antes de escrever uma linha de código.',
-    tags: ['Discovery', 'PRD', 'Wireframes'],
-    Icon: Search,
-  },
-  {
-    number: '02',
-    title: 'Construção ágil',
-    description:
-      'Squad sênior dedicado ao seu projeto. Sprints quinzenais com entregas validadas — você acompanha o progresso em tempo real via repositório e dashboard.',
-    tags: ['Sprints', 'Code Review', 'CI/CD'],
-    Icon: Zap,
-  },
-  {
-    number: '03',
-    title: 'Escala e evolução',
-    description:
-      'Monitoramos, otimizamos e expandimos features com dados reais de uso. Suporte técnico dedicado e código 100% seu — sem lock-in.',
-    tags: ['Monitoramento', 'Iteração', 'Suporte'],
-    Icon: TrendingUp,
-  },
-]
+const STEP_ICONS = [Search, Zap, TrendingUp] as const
+
+const steps = (proc.steps ?? []).map((step, i) => ({
+  ...step,
+  Icon: STEP_ICONS[i] ?? Search,
+}))
 
 export function ProcessSection() {
-  const cta = buildWhatsAppCTA('Vamos começar', 'projeto de software')
+  const cta = buildWhatsAppCTA(proc.cta, proc.eyebrow)
   const sectionRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -85,16 +66,15 @@ export function ProcessSection() {
             <div className="flex items-center gap-2">
               <div className="h-px w-8 bg-primary" aria-hidden="true" />
               <span className="text-sm font-semibold text-primary uppercase tracking-widest">
-                Como trabalhamos
+                {proc.eyebrow}
               </span>
             </div>
             <h2 className="text-[32px] sm:text-[40px] font-semibold text-foreground leading-tight">
-              Do briefing ao lançamento —{' '}
-              <span className="text-muted-foreground">sem surpresas</span>
+              {proc.heading} —{' '}
+              <span className="text-muted-foreground">{proc.headingMuted}</span>
             </h2>
             <p className="text-base text-muted-foreground leading-relaxed">
-              Processo estruturado e transparente. Você sabe exatamente o que está sendo construído
-              e por quê, em cada etapa do projeto.
+              {proc.description}
             </p>
           </div>
 
@@ -124,7 +104,7 @@ export function ProcessSection() {
                       <Icon size={20} strokeWidth={1.75} aria-hidden="true" />
                     </div>
                     <span className="text-xs font-bold uppercase tracking-widest text-primary/60">
-                      Passo {step.number}
+                      {proc.stepLabel} {step.number}
                     </span>
                   </div>
 
@@ -162,7 +142,9 @@ export function ProcessSection() {
           >
             <CTAButton config={cta} size="lg" variant="primary" />
             <p className="text-sm text-muted-foreground">
-              ✓ Orçamento gratuito &nbsp;·&nbsp; ✓ Resposta em até 2h
+              {messages.sections.cta.trustSignals.slice(0, 2).map((s, i) => (
+                <span key={i}>{i > 0 ? ' \u00A0·\u00A0 ' : ''}✓ {s}</span>
+              ))}
             </p>
           </div>
         </div>

@@ -17,13 +17,13 @@ const doubled = [...projects, ...projects]
 
 export function ClientLogosStrip() {
   return (
-    <div
+    <section
       data-testid="section-logos"
       aria-label={m.sections.clients.ariaLabel}
       className="w-full bg-surface border-y border-border py-8 overflow-hidden"
     >
       <p className="text-center text-xs text-muted-foreground uppercase tracking-widest font-medium mb-6">
-        Empresas que confiaram na SystemForge
+        {m.sections.clients.heading}
       </p>
 
       <div className="relative">
@@ -60,6 +60,6 @@ export function ClientLogosStrip() {
           ))}
         </div>
       </div>
-    </div>
+    </section>
   )
 }
