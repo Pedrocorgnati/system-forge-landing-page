@@ -29,6 +29,7 @@ export default function HomePage() {
     <>
       <JsonLdFaq items={faqItems.map((item) => ({ question: item.question, answer: item.answer }))} />
       <HeroSection />
+      <ContactSection />
       <ServicesGrid />
       <PortfolioBento />
       <WhySystemForge />
@@ -36,7 +37,6 @@ export default function HomePage() {
       <FaqSection />
       <CTASection />
       <BlogPreview />
-      <ContactSection />
     </>
   )
 }

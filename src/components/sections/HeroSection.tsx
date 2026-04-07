@@ -1,9 +1,7 @@
 import { ArrowRight } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CTAButton } from '@/components/ui/CTAButton'
 import { Container } from '@/components/ui/Container'
-import { buildDefaultCTAs } from '@/lib/cta'
 import { getSiteConfig } from '@config'
 import { loadMessages, loadPageMessages } from '@config/content'
 
@@ -42,9 +40,6 @@ const clientNamesDoubled = [...clientNames, ...clientNames]
 
 
 export function HeroSection() {
-  const ctas = buildDefaultCTAs()
-  const primaryCTA = ctas[0]!
-
   return (
     <section
       data-testid="section-hero"
@@ -88,12 +83,6 @@ export function HeroSection() {
 
             {/* CTAs */}
             <div className="hero-enter hero-delay-300 flex flex-wrap items-center gap-3">
-              <CTAButton
-                config={primaryCTA}
-                size="lg"
-                variant="primary"
-                className="hover:-translate-y-px active:translate-y-0 shadow-[0_4px_14px_rgba(37,99,235,0.2)] hover:shadow-[0_6px_20px_rgba(37,99,235,0.38)] transition-all duration-200"
-              />
               <Link
                 href={config.routes.portfolio}
                 className="group inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-lg"

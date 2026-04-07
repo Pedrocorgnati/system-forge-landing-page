@@ -107,6 +107,15 @@ export function ContactSection() {
             <p className="contact-stagger-3 text-white/70 text-lg leading-relaxed">
               {ct.responseTime}
             </p>
+            <a
+              href={SITE.budgetEngine}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="contact-stagger-3 mt-2 inline-flex items-center gap-2 w-fit px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-semibold text-lg shadow-[0_4px_14px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.45)] hover:-translate-y-0.5 transition-all duration-200"
+            >
+              {ct.budgetHeroCta}
+              <ArrowRight size={18} aria-hidden="true" />
+            </a>
           </div>
 
           {/* Channel cards */}
