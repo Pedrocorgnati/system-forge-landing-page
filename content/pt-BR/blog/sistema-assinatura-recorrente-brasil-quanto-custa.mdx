@@ -1,0 +1,160 @@
+---
+title: "Sistema de Assinatura Recorrente no Brasil: Quanto Custa e Como Construir em 2026"
+slug: "sistema-assinatura-recorrente-brasil-quanto-custa"
+date: "2026-04-10"
+locale: "pt-BR"
+description: "Sistema de assinatura recorrente no Brasil custa R$ 15.000 a R$ 80.000. Vindi vs Stripe vs Iugu, dunning, Pix recorrente e caso real com 34% de conversão."
+excerpt: "Guia completo para construir sistema de assinatura recorrente no Brasil: comparativo de gateways, dunning, Pix recorrente e caso real com 34% de conversão."
+tags: ["assinatura recorrente", "billing recorrente", "cobrança recorrente", "SaaS billing", "Vindi", "Stripe Brasil", "Pix recorrente"]
+coverImage: "/images/blog/sistema-assinatura-recorrente-brasil-quanto-custa.webp"
+author: "Pedro Corgnati"
+relatedService: "sistemas-personalizados"
+---
+
+# Sistema de Assinatura Recorrente no Brasil: Quanto Custa e Como Construir em 2026
+
+*Pedro Corgnati — Forja de Sistemas*
+
+Um sistema de assinatura recorrente no Brasil custa entre R$ 15.000 e R$ 80.000 dependendo da complexidade, com prazo de 6 a 20 semanas. A escolha do gateway — Vindi, Stripe, Iugu ou Pagar.me — impacta tanto o custo de desenvolvimento quanto a taxa por transação, e cada opção tem comportamentos diferentes no contexto brasileiro: boleto, Pix recorrente e dunning automático não funcionam da mesma forma em todos os gateways. Usar apenas o Stripe sem camada customizada, por exemplo, deixa você sem Pix recorrente nativo e com dunning limitado para o comportamento de pagamento brasileiro.
+
+Já implementei sistemas de billing recorrente para SaaS B2B, clubes de assinatura e plataformas de serviços no Brasil. O que descrevo aqui vem de projetos reais, não de documentação de gateway.
+
+## Quanto custa desenvolver um sistema de assinatura recorrente no Brasil
+
+O custo depende do que você precisa resolver:
+
+| Escopo | Custo estimado | Prazo |
+|---|---|---|
+| MVP de billing: planos fixos, cartão, boleto | R$ 15.000–R$ 28.000 | 6–10 semanas |
+| Sistema completo: Pix recorrente, dunning, free trial | R$ 28.000–R$ 50.000 | 10–16 semanas |
+| Plataforma multi-tenant com relatórios e churn | R$ 45.000–R$ 80.000 | 14–20 semanas |
+
+Esses valores consideram desenvolvimento com gateway via API, frontend de checkout, área de cliente (upgrade/downgrade/cancelamento), webhooks de eventos e painel admin básico. Não incluem o custo mensal do gateway nem infraestrutura de servidor.
+
+O maior erro que vejo fundadores cometendo é subestimar o escopo de billing. Um checkout que aceita cartão parece simples — mas quando você adiciona free trial com trial-end automático, grace period para pagamento falho, lógica de prorate em upgrade de plano, dunning com três tentativas e e-mail de recuperação, o escopo dobra.
+
+> **[Fale com um especialista sobre billing recorrente](https://wa.me/)** — avaliamos qual gateway faz sentido para o seu produto.
+
+## Gateways de pagamento para assinatura: Vindi vs Stripe vs Iugu vs Pagar.me
+
+A escolha do gateway tem implicações técnicas e financeiras que vão além da taxa por transação.
+
+| Gateway | Taxa cartão | Boleto | Pix recorrente | Dunning nativo | Suporte BR | Free trial |
+|---|---|---|---|---|---|---|
+| Vindi | 3,2–4,5% | Sim | Sim (2024) | Avançado | Sim | Sim |
+| Stripe | 3,4% + R$ 0,80 | Sim | Não nativo | Básico | Limitado | Sim |
+| Iugu | 2,9–3,5% | Sim | Sim | Básico | Sim | Manual |
+| Pagar.me | 3,0–4,2% | Sim | Sim | Básico | Sim | Manual |
+
+**Vindi** é o gateway mais maduro para billing recorrente no Brasil. Tem Pix recorrente desde 2024, dunning configurável por produto, régua de cobrança nativa e API bem documentada. Para SaaS B2B com planos mensais/anuais, é geralmente a melhor escolha. A desvantagem é o custo: planos a partir de R$ 199/mês mais taxas por transação.
+
+**Stripe** tem a melhor infraestrutura técnica do mundo para billing, mas no contexto brasileiro enfrenta limitações reais. Pix recorrente não está disponível nativamente — você precisa construir uma camada extra. O dunning é menos sofisticado que o da Vindi para o comportamento BR (muita gente paga boleto na última hora). Suporte em português é limitado.
+
+**Iugu** é uma boa alternativa mid-market, especialmente para quem precisa de boleto recorrente com vencimento fixo e Pix. A API é mais simples que a do Stripe e o suporte em português é melhor.
+
+**Pagar.me** (Banco do Brasil / StoneCo) tem uma base de clientes estabelecida no Brasil, taxa competitiva e integração razoável para recorrência, mas a documentação de webhook e a experiência de developer não são tão polidas quanto Stripe ou Vindi.
+
+### Qual escolher?
+
+Para SaaS B2B com foco em cartão e necessidade de dunning sofisticado: Vindi. Para produto com audiência mais jovem e volume internacional: Stripe com Pix construído na mão. Para clube de assinatura física com boleto e Pix: Iugu ou Pagar.me.
+
+## O que precisa ter num sistema de billing recorrente (funcionalidades mínimas)
+
+Um sistema de assinatura funcional em 2026 precisa de, no mínimo:
+
+**Gestão de planos e preços:** planos com diferentes features e limites, suporte a preço mensal e anual (com desconto), possibilidade de upgrade/downgrade com prorate calculado automaticamente.
+
+**Checkout e métodos de pagamento:** cartão de crédito com tokenização, boleto bancário com prazo configurável, Pix com QR Code. Para empresas B2B, é comum precisar de NF-e vinculada à cobrança — isso adiciona complexidade.
+
+**Área do cliente:** visualização do plano atual, histórico de cobranças, download de boleto/nota fiscal, cancelamento self-service (obrigatório pelo CDC).
+
+**Painel admin:** lista de assinantes, filtros por status (ativo/inadimplente/cancelado), override manual de cobrança, reativação de conta.
+
+**Webhooks e eventos:** o sistema precisa reagir a pagamento aprovado, pagamento falho, assinatura cancelada, trial expirando. Esses eventos disparam fluxos no seu produto (liberar acesso, bloquear, enviar e-mail).
+
+## Free trial, dunning e gestão de churn: como implementar
+
+### Free trial
+
+Free trial de 7, 14 ou 30 dias é padrão em SaaS. A implementação correta coleta dados de pagamento no início do trial (cartão salvo sem cobrança) e cobra automaticamente ao final. Isso exige tokenização no gateway antes da primeira cobrança — um detalhe técnico que muitos erram ao implementar com Stripe (que exige SetupIntent, não PaymentIntent, para captura sem cobrança).
+
+### Webhooks de pagamento: como tratar falhas e retentativas
+
+Pagamentos falham por vários motivos: cartão expirado, limite insuficiente, erro de autorização temporário. Uma régua de dunning eficaz para o Brasil tenta novamente em 3, 7 e 14 dias, envia e-mail personalizado por tipo de falha e oferece link para atualizar o cartão antes de cancelar.
+
+Sem dunning estruturado, a perda por falha de pagamento pode ser de 15 a 25% da base de assinantes em SaaS com ticket baixo. Já vi empresas perderem clientes que queriam continuar pagando simplesmente porque o sistema cancelou automaticamente sem tentar recuperar o pagamento.
+
+### Gestão de churn
+
+Churn involuntário (cartão falhando) é resolvido com dunning. Churn voluntário exige análise de comportamento — usuários que cancelam geralmente têm padrão de uso diferente semanas antes. Implementar cancelamento com offboarding survey (pergunta por que está cancelando) e opção de pausa de assinatura em vez de cancelamento reduz churn em 15 a 30%.
+
+> **[Peça um orçamento para seu sistema de assinatura](https://forjadesistemas.com.br/orcamento)** — enviamos proposta em 24h.
+
+## Sistema próprio vs plataforma de assinatura pronta: quando cada um vale
+
+Plataformas prontas como Hotmart, Eduzz, Kiwify ou Memberkit funcionam bem para infoprodutos e cursos — elas já resolvem checkout, afiliados, entrega de acesso e fiscal. O problema começa quando você tem um produto de software com lógica de acesso condicional, múltiplos planos com features distintas, ou necessidade de integração com o seu backend.
+
+Um SaaS precisa que o billing esteja integrado ao sistema de permissões, ao banco de dados de usuários e ao painel admin. Plataformas prontas não fazem isso — você acaba tendo dois sistemas paralelos e sincronização manual.
+
+**Use plataforma pronta** se você vende acesso a conteúdo (cursos, comunidade, materiais) sem lógica de software por trás.
+
+**Construa sistema próprio** se você vende acesso a um software com planos, features por tier e necessidade de controle de acesso programático.
+
+### LGPD e dados de cartão: compliance no Brasil
+
+No Brasil, você não armazena dados de cartão — o gateway faz isso e retorna um token. Usar o token é legalmente seguro e não gera obrigações de compliance PCI DSS para você.
+
+O que você armazena (nome, e-mail, CPF/CNPJ, histórico de pagamento) é dado pessoal e sensível financeiro sob a LGPD. Isso exige política de privacidade atualizada com base legal explícita (contrato, legítimo interesse ou consentimento), mecanismo de portabilidade e exclusão de dados, e registro das atividades de tratamento. Para sistemas com dados de menores, a base legal precisa ser consentimento dos responsáveis.
+
+Implementar LGPD corretamente em um sistema de billing não é só jurídico — requer funcionalidades técnicas específicas no sistema. Veja mais em [adequação LGPD para sistemas de empresas](https://forjadesistemas.com.br/blog/lgpd-sistema-empresa-adequar-2026).
+
+## Caso real: como implementamos billing recorrente para cliente BR
+
+Um cliente do segmento de gestão para escritórios contábeis — SaaS B2B com foco em PMEs — precisava migrar de cobranças manuais via boleto avulso para um sistema de assinatura com planos mensais e anuais, free trial de 14 dias e painel de gestão de clientes.
+
+O desafio técnico principal era a régua de dunning: a base de clientes do produto pagava muito via boleto e o comportamento era diferente do cartão — boleto costuma ser pago nos últimos dias antes do vencimento, então o sistema precisava de grace period generoso sem liberar acesso indefinidamente.
+
+Implementamos com Vindi, por conta do dunning configurável e do suporte a boleto recorrente com data de vencimento flexível. O sistema incluiu:
+
+- Checkout próprio (não o hosted do gateway) com validação de CNPJ e emissão automática de NF-e
+- Trial de 14 dias com cartão tokenizado e cobrança automática no dia 15
+- Régua de dunning com 3 tentativas em 7 dias + grace period de 5 dias
+- Downgrade automático para plano gratuito (não cancelamento) em caso de inadimplência
+- Painel admin com MRR, churn e LTV calculados em tempo real
+
+O projeto custou R$ 42.000 e foi concluído em 14 semanas. No primeiro trimestre pós-lançamento, a conversão de trial para pago foi de 34% e o churn involuntário caiu de estimados 20% para menos de 5%.
+
+## Quanto tempo leva para construir
+
+O prazo depende do escopo e da qualidade do time:
+
+- **MVP básico** (planos fixos, cartão + boleto, área do cliente): 6–9 semanas
+- **Sistema completo** (Pix, dunning, free trial, admin): 10–14 semanas
+- **Plataforma escalável** (multi-tenant, relatórios avançados, integrações): 16–20 semanas
+
+O maior atraso em projetos de billing costuma ser na definição de regras de negócio: prorate de upgrade, política de cancelamento, o que acontece no downgrade, como tratar crédito acumulado. Quanto mais claro o escopo antes de começar, mais rápido o desenvolvimento.
+
+> **[Fale com um especialista sobre billing recorrente](https://wa.me/)** — avaliamos o escopo correto para o seu produto.
+
+## Perguntas Frequentes
+
+### Quanto custa desenvolver um sistema de assinatura recorrente no Brasil?
+Entre R$ 15.000 e R$ 80.000 dependendo da complexidade. Um MVP com planos fixos e cartão custa entre R$ 15.000 e R$ 28.000. Um sistema completo com Pix recorrente, dunning e free trial fica entre R$ 28.000 e R$ 50.000.
+
+### Qual gateway usar para assinatura recorrente no Brasil?
+Para SaaS B2B com dunning sofisticado, Vindi é a melhor opção. Para produto com audiência tech ou volume internacional, Stripe com camada de Pix customizada. Para clube de assinatura com boleto e Pix, Iugu ou Pagar.me.
+
+### O Stripe funciona para assinatura recorrente no Brasil?
+Funciona para cartão. Pix recorrente não está disponível nativamente no Stripe — precisa de implementação customizada. O dunning do Stripe também é menos sofisticado para o comportamento de pagamento brasileiro (boleto, parcelamento).
+
+### Como implementar free trial corretamente no Brasil?
+Colete dados de pagamento no início do trial (tokenização sem cobrança) e cobre automaticamente ao vencimento. No Stripe isso usa SetupIntent; na Vindi existe fluxo específico. Sem coleta prévia de pagamento, a conversão de trial para pago cai drasticamente.
+
+### LGPD se aplica a sistemas de billing?
+Sim. Dados de cartão (tokenizados), CPF, CNPJ, e-mail e histórico de pagamento são dados pessoais. O sistema precisa ter política de privacidade com base legal explícita, mecanismo de exclusão de dados e registro de tratamento conforme a LGPD.
+
+### O que é Pix recorrente e como funciona?
+Pix recorrente é uma modalidade lançada pelo Bacen em 2024 que permite cobranças automáticas periódicas autorizadas pelo cliente via Pix. Funciona como débito automático, mas via Pix. Vindi, Iugu e Pagar.me já suportam. Stripe ainda não tem integração nativa com o Bacen para essa modalidade.
+
+### Qual a diferença entre dunning básico e avançado?
+Dunning básico retenta o pagamento 1 vez e cancela. Dunning avançado configura régua de retentativas (dia 1, 3, 7), envia e-mails personalizados por tipo de falha, oferece link de atualização de cartão e faz downgrade gradual em vez de cancelamento imediato — reduzindo o churn involuntário significativamente.
