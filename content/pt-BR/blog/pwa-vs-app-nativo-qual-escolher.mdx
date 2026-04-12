@@ -1,0 +1,176 @@
+---
+title: "PWA ou App Nativo em 2026? Guia Definitivo para Empresas Brasileiras"
+slug: "pwa-vs-app-nativo-qual-escolher"
+date: "2026-04-12"
+description: "PWA custa R$ 8k-30k e resolve 70% dos casos de PME brasileira. App nativo (R$ 25k-120k) para hardware específico e iOS crítico. Guia de decisão com tabela e 5 perguntas."
+tags: ["PWA", "app nativo", "React Native", "desenvolvimento mobile", "Android", "iOS", "PME Brasil"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "aplicativos-mobile"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "PWA custa R$ 8k-30k e é suficiente para 70% das PMEs brasileiras (90%+ de público Android). App nativo para hardware específico e iOS crítico. Tabela comparativa e framework de decisão em 5 perguntas."
+hreflang_pair:
+  - locale: 'it-IT'
+    slug: 'pwa-vs-app-nativo-quale-scegliere'
+  - locale: 'en'
+    slug: 'pwa-vs-native-app-which-to-choose-2026'
+  - locale: 'es-ES'
+    slug: 'pwa-vs-app-nativo-cual-elegir'
+---
+
+PWA custa entre R$ 8.000 e R$ 30.000 e é a escolha certa quando você não precisa de hardware do dispositivo (câmera avançada, GPS offline, Bluetooth) e seu público é majoritariamente Android — o que descreve 90%+ do mercado brasileiro. App nativo (R$ 25.000-120.000) faz sentido quando experiência premium e integração com hardware são essenciais. Para a maioria das PMEs brasileiras, PWA resolve com 1/3 do custo.
+
+Essa decisão aparece toda semana nos projetos que avalio. E a resposta quase sempre surpreende: "pra que você precisa de app nativo mesmo?"
+
+## O Que é PWA e Como Funciona na Prática (Sem Jargão)
+
+PWA (Progressive Web App) é um site que se comporta como aplicativo. O usuário acessa pelo navegador, pode "instalar" na tela inicial do celular (ícone igual ao de app), receber notificações push e usar offline em alguns recursos.
+
+O usuário não precisa ir à App Store ou Play Store. Não precisa de atualização manual. O desenvolvedor publica uma vez e todos veem a versão mais nova na próxima vez que abrem.
+
+**O que PWA consegue fazer (em 2026):**
+- Funcionar offline com dados em cache
+- Enviar notificações push (Android nativo, iOS desde Safari 16.4)
+- Ser instalado na tela inicial do celular
+- Usar câmera e microfone do dispositivo
+- Acessar localização (geolocalização)
+- Processar pagamentos via APIs web
+
+**O que PWA ainda não consegue fazer:**
+- Bluetooth e NFC (limitações de segurança do navegador)
+- GPS offline de alta precisão (como apps de entrega)
+- Integração profunda com sistema operacional (widgets, Live Activities iOS)
+- Apple Pay nativamente (funciona via Safari mas com limitações)
+- App Store/Play Store sem wrappers (dá pra fazer, mas é gambiarra)
+
+## PWA vs App Nativo vs React Native: Diferenças Reais
+
+| Critério | PWA | React Native | App Nativo (iOS/Android) |
+|----------|-----|--------------|--------------------------|
+| Custo Brasil 2026 | R$ 8k-30k | R$ 20k-90k | R$ 25k-120k por plataforma |
+| Prazo | 4-8 semanas | 8-16 semanas | 12-24 semanas |
+| Manutenção anual | 10-15% do custo | 15-20% | 20-30% |
+| 1 código = 2 plataformas | Sim | Sim | Não (precisa duplicar) |
+| Publicação lojas | Sem Play/App Store | App Store + Play Store | App Store + Play Store |
+| Atualização OTA | Instantânea | Parcial (Expo OTA) | Revisão da loja (7-14 dias) |
+| Performance | 80-90% do nativo | 90-95% | 100% |
+| Acesso hardware | Limitado | Quase completo | Completo |
+
+Para quem está considerando React Native especificamente, vale ler a comparação detalhada de [React Native vs Flutter](/blog/react-native-vs-flutter) antes de decidir qual framework escolher para o app nativo/híbrido.
+
+### Por que React Native não é sempre a solução do meio
+
+React Native é bom quando: público usa iOS significativamente (15%+ do público-alvo), precisa de acesso a hardware que PWA não oferece, ou quer presença nas lojas. Mas é mais caro que PWA e mais lento de atualizar que app web. Para projetos de PME com orçamento limitado, PWA geralmente ganha.
+
+## Quanto Custa Cada Opção no Brasil
+
+### PWA (R$ 8.000-30.000)
+
+Inclui: desenvolvimento web responsivo com funcionalidades PWA (service worker, manifest, push), design UI, 1 plataforma (funciona em iOS e Android via browser), hospedagem em cloud.
+
+Custo mensal pós-entrega: R$ 200-600 (hospedagem + manutenção).
+
+### React Native (R$ 20.000-90.000)
+
+Inclui: app para iOS e Android a partir do mesmo código, publicação nas lojas, design nativo por plataforma.
+
+Custo mensal pós-entrega: R$ 600-1.800 (hospedagem + Apple Developer + Google Play + manutenção).
+
+### App nativo iOS + Android (R$ 50.000-240.000 total)
+
+O dobro: um time para iOS (Swift), outro para Android (Kotlin/Java). Ou uma agência que faz os dois. Faz sentido para apps onde experiência premium é o produto em si (banco, healthtech, jogos).
+
+Para uma visão geral de custos de desenvolvimento mobile no Brasil, veja o guia completo de [custo de desenvolvimento de app mobile](/blog/custo-desenvolvimento-app-mobile).
+
+### Caso real: e-commerce que economizou R$ 60k
+
+E-commerce de moda com 70% de público Android. Orçamento inicial: R$ 80.000 para app nativo iOS + Android. Decisão: PWA a R$ 20.000, com orçamento restante para marketing.
+
+Resultado em 6 meses: taxa de conversão mobile +25% comparado ao site mobile anterior (PWA carrega 2x mais rápido), custo de manutenção 60% menor, e atualizações de campanha em horas, não em 2 semanas de revisão de loja.
+
+## Quando PWA é Suficiente (e Quando Não É)
+
+**PWA resolve bem:**
+- E-commerce, catálogos, lojas virtuais
+- Sistemas de agendamento (clínicas, barbearias, salões)
+- Dashboards e painéis internos
+- Portais de cliente B2B
+- Landing pages interativas com funcionalidades básicas
+- Plataformas de conteúdo (notícias, blog, EAD)
+
+**App nativo faz sentido:**
+- Apps de delivery com GPS offline em tempo real
+- Fintech/banco com biometria e autenticação forte
+- Games e entretenimento interativo
+- Apps industriais com Bluetooth/NFC (leitura de sensores, QR offline)
+- Healthtech com integração HealthKit/Google Fit
+- Qualquer app onde iOS representa 25%+ do público
+
+## Limitações do PWA no iOS: o Que a Apple Ainda Bloqueia
+
+A situação melhorou muito com iOS 16.4 (2023) e iOS 17. Mas ainda existem limitações:
+
+**O que funciona no iOS (Safari) em 2026:**
+- Notificações push (desde iOS 16.4, apenas para PWAs instalados na tela inicial)
+- Instalação na tela inicial com ícone e splash screen
+- Acesso a câmera e microfone
+- Web Payments API (Apple Pay via Safari com limitações)
+
+**O que ainda não funciona no iOS:**
+- Notificações push para PWAs abertos pelo browser (precisa estar "instalado")
+- Background sync confiável (sincronização quando app está fechado)
+- Web Share Target (receber arquivos compartilhados via share sheet)
+- Badging API (número no ícone do app)
+
+**Conclusão prática:** Se seu público iOS é significativo (20%+) e o diferencial do produto depende dessas funcionalidades faltantes, aí app nativo ou React Native faz sentido. Para a maioria dos casos de uso de PME, as limitações do iOS não afetam o produto.
+
+## Framework de Decisão em 5 Perguntas
+
+**1. Seu público é mais de 80% Android?**
+→ Sim: PWA tem 0 limitações relevantes. Custo menor.
+→ Não: avaliar limitações de iOS para seu caso específico.
+
+**2. Precisa de acesso a hardware específico (Bluetooth, GPS offline, NFC)?**
+→ Sim: app nativo ou React Native.
+→ Não: PWA resolve.
+
+**3. Atualização rápida é importante para o negócio (promoções, eventos)?**
+→ Sim: PWA (atualizações instantâneas sem revisão de loja).
+→ Não: qualquer opção funciona.
+
+**4. O app precisa estar na App Store como diferencial de produto?**
+→ Sim: React Native ou nativo.
+→ Não: PWA (Play Store opcional com TWA wrapper).
+
+**5. Qual o orçamento?**
+→ Até R$ 30.000: PWA.
+→ R$ 30.000-90.000: React Native.
+→ Acima de R$ 90.000: considerar nativo se os critérios acima justificarem.
+
+Para quem quer publicar nas lojas de qualquer forma, veja o guia de [como publicar app na App Store e Google Play](/blog/publicar-app-app-store-google-play-guia) para entender o processo e os requisitos de cada plataforma.
+
+## Perguntas Frequentes sobre PWA vs App Nativo
+
+**PWA ou app nativo qual desenvolver para empresa?**
+Depende do público e funcionalidades. Para 70%+ dos casos de PME brasileira (público Android, funcionalidades web-compatíveis), PWA a R$ 8k-30k é a escolha racional. App nativo faz sentido para hardware específico, iOS crítico ou experiência premium como produto.
+
+**Quanto custa PWA vs app iOS Android Brasil?**
+PWA: R$ 8.000-30.000. React Native: R$ 20.000-90.000. Nativo por plataforma: R$ 25.000-120.000. Total nativo iOS + Android: R$ 50.000-240.000.
+
+**PWA aparece na Play Store e App Store?**
+Play Store: sim, usando TWA (Trusted Web Activity) — processo técnico mas possível. App Store iOS: possível mas mais restritivo e exige aprovação da Apple. Para maioria das PMEs, não estar nas lojas não é problema — o usuário instala direto do site.
+
+**PWA funciona no iPhone em 2026?**
+Sim, com Safari. Notificações push funcionam para PWAs instalados na tela inicial desde iOS 16.4. Algumas funcionalidades avançadas têm limitações no iOS comparado ao Android.
+
+**Qual a manutenção de PWA vs app nativo?**
+PWA: 10-15% do custo anual. App nativo: 20-30% do custo anual (mais custo de Apple Developer $99/ano, revisão das lojas para updates). PWA é significativamente mais barato de manter.
+
+**PWA pode usar câmera e GPS?**
+Sim. Câmera (tirar fotos, QR code) e GPS funcionam bem no PWA. GPS offline de alta precisão (como apps de entrega com tracking em background) ainda tem limitações.
+
+---
+
+Se você está decidindo entre PWA e app nativo para o seu projeto e quer uma análise técnica do que faz sentido para o seu público e orçamento, podemos ajudar. [Solicite um diagnóstico gratuito](/contato) — analisamos o caso específico sem custo.

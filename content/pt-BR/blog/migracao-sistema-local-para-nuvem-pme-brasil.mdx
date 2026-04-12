@@ -1,0 +1,188 @@
+---
+title: "Migração para a Nuvem para PMEs Brasileiras: Custos, Riscos e Como Fazer em 2026"
+slug: "migracao-sistema-local-para-nuvem-pme-brasil"
+date: "2026-04-12"
+description: "Quanto custa migrar sistema local para nuvem no Brasil: R$ 10k-80k de migração + R$ 500-8k/mês. AWS vs Azure vs GCP, 5 riscos reais e o método para migrar sem parar o negócio."
+tags: ["migração cloud", "cloud computing", "AWS", "Azure", "GCP", "PME Brasil", "LGPD", "infraestrutura"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sistemas-personalizados"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Migrar sistema local para nuvem no Brasil custa R$ 10k-80k + R$ 500-8k/mês recorrente. Comparativo honesto AWS/Azure/GCP para PMEs, 5 riscos reais e como migrar sem downtime."
+hreflang_pair:
+  - locale: 'it-IT'
+    slug: 'migrazione-cloud-pmi-italia-costi-rischi'
+  - locale: 'en'
+    slug: 'cloud-migration-small-business-costs-risks'
+  - locale: 'es-ES'
+    slug: 'migracion-nube-pyme-espana-costes-riesgos'
+---
+
+Migrar um sistema local para a nuvem no Brasil custa entre R$ 10.000 e R$ 80.000 dependendo da complexidade, mais o custo recorrente de R$ 500 a R$ 8.000/mês. Para a maioria das PMEs, o ponto de equilíbrio vem em 18-36 meses considerando a economia com hardware, licenças e manutenção de servidor físico. A questão não é "se vale a pena" — é quando vale e para qual tipo de sistema.
+
+Eu participei de 12 migrações de sistemas on-premise para cloud nos últimos 3 anos. O erro mais comum: a empresa decide migrar por moda, sem calcular TCO real. O segundo mais comum: subestima o custo de redesenvolvimento quando o sistema foi feito para Windows Server 2008 e não roda mais em contêiner.
+
+## Quanto Custa Migrar para a Nuvem no Brasil (Tabela por Porte)
+
+| Porte | Sistema | Custo de Migração | Custo Recorrente/mês |
+|-------|---------|------------------|----------------------|
+| Micro | Site + BD simples | R$ 3.000-8.000 | R$ 150-400 |
+| Pequeno | Sistema web 1-5 usuários | R$ 10.000-25.000 | R$ 500-1.200 |
+| Médio | Sistema multi-módulo 5-30 usuários | R$ 25.000-60.000 | R$ 1.500-4.000 |
+| Grande | ERP/plataforma 30+ usuários + integrações | R$ 50.000-150.000 | R$ 4.000-15.000 |
+
+### O que está incluso no custo de migração
+
+- Análise de dependências do sistema atual
+- Refatoração necessária (se o sistema não for cloud-ready)
+- Configuração de infraestrutura (VPC, banco gerenciado, CDN)
+- Migração de dados com validação de integridade
+- Período de operação paralela (on-premise + cloud) — em geral 2-4 semanas
+- Treinamento da equipe
+- Monitoramento inicial pós-migração
+
+O que não está incluso: upgrade de funcionalidades, redesign de UI, novas integrações.
+
+### Custo real de servidor físico (o que você deixa de pagar)
+
+Um servidor on-premise para PME custa, em média:
+- Hardware: R$ 15.000-30.000 a cada 4-5 anos
+- Licenças Windows Server: R$ 4.000-12.000
+- Manutenção preventiva: R$ 1.200-3.600/ano
+- Energia elétrica: R$ 2.400-6.000/ano
+- Suporte de TI dedicado: R$ 12.000-30.000/ano
+
+Total em 3 anos: R$ 44.000-105.000 para um servidor de porte médio.
+
+Cloud equivalente: R$ 18.000-45.000 em 3 anos. Ponto de equilíbrio em 18-30 meses para a maioria das PMEs.
+
+## AWS vs Azure vs Google Cloud para PMEs Brasileiras: Comparativo Honesto
+
+### Amazon Web Services (AWS) — Região São Paulo
+
+Infraestrutura mais madura no Brasil. Região SA-East-1 (São Paulo) operacional desde 2012. Melhor ecossistema de integrações e a maior comunidade de suporte em português. Custo ligeiramente mais alto que concorrentes em algumas categorias.
+
+**Quando escolher:** sistema legado, equipe já familiarizada com AWS, ou se precisar de serviços gerenciados avançados (RDS, ECS, Lambda).
+
+### Microsoft Azure — Brasil Sul e Sudeste
+
+Duas regiões no Brasil (Campinas e Vinhedo). Melhor opção para empresas que já usam Microsoft 365, Dynamics ou licenças On-premises com Software Assurance (benefício de migração para Azure). Integração nativa com Active Directory.
+
+**Quando escolher:** empresa com stack Microsoft (Windows Server, SQL Server), ou que já paga licenciamento Microsoft e pode aproveitar Azure Hybrid Benefit.
+
+### Google Cloud (GCP) — Região Osasco
+
+Região mais recente no Brasil (São Paulo, Osasco). Preços geralmente mais competitivos que AWS e Azure para algumas cargas de trabalho. Melhor para empresas com workloads de dados/BI (BigQuery é referência de mercado).
+
+**Quando escolher:** startup data-driven, equipe com experiência em GCP, ou workload de analytics e ML.
+
+### Tabela comparativa
+
+| Critério | AWS SP | Azure BR | GCP SP |
+|----------|--------|----------|--------|
+| Presença BR | Desde 2012 | Desde 2014 | Desde 2020 |
+| Suporte PT-BR | Pago e comunitário | Pago | Comunitário |
+| Custo médio VM/mês | R$ 180-600 | R$ 170-580 | R$ 160-540 |
+| Integração Microsoft | Boa | Nativa | Boa |
+| Serviços gerenciados | Mais completo | Muito completo | Forte em dados |
+
+## Quando Migrar Faz Sentido (e Quando Não Faz)
+
+**Migrar faz sentido quando:**
+- Hardware físico precisa de substituição em 12-18 meses (não vale comprar novo)
+- Empresa está crescendo e precisa de escalabilidade elástica (picos de acesso)
+- TI passa tempo demais em manutenção de servidor em vez de projeto
+- Disaster recovery atual é precário ou inexistente
+- Equipe remota precisa de acesso sem VPN complexa
+
+**Não migrar faz sentido quando:**
+- Sistema legado depende de hardware específico (impressoras térmicas, leitores seriais)
+- Regulamentação do setor exige dados em infraestrutura própria auditável fisicamente
+- O custo recorrente de cloud supera o custo de servidor novo em 3 anos
+- O sistema seria totalmente reescrito para rodar em cloud (nesse ponto vale avaliar [reescrita completa](/blog/integrar-sistemas-legados-sem-reescrever) em vez de migração)
+
+## Os 5 Riscos Mais Comuns na Migração Cloud
+
+### 1. Subestimar a interdependência do sistema
+
+"Só vou subir o servidor na AWS" — mas o sistema tem chamadas para IP fixo interno, banco que roda em outro servidor, integração com impressora na rede local. A análise de dependências antes de qualquer migração é obrigatória.
+
+### 2. Ignorar o custo de egress (saída de dados)
+
+AWS, Azure e GCP cobram pela saída de dados para a internet (egress). Para sistemas que transferem muito dado (backups, relatórios, streaming), esse custo pode surpreender. Simule com dados reais antes de assinar.
+
+### 3. Migrar sistema não cloud-ready sem refatorar
+
+Sistema escrito para IIS + Windows Server raramente vai direto para Linux + container. Algumas dependências de COM objects, registry Windows ou bibliotecas 32-bit exigem refatoração. Isso aumenta custo e prazo.
+
+### 4. Downtime não planejado
+
+Migração sem plano de rollback e sem período de operação paralela pode parar a operação. O padrão que uso: 2-4 semanas com os dois ambientes rodando em paralelo, validando dados antes de desligar o servidor físico.
+
+### 5. LGPD e soberania de dados
+
+AWS, Azure e GCP têm regiões no Brasil — dá para garantir que os dados fiquem no território nacional. Mas a configuração precisa ser explícita. Por padrão, backup cross-region pode mover dados para regiões fora do Brasil se não configurado corretamente. Isso pode criar problema com LGPD Art. 33 (transferência internacional de dados).
+
+## Como Fazer a Migração Sem Parar o Negócio
+
+### Fase 1: Discovery (1-2 semanas)
+- Inventário completo: servidores, sistemas, dependências, volumes de dados
+- Análise de cloud-readiness de cada componente
+- Estimativa de custo recorrente antes de qualquer compromisso
+
+### Fase 2: Arquitetura alvo (1 semana)
+- Decisão: lift-and-shift (mover como está) vs re-arquitetura (modernizar durante)
+- Lift-and-shift: mais rápido e barato, mas não aproveita recursos nativos de cloud
+- Re-arquitetura: mais caro, mas entrega escalabilidade e custo operacional melhor
+
+### Fase 3: Migração em fases (4-12 semanas)
+- Migrar por módulos: banco primeiro, depois aplicação, depois integrações
+- Período de operação paralela para validar dados e performance
+- Testes de carga antes de desligar servidor físico
+
+### Fase 4: Validação e corte (1-2 semanas)
+- Comparar dados entre on-premise e cloud
+- Testes de usuários reais
+- Plano de rollback documentado
+- Corte definitivo com monitoramento intensivo nas primeiras 72h
+
+### Caso real: escritório contábil (40 usuários)
+
+Escritório com sistema fiscal legado em servidor Windows 2012. Hardware com 7 anos, sem contrato de manutenção. Migração para Azure com re-arquitetura parcial (banco para Azure SQL, aplicação em VMs Windows).
+
+- Prazo: 10 semanas (incluindo 3 de operação paralela)
+- Custo de migração: R$ 34.000
+- Custo mensal Azure: R$ 2.100
+- Custo anterior (hardware + manutenção + energia): R$ 3.800/mês equivalente
+- Ponto de equilíbrio: 20 meses
+- Bonus: backup automatizado com retenção de 30 dias que antes não existia
+
+Para sistemas fiscais especificamente, vale entender os [requisitos de software contábil com SPED e NF-e](/blog/software-contabilidade-sped-nfe) antes de planejar a arquitetura cloud — algumas integrações com a Receita Federal têm restrições de IP que precisam ser consideradas.
+
+Empresas que estão avaliando migrar um [ERP de pequeno porte](/blog/erp-pequenas-empresas-construir-vs-comprar) devem incluir o custo de migração cloud no TCO total da decisão.
+
+## Perguntas Frequentes sobre Migração para Cloud
+
+**Quanto custa migrar sistema local para a nuvem no Brasil?**
+Entre R$ 10.000 e R$ 80.000 de custo de migração, mais R$ 500-8.000/mês de custo recorrente dependendo do porte. Pequenas PMEs (até 10 usuários): R$ 10.000-25.000 de migração.
+
+**AWS, Azure ou GCP para empresa pequena no Brasil?**
+Para maioria das PMEs sem histórico de cloud: AWS (mais documentação em PT-BR) ou Azure (se já usa Microsoft 365). GCP é bom para empresas com foco em dados/analytics.
+
+**LGPD permite usar cloud americano?**
+Sim, desde que configure para usar regiões brasileiras. AWS tem região em São Paulo, Azure em Campinas/Vinhedo, GCP em Osasco. Com região BR configurada corretamente, dados ficam no Brasil.
+
+**Quanto tempo demora uma migração?**
+Para PME pequena: 4-8 semanas. PME média: 8-16 semanas. Inclua 2-4 semanas de operação paralela no cálculo — não pule essa fase.
+
+**O que é lift-and-shift vs re-arquitetura?**
+Lift-and-shift: move o sistema como está para cloud (mais barato, mais rápido). Re-arquitetura: aproveita para modernizar (containers, serverless) durante a migração (mais caro, mas custo operacional melhor depois).
+
+**É possível fazer migração sem parar o sistema?**
+Sim, com operação paralela bem planejada. O sistema fica rodando nos dois ambientes simultaneamente até validação completa. Não existe migração "zero risco" — mas dá para chegar muito perto de zero downtime.
+
+---
+
+Se você tem um sistema local que precisa migrar para a nuvem e quer uma análise técnica honesta do que faz sentido para o seu porte e orçamento, fazemos um diagnóstico gratuito. [Entre em contato](/contato) para uma conversa sem compromisso.
