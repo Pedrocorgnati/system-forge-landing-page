@@ -1,0 +1,280 @@
+---
+title: "Facturación electrónica obligatoria España 2026: Verifactu"
+slug: "facturacion-electronica-obligatoria-espana-verifactu-2026"
+date: "2026-04-13"
+locale: "es-ES"
+description: "Verifactu 2026: plazos exactos, sanciones hasta 10.000€ y qué software necesita tu empresa. Guía práctica con precios desde 800€ para PYMEs y autónomos."
+excerpt: "Verifactu es obligatorio desde 2026 para grandes empresas y 2027 para PYMEs. Descubre plazos, sanciones y qué debe hacer tu software ahora para cumplir con la AEAT."
+tags: ["facturación electrónica", "Verifactu", "AEAT", "Ley Crea y Crece", "TicketBAI", "Kit Digital", "PYMEs España", "software homologado"]
+coverImage: "/images/blog/facturacion-electronica-obligatoria-espana-verifactu-2026.webp"
+author: "Pedro Corgnati"
+relatedService: "sistema-personalizado"
+---
+
+# Facturación electrónica obligatoria en España 2026: Verifactu, plazos y qué hacer ahora
+
+La facturación electrónica es obligatoria en España a partir de 2026 para empresas con facturación superior a 8 millones de euros anuales, y en 2027 para el resto de PYMEs y autónomos, según la Ley Crea y Crece (Ley 18/2022). El sistema Verifactu del AEAT implica que tu software de facturación debe registrar cada factura y enviarla a Hacienda. No cumplir conlleva sanciones de hasta 10.000€. Si tu empresa aún usa Excel, Word o un programa sin soporte activo, necesitas actuar ahora — no el año que viene.
+
+En más de 15 proyectos de sistemas de gestión para PYMEs españolas, Pedro Corgnati, fundador de SystemForge, ha visto el mismo patrón: las empresas saben que viene el cambio pero esperan al último momento. Los que empiezan ahora tienen tiempo de hacerlo bien. Los que esperan, pagan el doble con prisas.
+
+---
+
+## Qué es la factura electrónica obligatoria y por qué cambia todo
+
+### Ley Crea y Crece: el origen de la obligación
+
+La Ley 18/2022, conocida como Ley Crea y Crece, publicada en el BOE el 29 de septiembre de 2022, establece la obligatoriedad de la facturación electrónica en las relaciones entre empresas y autónomos en España. No se trata de una recomendación ni de una buena práctica — es una obligación legal con fecha límite y sanciones económicas.
+
+El objetivo declarado del Gobierno es reducir la morosidad entre empresas y aumentar la trazabilidad fiscal. En la práctica, significa que todas las facturas que emitáis a otras empresas deberán ser electrónicas, en formato estandarizado, con registro inmutable.
+
+### Verifactu vs SII: dos sistemas, dos públicos distintos
+
+Muchos propietarios de PYMEs confunden Verifactu con el SII (Suministro Inmediato de Información). Son sistemas diferentes:
+
+**SII (ya vigente):** Afecta a grandes empresas con facturación superior a 6 millones de euros o inscritas en el REDEME. Envían los datos de cada factura a la AEAT en un plazo de 4 días. Este sistema ya funciona desde 2017.
+
+**Verifactu (nuevo):** Afecta a TODOS: PYMEs, autónomos, grandes empresas. Implica que el software de facturación genera un registro inmutable (hash encadenado) de cada factura y la reporta a la AEAT en tiempo real o por lotes. El objetivo es eliminar el "software de doble uso" que permite emitir facturas no declaradas.
+
+Si ya usáis SII, Verifactu se suma como capa adicional. Si no usáis SII, Verifactu es vuestro primer contacto obligatorio con el sistema de facturación electrónica de la AEAT.
+
+---
+
+## Plazos exactos por tamaño de empresa
+
+Este es el punto donde más confusión hay. Los plazos no son iguales para todos:
+
+### 2026: grandes empresas y grupos consolidados
+
+Las empresas con facturación anual superior a **8 millones de euros** tienen que tener el sistema Verifactu operativo antes del **1 de enero de 2026**. Esto incluye grupos empresariales consolidados aunque cada empresa individual facture menos.
+
+El software debe estar certificado y en producción con antelación suficiente — el reglamento borrador del AEAT establece que los proveedores de software deben tener sus sistemas homologados 9 meses antes de la fecha del contribuyente, lo que en la práctica significa que los grandes tenían que moverse en 2025.
+
+### 2027: PYMEs, autónomos y el resto
+
+Para el resto de empresas y autónomos, el plazo es el **1 de julio de 2027**. Pero aplicando la misma lógica de los 9 meses previos, deberíais tener el software homologado y en producción antes de octubre de 2026.
+
+Eso significa que tenéis menos de un año desde ahora para evaluar, decidir, contratar e implementar.
+
+### Excepciones y casos especiales
+
+- **Autónomos en estimación objetiva (módulos):** Tienen reglas específicas de adaptación — consultad con vuestra asesoría o con nosotros si es vuestro caso.
+- **Empresas en régimen de módulos:** La obligación de Verifactu se aplica igualmente, aunque la forma de implementación puede variar.
+- **Sector hostelería:** Además de Verifactu, la normativa exige cajas registradoras certificadas que generan tickets con código QR verificable.
+- **TicketBAI (País Vasco y Navarra):** Si operáis en estas provincias, vuestro software debe cumplir [TicketBAI para empresas del País Vasco](/blog/empresa-software-pais-vasco-bilbao-ticketbai) — que es funcionalmente equivalente a Verifactu pero gestionado de forma independiente.
+
+---
+
+## Qué cambia en la práctica para tu empresa
+
+### Qué debe hacer tu software ahora mismo
+
+Para cumplir con Verifactu, tu software de facturación debe ser capaz de:
+
+1. **Generar facturas en formato FacturaE** (XML estructurado, versión 3.2.2 o superior)
+2. **Crear un registro inmutable** de cada factura mediante encadenamiento de hashes (SHA-256)
+3. **Enviar los datos a la AEAT** mediante el sistema de comunicación que publicará la agencia tributaria
+4. **Mantener un log de auditoría** de todas las facturas emitidas sin posibilidad de modificación retroactiva
+5. **Mostrar código QR** en cada factura para verificación por parte del receptor
+
+Si vuestro software actual no hace ninguna de estas cosas — o si usáis Excel o Word para facturar — no podéis adaptarlo vosotros mismos: necesitáis un sistema nuevo o un módulo add-on.
+
+### Formato FacturaE y estándares técnicos obligatorios
+
+FacturaE es el formato de factura electrónica estándar en España, desarrollado por el Ministerio de Industria y la Agencia Tributaria. Es un XML con estructura definida que incluye todos los campos obligatorios de una factura más metadatos de trazabilidad.
+
+Los estándares técnicos que vuestro software debe cumplir están publicados en la web oficial de la AEAT (sede.agenciatributaria.gob.es). La buena noticia es que si contratáis un [sistema de gestión a medida con Verifactu integrado](/blog/cuanto-cuesta-sistema-gestion-medida-espana-2026) con un proveedor serio, ellos se encargan de toda esta capa técnica.
+
+### Sanciones por incumplimiento (hasta 10.000€)
+
+El artículo 201 de la Ley General Tributaria establece las sanciones por incumplimiento de obligaciones de facturación. Para el caso de Verifactu, las sanciones van desde:
+
+- **Infracción leve** (errores formales): 300€ - 3.000€
+- **Infracción grave** (no emisión, emisión incorrecta, software no homologado): 3.000€ - 10.000€
+- **Infracción muy grave** (ocultación deliberada): hasta el 150% de las cuotas defraudadas
+
+Además, las facturas emitidas sin cumplir los requisitos Verifactu pueden ser rechazadas por vuestros clientes y consideradas no deducibles fiscalmente.
+
+---
+
+## Software Verifactu homologado: cómo elegir
+
+### Características obligatorias del software
+
+Un software homologado para Verifactu debe cumplir los siguientes requisitos técnicos publicados por la AEAT:
+
+- Generación de huella digital encadenada (hash SHA-256 por factura)
+- Registro de alta de facturas en el sistema de la AEAT (en tiempo real o por lotes)
+- Inalterabilidad de los registros (no se pueden editar facturas ya enviadas)
+- Generación de código QR en cada factura
+- Disponibilidad de logs de auditoría completos
+
+Cualquier proveedor de software que afirme estar homologado debe poder mostraros la certificación oficial de la AEAT.
+
+### Software genérico (Sage, Holded, Contasimple) vs sistema a medida
+
+| Criterio | SaaS genérico | Sistema a medida |
+|---|---|---|
+| Coste mensual | 30€ - 120€/mes | 0€ (mantenimiento anual) |
+| Verifactu | Actualización automática del proveedor | Módulo integrado en el desarrollo |
+| Adaptación a tu negocio | Limitada (módulos estándar) | Total |
+| Integración con otros sistemas | APIs genéricas | Integración específica |
+| Propiedad de los datos | Del proveedor SaaS | Tuya al 100% |
+| Riesgo de cambio de precio | Alto (el SaaS puede subir precios) | Bajo |
+
+Para empresas con procesos estándar y menos de 10 empleados, un SaaS genérico como Holded o Sage puede ser suficiente — la actualización a Verifactu la gestiona el proveedor.
+
+Para empresas con procesos propios, múltiples módulos o sectores regulados (hostelería, construcción, sanidad), un sistema a medida con Verifactu integrado es más rentable a 3-5 años.
+
+### Cuánto cuesta adaptar o cambiar de sistema
+
+| Escenario | Coste orientativo | Plazo |
+|---|---|---|
+| Módulo Verifactu add-on a sistema existente | 800€ - 3.000€ | 3-8 semanas |
+| Sistema de facturación a medida con Verifactu | 4.000€ - 15.000€ | 6-12 semanas |
+| ERP a medida con Verifactu + AEAT completo | 12.000€ - 45.000€ | 3-5 meses |
+| SaaS homologado (Holded, Sage One) | 30€ - 120€/mes | Inmediato |
+
+El Kit Digital cubre hasta 2.000€ en la categoría "Factura electrónica" para empresas de 3-9 empleados, y hasta 1.000€ para autónomos. Para empresas de 10-49 empleados, la categoría "Gestión de procesos" puede cubrir hasta 6.000€ del sistema completo.
+
+Si os interesa saber [cómo evaluar el presupuesto de vuestro nuevo software](/blog/como-evaluar-presupuesto-software-espana-sin-costes-ocultos) antes de hablar con proveedores, tenemos una guía específica para eso.
+
+---
+
+## Caso práctico: PYME distribuidora de alimentación en Valencia
+
+### Situación inicial
+
+Una distribuidora de alimentación en Valencia con 15 empleados llevaba 12 años gestionando sus facturas con Word y Excel. El propietario había oído hablar de Verifactu pero no tenía claro si le afectaba ni cuándo. Facturación anual: 2,3 millones de euros. Resultado: obligación a partir de julio de 2027, pero con el plazo del software adelantado a octubre de 2026.
+
+### Solución implementada
+
+En lugar de adaptar el caos de plantillas Word (imposible de certificar), optaron por un sistema de gestión a medida que incluía:
+
+- Módulo de facturación con Verifactu integrado (FacturaE + envío AEAT)
+- Gestión de pedidos y albaranes
+- Control de stock básico
+- Dashboard de ventas por cliente y ruta
+
+### Inversión y plazo
+
+**Coste total: 6.500€** (IVA no incluido). Plazo de desarrollo e implantación: 8 semanas. El propietario solicitó además el Kit Digital — la categoría "Gestión de procesos" cubrió 3.000€, lo que dejó el coste neto real en 3.500€.
+
+El sistema lleva funcionando desde enero de 2026, con formación al equipo completada en 2 sesiones de 3 horas. Tiempo de adaptación del equipo: 3 semanas.
+
+---
+
+## Pasos concretos para cumplir antes del plazo
+
+Aquí tenéis un checklist de 7 pasos para no quedaros fuera del plazo:
+
+1. **Identificad vuestra fecha límite exacta** — ¿facturáis más de 8M€? Plazo: 1 enero 2026. ¿Menos? Plazo: 1 julio 2027, pero el software debe estar listo en octubre 2026.
+
+2. **Auditad vuestro software actual** — ¿Qué usáis ahora para facturar? ¿Tiene soporte activo? ¿El proveedor ya ha anunciado actualización a Verifactu?
+
+3. **Decidid si adaptáis o cambiáis** — Si el software tiene soporte y el proveedor actualiza, esperad la actualización. Si usáis Excel/Word o software sin soporte, cambiad ya.
+
+4. **Solicitad presupuestos a 3 proveedores** — Exigid que el presupuesto incluya: módulo Verifactu certificado, integración con AEAT, formación al equipo y soporte post-lanzamiento.
+
+5. **Evaluad el Kit Digital** — Consultad si vuestra empresa tiene saldo disponible en Kit Digital (acceso por acelerapyme.gob.es). Puede cubrir una parte significativa del coste.
+
+6. **Contratad con margen de al menos 3 meses** — El desarrollo tarda entre 3 y 8 semanas, más el periodo de prueba y formación. No lo dejéis para el último mes.
+
+7. **Probad el sistema con facturas reales antes del plazo** — Generad facturas de prueba, verificad que se envían correctamente a la AEAT y que el código QR es válido.
+
+¿Necesitáis ayuda con el paso 2 (auditoría de vuestro sistema actual)? Ofrecemos un [diagnóstico gratuito de vuestro sistema de facturación](/blog/diagnostico-gratuito-presupuesto-software-espana): revisamos qué tenéis y os decimos exactamente qué necesitáis.
+
+[Pedir diagnóstico gratuito — sin compromiso](/contacto)
+
+---
+
+## Errores más comunes al enfrentar Verifactu
+
+**Error 1: Esperar a que el proveedor "lo arregle solo"**
+Si vuestro software está desactualizado o sin soporte, el proveedor no va a actualizarlo. Es vuestra responsabilidad, no la suya.
+
+**Error 2: Pensar que con un SaaS barato se soluciona todo**
+Un SaaS de 30€/mes puede no cubrir vuestras necesidades específicas (múltiples almacenes, diferentes tipos de IVA, integración con vuestro ERP actual). Comprobad que el SaaS que elegís cubre vuestro caso concreto.
+
+**Error 3: No pedir la certificación de homologación**
+Un proveedor de software que dice ser "compatible con Verifactu" pero no puede mostraros la certificación oficial de la AEAT es una señal de alerta. Exigid el número de homologación.
+
+**Error 4: No incluir la formación en el presupuesto**
+Muchas empresas se centran en el desarrollo y olvidan la formación. Un sistema técnicamente perfecto que el equipo no sabe usar es inútil. La formación debe estar en el contrato.
+
+**Error 5: Confundir Verifactu con la factura electrónica B2G**
+La factura electrónica con la Administración Pública (B2G) lleva años siendo obligatoria a través de FACe. Verifactu es una capa diferente que afecta a las relaciones entre empresas (B2B) y de empresas con autónomos.
+
+---
+
+## Cuándo contratar vs resolver internamente
+
+**Resolvéis internamente si:**
+- Ya tenéis software de facturación con soporte activo cuyo proveedor ha confirmado la actualización a Verifactu
+- Tenéis equipo técnico interno capaz de integrar la API de la AEAT
+- Vuestro volumen de facturación es bajo (menos de 100 facturas/mes) y el SaaS genérico cubre vuestro caso
+
+**Contratad si:**
+- Usáis Excel, Word u otro sistema sin soporte para facturar
+- Vuestro sistema actual no tiene proveedor activo o el proveedor no ha confirmado la actualización
+- Necesitáis integrar Verifactu con otros módulos (stock, CRM, gestión de obras, etc.)
+- Estáis en sectores específicos: hostelería, construcción, farmacia, clínicas — donde la obligación técnica es más compleja
+
+Si también os interesa [automatizar los procesos de vuestra PYME](/blog/cuanto-cuesta-automatizar-procesos-pyme-espana) más allá de la facturación, Verifactu es un buen punto de partida para una digitalización más amplia.
+
+En SystemForge desarrollamos sistemas con Verifactu integrado para PYMEs españolas. El proceso empieza con una revisión gratuita de vuestra situación actual.
+
+[Escribirnos por email — os respondemos en menos de 24 horas](/contacto)
+
+---
+
+## Conclusión
+
+Verifactu no es opcional ni lejano. Las grandes empresas ya tienen el plazo encima (enero 2026) y las PYMEs y autónomos tienen hasta julio de 2027 — pero con el software debiendo estar listo varios meses antes. La única pregunta real es si preferís gestionarlo con tiempo o con prisas.
+
+Los que actúan ahora se benefician de poder elegir la solución correcta para su negocio, solicitar el Kit Digital, y formar al equipo sin urgencia. Los que esperan acaban pagando más por soluciones de emergencia que no siempre encajan.
+
+Si no sabéis exactamente qué necesitáis, el primer paso es la auditoría gratuita de vuestro sistema actual. En 24 horas os decimos qué tenéis, qué os falta y cuánto costaría resolverlo.
+
+[Solicitar auditoría gratuita de vuestro sistema de facturación](/contacto)
+
+---
+
+## Preguntas Frecuentes
+
+### ¿Cuándo exactamente tengo que tener la factura electrónica lista?
+
+Si tu empresa factura más de 8 millones de euros al año, el plazo es el 1 de enero de 2026. Si facturáis menos, tenéis hasta el 1 de julio de 2027. Pero el software debe estar certificado y operativo 9 meses antes — así que si sois PYME, deberíais empezar a buscar solución antes de octubre de 2026 como muy tarde.
+
+### ¿Mi software de facturación actual vale o tengo que cambiar?
+
+Depende. Si usáis Holded, Sage, Contasimple o similar con soporte activo, la actualización la gestiona el proveedor — comprobad que lo han confirmado por escrito. Si usáis Excel, Word, o un programa antiguo sin soporte activo, necesitáis cambiarlo. Si tenéis un sistema a medida, hay que adaptarlo con el módulo Verifactu.
+
+### ¿Qué pasa si no cumplo el plazo?
+
+Sanciones de hasta 10.000€ por infracción grave según el artículo 201 de la Ley General Tributaria. Además, las facturas emitidas sin cumplir los requisitos Verifactu pueden ser rechazadas por vuestros clientes y no ser deducibles fiscalmente para ellos.
+
+### ¿Verifactu es lo mismo que el SII?
+
+No. El SII ya existe y afecta a grandes empresas (más de 6M€ de facturación) — envían datos a Hacienda en 4 días. Verifactu es el nuevo sistema para todos: cada factura genera un registro inmutable que se reporta a la AEAT. Son sistemas compatibles pero con alcance diferente.
+
+### ¿Qué es TicketBAI y me afecta si estoy en el País Vasco?
+
+TicketBAI es el sistema equivalente a Verifactu gestionado por las Haciendas Forales de Álava, Bizkaia, Gipuzkoa y Navarra. Si operáis en estas provincias, vuestro software debe cumplir TicketBAI, que funciona de forma independiente al sistema nacional. Para empresas que operan en territorio foral y también en territorio común, necesitáis cumplir ambos.
+
+### ¿Cuánto tiempo tarda adaptar mi sistema?
+
+Un módulo Verifactu add-on para un sistema existente tarda entre 3 y 8 semanas. Un sistema nuevo completo con Verifactu integrado, entre 6 y 12 semanas. Un ERP complejo, entre 3 y 5 meses. Empezar ahora os da margen para probar, corregir errores y formar al equipo.
+
+### ¿Puedo usar el Kit Digital para sufragar el coste?
+
+Sí. La categoría "Factura electrónica" del Kit Digital cubre hasta 2.000€ para empresas de 3-9 empleados y hasta 1.000€ para autónomos. La categoría "Gestión de procesos" puede cubrir hasta 6.000€ para empresas de 10-49 empleados si el sistema incluye más módulos además de la facturación. Hay que solicitarlo a través de un Agente Digitalizador homologado en acelerapyme.gob.es.
+
+---
+
+*Artículo escrito por Pedro Corgnati, fundador de SystemForge y desarrollador full-stack con experiencia en sistemas de gestión a medida para PYMEs españolas. Última actualización normativa: abril 2026. Los plazos y sanciones se basan en la Ley 18/2022 y el reglamento borrador del AEAT — consultad la web oficial de la AEAT para confirmar cualquier cambio posterior a esta fecha.*
+
+*Links relacionados:*
+- [Software para asesoría y gestoría española: AEAT y Verifactu](/blog/software-asesoria-gestoria-espana-aeat-verifactu)
+- [Cuánto cuesta un sistema de gestión a medida en España 2026](/blog/cuanto-cuesta-sistema-gestion-medida-espana-2026)
+- [Software para constructora en España: gestión de obras y Verifactu](/blog/software-gestion-obras-constructora-espana)
+- [Nuestros servicios de sistemas personalizados](/servicios/sistemas-personalizados)
