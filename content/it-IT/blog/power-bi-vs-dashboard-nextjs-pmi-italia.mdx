@@ -1,0 +1,152 @@
+---
+title: "Power BI vs Dashboard Next.js Su Misura per PMI nel 2026"
+slug: "power-bi-vs-dashboard-nextjs-pmi-italia"
+date: "2026-04-23"
+description: "Power BI Pro €10/utente/mese. Dashboard Next.js su misura €12-40k. TCO 3 anni, UX, RLS, embed e alternative open-source per PMI italiane."
+excerpt: "Confronto tecnico Power BI vs dashboard Next.js su misura con TCO 3 anni, performance, sicurezza RLS e alternative Metabase/Superset per PMI italiane nel 2026."
+tags: ["power bi vs dashboard custom", "power bi vs nextjs", "bi pmi italia", "dashboard su misura", "alternativa power bi"]
+coverImage: "/images/blog/power-bi-vs-dashboard-nextjs-pmi-italia-2026.webp"
+author: "Pedro Corgnati"
+relatedService: "sistemi-personalizzati"
+locale: 'it-IT'
+published: true
+exclusive: false
+hreflang_pair: [{"locale": "pt-BR", "slug": "power-bi-vs-dashboard-customizado-nextjs-pme"}, {"locale": "en", "slug": "power-bi-vs-custom-nextjs-dashboard-2026"}, {"locale": "es-ES", "slug": "power-bi-vs-dashboard-nextjs-pyme-espana-2026"}]
+---
+
+# Power BI vs Dashboard Next.js Su Misura per PMI nel 2026
+
+Power BI Pro costa €10/utente/mese, Premium per utente €18,70/mese, Premium per capacity parte da €4.200/mese. Un dashboard Next.js su misura costa tra €12.000 e €40.000 una tantum piu €250-1.200/mese di infrastruttura. Su 3 anni con 10 utenti il conto fa: Power BI Pro €3.600 totali, custom €20-50k. Power BI vince per velocita di avvio, ecosistema Microsoft e modello semantico riusabile. Su misura vince per UX personalizzata, embedding nativo in prodotti propri, zero tassa per utente e quando lo stack dell'azienda e gia Next.js/Supabase.
+
+*A cura di Pedro Corgnati — fondatore di SystemForge, sviluppatore full-stack con oltre 8 anni di esperienza in sistemi su misura per PMI. Ho costruito dashboard BI su Next.js per aziende che avevano prima Power BI e mi occupo di decisioni TCO su BI da anni.*
+
+Il web italiano nel 2026 e pieno di contenuti marketing Microsoft che vendono Power BI senza un confronto onesto. Questo articolo mette il TCO a 3 anni sul tavolo, include Metabase e Superset come alternative reali e parla di embed — l'argomento che Microsoft preferisce omettere.
+
+## Quando Power BI e imbattibile
+
+Power BI e la scelta corretta in tre scenari molto concreti.
+
+**Aziende gia dentro Microsoft 365 E5.** Se hai M365 E5 Power BI e gia incluso per gli utenti con licenza (entro limiti di workspace e refresh). Usare altro significa lasciare soldi sul tavolo. A questo livello Power BI e "quasi gratis" — non serve giustificazione di TCO.
+
+**Reporting finanziario standard con modelli tabulari.** Per dashboard finanziari, controllo di gestione, KPI operativi — tutto quello che un controller riconosce immediatamente — Power BI con modello semantico ben disegnato e imbattibile. Tempo di setup di una settimana, refresh automatico, connettori nativi a SAP, Dynamics, SQL Server, Excel. Il controller ama Power BI perche la curva di apprendimento e accettabile.
+
+**Ecosistema Windows-heavy con IT interno formato su Microsoft.** Se il tuo IT e abituato a Power BI, Dataverse e Azure Data Factory, andare custom significa formare qualcuno o assumere esterno. Il TCO include anche il costo umano.
+
+## Quando il custom vince
+
+Tre scenari in cui il dashboard Next.js su misura e matematicamente la scelta corretta.
+
+**Embedding nativo in un prodotto SaaS proprio.** Se stai costruendo un prodotto SaaS e vuoi dashboard dentro la tua app, Power BI Embedded costa €5.000-7.000/mese di capacity A1 minima. Un dashboard Next.js embedded nel tuo frontend e codice tuo, gira sulla tua infrastruttura e non ha tetto di utenti. Per prodotti con centinaia di clienti finali la matematica diventa impossibile per Power BI Embedded.
+
+**UX specializzata per un dominio.** Power BI ha widget generici (tabelle, grafici, card). Un dashboard logistico che mostra mappa + timeline + stato ordini in un'unica vista interattiva con annotazioni geografiche non si disegna in Power BI — si disegna in Figma e si implementa in Next.js con Mapbox o Recharts. Quando l'UX e il prodotto, custom vince.
+
+**Integrazione profonda con Postgres/Supabase e RLS a livello di riga.** Se il tuo database e gia Postgres con Row Level Security, un dashboard Next.js che fa query usando il JWT dell'utente applica RLS naturalmente. Power BI RLS funziona ma e un modello parallelo — duplichi la logica di sicurezza su Power BI Dataset e su Postgres. Fonte singola di verita vale molto in contesti regolati.
+
+**Volume di utenti anonimi o semi-pubblici.** Se stai mostrando dashboard a clienti finali o al pubblico, Power BI Pro costa €10/utente/mese — con 200 utenti sono €24.000/anno di licenze. Custom non ha questa tassa.
+
+## TCO reale a 3 anni
+
+Tabella concreta con costi 2026 verificati.
+
+**Scenario A — 10 utenti interni, reporting finanziario semplice:**
+
+| Voce | Power BI Pro | Next.js Custom |
+|------|--------------|----------------|
+| Licenze (10 utenti x €10 x 36 mesi) | €3.600 | €0 |
+| Build | €0 | €18.000 |
+| Infrastruttura (Vercel + Supabase + Postgres) | €0 | €9.000 (€250/mese x 36) |
+| Manutenzione (3 anni) | €2.000 | €4.500 |
+| **Totale 3 anni** | **€5.600** | **€31.500** |
+
+A questa taglia Power BI vince nettamente. Custom costa 5-6x.
+
+**Scenario B — 50 utenti, dashboard con embed in prodotto SaaS:**
+
+| Voce | Power BI Embedded A1 | Next.js Custom |
+|------|---------------------|----------------|
+| Capacity (€4.200/mese x 36) | €151.200 | €0 |
+| Build | €0 | €35.000 |
+| Infrastruttura (Vercel Pro + Supabase Team) | €0 | €18.000 (€500/mese x 36) |
+| Manutenzione | €5.000 | €12.000 |
+| **Totale 3 anni** | **€156.200** | **€65.000** |
+
+A questa taglia custom vince di oltre €90.000. Power BI Embedded non e competitivo.
+
+**Scenario C — 200 utenti finali, dashboard white-label:**
+
+| Voce | Power BI Pro | Next.js Custom |
+|------|--------------|----------------|
+| Licenze (200 x €10 x 36) | €72.000 | €0 |
+| Build | €0 | €40.000 |
+| Infrastruttura | €0 | €25.000 |
+| Manutenzione | €8.000 | €15.000 |
+| **Totale 3 anni** | **€80.000** | **€80.000** |
+
+Break-even netto. La scelta dipende da UX e embed.
+
+## UX: modello semantico vs componenti propri
+
+Power BI vincola l'UX al catalogo di visuals e al theme engine. I visual custom esistono (Power BI Custom Visuals) ma scrivere uno in TypeScript + React e sempre piu complicato del custom puro in Next.js. Per dashboard standard va benissimo; per dashboard con flussi interattivi complessi (drag e drop, annotation layer, real-time collaboration) tocchi il tetto del framework.
+
+Next.js + Recharts/Tremor/Chart.js non ha limite architetturale. Ogni componente e React puro. Il costo e che devi disegnare e mantenere componenti tuoi. Per tre-quattro dashboard simili conviene il design system interno; per una decina conviene Power BI.
+
+## Performance: DirectQuery vs Edge + Postgres
+
+Power BI ha due modalita principali: Import (dati in-memory, veloce, refresh schedulato) e DirectQuery (query live al database, piu lento ma sempre aggiornato). Import e la scelta di default e performa benissimo su dataset sotto i 10 GB compressi. Oltre serve Premium.
+
+Next.js + Postgres su Supabase o Neon con Edge Functions ha latenza P95 sotto i 200ms per query indicizzate su tabelle fino a ~100M di righe se il modello e ragionato. Con query materializzate e cache Redis si scende a 50ms. Per real-time (aggiornamenti ogni 10s) Next.js batte Power BI senza gara.
+
+## Sicurezza: RLS Power BI vs RLS Postgres
+
+Power BI RLS si configura a livello di dataset con DAX. Funziona per report standard. Problema: duplichi la logica di sicurezza — Postgres ha una regola, Power BI ne ha un'altra, drift silenzioso e un incident aspetti accadere.
+
+Postgres RLS su Supabase con JWT claim dell'utente applica security a livello DB. Il dashboard Next.js fa query con Supabase client che passa il JWT — la sicurezza e nel database, non nel frontend. Fonte singola di verita. In contesti regolati (sanita, finanza, HR) questo vale molto piu del prezzo di licenza.
+
+## Embed in prodotti propri
+
+Power BI Embedded richiede capacity A1 minima da €4.200/mese. Ogni report embedded consuma capacity. Scalare utenti finali richiede capacity piu alta. Per un SaaS con 50 clienti e 10 dashboard ciascuno sei gia fuori budget.
+
+Next.js dashboard embedded come iframe o componente nativo nel tuo frontend e codice tuo. Scaling lineare con Vercel/Cloudflare, nessun limite di utenti, personalizzazione totale. E la ragione piu forte per scegliere custom.
+
+## Metabase e Superset come alternative reali
+
+**Metabase** e open-source con piano cloud da €85/mese per 5 utenti, €85 + €15/utente extra. Self-hosted su Docker gratis. UX piu amichevole di Superset, buono per PMI che vogliono BI senza licenze Microsoft ma non vogliono custom. Con Postgres Supabase si integra in 30 minuti.
+
+**Superset** e open-source Apache, piu tecnico. Potente per dashboard complessi, richiede team DevOps per gestirlo in produzione. Scelta valida per PMI con IT interno forte.
+
+**Grafana** e primariamente per metriche operative (infra, app performance) non per BI business. Non e alternativa a Power BI per controllo di gestione.
+
+La mia regola: se Power BI costa troppo ma custom e troppo, Metabase risolve il 70% dei casi PMI.
+
+## Checklist di decisione
+
+Rispondi SI o NO alle seguenti:
+
+1. Siete gia su Microsoft 365 E5? → SI: parti con Power BI, probabilmente e gratis
+2. Gli utenti del dashboard sono >50 con prezzo per utente? → SI: valuta custom o Metabase
+3. Volete embed nel vostro prodotto SaaS per clienti finali? → SI: custom e l'unica scelta sana
+4. La UX ha requisiti specializzati (mappa+timeline+annotation)? → SI: custom
+5. Il database e gia Postgres con RLS configurato? → SI: custom si integra meglio
+6. Il team IT conosce solo ambiente Microsoft? → SI: resta su Power BI
+7. Budget build disponibile <€15.000? → SI: Power BI o Metabase, custom non sta nel budget
+
+## FAQ
+
+**Quanti utenti giustificano la migrazione da Power BI a custom?**
+Oltre 50 utenti con prezzo per utente, considera custom per il solo risparmio di licenze. Se stai embed in prodotto SaaS, la soglia scende a 20-30 utenti finali. Sotto i 10 utenti interni custom quasi sempre non si giustifica.
+
+**Power BI Embedded batte un dashboard proprio?**
+In costo no — Embedded parte da €4.200/mese di capacity. In funzionalita standard si. Se ti serve solo mostrare report Power BI dentro un'app senza customizzare nulla, Embedded e piu veloce da implementare; se devi controllare UX e scalare a molti utenti, custom vince.
+
+**Metabase e Superset sono alternative vere in PMI?**
+Metabase si, facilmente. Superset solo se hai IT forte. Entrambi eliminano la tassa per utente e danno controllo completo sull'infrastruttura.
+
+**Se l'azienda usa Microsoft 365 E5, e tutto gia incluso?**
+Power BI Pro per utente e incluso in E5, con alcuni limiti di workspace e refresh. Per dashboard condivisi a utenti fuori dell'organizzazione servono licenze addizionali o Premium per capacity. Verifica il tier esatto con il CSM Microsoft.
+
+**Posso iniziare con Power BI e migrare poi a custom?**
+Si, e il percorso che raccomando. Inizia con Power BI per validare quali dashboard servono davvero. Dopo 6-12 mesi sai quali usano di piu, quali UX limitanti hai e se vale il custom. Migrare significa ricostruire i dashboard piu usati su Next.js — non tutto.
+
+---
+
+Se stai valutando Power BI vs dashboard su misura e vuoi TCO dettagliato prima di firmare qualsiasi licenza, [scrivimi su WhatsApp](https://wa.me/5500000000000) — senza impegno, senza sales pitch. Oppure scopri il servizio di [sistemi personalizzati](/servizi/sistemi-personalizzati). Per confronto di costo analogo su gestionali, vedi [quanto costa un gestionale per piccola impresa](/blog/gestionale-piccola-impresa-quanto-costa-2026).
