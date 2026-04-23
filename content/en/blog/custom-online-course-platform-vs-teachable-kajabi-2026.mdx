@@ -1,0 +1,131 @@
+---
+title: "Custom Course Platform vs Teachable, Kajabi in 2026"
+slug: "custom-online-course-platform-vs-teachable-kajabi-2026"
+date: "2026-04-23"
+description: "Custom LMS $25-90k vs Teachable, Kajabi, Thinkific, Docebo. AI tutor, auto-grader, white-label B2B, sales tax reality. 2026 buyer guide."
+excerpt: "A 2026 side-by-side comparison of Teachable, Thinkific, Kajabi, Docebo and a custom online course platform with real pricing, AI features, white-label B2B and US sales tax."
+tags: ["custom lms vs teachable", "kajabi vs custom platform", "thinkific alternatives", "white-label lms", "corporate training software"]
+coverImage: "/images/blog/custom-online-course-platform-vs-teachable-kajabi-2026.jpg"
+author: "Pedro Corgnati"
+relatedService: "custom-systems"
+locale: 'en'
+published: true
+exclusive: false
+hreflang_pair: [{"locale": "pt-BR", "slug": "plataforma-propria-cursos-online-whitelabel-ia-2026"}, {"locale": "it-IT", "slug": "piattaforma-corsi-online-su-misura-2026"}, {"locale": "es-ES", "slug": "plataforma-propia-cursos-online-vs-hotmart-2026"}]
+---
+
+# Custom Online Course Platform vs Teachable and Kajabi in 2026
+
+A custom online course platform in 2026 costs between $25,000 and $90,000 to build. Teachable starts at $29 per month, Thinkific at $36, Kajabi at $149, and Docebo at roughly $25 per user per month with enterprise minimums. A custom build wins when monthly course revenue exceeds around $4,000 per tenant (platform fees plus transaction percentages compound fast), when you white-label the product for B2B resale, or when you embed AI features — auto-grader, quiz generator, AI tutor, automatic transcription — that off-the-shelf platforms still do not handle seriously.
+
+*By Pedro Corgnati — founder of SystemForge, full-stack developer with over 8 years building custom software for SMBs. I've shipped white-label LMS platforms with AI for corporate training consultancies and track the B2B EdTech market closely.*
+
+This article is the side-by-side that the market still lacks in 2026: real pricing, AI depth, white-label B2B reality, and the US sales tax complications that marketing-led comparisons tend to skip.
+
+## What Teachable, Thinkific, Kajabi and Docebo actually cost
+
+**Teachable** sits in the middle of the creator market. Pro plan at $59/month with 5% transaction fees, custom domain, certificates, basic quizzes, drip content. The interface is simple and the onboarding is fast. The catch is sales tax — Teachable can collect through Stripe but does not act as Merchant of Record (MoR) for US state nexus calculations. You handle Wayfair compliance yourself.
+
+**Thinkific** offers feature parity with Teachable plus better theme customization. Business plan at $149/month removes transaction fees and adds live groups, community and API access. Same sales tax reality as Teachable.
+
+**Kajabi** is the right pick when you sell a funnel instead of a course: landing pages, email sequences, pipelines, checkout, and course delivery in one product. More expensive ($149-399/month) but eliminates the Mailchimp + Stripe + landing builder stack. Vendor lock-in is real — migrating out after 2-3 years is painful.
+
+**Docebo** plays a different game. It's enterprise LMS, starting at around $25/user/month with annual minimums that translate to $25,000+. SAML SSO, SCORM, xAPI, advanced reporting, multi-tenant white-label. For a corporate academy with 500+ learners and structured training requirements it's serious software. For a solo creator or small consultancy it's overkill.
+
+## When custom genuinely wins
+
+This is not a pricing decision. It's a business model decision. Three scenarios tilt the math toward building your own.
+
+### White-label B2B resale
+
+If your model is licensing the platform to other companies with their own branding — training consultancy reselling to its enterprise clients, franchise network wanting centralized onboarding, corporate academy serving multiple business units — off-the-shelf products punish you on white-label. Teachable offers it only in the Enterprise plan with steep annual fees and tenant caps. Thinkific Plus likewise. Docebo handles multi-tenancy well but at enterprise pricing.
+
+A custom platform architected for multi-tenancy (one codebase, many clients, each with their own subdomain, SSL, branding and data isolation) keeps 70-85% margin on licensing. At $3,000-15,000/month per client tenant and 5-15 active tenants, payback on a $80,000 build lands in 12-18 months. After that the product is yours.
+
+### Enterprise clients demanding SSO and HRIS integration
+
+Selling to companies above 500 employees surfaces predictable requirements: SAML or OIDC SSO against Okta or Azure AD, group sync from Workday or BambooHR, completion webhooks to the HRIS, SCORM 1.2/2004 and xAPI (Tin Can) for LMS content imports, detailed audit logs for compliance training. Teachable Enterprise handles SSO but not deep bidirectional HRIS integration.
+
+Custom implements exactly what the enterprise buyer asks for — which becomes a sales argument to justify a higher monthly license.
+
+### AI features worth paying for
+
+This is where 2026 draws a real line. Teachable and Thinkific have no native AI that materially changes the learner experience. Kajabi has creator-side helpers (generate course description, outline, email subject) but nothing for the student. Docebo has AI features locked behind enterprise pricing.
+
+A custom build integrates Claude, GPT-4.1 or Gemini directly to deliver:
+
+- **Auto-grader for written responses**: an LLM scores free-text answers against a rubric, returns a score and feedback. Confidence-based routing: high confidence applies the grade automatically, medium queues for human review, low requires mandatory review. Cost per response at 2026 pricing is $0.02-0.08.
+- **Automatic quiz generation**: take the lesson transcript, extract topics, generate 5-10 multiple-choice questions with per-option feedback. The best implementations use semantic chunking plus a second-pass quality filter.
+- **AI tutor with RAG**: in-course chat that answers only from your course material, citing the specific lesson where the answer lives. Requires a vector database (pgvector on Postgres, Pinecone or Qdrant) at $150-500/month. API cost $0.01-0.05 per question.
+- **Video transcription and search**: Whisper runs at $0.006 per minute. A 200-hour catalog transcribes for $72. Students search "SLA in SaaS contract" and jump to minute 23 of lesson 4.
+- **Adaptive learning paths**: collaborative filtering plus learner embeddings suggest the next lesson or next track.
+
+These features shift perceived value from "website with videos" into a proper product and justify a higher B2B license. If you're weighing the broader build-versus-buy question, the [micro-SaaS build guide](/blog/how-to-build-a-micro-saas-2026-complete-guide) covers the commercial math from a different angle, and [HubSpot versus custom CRM](/blog/hubspot-vs-custom-crm-which-to-choose-2026) applies the same logic to the CRM layer.
+
+## Real 2026 pricing tiers for custom
+
+Three concrete scope tiers I see in practice:
+
+| Scope | Investment | Timeline | What it ships |
+|-------|-----------|----------|---------------|
+| MVP white-label | $25,000-45,000 | 3-4 months | Multi-tenant base + video + quizzes + certificates + 1 AI feature (auto-grader or tutor) |
+| Full + AI | $50,000-80,000 | 5-7 months | MVP scope + AI tutor + auto-grader + auto-quiz + transcription + gamification |
+| Enterprise white-label | $80,000-150,000 | 7-10 months | Full scope + SAML SSO + HRIS integration + SCORM/xAPI + advanced reporting + 99.9% SLA |
+
+These numbers include design, development, QA and deploy. They don't include ongoing infrastructure — Vercel, Mux, Clerk, LLM APIs and database costs land between $1,500-8,000/month depending on learner volume. Plan 10-20% of the initial build per year for maintenance, model updates (LLMs shift every 6 months) and minor features.
+
+## Break-even math that actually holds
+
+**Scenario 1 — Solo creator selling a course.** Teachable Pro at $59/month plus 5% on sales. With $4,000/month of course revenue you pay $259/month ($59 base + $200 in transaction fees), or $3,108/year. A $40,000 custom build pays back in roughly 13 years — effectively never. Stick with off-the-shelf.
+
+**Scenario 2 — Training consultancy licensing to 5 B2B clients.** Five clients at $5,000/month each = $25,000/month in revenue. Teachable Enterprise doesn't realistically serve 5 branded tenants without a custom annual contract at similar cost. A custom build at $80,000 pays back in 3-4 months of incremental revenue at 70% margin on licensing. And the product is yours, not rented.
+
+**Scenario 3 — Corporation training 2,000 internal employees.** Docebo at $25/user/month = $50,000/month = $600,000/year. A custom build at $100,000 plus $30,000/year maintenance plus $20,000/year infrastructure = $150,000 first year, $50,000/year steady state. Break-even in 3 months, annual savings of ~$450,000.
+
+## The stack I ship to production
+
+- **Frontend**: Next.js 15 App Router on Vercel. Hybrid rendering (SSG for public catalog, SSR for learner dashboard, React Server Components for admin panels).
+- **Backend**: Next.js Route Handlers for synchronous work, Inngest or BullMQ for AI jobs (transcription, auto-grading, quiz generation).
+- **Database**: PostgreSQL (Supabase or Neon) with pgvector for RAG.
+- **Video**: Mux for ingest, adaptive transcoding and player. Roughly $0.006 per minute encoded plus storage and bandwidth, typically $0.02-0.04 per hour watched.
+- **Multi-tenant auth**: Clerk with organizations, or WorkOS for enterprise SAML/OIDC.
+- **AI**: OpenAI (Whisper, GPT-4.1) and Anthropic (Claude Sonnet) via API with provider fallback for reliability.
+- **Storage**: S3 or Cloudflare R2 for uploads, PDFs, generated certificates.
+- **Payments**: Stripe with per-tenant subscriptions for B2B licensing, plus one-time for direct course sales.
+
+Team: 1 tech lead + 2 developers + 1 UX designer. Smaller teams can ship but not in 6 months.
+
+## US sales tax reality
+
+Teachable and Thinkific don't act as Merchant of Record. You handle sales tax compliance yourself — which after the Wayfair decision means tracking economic nexus in every US state (thresholds vary, typically $100,000 revenue or 200 transactions per state per year). At low volumes this is manageable. Past 5-6 states it gets painful.
+
+Two solutions in a custom build:
+
+1. **Stripe with Stripe Tax** ($1.00 per transaction). Automates US state sales tax calculation and collection. You still file returns in each state where you have nexus.
+2. **LemonSqueezy as MoR**. Takes 5% + $0.50 per transaction but acts as Merchant of Record — it handles sales tax everywhere. For VAT OSS on EU sales, LemonSqueezy is also the simpler path.
+
+If you sell to US + international, LemonSqueezy is the low-ops choice. If you're volume-heavy on US only, Stripe Tax is cheaper at scale.
+
+## FAQ
+
+**At what monthly revenue does custom beat Kajabi?**
+For a solo creator: never, realistically. Kajabi's value is integrated marketing, not just the course. For a consultancy reselling to 3+ enterprise clients at $5,000+/month each, custom pays back within a year.
+
+**Can I use Stripe directly or is an MoR better?**
+Stripe direct is cheaper per transaction (~2.9% + $0.30) but you own tax compliance. LemonSqueezy as MoR is 5% + $0.50 and takes tax off your desk. US-only sellers with good finance ops save with Stripe; international or solo operators win with LemonSqueezy.
+
+**How much does HLS video CDN cost per 1,000 learners?**
+With Mux: an average learner watches 8-12 hours/month. 1,000 learners = 10,000 hours/month at ~$0.03/hour = $300/month. Add $0.006/minute for new encoding (negligible after initial catalog upload). Self-hosting via Bunny.net Stream is cheaper ($0.005-0.015/hour) but more operational overhead.
+
+**AI tutor: OpenAI, Anthropic, or open-source — what's best value?**
+Claude Sonnet has the best cost-to-quality ratio for RAG-style tutoring in 2026. GPT-4.1 is marginally better in English, worse in many other languages. For scale, route easy questions to GPT-4.1-mini or Claude Haiku and escalate to larger models only on complex ones. Self-hosted open-source (Llama 3.3, Qwen 2.5) is viable for high-volume and gives you zero API cost, but you trade that for GPU ops.
+
+**Is Docebo worth the enterprise price?**
+Only if you have 500+ learners, serious SCORM/xAPI compliance requirements and integration with a full HR tech stack. For anything smaller, Docebo is overkill and you'll pay for features you never use.
+
+**How do I handle sales tax for US + international learners?**
+Simplest: LemonSqueezy as Merchant of Record. They handle US states, EU VAT OSS, UK VAT, Canadian GST/HST. You pay the 5% fee. For volume sellers, Stripe Tax + manual OSS registration is cheaper but requires ongoing compliance work.
+
+---
+
+If you're deciding between off-the-shelf and a custom LMS and want a second opinion on scope and break-even before you sign with anyone, [message me on WhatsApp](https://wa.me/5500000000000) — no pitch, no commitment. Or see the [custom systems service](/services/custom-systems).

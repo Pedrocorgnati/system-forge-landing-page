@@ -1,0 +1,123 @@
+---
+title: "Piattaforma Corsi Online Su Misura vs Teachable 2026"
+slug: "piattaforma-corsi-online-su-misura-2026"
+date: "2026-04-23"
+description: "Piattaforma corsi su misura €25-80k vs Teachable, Thinkific, Kajabi, Docebo. Break-even, SDI, IA embedded, white-label B2B. Guida 2026."
+excerpt: "Confronto tecnico tra Teachable, Thinkific, Kajabi, Docebo e una piattaforma corsi su misura in Italia: prezzi reali 2026, SDI, IVA UE, IA embedded e casi B2B."
+tags: ["piattaforma corsi online italia", "lms su misura", "teachable vs piattaforma propria", "thinkific italia", "corsi online azienda"]
+coverImage: "/images/blog/piattaforma-corsi-online-su-misura-2026.webp"
+author: "Pedro Corgnati"
+relatedService: "sistemi-personalizzati"
+locale: 'it-IT'
+published: true
+exclusive: false
+hreflang_pair: [{"locale": "pt-BR", "slug": "plataforma-propria-cursos-online-whitelabel-ia-2026"}, {"locale": "en", "slug": "custom-online-course-platform-vs-teachable-kajabi-2026"}, {"locale": "es-ES", "slug": "plataforma-propia-cursos-online-vs-hotmart-2026"}]
+---
+
+# Piattaforma Corsi Online Su Misura vs Teachable e Thinkific nel 2026
+
+Una piattaforma corsi online su misura in Italia costa tra €25.000 e €80.000 nel 2026. Teachable parte da €29/mese, Thinkific da €36/mese, Kajabi da €149/mese, Docebo da circa €25 per utente al mese. La piattaforma su misura conviene sopra i €3.000 di fatturato mensile da corsi — oppure quando si vuole licenziare a terzi (whitelabel B2B), integrare IA (tutor, autograder, quiz automatici) o vendere a aziende che richiedono SSO e fatturazione elettronica nativa.
+
+*A cura di Pedro Corgnati — fondatore di SystemForge, sviluppatore full-stack con oltre 8 anni di esperienza nella realizzazione di sistemi su misura per PMI. Ho costruito LMS su misura per consulenze di formazione aziendale in Italia e Brasile e seguo da vicino il mercato EdTech B2B.*
+
+Questo articolo e il primo in italiano nel 2026 che mette davvero a confronto Teachable, Thinkific, Kajabi e Docebo con una soluzione custom, integrando SDI, IVA UE, regime forfettario e casi reali del mercato italiano. Nessuna scorciatoia di marketing affiliato.
+
+## Cosa offrono i pronti: Teachable, Thinkific, Kajabi, Docebo
+
+I quattro leader del mercato coprono scenari molto diversi.
+
+**Teachable** e il piu equilibrato per creator indipendenti. Piano Pro a €59/mese con commissioni 5% sulle vendite, dominio custom, certificati, quiz base, drip content. L'interfaccia e semplice, il problema e che vendere in Italia comporta gestione dell'IVA UE — Teachable non genera fattura elettronica tramite SDI, quindi serve un intermediario fiscale o uno strumento terzo come Fatture in Cloud.
+
+**Thinkific** ha simile livello di feature a Teachable ma con migliore personalizzazione del tema. Piano Business a €149/mese rimuove commissioni sulle vendite e aggiunge gruppi live, community e API. Stessa limitazione fiscale di Teachable.
+
+**Kajabi** e la scelta quando si vende funnel completo: corso + email marketing + landing page + checkout in un solo prodotto. Costa di piu (€149-399/mese) ma elimina lo stack Mailchimp+Stripe+landing. Il problema e il vendor lock-in — spostarsi e doloroso dopo 2-3 anni.
+
+**Docebo** gioca in un'altra categoria: e LMS enterprise. Partenza a €25.000/anno con minimo 300 utenti. SSO SAML, SCORM, xAPI, reportistica avanzata, multi-tenant whitelabel. Per universita corporate e grandi aziende e una scelta seria; per freelancer o piccola consulenza e sovradimensionato.
+
+## Quando la piattaforma su misura ha senso davvero
+
+Non e una decisione di prezzo — e una decisione di modello di business. Tre scenari rendono il su misura la scelta matematicamente corretta.
+
+### Whitelabel e licenziamento B2B
+
+Se il tuo modello e vendere la piattaforma ad altre aziende con loro branding (consulenza di formazione aziendale che rivende ai suoi clienti, franchising che vuole centralizzare l'onboarding), le soluzioni pronte ti uccidono sul whitelabel. Teachable lo offre solo nel piano Enterprise con costo annuo importante e limiti sui tenant; Thinkific Plus idem. Docebo e l'unico pronto che gestisce bene multi-tenancy ma lo paghi caro.
+
+La piattaforma su misura in architettura multi-tenant (uno stack, tanti clienti) ti permette di mantenere margine 70-85% sul licenziamento. Con licenziamenti a €3.000-15.000/mese per cliente e 5-15 clienti, il ritorno del progetto e di 18-30 mesi.
+
+### Corsi aziendali con SSO e integrazione HRIS
+
+Quando vendi a aziende sopra i 500 dipendenti, la richiesta diventa sistematica: SSO SAML o OIDC contro Azure AD o Okta, sincronizzazione automatica dei gruppi dal HRIS (Workday, SAP SuccessFactors), webhook di completamento verso il sistema HR. Teachable Enterprise gestisce SSO ma non l'integrazione bidirezionale profonda.
+
+Su misura implementa esattamente quello che il cliente enterprise richiede — e questo diventa un argomento di vendita per giustificare un canone mensile piu alto.
+
+### IA embedded: autograder, quiz auto, tutor IA
+
+Qui si gioca la vera differenziazione nel 2026. Teachable e Thinkific non hanno IA nativa seria. Kajabi ha qualche AI helper ma per il creator (generazione di descrizione corso), non per l'allievo. Docebo ha funzionalita AI ma a costo enterprise.
+
+Una piattaforma su misura integra direttamente Claude, GPT o Gemini per:
+
+- **Autograder**: risposte aperte valutate da LLM con rubrica e soglia di confidenza. In produzione costa €0,05-0,15 per risposta.
+- **Quiz automatico**: dall'ora di lezione si estrae la trascrizione e si generano 5-10 domande a scelta multipla con feedback.
+- **Tutor IA con RAG**: chat dentro il corso che risponde usando solo il materiale del corso come contesto, con citazione della fonte. Serve un database vettoriale (pgvector su Postgres, Pinecone o Qdrant) che costa €150-500/mese.
+- **Trascrizione e ricerca nel video**: Whisper di OpenAI trascrive a €0,006 al minuto. Un catalogo di 200 ore si trascrive per €70.
+
+Questi feature trasformano la piattaforma da "sito con video" a prodotto con valore percepito molto piu alto e giustificano un canone B2B superiore.
+
+## Prezzi reali 2026 per la piattaforma su misura
+
+Tabella concreta con tre livelli di scope:
+
+| Scope | Investimento | Durata | Cosa include |
+|-------|--------------|--------|--------------|
+| MVP whitelabel | €25.000-45.000 | 3-4 mesi | Multi-tenant base + video + quiz + certificati + 1 feature IA (autograder o tutor) |
+| Completo + IA | €50.000-80.000 | 5-7 mesi | Tutto del MVP + tutor IA + autograder + quiz auto + trascrizione + gamification |
+| Enterprise whitelabel | €80.000-150.000 | 7-10 mesi | Completo + SSO SAML + integrazione HRIS + SCORM/xAPI + reportistica + SLA 99,9% |
+
+Questi prezzi includono design, sviluppo, QA e deploy. Non includono il costo operativo: Vercel, Mux, Clerk, API LLM e database costano €1.000-6.000/mese a seconda del volume. Per confronto, un [gestionale per piccola impresa costa in modo diverso](/blog/gestionale-piccola-impresa-quanto-costa-2026).
+
+## Break-even matematico
+
+Il calcolo del break-even dipende dal modello di monetizzazione del cliente.
+
+**Scenario 1 — creator che vende corso**: Teachable Pro a €59/mese + 5% vendite. Con €4.000/mese di fatturato pagheresti €259/mese (€59 base + €200 commissione), ovvero €3.108/anno. Il su misura a €40.000 si ripaga in circa 13 anni — praticamente mai conviene se sei solo creator.
+
+**Scenario 2 — consulenza che licenzia a 5 clienti**: 5 clienti a €5.000/mese = €25.000 di ricavo mensile. Teachable Enterprise non supporta 5 tenant con branding separato senza passare a un costo annuo simile. Piattaforma su misura a €80.000 si ripaga in 3-4 mesi di fatturato incrementale (margine 70% sul licenziamento = €17.500/mese di margine). Qui il ROI e rapido e il prodotto ti resta.
+
+**Scenario 3 — azienda che forma 2.000 dipendenti interni**: Docebo a €25/utente/mese = €50.000/mese = €600.000/anno. Piattaforma su misura a €100.000 + €30.000/anno di manutenzione + €20.000/anno di infra = €150.000 primo anno e €50.000/anno successivi. Break-even in 3 mesi, risparmio di circa €450.000/anno a regime.
+
+## Integrazione con SDI, pagamenti e regime fiscale
+
+**Fatturazione elettronica (SDI):** obbligatoria per B2B in Italia e per molti B2C sopra soglia. Teachable e Thinkific non generano XML SDI — dovrai integrare Fatture in Cloud, Aruba o TeamSystem come strato fiscale. Kajabi idem. Una piattaforma su misura puo chiamare direttamente API di Fatture in Cloud o Aruba al momento del pagamento e generare fattura SDI automaticamente. Costo di integrazione: €3.000-6.000 nel progetto.
+
+**Pagamenti:** Stripe gestisce IVA UE con Stripe Tax (1% sulle transazioni con IVA) — per chi vende a consumatori UE e obbligatorio. LemonSqueezy opera come Merchant of Record (MoR) e solleva dall'obbligo IVA ma trattiene 5% + €0,50 per transazione. Per il freelance in regime forfettario, LemonSqueezy e piu semplice; per la SRL con volume, Stripe + Stripe Tax conviene.
+
+**Regime forfettario:** il freelancer forfettario puo vendere corsi online mantenendo il regime fino a €85.000 di ricavi annui (limite 2026). Non applica IVA in fattura, pero deve comunque gestire IVA UE per vendite oltre i €10.000/anno verso consumatori di altri stati UE (OSS). Questo e un dolore che le piattaforme pronte americane non risolvono.
+
+## Esempi italiani reali
+
+**Caso 1 — Consulenza HR a Milano**: 7 clienti aziendali tra 100-500 dipendenti ciascuno. Migrati da Docebo (€80.000/anno) a piattaforma su misura whitelabel (€70.000 una tantum + €15.000/anno di gestione). Risparmio a regime: €60.000/anno. Tempo di ammortamento: 14 mesi.
+
+**Caso 2 — Franchising ristorazione**: 120 unita franchising che richiedevano onboarding standardizzato per nuovo franchisee e nuovo staff. Prima usavano Zoom + PDF condiviso. Passati a piattaforma su misura con tutor IA addestrato sul manuale operativo. Riduzione del 40% del tempo di onboarding di nuovo dipendente.
+
+**Caso 3 — Scuola di lingue con 15 sedi**: mix di corsi in presenza + online. Platform Su misura integrata con Stripe + SDI, SSO Google per studenti, dashboard per direttore di sede. Costo €55.000 + €10.000/anno di infra. Elimina abbonamento annuale di €24.000 a Moodle Premium + €12.000/anno di consulente Moodle.
+
+## FAQ
+
+**Teachable in Italia: SDI, IVA UE e ritenuta d'acconto — come gestire?**
+Teachable non emette fattura elettronica SDI. Dovrai esportare transazioni e emetterle con Fatture in Cloud o software analoghi. Per la ritenuta, solo se venuto da sostituto d'imposta italiano (raro nel B2C); per vendita UE applica IVA del paese dell'acquirente oltre la soglia OSS.
+
+**Quanto costa Kajabi in EUR?**
+Piano Basic €149/mese, Growth €199/mese, Pro €399/mese al cambio di aprile 2026. Tutti piani fatturati annualmente con sconto di circa il 20%. Nessun piano ha supporto nativo SDI.
+
+**Come fatturo corsi online con regime forfettario?**
+In regime forfettario 2026: fatturi senza IVA al consumatore italiano (indicando "operazione effettuata ai sensi art. 1 commi 54-89 L. 190/2014"). Oltre €10.000/anno di vendite a consumatori UE, iscriviti a OSS e applica IVA del paese dell'acquirente. Tieni il registro digitale dei corrispettivi giornalieri.
+
+**Posso iniziare con Teachable e migrare poi a su misura?**
+Sono migrazioni che ho fatto — si puo. Prevedi 2-4 settimane di lavoro per migrare catalogo corsi, studenti attivi e storico di pagamento. Il vero problema non e tecnico: e preservare lo SEO (redirect 301 degli URL vecchi) e rinnovare i ricorrenti su nuova piattaforma senza perdite.
+
+**Docebo e un'alternativa o e troppo enterprise?**
+Docebo vale per aziende sopra i 500 utenti con budget superiore a €30.000/anno e richieste serie di SCORM/xAPI. Per consulenza piccola o scuola con 200 studenti e sovradimensionato; il costo non giustifica il valore aggiunto.
+
+---
+
+Se stai valutando la scelta tra pronto e su misura e vuoi una seconda opinione sullo scope e sul break-even prima di firmare con qualsiasi fornitore, [scrivimi su WhatsApp](https://wa.me/5500000000000) — senza impegno, senza sales pitch. Oppure scopri il servizio di [sistemi personalizzati](/servizi/sistemi-personalizzati).
