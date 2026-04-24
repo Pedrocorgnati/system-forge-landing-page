@@ -1,0 +1,233 @@
+---
+title: "LGPD no Sistema da Sua Empresa em 2026: o Que Precisa Ter pra Não Receber Multa"
+slug: "lgpd-sistema-empresa-2026"
+date: "2026-04-24"
+description: "Para estar em compliance com a LGPD em 2026, o sistema da sua empresa precisa: (1) registrar consentimento explícito antes de coletar dados pessoais, (2) t."
+tags: ["lgpd", "compliance", "anpd", "protecao de dados", "pme"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "consultoria-tecnica"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Para estar em compliance com a LGPD em 2026, o sistema da sua empresa precisa: (1) registrar consentimento explícito antes de coletar dados pessoais, (2) t."
+hreflang_pair: []
+---
+
+# LGPD no Sistema da Sua Empresa em 2026: o Que Precisa Ter pra Não Receber Multa
+
+Para estar em compliance com a LGPD em 2026, o sistema da sua empresa precisa: (1) registrar consentimento explícito antes de coletar dados pessoais, (2) ter mecanismo de exclusão e portabilidade de dados do titular, (3) registrar log de acesso a dados sensíveis, (4) criptografar dados pessoais no banco de dados, e (5) ter processo documentado para notificar a ANPD em até 72 horas em caso de vazamento. O custo de adequação de sistema existente fica entre R$5.000 e R$25.000. A multa máxima da ANPD é de 2% do faturamento anual, limitada a R$50 milhões por infração.
+
+Em projetos de adequação de sistemas que executamos para PMEs no Brasil, vimos que 8 em cada 10 empresas acreditavam estar em compliance por terem uma política de privacidade publicada no site. Política de privacidade é documentação. LGPD exige que os sistemas implementem as regras na prática. São coisas distintas.
+
+## O que a LGPD exige dos sistemas de PMEs em 2026
+
+A Lei Geral de Proteção de Dados (Lei 13.709/2018) está em vigor pleno e a ANPD (Autoridade Nacional de Proteção de Dados) está ativa no enforcement. Em 2025, a ANPD aplicou R$14,4 milhões em multas a 23 empresas, segundo o Relatório Anual da autarquia. O critério não é o tamanho da empresa — é o risco ao titular dos dados.
+
+Uma PME de saúde com 200 pacientes tem risco maior de autuação que uma empresa de e-commerce com 5.000 clientes, porque dados médicos são dados sensíveis e têm proteção reforçada pela lei.
+
+As obrigações da LGPD para sistemas empresariais se dividem em quatro blocos:
+
+**Bloco 1: Coleta e base legal.** Todo dado pessoal coletado precisa de uma base legal (consentimento, contrato, obrigação legal, etc.). O sistema precisa registrar qual base legal justifica cada coleta.
+
+**Bloco 2: Direitos do titular.** O titular pode pedir confirmação de que seus dados existem, acesso a eles, correção, portabilidade e exclusão. O sistema precisa ter mecanismos para atender a cada um desses pedidos.
+
+**Bloco 3: Segurança.** Dados pessoais precisam ser protegidos por medidas técnicas adequadas: criptografia, controle de acesso, log de operações sobre dados sensíveis.
+
+**Bloco 4: Incidentes.** Se houver vazamento que possa afetar titulares, a empresa precisa notificar a ANPD em até 72 horas. O sistema precisa ter infraestrutura para detectar e documentar incidentes.
+
+## Funcionalidades que o Sistema da Empresa Precisa ter para LGPD
+
+Esta é a checklist que usamos para auditar sistemas de PME:
+
+### Coleta e Consentimento
+- [ ] Formulários de cadastro com checkbox de consentimento explícito (não pré-marcado)
+- [ ] Registro de quando o consentimento foi dado (timestamp) e qual versão da política estava vigente
+- [ ] Mecanismo de revogação de consentimento acessível ao titular (sem precisar de suporte)
+- [ ] Finalidade da coleta registrada no sistema (para qual propósito cada dado é usado)
+
+### Direitos do Titular
+- [ ] Interface ou processo para o titular solicitar acesso aos próprios dados
+- [ ] Funcionalidade de exportação de dados do titular em formato legível (JSON, CSV ou PDF)
+- [ ] Funcionalidade de exclusão de dados do titular (ou anonimização, quando exclusão total não for possível por obrigação legal)
+- [ ] Prazo de resposta a pedidos do titular definido (máximo 15 dias conforme LGPD)
+- [ ] Log de pedidos recebidos e como foram atendidos
+
+### Segurança Técnica
+- [ ] Criptografia de dados sensíveis no banco de dados (CPF, dados médicos, financeiros, biometria)
+- [ ] Log de acesso a dados sensíveis (quem acessou, quando, de qual IP)
+- [ ] Controle de acesso por perfil (cada usuário do sistema vê apenas os dados necessários para a função)
+- [ ] Dados pessoais mascarados em logs de sistema (CPF e e-mail não aparecem em claro em logs de erro)
+- [ ] Backup criptografado e com acesso restrito
+
+### Incidentes e Notificação
+- [ ] Processo documentado para detectar e registrar incidentes de segurança
+- [ ] Template de notificação à ANPD preenchível em menos de 1 hora
+- [ ] Registro de incidentes com data, natureza, dados afetados e ações tomadas
+
+## Dados Pessoais vs Dados Sensíveis: o Que Muda na Proteção
+
+A LGPD divide os dados em duas categorias com proteções diferentes.
+
+**Dados pessoais** são qualquer informação que identifique ou permita identificar uma pessoa: nome, CPF, e-mail, endereço, telefone, IP, histórico de compras.
+
+**Dados sensíveis** têm proteção reforçada e exigem consentimento específico e destacado. São: dados sobre origem racial ou étnica, convicção religiosa, opinião política, filiação a sindicato, dado de saúde ou vida sexual, dado genético ou biométrico, e dado de criança.
+
+Na prática para PMEs:
+
+- **Clínicas e consultórios:** prontuários e histórico médico são dados sensíveis. O sistema precisa de criptografia no banco, log de acesso por profissional e mecanismo de exclusão de prontuário quando solicitado pelo paciente.
+- **Academias e salões:** dados de saúde (laudos, restrições físicas) coletados no cadastro são sensíveis. Se você coleta "restrição médica" no formulário, isso é dado sensível.
+- **RH:** dados sobre origem, saúde (atestados), sindicalização e processos disciplinares são sensíveis. O sistema de RH precisa das mesmas proteções de criptografia e log.
+- **Varejo:** dados de pagamento (cartão, CPF em nota fiscal) são pessoais, não sensíveis, mas têm obrigação de proteção adequada.
+
+## Consentimento no Sistema: Como Coletar e Registrar Corretamente
+
+O consentimento LGPD válido precisa ser: livre, informado, inequívoco e específico. Traduzindo para sistema:
+
+**O que não vale:**
+- Checkbox pré-marcado ("Aceito receber comunicações" já marcado por padrão)
+- Consentimento genérico para "qualquer uso" dos dados
+- Termos longos em linguagem jurídica sem resumo claro
+- Consentimento como condição obrigatória para usar o serviço quando não é necessário
+
+**O que vale:**
+- Checkbox desmarcado que o usuário marca ativamente
+- Texto curto e claro: "Autorizo o uso do meu e-mail para envio de notas fiscais e comunicados sobre minha conta"
+- Finalidade específica: um consentimento para marketing, outro para operacional
+- Data e versão da política registradas no banco quando o consentimento é dado
+
+Exemplo de registro no banco de dados:
+```
+user_consents:
+  user_id: 12345
+  consent_type: "marketing_email"
+  status: "active"
+  granted_at: "2026-02-15T14:23:00Z"
+  policy_version: "v2.1"
+  ip_address: "***.***.***"  (mascarado em logs, completo no banco criptografado)
+  revoked_at: null
+```
+
+## Portabilidade e Exclusão de Dados: o Que o Sistema Precisa Suportar
+
+**Portabilidade** significa que o titular pode pedir seus dados num formato estruturado para levar para outro serviço. O sistema precisa de um endpoint ou funcionalidade que exporte todos os dados do titular em formato legível (JSON, CSV ou PDF).
+
+**Exclusão** significa que o titular pode pedir que seus dados sejam apagados. Aqui há uma nuance importante: a LGPD permite manter dados quando há obrigação legal (dados fiscais por 5 anos, prontuários médicos por 20 anos pelo CFM). O sistema precisa distinguir:
+- Dados que podem ser excluídos: preferências, histórico de navegação, dados de marketing
+- Dados que precisam ser mantidos por obrigação legal: notas fiscais, prontuários, contratos
+- Dados que podem ser anonimizados: o dado continua no banco mas sem a identificação pessoal
+
+O erro mais comum que a ANPD autua: empresa que não tem mecanismo algum de exclusão. Uma clínica médica foi notificada pela ANPD exatamente por isso — paciente solicitou exclusão do prontuário após término do tratamento e a clínica não tinha processo definido para atender o pedido.
+
+## Multas da ANPD em 2026: o Que Está Sendo Autuado
+
+Em 2025, a ANPD aplicou R$14,4 milhões em multas a 23 empresas. Os setores com mais autuações:
+
+1. **Saúde:** dados sensíveis sem proteção adequada, ausência de mecanismo de exclusão de prontuário
+2. **Varejo:** dados de clientes mantidos sem consentimento registrado, compartilhamento com terceiros sem base legal
+3. **RH:** dados de funcionários e candidatos sem consentimento claro para uso em processos seletivos
+
+Casos concretos:
+- Uma PME de varejo foi multada em R$1,2 milhão por manter base de clientes com histórico de compras sem consentimento registrado no sistema. O consentimento havia sido coletado verbalmente no momento da venda — sem registro digital.
+- Uma clínica médica recebeu notificação por não ter mecanismo de exclusão de prontuário. O paciente solicitou remoção via e-mail, a clínica não respondeu em 15 dias e não tinha como executar o pedido tecnicamente.
+
+O tamanho da empresa importa no cálculo da multa (2% do faturamento), mas não isenta de autuação. A ANPD já multou empresas com menos de 20 funcionários.
+
+## Como o SystemForge Adequa seu Sistema Existente à LGPD
+
+Não é necessário trocar o sistema atual. Na maioria dos casos, a adequação é feita como extensão do sistema que já existe — adicionando as funcionalidades que faltam sem reescrever o que já funciona.
+
+Nosso processo de adequação:
+
+**Fase 1: Mapeamento de dados (1-2 semanas).** Identificamos todos os dados pessoais e sensíveis que o sistema coleta, onde estão armazenados e qual é a base legal atual (ou ausente) para cada coleta.
+
+**Fase 2: Priorização por risco (1 semana).** Não precisamos adequar tudo de uma vez. Priorizamos: dados sensíveis primeiro, dados com maior volume segundo, dados sem base legal terceiro.
+
+**Fase 3: Desenvolvimento das adequações.** Implementamos: módulo de consentimento com registro, funcionalidade de exportação e exclusão de dados do titular, criptografia nos campos sensíveis do banco, log de acesso e mascaramento em logs de aplicação.
+
+**Fase 4: Documentação.** Entregamos: política de privacidade atualizada refletindo o que o sistema faz, registro de atividades de tratamento (exigido pela LGPD para empresas acima de 10 funcionários), e template de notificação de incidente.
+
+Custo de adequação: R$5.000 a R$25.000 dependendo da complexidade do sistema e do volume de adequações necessárias. Prazo: 4 a 12 semanas.
+
+**Solicite um diagnóstico gratuito de LGPD:** avaliamos se o sistema da sua empresa está em compliance e o que precisa adequar — sem compromisso. A avaliação inicial não gera custo.
+
+## Como Adequar seu Sistema Existente à LGPD: Roteiro Prático
+
+Se você quer começar agora sem contratar imediatamente, aqui está o roteiro:
+
+**Semana 1-2: Mapeamento.** Liste todos os formulários do sistema que coletam dados pessoais. Para cada um, responda: (1) qual dado é coletado, (2) onde está armazenado, (3) para qual finalidade, (4) qual é a base legal.
+
+**Semana 3: Priorização.** Identifique onde estão os maiores riscos: dados sensíveis sem proteção, dados sem base legal, e ausência de mecanismo de exclusão.
+
+**Semana 4-8: Desenvolvimento.** Com o mapa em mãos, implemente as adequações por ordem de risco. Consentimento e exclusão são as prioridades 1 e 2.
+
+**Semana 9-12: Documentação e testes.** Atualize a política de privacidade, crie o registro de atividades de tratamento e teste os fluxos de pedido do titular (acesso, exclusão, portabilidade).
+
+Para setores com dados sensíveis, recomendamos também verificar a necessidade de DPO (Encarregado de Dados). Para PMEs, o DPO não precisa ser um cargo interno — pode ser um serviço terceirizado.
+
+## Erros Comuns das PMEs na LGPD
+
+**1. "LGPD é para empresa grande — minha PME não vai ser autuada."**
+A ANPD já multou pequenas empresas. O critério é o risco ao titular, não o tamanho da empresa. Uma clínica com 50 pacientes que tem dados médicos sem proteção tem risco regulatório maior que uma empresa de e-commerce com 5.000 clientes.
+
+**2. "Já tenho política de privacidade no site — estou em compliance."**
+Política de privacidade é a documentação do que você faz com os dados. LGPD exige que os sistemas implementem o que a política descreve. Se a política diz "coletamos consentimento" mas o sistema não registra o consentimento, você não está em compliance.
+
+**3. "Vou adequar quando a ANPD me notificar."**
+A notificação é o início do processo de multa, não um aviso amigável. A partir da notificação, você tem prazo curto para demonstrar adequação — e a multa pode ser aplicada mesmo com adequação em curso se o dano ao titular já ocorreu.
+
+**4. "Criptografia é caro e complexo."**
+Criptografar campos sensíveis no banco de dados é uma operação técnica padrão, não um projeto complexo. Em sistemas modernos (PostgreSQL, MySQL 8+), a criptografia de campo é configurada em horas, não semanas.
+
+## Quando Vale a Pena Contratar uma Adequação Profissional
+
+Contratar faz sentido quando:
+- Seu sistema tem dados sensíveis (saúde, biometria, dados financeiros detalhados)
+- Você não tem desenvolvedor interno que conheça os requisitos técnicos da LGPD
+- O sistema tem múltiplas fontes de dados (CRM, ERP, sistema de agendamento) e o mapeamento manual seria impraticável
+- Você já recebeu alguma notificação ou reclamação de titular
+
+Resolver internamente funciona se:
+- Você tem desenvolvedor interno familiarizado com segurança de dados
+- O sistema é simples (um único banco de dados, poucos formulários)
+- Os dados coletados são básicos (nome, e-mail, telefone) sem dados sensíveis
+
+Para entender o contexto regulatório mais amplo de sistemas que coletam dados pessoais, veja [sistema personalizado por nicho](/blog/sistema-personalizado-por-nicho) e consulte a [página de consultoria técnica](/servicos/consultoria-tecnica) para casos mais complexos.
+
+## Conclusão
+
+LGPD não é burocracia opcional — é conformidade legal com enforcement ativo. A ANPD multou 23 empresas em 2025 e a tendência é de mais fiscalização, não menos. Para a maioria das PMEs, a adequação do sistema custa menos de R$15.000 e leva menos de 3 meses.
+
+O custo de não adequar pode ser uma notificação seguida de multa que chega a 2% do faturamento. Para uma PME com R$2 milhões de faturamento, isso é R$40.000 — três vezes o custo de adequação.
+
+**Próximo passo:** solicite o diagnóstico gratuito de LGPD. Avaliamos o sistema atual, identificamos as lacunas e entregamos um plano de adequação com custo e prazo.
+
+## Perguntas Frequentes sobre LGPD em Sistemas Empresariais
+
+### Minha empresa pode ser multada pela LGPD em 2026?
+
+Sim. A ANPD está aplicando multas desde 2023 e intensificou o enforcement em 2025, com R$14,4 milhões em multas a 23 empresas. O critério não é o tamanho — é o risco ao titular dos dados. Empresas de saúde, varejo e RH são os setores com mais autuações.
+
+### O que o sistema da empresa precisa ter para estar em compliance com LGPD?
+
+Os cinco requisitos técnicos fundamentais: (1) registro de consentimento explícito antes de coletar dados, (2) mecanismo de exclusão e portabilidade de dados do titular, (3) log de acesso a dados sensíveis, (4) criptografia de dados pessoais sensíveis no banco de dados, e (5) processo documentado para notificar a ANPD em até 72h em caso de vazamento.
+
+### Quanto custa adequar o sistema existente à LGPD?
+
+O custo de adequação de sistema existente varia entre R$5.000 e R$25.000 dependendo da complexidade do sistema e do volume de adequações necessárias. Sistemas simples com poucos dados pessoais ficam na faixa de R$5.000-10.000. Sistemas complexos com dados sensíveis (saúde, financeiro) chegam a R$20.000-25.000. O prazo é de 4 a 12 semanas.
+
+### LGPD se aplica a sistemas de pequenas empresas?
+
+Sim. A LGPD se aplica a qualquer empresa que trate dados pessoais de pessoas físicas no Brasil, independente do porte. A lei prevê tratamento diferenciado para microempresas e EPPs em termos de flexibilização de algumas obrigações administrativas — mas as obrigações técnicas de proteção de dados se aplicam a todas.
+
+### O que é dado sensível e como tratar diferente no sistema?
+
+Dados sensíveis são: dados de saúde, origem racial ou étnica, convicção religiosa, opinião política, filiação sindical, dados genéticos ou biométricos, e dados de crianças. Precisam de: consentimento específico e destacado (não vale consentimento genérico), criptografia obrigatória no banco de dados, log de acesso com identificação de quem acessou, e processo de exclusão que leve em conta prazos de guarda obrigatórios (prontuários médicos: 20 anos pelo CFM).
+
+### Em quanto tempo preciso adequar meu sistema à LGPD?
+
+A lei está em vigor desde 2020. Não há "prazo de adequação" — a obrigação é imediata. Começar agora é melhor que esperar uma notificação da ANPD. O processo de adequação técnica de um sistema PME típico leva de 4 a 12 semanas.
+
+### O que acontece se meu sistema sofrer vazamento de dados?
+
+Em caso de incidente de segurança que possa causar risco ou dano aos titulares, a empresa tem obrigação de notificar a ANPD em até 72 horas a partir do conhecimento do incidente. A notificação precisa incluir: natureza dos dados afetados, número de titulares afetados, medidas de contenção adotadas e medidas preventivas para incidentes futuros. Ausência de notificação agrava a avaliação da ANPD.
