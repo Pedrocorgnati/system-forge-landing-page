@@ -1,0 +1,192 @@
+---
+title: "Verifactu en Software a Medida 2026: Guia Tecnica de Integracion para PYMES Espana"
+slug: "verifactu-integracion-software-medida-2026"
+date: "2026-04-25"
+description: "Como integrar Verifactu en tu ERP o software a medida en 2026: arquitectura, firma digital XAdES, XSD AEAT, librerias open source, costes reales y errores frecuentes."
+tags: ["verifactu integracion", "software a medida espana", "firma digital factura", "aeat api desarrolladores", "verifactu pyme 2026", "xml facturae"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sistemas-personalizados"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Guia tecnica completa para integrar Verifactu en software a medida: arquitectura, firma XAdES, XSD AEAT, librerias open source y coste real de implementacion en PYMES espanolas."
+seo_title: "Verifactu en Software a Medida 2026: Guia Tecnica de"
+meta_description: "Como integrar Verifactu en tu ERP o software a medida en 2026: arquitectura, firma digital XAdES, XSD AEAT, librerias open source, costes reales y errores frecuentes."
+canonical: "https://forjadesistemas.es/blog/verifactu-integracion-software-medida-2026"
+ogTitle: "Verifactu en Software a Medida 2026: Guia Tecnica de"
+ogDescription: "Como integrar Verifactu en tu ERP o software a medida en 2026: arquitectura, firma digital XAdES, XSD AEAT, librerias open source, costes reales y errores"
+ogType: "article"
+ogLocale: "es_ES"
+ogImage: "https://forjadesistemas.es/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.es/blog/verifactu-integracion-software-medida-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Verifactu en Software a Medida 2026: Guia Tecnica de"
+twitterDescription: "Como integrar Verifactu en tu ERP o software a medida en 2026: arquitectura, firma digital XAdES, XSD AEAT, librerias open source, costes reales y errores"
+twitterImage: "https://forjadesistemas.es/images/blog/default-cover.png"
+primary_category: "sistemas-personalizados"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Verifactu en Software a Medida 2026: Guia Tecnica de Integracion para PYMES Espana
+
+Integrar Verifactu en un software a medida cuesta entre 4.500 y 25.000 euros en 2026, segun la complejidad del sistema existente y si manejas multi-sociedad. La obligacion regulatoria ya esta clara y cubierta en otro articulo del blog. Lo que casi nadie te cuenta es como hacerlo bien tecnicamente: que arquitectura usar, como firmar el XML, como hablar con la sede electronica de la AEAT sin que se rompa todo en preproduccion, que librerias open source son fiables y que errores te van a tocar resolver a las 23:00 del dia que falla por primera vez en cliente.
+
+*Por Pedro Corgnati, consultor brasileno full-stack con mas de 8 anos integrando sistemas fiscales: NF-e en Brasil desde 2018, Verifactu en clientes espanoles desde 2024. Esta guia es el manual que me hubiera gustado tener en el primer proyecto.*
+
+Si lo que buscas es entender la obligacion legal y los plazos, ve antes a [facturacion electronica obligatoria Espana Verifactu 2026](/blog/facturacion-electronica-obligatoria-espana-verifactu-2026). Esto que sigue es para quien ya sabe que tiene que cumplir y necesita disenar la integracion en su software propio.
+
+## Por que hablar de integracion tecnica y no de obligacion
+
+Verifactu, regulado por el Real Decreto 1007/2023, exige que todo sistema informatico de facturacion en Espana firme y registre cada factura con encadenamiento criptografico verificable y comunicacion con la AEAT. Para empresas que usan Holded, Sage50, Contasol o A3, el proveedor del software resuelve la integracion. Para quien tiene un ERP a medida, un sistema interno de facturacion o una plataforma SaaS que emite facturas en nombre de sus clientes, el problema es propio.
+
+La pregunta no es si se cumple, sino como se integra sin romper lo que ya funciona y sin pagar cinco veces lo que cuesta. La diferencia entre una integracion bien planteada y una hecha a martillazos son tres meses de calmaria post lanzamiento o tres meses de incidencias y multas.
+
+## Arquitectura tecnica del sistema Verifactu
+
+Verifactu pide que tu software mantenga un registro inalterable de cada factura, con encadenamiento entre registros y firma digital. El modelo mental correcto es de blockchain ligero auditable por la AEAT.
+
+### Modelo de datos requerido
+
+Para cada factura emitida (RegistroAlta) y cada anulacion (RegistroAnulacion), tu sistema debe almacenar:
+
+- Identificacion de la factura (NIF emisor, numero serie, fecha expedicion)
+- Datos del receptor (NIF o identificacion sustitutiva)
+- Importe total, base imponible, cuota IVA por tipo
+- Hash SHA-256 del registro actual
+- Hash del registro inmediatamente anterior (la huella encadenada)
+- Marca temporal
+- Firma digital del emisor
+
+El encadenamiento es el corazon del sistema: cada registro contiene la huella del anterior, formando una cadena verificable. Si rompes la cadena, la AEAT lo detecta en auditoria.
+
+### Formato XML y XSD oficiales
+
+La AEAT publica esquemas XSD oficiales (RegFactuSistemaFacturacion.xsd y suministros relacionados) descargables desde la sede electronica. Tu sistema debe generar XML conforme y validarlo localmente antes de enviar. Validar contra el XSD oficial en tu pipeline ahorra el 70% de los errores de produccion.
+
+Importante: la AEAT versiona el esquema. Cuando publican v1.1 reemplazando v1.0, tu sistema debe poder consumir la nueva en el plazo que indiquen, normalmente 60-90 dias. Mantener el XSD versionado en el repo y un test de schema validation en CI evita sorpresas.
+
+## Firma digital en codigo: como funciona de verdad
+
+Necesitas un certificado de representante de persona juridica (CIF) emitido por la FNMT, Camerfirma u otra autoridad reconocida. El certificado de persona fisica del autonomo vale solo si el sistema factura como autonomo.
+
+### Almacenamiento del certificado
+
+Nunca, jamas, en el repositorio. Opciones reales en orden de seguridad:
+
+1. **HSM (Hardware Security Module)**: AWS CloudHSM, Azure Key Vault HSM. Coste alto pero certificado nunca sale del modulo. Para enterprise.
+2. **Secret manager cloud**: AWS Secrets Manager, GCP Secret Manager, Azure Key Vault. Acceso por IAM, rotacion automatica. Recomendacion estandar para PYME.
+3. **Vault on-prem**: HashiCorp Vault si quieres quedarte fuera de cloud.
+4. **Variable de entorno cifrada**: ultimo recurso para entorno autonomo, jamas en produccion seria.
+
+### Librerias por lenguaje
+
+- **Node.js / TypeScript**: `xml-crypto` para firmar, `node-forge` para manejo de PFX/P12. Hay wrappers especificos Verifactu emergiendo en npm desde 2025.
+- **Python**: `signxml` para firma XAdES, `cryptography` para todo lo demas. Wrapper `verifactu-py` en GitHub maduro a inicios 2026.
+- **.NET**: `System.Security.Cryptography.Xml` nativo. Microsoft tiene ejemplos oficiales de XAdES.
+- **PHP**: `XMLSeclibs` clasico. Algunos plugins WordPress de facturacion lo usan ya.
+- **Java**: Apache Santuario y BouncyCastle. Stack tradicional banca.
+
+La firma debe seguir politica XAdES-BES como minimo, idealmente XAdES-EPES con politica de firma referenciada. Si no sabes que es XAdES, no improvises: contrata 2-3 horas de un consultor con experiencia para que te valide la primera firma. El error mas comun en proyectos nuevos es generar firmas XML que parecen validas pero la AEAT rechaza con mensajes confusos.
+
+## Comunicacion con AEAT: endpoints y autenticacion
+
+La sede electronica de la AEAT expone servicios web SOAP con autenticacion mTLS usando el certificado del emisor. URLs principales:
+
+- Preproduccion: `https://prewww1.aeat.es/wlpl/...`
+- Produccion: `https://www1.aeat.es/wlpl/...`
+
+Cliente SOAP en Node.js con `axios` y `https.Agent` configurado con cert + key del PFX. En Python, `zeep` con session que pase el certificado. La autenticacion es mTLS: tu cliente envia su certificado, AEAT lo valida contra el directorio de certificados aceptados y solo entonces acepta el SOAP envelope.
+
+Envios individuales son la norma para volumen bajo (menos de 100 facturas/dia). Lotes (hasta 1000 registros por SOAP) ahorran latencia para volumen alto pero complican el manejo de errores parcial: un registro malo puede invalidar el lote entero o solo el registro, segun el endpoint.
+
+## Manejo de errores AEAT: la parte que mas duele
+
+La AEAT devuelve codigos de error estructurados. Los grupos a tratar:
+
+- **Errores de validacion XSD (cliente)**: tu XML no cumple esquema. Soluciona reforzando validacion local antes de enviar.
+- **Errores de negocio**: factura ya registrada (duplicado por re-envio), NIF receptor invalido, cuota IVA no coincide con base * tipo.
+- **Errores de firma**: certificado revocado, formato XAdES incorrecto, hash incorrecto.
+- **Errores transitorios**: 503 de AEAT, timeout, certificado caducado.
+
+Patron recomendado: cola persistente (Postgres con tabla `verifactu_pending`, o SQS, o RabbitMQ) con reintentos exponenciales (1m, 5m, 30m, 2h, 6h, 24h) y circuit breaker que abre tras 5 fallos consecutivos por mas de 10 minutos. Cuando AEAT cae (pasa cada 2-3 meses), tu sistema sigue aceptando facturas, las acumula en cola y las envia cuando vuelve. Sin esto, un dia de caida AEAT bloquea tu facturacion entera.
+
+Logging estructurado de cada interaccion con AEAT (request, response, hash, timestamp) es obligatorio para auditorias futuras. Retenelos 4 anos minimo.
+
+## Testing en preproduccion AEAT
+
+La AEAT mantiene entorno preproduccion con certificado de pruebas distinto al de produccion. Reglas de oro:
+
+- Certificado de pruebas vive en `.env.preprod`. Certificado real solo en secret manager con acceso restringido a 2-3 personas.
+- CI/CD usa siempre preproduccion. Nunca despliegues que toquen produccion AEAT en tests automatizados.
+- Suite de casos minimos: factura simple un solo IVA, factura multi IVA, rectificativa, anulacion, factura con descuento, factura con retencion IRPF, factura intracomunitaria.
+- Snapshot tests del XML generado: el dia que cambies algo y el XML difiera del snapshot, sabras antes que la AEAT.
+
+## Librerias open source disponibles
+
+A inicios 2026, el ecosistema esta madurando. Lo mejor que existe:
+
+| Lenguaje | Libreria | Madurez | Notas |
+|----------|----------|---------|-------|
+| Java | verifactu-java (community) | Alta | Muchas asesorias la usan |
+| .NET | aeat-verifactu-dotnet | Media-alta | Ejemplos oficiales Microsoft |
+| Python | signxml + verifactu-py wrapper | Media | Crece rapido en 2026 |
+| Node.js | xml-crypto + adapter custom | Media | Wrappers especificos emergiendo |
+| PHP | XMLSeclibs + parsers facturae | Media | Plugins WordPress aprovechan |
+
+Cuando tu volumen es bajo (menos de 500 facturas/mes) y el sistema es simple, librerias open source ahorran 4-6 semanas de desarrollo. Cuando tienes multi-sociedad, factura electronica B2B con FacturaE, o casos como autofacturas y facturacion por terceros, conviene construir una capa propia encima del firmador con modelo de dominio claro.
+
+**Si necesitas evaluar coste exacto de integracion sobre TU stack actual antes de comprometerte, [escribeme por WhatsApp](https://wa.me/5500000000000) para diagnostico gratuito y revision de arquitectura.**
+
+## Coste real de integracion en 2026
+
+Rangos honestos en mercado espanol:
+
+| Escenario | Inversion | Plazo |
+|-----------|-----------|-------|
+| Integracion en software simple (un solo emisor, IVA estandar) | 4.500-9.000 | 3-5 semanas |
+| Integracion media (multi serie, multi tipo IVA, rectificativas) | 9.000-16.000 | 6-9 semanas |
+| Integracion compleja (multi sociedad, multi pais, EDI, B2B FacturaE) | 16.000-25.000 | 10-14 semanas |
+| Mantenimiento evolutivo anual | 8-12% inversion inicial | continuo |
+
+Coste de no integrar: sancion por no presentar registro o presentarlo erroneo va de 150 a 50.000 euros, mas la suspension cautelar del sistema. Y la pesadilla operativa de paralizar facturacion.
+
+Para entender en que se diferencia esto del coste de un sistema completo, ve a [cuanto cuesta sistema gestion medida Espana 2026](/blog/cuanto-cuesta-sistema-gestion-medida-espana-2026). Si estas evaluando si construir vs comprar el ERP entero, [Holded Contasol vs ERP a medida cual elegir](/blog/holded-contasol-vs-erp-a-medida-cual-elegir) te ayuda. Y si tu sistema ya integra con SAP, Sage o Holded, mira [integraciones ERPs espanoles SAP Sage Holded](/blog/integraciones-erps-espanoles-sap-sage-holded) para ver como conectar Verifactu por encima.
+
+## Errores frecuentes en proyectos reales
+
+He visto los mismos errores en cinco proyectos distintos. Lista que te puedes ahorrar:
+
+1. **No versionar el certificado en el sistema**: cuando renuevas certificado anual, el sistema no sabe cual usar para firmas pendientes de hace 30 dias. Solucion: cada registro guarda referencia al certificado usado.
+2. **Generar XML sin validar contra XSD oficial**: 50% de los errores AEAT son XML malformado. Validar local en cada generacion es trivial y elimina el problema.
+3. **No persistir el hash anterior en transaccion atomica**: si cae el sistema entre persistir hash N y enviar hash N+1, la cadena se rompe. Solucion: transaccion DB que escribe hash + envia (o encola), todo o nada.
+4. **No tener entorno preproduccion separado**: testing contra produccion AEAT genera registros reales que no puedes anular. Es un desastre auditable.
+5. **No monitorizar caidas AEAT**: cuando AEAT cae, tu sistema reintenta sin parar y satura logs. Necesitas circuit breaker + alerta a operaciones.
+6. **Ignorar zona horaria en timestamps**: AEAT espera Europe/Madrid. Si tu servidor esta en UTC y no conviertes, los timestamps no cuadran.
+7. **Usar certificado de persona fisica para emitir como sociedad**: lo rechazan en validacion. Necesitas certificado representante CIF.
+
+Si tu empresa esta en Madrid y necesitas ayuda local, mira [empresa software medida Madrid](/blog/empresa-software-medida-madrid).
+
+## FAQ
+
+**Verifactu es lo mismo que TicketBAI?**
+No. TicketBAI es la version del Pais Vasco (Vizcaya, Guipuzcoa, Alava), obligatoria desde 2022/2024 segun territorio. Verifactu es la version estatal del resto de Espana, regulada por RD 1007/2023, en despliegue progresivo desde 2026. Si operas en Pais Vasco usas TicketBAI; en el resto, Verifactu. Empresas con presencia en ambos territorios deben implementar los dos.
+
+**Puedo seguir usando mi sistema actual y enchufar Verifactu encima?**
+Si tu sistema actual emite facturas, Verifactu va encima como capa de firma + comunicacion AEAT. No es necesario reescribir el sistema entero, pero hay que tocar el modelo de datos para almacenar hashes y timestamps con encadenamiento. En proyectos donde el sistema fue mal modelado originalmente, integrar Verifactu obliga a refactorizar el modulo de facturacion. Calcular ese refactor antes de presupuestar es importante.
+
+**Cuanto tarda integrar Verifactu en un ERP a medida ya en produccion?**
+Entre 6 y 12 semanas tipicamente. Las primeras 2-3 semanas son auditoria del modelo actual y diseno. 4-6 semanas implementacion + tests preproduccion. 1-2 semanas piloto produccion paralelo (envias a AEAT pero mantienes facturacion clasica). Despliegue total cuando 100% facturas pasan validacion 2 semanas seguidas.
+
+**Necesito un certificado nuevo o vale el de la empresa?**
+El certificado de representante de persona juridica que ya usas para Modelo 303 y demas es valido. Verifica que sea cualificado (FNMT, Camerfirma, ANCERT) y que no caduque en los proximos 6 meses. Renueva con margen.
+
+**Que pasa si AEAT cae justo cuando emito la factura?**
+Tu sistema debe aceptar la factura, persistirla con hash y encolar el envio. Cuando AEAT vuelve, la cola se procesa. La factura es valida desde el momento de emision; el envio AEAT puede demorar legitimamente hasta 4 dias naturales segun normativa. Si supera ese plazo, debes documentar la incidencia.
+
+**La AEAT acepta integraciones desde infraestructura cloud fuera de Espana?**
+Si. La AEAT no impone localizacion geografica de la infraestructura del emisor. Lo que importa es la firma digital con certificado valido, el XML conforme y la comunicacion HTTPS. Vercel en Frankfurt, AWS en Irlanda o Railway en Estados Unidos son tecnicamente validos. Para empresas con compromiso de soberania de datos puede convenir AWS Madrid o IONOS Espana, pero es decision tuya, no requisito AEAT.
+
+---
+
+Si tu sistema actual no soporta Verifactu y necesitas evaluar coste real de integracion antes del fin de plazo, [escribeme por WhatsApp](https://wa.me/5500000000000) para diagnostico gratuito de tu stack y plan de integracion. O visita el servicio de [sistemas personalizados](https://forjadesistemas.es/servicios/sistemas-personalizados) para ver casos similares ya entregados.

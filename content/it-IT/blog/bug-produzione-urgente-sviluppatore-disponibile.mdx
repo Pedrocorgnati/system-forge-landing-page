@@ -1,0 +1,185 @@
+---
+title: "Bug Critico in Produzione 2026: Cosa Fare nei Primi 30 Minuti e Dove Trovare uno Sviluppatore"
+slug: "bug-produzione-urgente-sviluppatore-disponibile"
+date: "2026-04-25"
+description: "Sistema fuori uso? Guida pratica primi 30 minuti, classificazione gravita, costi reali (€250-2.800 secondo gravita) e dove trovare dev disponibili nel 2026."
+excerpt: "Guida pratica per PMI: come classificare, comunicare e risolvere un bug critico in produzione, con tabella di costi reali e dove trovare uno sviluppatore disponibile adesso."
+tags: ["bug produzione urgente", "sistema fuori uso", "supporto emergenza software", "sviluppatore disponibile adesso", "plantone tecnico software", "sla supporto", "software house emergenza italia 2026"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "assistenza-software"
+locale: 'it-IT'
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-producao-bug-urgente-dev-disponivel'
+seo_title: "Bug Critico in Produzione 2026: Cosa Fare nei Primi 30"
+meta_description: "Sistema fuori uso? Guida pratica primi 30 minuti, classificazione gravita, costi reali (€250-2.800 secondo gravita) e dove trovare dev disponibili nel 2026."
+canonical: "https://forjadesistemas.it/blog/bug-produzione-urgente-sviluppatore-disponibile"
+ogTitle: "Bug Critico in Produzione 2026: Cosa Fare nei Primi 30"
+ogDescription: "Sistema fuori uso? Guida pratica primi 30 minuti, classificazione gravita, costi reali (€250-2.800 secondo gravita) e dove trovare dev disponibili nel 2026."
+ogType: "article"
+ogLocale: "it_IT"
+ogImage: "https://forjadesistemas.it/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.it/blog/bug-produzione-urgente-sviluppatore-disponibile"
+twitterCard: "summary_large_image"
+twitterTitle: "Bug Critico in Produzione 2026: Cosa Fare nei Primi 30"
+twitterDescription: "Sistema fuori uso? Guida pratica primi 30 minuti, classificazione gravita, costi reali (€250-2.800 secondo gravita) e dove trovare dev disponibili nel 2026."
+twitterImage: "https://forjadesistemas.it/images/blog/default-cover.png"
+primary_category: "assistenza-software"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Bug Critico in Produzione 2026: Cosa Fare nei Primi 30 Minuti e Dove Trovare uno Sviluppatore
+
+Quando un sistema entra in crisi in produzione, ogni minuto costa. Il primo passo e isolare il problema: il sistema e completamente fuori uso o solo una funzionalita ha smesso di funzionare? Se e down totale, comunica subito ai clienti e attiva un plantone tecnico. La maggior parte dei bug critici nelle PMI italiane (errori database, certificati scaduti, integrazioni rotte) si risolve in 2-8 ore con uno sviluppatore disponibile. Il costo di una correzione emergenziale varia tra €250 e €2.800 secondo complessita. Aspettare peggiora il problema.
+
+*A cura di Pedro Corgnati - sviluppatore full-stack, fondatore di SystemForge. In oltre 8 anni mantenendo sistemi per PMI italiane ho gestito plantoni per 6 PMI su contratto SLA e diagnostato 80+ bug critici in produzione negli ultimi 24 mesi: clinica con cartelle inaccessibili 30 minuti prima dei pazienti, e-commerce con checkout bloccato in Black Friday, trasportatore con tracking fuori uso a meta consegna critica.*
+
+In questa guida ti spiego esattamente cosa fare adesso, nei prossimi 30 minuti e nelle prossime 24 ore. Se la situazione e weekend o notte profonda, il [protocollo specifico per bug venerdi sera/notte](/blog/bug-produzione-venerdi-sera-dev-notte-2026) ha ulteriori dettagli. Se invece il fornitore originale non risponde piu, leggi [assistenza software urgente](/blog/assistenza-software-urgente). Per impostare osservabilita preventiva: [monitoraggio API in produzione: metriche e alert](/blog/monitoraggio-api-produzione-metriche-alert). Per scegliere il partner di pronto intervento: [come assumere una software house: cosa valutare](/blog/come-assumere-software-house-cosa-valutare).
+
+## Quanto e grave? Classificare nei primi 5 minuti
+
+Prima di chiamare tutti in panico, respira. Il primo compito e classificare. 5 minuti che definiscono tutto il piano di azione.
+
+**Down totale** significa che nessun utente puo accedere al sistema. Errore 502, 503 o 504. Sito completamente fuori. App che restituisce "senza connessione" anche con internet funzionante.
+
+**Down parziale** e quando il sistema e online, ma una funzionalita specifica e ferma: il checkout non processa pagamenti, il report non si genera, l'integrazione SDI restituisce errore, il login fallisce per un gruppo di utenti.
+
+Esempi pratici per tipologia di errore.
+
+| Codice/Sintomo | Probabile causa | Gravita tipica |
+|----------------|------------------|----------------|
+| 502 Bad Gateway | Backend giu o non risponde | Critico |
+| 503 Service Unavailable | Server sovraccarico o in maintenance | Critico |
+| 504 Gateway Timeout | Backend lento, query bloccate | Critico |
+| Errore SDI -1 / -3 | Token scaduto, certificato Aruba | Alto |
+| Stripe webhook fallito | Token scaduto, IP cambiato | Alto |
+| Errore PagoPA generico | Avviso scaduto o IUV malformato | Alto-Medio |
+| Login lento ma funziona | DB lento, indice mancante | Medio |
+| UI rotta su Safari | Bug CSS/JS browser-specific | Basso-Medio |
+
+Matrice impatto business: chi e bloccato? Quante persone? Quanto rivenue costa per ora? Una clinica con prenotazioni bloccate la mattina e diverso da un dashboard interno consultivo per 3 utenti.
+
+## Comunicazione: cosa dire ai clienti nei primi 15 minuti
+
+Errore comune: nascondere il problema sperando si risolva. Errore peggiore: sparire dai radar.
+
+**Template messaggio (WhatsApp/email/banner sito).** "Stiamo riscontrando un'interruzione del servizio iniziata alle [HH:MM]. Il nostro team tecnico sta intervenendo. Aggiorneremo qui ogni 30 minuti fino a risoluzione. Per urgenze contattaci a [numero]."
+
+Onesta + cadenza di aggiornamento. Vince sempre vs silenzio.
+
+**Cosa NON dire.** "E colpa del fornitore." Anche se vero, dal punto di vista del cliente sei tu che fornisci il servizio. La responsabilita verso l'esterno e tua.
+
+**Pagina di stato.** Per sistemi con uptime importante vale investire in statuspage.io (€29/mese) o in una pagina /status custom semplice. Riduce drammaticamente il volume di richieste durante incidenti.
+
+## Dove trovare uno sviluppatore disponibile ADESSO
+
+Il problema non e solo trovare un dev - e trovarne uno disponibile, qualificato e velocemente attivabile.
+
+**Plantone software house con SLA (€600-1.500/intervento spot).** Software house piccole/medie italiane offrono spesso plantone di emergenza anche senza contratto continuativo. Tariffa premium ma attivazione in 1-4 ore. Cerca "assistenza software emergenza [tua citta]" o usa LinkedIn.
+
+**Freelance disponibili oggi.** LinkedIn (filtra per "open to work" + competenza specifica), Toptal (carissimi ma rapidi), Malt (mercato europeo, italiani disponibili). Verifica prima di contrattare: portfolio live, GitHub attivo, almeno una call video di 15 minuti.
+
+**Network italiano.** Comunita Telegram dev italiani (Italia.dev, italian-dev), forum specializzati, Slack regionali. Tempo medio risposta: 30 minuti se il messaggio e ben formulato. Vantaggio: peer review da altri sviluppatori che possono indicarti pattern noti.
+
+**Cosa NON fare.** Post panico in gruppi Facebook generici per imprenditori, Telegram dropshipping, gruppi WhatsApp "freelancer Italia". Riceverai 80% di non-tecnici e 20% di principianti. Spreco di tempo critico.
+
+## Tabella costi reali correzione bug 2026
+
+Costi medi visti sul mercato italiano nei primi 4 mesi 2026.
+
+| Gravita | Tempo tipico | Costo |
+|---------|--------------|-------|
+| Bug minore (UI, validazione) | 1-2h | €120-280 |
+| Bug funzionale (calcolo, filtro) | 2-4h | €280-650 |
+| Down parziale (integrazione, gateway) | 3-6h | €450-1.300 |
+| Down totale (DB, deploy, infra) | 4-12h | €700-2.800 |
+| Disastro (corruzione dati, attacco) | 1-5 giorni | €2.500-15.000 |
+
+Tariffa oraria emergenza fuori orario: €180-280/h tipicamente. In orario lavorativo: €120-180/h. Weekend e festivita: surcharge 30-50%.
+
+Sistema fuori uso adesso? Mandami su WhatsApp: 1) cosa non funziona esattamente, 2) da quando, 3) accesso ai log/server. Ti rispondo in 30 minuti se posso aiutare. [Scrivimi su WhatsApp](https://forjadesistemas.it/contatti) oppure scopri il servizio di [assistenza software](/servizi/assistenza-software).
+
+## Cause piu comuni di bug critico in PMI italiane
+
+Pattern visti centinaia di volte.
+
+**Certificato SSL scaduto.** Let's Encrypt non si e auto-rinnovato (cron rotto, server al limite del disco), oppure certificato a pagamento dimenticato. Sintomo: tutti i browser bloccano accesso. Fix: 30 minuti se hai accesso al server.
+
+**Quota Postgres / spazio disco esaurito.** Database cresce, log saturano disco, scrittura blocca. Sintomo: errori intermittenti, poi blocco totale. Fix: 1-3 ore (cleanup + ridimensionamento).
+
+**API SDI cambiata (Aruba, Fatture in Cloud).** Provider aggiorna endpoint o autenticazione, sistema non aggiornato. Sintomo: fatture non partono, errore -1 o -3. Fix: 2-4 ore (aggiornamento client API).
+
+**Token Stripe / PagoPA scaduto.** Webhook non validano firma. Sintomo: pagamenti incassati ma non registrati nel sistema, oppure errore 401. Fix: 1-2 ore (rigenerazione token + redeploy).
+
+**Deploy non testato in venerdi pomeriggio.** Modifica innocua che rompe edge case in produzione. Sintomo: bug improvviso correlato all'ultimo deploy. Fix: rollback immediato (5 min) + analisi (2-4 ore).
+
+**Migrazione DB rimasta a meta.** Schema parzialmente aggiornato, codice nuovo che si aspetta colonna inesistente. Sintomo: errore SQL ricorrente. Fix: 2-6 ore.
+
+**Dipendenza npm con CVE che ha bloccato build.** Pacchetto compromesso, audit blocca deploy automatico. Sintomo: deploy falliscono, vecchio sistema funziona. Fix: 1-3 ore (lock version, security patch).
+
+## Cosa documentare per il dev al primo contatto
+
+Quando contatti un dev di emergenza, queste informazioni accelerano dell'80% il time-to-fix.
+
+**Cosa funzionava 24h fa? Cosa e cambiato?** Deploy recenti, modifiche infrastruttura, aggiornamenti. Anche un cron innocuo conta.
+
+**Log accessibili (link).** URL al sistema di log (Vercel, AWS CloudWatch, Sentry, anche solo SSH per tail dei log file). Senza log, il dev sta a tentativi.
+
+**Accesso server / cloud / DB / Git.** Credenziali pronte. Aspettare 4 ore perche il responsabile IT sta dormendo per dare le password e tempo perso costoso.
+
+**Stack tecnico.** Next.js? PHP? .NET? Versione del runtime, framework, database. Un dev senior generalista coprira tutto, uno specialista ti chiedera prima.
+
+**Backup recente disponibile?** Quando l'ultimo backup verificato? Per quanti giorni copre? Indispensabile per scenario "rollback dati".
+
+## Errori comuni nelle prime ore
+
+**Riavviare server senza diagnosi.** A volte funziona, ma cancella la causa. Quando ricapita non sai cosa fare. Sempre log + snapshot prima del restart.
+
+**Restorare backup di 30 giorni fa senza analisi.** Perdi 30 giorni di dati operativi (ordini, cartelle pazienti, transazioni). Per emergenze strict: rollback solo dell'ultimo deploy, non dei dati.
+
+**Modificare codice in produzione direttamente.** SSH sul server, vim su file PHP, salva, refresh. Funziona oggi, esplode domani. Sempre via Git + CI/CD anche in emergenza.
+
+**Pagare in anticipo a sconosciuto su Telegram.** Dopo 2 ore senza fix sentirai disperazione. Resisti. Pagamenti solo dopo deliverable verificabile o a chi ha referenze concrete.
+
+**Non documentare le modifiche di emergenza.** Risolto bug alle 23, dimenticato cosa fatto, settimana prossima si ripresenta. Sempre changelog anche scritto a mano della notte.
+
+## Prevenire il prossimo bug critico
+
+Investimento preventivo che paga 10x in risparmi futuri.
+
+**Monitoraggio.** Sentry per errori applicativi (€26-80/mese), Better Uptime o Pingdom per uptime esterno (€19-150/mese). Notifica WhatsApp/email quando qualcosa rompe - tu sai prima del cliente.
+
+**CI/CD con test obbligatori.** GitHub Actions o Vercel CI. Test base (build OK, type check OK, lint OK) obbligatori prima di merge. Costa zero in setup, salva mille bug.
+
+**Backup giornalieri verificati.** Backup esiste != backup funziona. Test restore mensile su staging. Una volta vista la sorpresa di un backup corrotto, non si scorda.
+
+**Runbook documentato per i top 5 incidenti probabili.** Per ogni sistema critico: documento "se succede X, fai Y". 2 ore di scrittura, ore di salvezza in emergenza.
+
+**Contratto di plantone preventivo.** €1.500-4.500/mese per SLA 4-8h. Sembra caro finche non hai un down totale che ti costa €25.000 in 6 ore di blocco operativo.
+
+## FAQ
+
+**Quanto tempo dovrebbe metterci un dev senior a diagnosticare?**
+Per bug noti (certificato, deploy, token): 15-45 minuti per diagnosi + plan. Per bug strani (race condition, corruzione dati intermittente): 2-6 ore di investigazione prima di trovare la causa. Se a 2 ore non ha clue concrete, cambia dev.
+
+**Posso pagare con bonifico immediato o solo carta?**
+Bonifico SEPA istantaneo (max €25.000) e quasi tutti gli istituti italiani lo offrono. Stripe link funziona pure ma con commissione. Pagamento upfront 50% pre-inizio + 50% post-fix e schema standard per emergenze.
+
+**Cosa fare se il dev di plantone non risolve in 4h?**
+Tre opzioni: (1) attiva un secondo dev in parallelo per second opinion, (2) chiedi escalation al partner senior (se software house), (3) cambia fornitore se SLA non rispettato e contratto lo permette.
+
+**SLA realistico per PMI sotto i 50 dipendenti?**
+SLA 4h critico, 8h alto, 24h medio, 72h basso e standard sano per PMI italiane. SLA 1h critico esiste ma costa 3-5x e raramente vale per PMI sotto 50 dipendenti.
+
+**Conviene avere un contratto di plantone o pagare on-demand?**
+Se hai >2 incidenti significativi/anno o sistema business-critical, plantone preventivo paga sempre. On-demand conviene solo per sistemi marginali con bassissima criticita.
+
+**E se il problema e nel server del fornitore (hosting)?**
+Aprir ticket urgente al provider (Aruba, Hetzner, OVH, AWS) + parallelamente prepara workaround o failover. Provider seri rispondono in 30-60 minuti per criticita di livello enterprise (su piano adeguato).
+
+---
+
+Sistema critico fuori uso e bisogno di sviluppatore disponibile adesso? [Scrivimi su WhatsApp](https://forjadesistemas.it/contatti) - risposta in 30 minuti per valutazione preliminare. Oppure scopri il servizio di [assistenza software](/servizi/assistenza-software).

@@ -1,0 +1,192 @@
+---
+title: "QuickBooks vs Custom ERP: Which to Choose for Your US SMB in 2026"
+slug: "quickbooks-vs-custom-erp"
+date: "2026-04-25"
+description: "QuickBooks Online ($30-235/month) vs custom ERP ($25k-90k). Honest comparison: when QuickBooks is enough and when manual workarounds cost more than building your own."
+tags: ["quickbooks vs custom erp", "when to leave quickbooks", "custom erp small business us", "quickbooks limits 2026", "build vs buy erp smb"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "custom-systems"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "QuickBooks Online vs custom ERP: real cost comparison over 36 months, where QuickBooks genuinely breaks, and the hybrid path that keeps QBO for accounting while a custom layer runs ops."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'tiny-erp-vs-erp-personalizado'
+seo_title: "QuickBooks vs Custom ERP: Which to Choose for Your US SMB"
+meta_description: "QuickBooks Online ($30-235/month) vs custom ERP ($25k-90k). Honest comparison: when QuickBooks is enough and when manual workarounds cost more than building your own."
+canonical: "https://forjadesistemas.com/blog/quickbooks-vs-custom-erp"
+ogTitle: "QuickBooks vs Custom ERP: Which to Choose for Your US SMB"
+ogDescription: "QuickBooks Online ($30-235/month) vs custom ERP ($25k-90k). Honest comparison: when QuickBooks is enough and when manual workarounds cost more than building"
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://forjadesistemas.com/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.com/blog/quickbooks-vs-custom-erp"
+twitterCard: "summary_large_image"
+twitterTitle: "QuickBooks vs Custom ERP: Which to Choose for Your US SMB"
+twitterDescription: "QuickBooks Online ($30-235/month) vs custom ERP ($25k-90k). Honest comparison: when QuickBooks is enough and when manual workarounds cost more than building"
+twitterImage: "https://forjadesistemas.com/images/blog/default-cover.png"
+primary_category: "custom-systems"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# QuickBooks vs Custom ERP: Which to Choose for Your US SMB in 2026
+
+Choose QuickBooks Online when your business has standard accounting, sub-$5M revenue, single legal entity, no manufacturing, no multi-warehouse with batch tracking, and no commission structure beyond flat percentages. Choose a custom ERP when QuickBooks forces you to maintain 3+ side spreadsheets, when you pay 4-6 paid integrations to fill gaps, or when manual reconciliation eats more than $30,000/year of staff time. QuickBooks Online: $30-235/month. Custom ERP for a US SMB: $25,000-90,000 initial build plus $300-1,500/month infrastructure.
+
+*By Pedro Corgnati -- founder of SystemForge, full-stack developer with 8+ years building custom software for SMBs. I have shipped custom operational layers on top of QuickBooks Online via the Intuit API and full QuickBooks replacements for US clients in distribution and light manufacturing.*
+
+I'm not anti-QuickBooks. For 80% of US SMBs, QuickBooks Online is the right call. The argument for a custom ERP is not about cost -- it is about functionality QuickBooks does not deliver and the operational hidden costs of working around it.
+
+## Direct comparison summary
+
+**QuickBooks Online** is the dominant US SMB accounting platform. Strong: tax handling (1099, W-2, sales tax via integration), accountant network, ecosystem (Shopify, Amazon, Square, Bill.com, Avalara). Weak: inventory beyond basic, no real manufacturing, role-based access only on Advanced, anemic custom reporting.
+
+**Custom ERP** is software designed around your specific business rules: production scheduling, lot/serial tracking, multi-warehouse, complex commissioning, custom pricing, multi-entity consolidation, embedded BI. Built once, owned forever, evolves with the business.
+
+The right question: does QuickBooks resolve 100% of what you need (stick with it), or do you maintain spreadsheets, hire integrations and reconcile manually to fill its gaps (evaluate custom)?
+
+## What QuickBooks Online actually does
+
+### Plans, features, real limits per tier
+
+| Plan | Cost/month | Users | Strengths | Real limits |
+|------|-----------|-------|-----------|-------------|
+| Simple Start | $30 | 1 | Basic accounting, invoicing, expense tracking, mileage | No bill pay, no inventory, no multi-user |
+| Essentials | $60 | 3 | + bill management, time tracking, multi-currency | No inventory, no project profitability |
+| Plus | $90 | 5 | + inventory tracking, project profitability, class/location | Inventory is FIFO only, no batch/serial, no multi-warehouse |
+| Advanced | $235 | 25 | + role-based access, custom fields, workflow automation, smart reporting | Still no real manufacturing, weak multi-entity |
+
+### QuickBooks for retail and e-commerce (Shopify, Amazon, eBay)
+
+The integration story is solid for standard retail. Shopify, Amazon, eBay and Square sync orders, fees, refunds and inventory adjustments. Most US SMB retailers under $5M run this stack happily.
+
+Friction starts when you need: cross-channel inventory truth (Cin7, Linnworks or custom), sales tax automation across multiple states (Avalara at $50-200/month), 3PL integration (ShipStation at $30-200/month), abandoned-cart and email automation outside Shopify (Klaviyo at $45-1,000/month).
+
+By the time you stack 4-5 integrations on top of QuickBooks, your "free" accounting platform is a $500-1,500/month operational stack with reconciliation gaps.
+
+### Real QuickBooks limits SMBs hit at scale
+
+The honest list of where QuickBooks Online breaks at scale:
+
+- **No real MRP** -- bill of materials is rudimentary; no routing, no work orders, no shop-floor scheduling.
+- **No lot/serial/expiration tracking** -- a hard stop for food, pharma, cosmetics.
+- **No multi-warehouse with transfers** -- the "Advanced" version has location tracking but it is not a real WMS.
+- **Weak multi-entity** -- you run one QBO file per legal entity and consolidate manually or with QuickBooks Enterprise (different product, different price).
+- **Custom reports are weak** -- Smart Reporting (Advanced plan) is better but still falls short of Power BI / Metabase / Looker for cross-cutting analysis.
+- **API rate limits** -- the Intuit API is throttled (500 req/minute, with daily caps); high-volume e-commerce hits this.
+- **Sales tax across states** -- requires Avalara, TaxJar, or manual filing; QBO does not handle Wayfair nexus tracking natively.
+- **Complex commissioning** -- tiered commissions, splits, claw-backs are spreadsheet land.
+
+When 3+ of these matter to your operation, the hidden cost of working around them adds up.
+
+## What a custom ERP gives you
+
+### Specific business rules QuickBooks can't model
+
+Examples from real US client engagements:
+
+- **Distributor** with per-customer, per-product pricing matrices, EDI to 12 retailers and weekly truckload allocation rules.
+- **Light manufacturer** of contract food packaging with lot tracking, allergen segregation, batch certificates of analysis, and per-customer minimum-order quantities.
+- **Multi-location service business** (6 dental clinics) with shared patient records, per-clinic P&L, per-dentist commission and claims integration with payer clearinghouses.
+- **B2B + DTC hybrid** with separate price lists, shared inventory pool, and channel-level allocation rules.
+
+QuickBooks can hold the accounting layer for any of these. Operations need their own system.
+
+### Multi-entity, multi-warehouse, lot/serial, MRP-light
+
+A custom ERP delivers exactly the operational depth you need -- not a generic feature trying to fit every industry. For most SMBs that means: real multi-warehouse with transfer logic, lot/serial with expiration, MRP-light for assembly or kitting, multi-entity with intercompany transactions, custom pricing with rule-based discounts.
+
+### Custom reports and embedded BI
+
+Postgres + Metabase or Postgres + Power BI gives you analytics depth that QuickBooks reporting cannot match. Cohort analysis, custom margin breakdowns, vendor scorecards, customer profitability with allocated overhead -- all become trivial when you own the data layer.
+
+## Real cost comparison over 36 months
+
+A representative comparison for an $8M revenue light manufacturer:
+
+| Item | QuickBooks Plus + integrations | Custom ERP |
+|------|--------------------------------|------------|
+| Software license / build | $90/month QBO + $1,400/month integrations | $65,000 build (year 1) |
+| Infrastructure | Included | $700/month |
+| Reconciliation FTE | 0.6 FTE = $36,000/year | 0.1 FTE = $6,000/year |
+| Customization | $200-400/hr per change | Internal, ongoing |
+| 36-month total | ~$162,000 | ~$120,200 (incl. amortized build) |
+
+The custom build pays back inside 24 months, then continues to widen the lead because the FTE cost compounds.
+
+## 3 switching scenarios
+
+### Multi-state distributor ($12M revenue)
+
+QuickBooks + Cin7 + ShipStation + Avalara + Excel for allocation = $1,800/month + 0.8 FTE on reconciliation. Custom ERP scope: orders, allocation rules, EDI to top 5 retailers, custom pricing per customer, real-time inventory across 3 warehouses. Build cost: $75,000. Year-1 break-even: 16 months including FTE savings.
+
+### Light manufacturer ($8M revenue)
+
+Detailed above. Custom build $65,000, payback 14 months.
+
+### Multi-location service business ($4M revenue, 6 clinics)
+
+Considered NetSuite ($42,000 year-one quote). Built custom on Next.js + Postgres + Stripe + claims clearinghouse API: $55,000 build + $700/month infra. Equivalent to 1.3 years of NetSuite, with the platform being theirs.
+
+## Hybrid path: keep QuickBooks for accounting, build operational layer
+
+This is the path I recommend most often. Keep QuickBooks Online for accounting (tax filings, GL, AP, AR, your accountant likes it). Build a custom operational layer for orders, inventory, production, custom pricing, BI. Sync between the two via the Intuit API:
+
+- **Customer master**: source of truth in custom ERP, sync to QBO when first invoice generated.
+- **Invoices**: created in custom ERP from completed orders, posted to QBO via API.
+- **Bills**: received in custom ERP if AP is operational, posted to QBO; otherwise stay in QBO.
+- **Inventory adjustments**: source of truth in custom ERP, summarized journal entry to QBO monthly.
+- **Bank feeds**: stay in QBO, accountant reconciles there.
+
+Build cost: $25,000-50,000 versus $50,000-90,000 for full replacement. Faster payback (8-14 months), preserves the accountant's workflow, lower risk.
+
+For more depth, see the [build vs buy analysis for ERP](/blog/erp-for-small-businesses-build-vs-buy), the [SMB ERP cost comparison](/blog/erp-small-business-cost-comparison-2026), the [QuickBooks/Zoho vs custom ERP](/blog/quickbooks-zoho-vs-custom-erp-which-is-better) guide, the [ERP integration playbook](/blog/erp-integration-sap-netsuite-quickbooks-api), and the [ERP by industry chooser](/blog/erp-by-industry-which-one-to-choose).
+
+## How to test custom ERP fit before committing
+
+Before you commit $50k-90k to a custom build, validate with a 30-60 day pilot.
+
+1. **Document the 5 most painful workflows** with screenshots and time-spent measurements over 2 weeks. This becomes your scope baseline.
+2. **Build a 2-week throwaway prototype** of the highest-pain workflow (Properties + Inventory adjustments, or Orders + Custom Pricing). Real cost: $6,000-12,000. Real outcome: you know if the team adopts the workflow before scaling.
+3. **Run it parallel to QuickBooks for 30 days** with 2-3 users. Measure time saved, errors caught, satisfaction.
+4. **Decide**: scale up the prototype (typical), abandon (rare but valid), pivot scope (common).
+
+This is how you avoid the $80,000 build that nobody uses. The prototype dollars are not wasted -- they become the foundation of the full build or they save you 10x in avoided sunk cost.
+
+## What to demand from any custom ERP vendor
+
+- **TypeScript strict mode** plus end-to-end tests on critical paths.
+- **Schema-first development** with proper foreign keys, indexes and constraints.
+- **CI/CD with preview deploys** per pull request.
+- **Sentry + uptime monitoring** from day one.
+- **Code ownership** -- you own the GitHub repo, not the vendor.
+- **Documentation in repo**: README, .env.example, ARCHITECTURE.md, RUNBOOK.md.
+- **Onboarding plan** for the next developer -- this is the single most important deliverable for long-term success.
+
+Without these, you have a $80,000 black box. With them, you have an asset that survives any developer turnover.
+
+## FAQ
+
+**At what revenue does QuickBooks genuinely break?**
+Around $5M with operational complexity (multi-warehouse, lot tracking, manufacturing) or around $10-15M with simple operations but multi-entity needs. The early signals are 3+ side spreadsheets and a paid integration stack costing $800+/month.
+
+**Can I keep QuickBooks for accounting and build a custom operational layer?**
+Yes -- this is the hybrid path and the right call for most $5-15M US SMBs. Custom ERP for operations, QuickBooks for accounting, sync via the Intuit API. Cheaper, faster, lower risk than full replacement.
+
+**How much does the average custom ERP cost in the US in 2026?**
+$25,000-50,000 for an operational layer on top of QuickBooks. $50,000-90,000 for a fuller replacement. $90,000-180,000 for multi-entity/multi-location with light manufacturing. Add 15-20% annual maintenance and $400-1,800/month infrastructure.
+
+**What integrations does QuickBooks Online API support reliably?**
+Customers, vendors, items, invoices, bills, payments, journal entries, bank feeds, attached files, classes, locations. Throttled at 500 requests/minute. Webhooks available for change notifications. Reliable enough to be the back-end of a hybrid ERP.
+
+**Is NetSuite a better step than custom?**
+For $20M+ multi-entity businesses with structured operations and a $50k+ implementation budget, possibly. For $5-15M businesses, NetSuite is usually overkill and overpriced versus a focused custom build that solves your specific business rules.
+
+**How long does a custom ERP take to ship?**
+Operational layer: 3-4 months. Full replacement: 5-7 months. Multi-entity / multi-location with manufacturing: 7-10 months. Phased delivery (MVP in 2-3 months, then iterations) is the right approach for most.
+
+---
+
+If you're hitting QuickBooks limits and want a second opinion on the hybrid path versus full custom before you commit, [message me on WhatsApp](https://wa.me/5500000000000) -- no pitch, no commitment. Or see the [custom systems service](/services/custom-systems).

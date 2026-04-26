@@ -1,0 +1,178 @@
+---
+title: "Suporte 24x7 para PHP legacy (5.x e 7.x) em 2026: riscos e refactor"
+slug: "suporte-software-24x7-sistema-legacy-php-2026"
+date: "2026-04-25"
+description: "Sistema legado em PHP 5.x ou 7.x sem suporte? Riscos de CVEs, custo de plantão emergencial e refactor incremental. Suporte 24x7 PHP legacy R$ 3-10k/mês."
+tags: ["suporte php legacy", "php 7 sem suporte 2026", "manutencao magento 1", "joomla 3 suporte", "refactor php incremental"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "manutencao-sistemas"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "PHP 5.x e 7.x rodando em produção em 2026 é bomba relógio. Veja CVEs reais, custos de plantão e como refatorar sem parar o sistema."
+hreflang_pair: []
+seo_title: "Suporte 24x7 para PHP legacy (5.x e 7.x) em 2026: riscos e"
+meta_description: "Sistema legado em PHP 5.x ou 7.x sem suporte? Riscos de CVEs, custo de plantão emergencial e refactor incremental. Suporte 24x7 PHP legacy R$ 3-10k/mês."
+canonical: "https://forjadesistemas.com.br/blog/suporte-software-24x7-sistema-legacy-php-2026"
+ogTitle: "Suporte 24x7 para PHP legacy (5.x e 7.x) em 2026: riscos e"
+ogDescription: "Sistema legado em PHP 5.x ou 7.x sem suporte? Riscos de CVEs, custo de plantão emergencial e refactor incremental. Suporte 24x7 PHP legacy R$ 3-10k/mês."
+ogType: "article"
+ogLocale: "pt_BR"
+ogImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.com.br/blog/suporte-software-24x7-sistema-legacy-php-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Suporte 24x7 para PHP legacy (5.x e 7.x) em 2026: riscos e"
+twitterDescription: "Sistema legado em PHP 5.x ou 7.x sem suporte? Riscos de CVEs, custo de plantão emergencial e refactor incremental. Suporte 24x7 PHP legacy R$ 3-10k/mês."
+twitterImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+primary_category: "manutencao-sistemas"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Suporte 24x7 para PHP legacy (5.x e 7.x) em 2026: riscos e refactor
+
+Suporte 24x7 para sistema legacy em PHP 5.x ou 7.x custa entre R$ 3.000 e R$ 10.000 por mês com SLA de 4-8h para crítico, e exige fornecedor especializado em legado, não é trabalho que freelancer júnior topa. PHP 5.x perdeu suporte oficial em 2019 e PHP 7.x em novembro de 2022. Rodar essas versões em produção em 2026 expõe seu sistema a CVEs conhecidas como CVE-2019-11043 (FPM RCE crítica) e CVE-2022-31625 (heap corruption no PostgreSQL extension). O caminho certo não é só "manter funcionando", é refactor incremental para PHP 8.3 enquanto o sistema continua no ar usando strangler fig pattern. Para suporte urgente pontual sem refactor, veja o guia geral de [suporte de software urgente](/blog/suporte-de-software-urgente).
+
+Sou Pedro Corgnati, dev full-stack e fundador da SystemForge. Mantenho e refatoro sistemas legados há 10+ anos. Já assumi Magento 1 abandonado pelo dev original (CVE conhecida explorada, banco invadido), Joomla 3 com 4 anos sem patch e portal interno em PHP 5.6 que processava NFe. Os três tinham o mesmo padrão: ninguém quis mexer durante anos, custo de manutenção foi crescendo, e quando deu problema sério, encontrar quem aceitasse o caso ficou caro. Este artigo mostra os riscos reais, o custo de plantão e o caminho de refactor incremental que aplico de verdade.
+
+## O que significa "PHP legacy" em 2026
+
+PHP legacy é sistema rodando em versão da linguagem fora de suporte oficial pela equipe do PHP Group. Em abril de 2026, isso significa três faixas críticas.
+
+### PHP 5.x, fim de vida em 2019
+
+PHP 5.6 foi a última versão da linha 5.x e parou de receber qualquer atualização de segurança em 31 de dezembro de 2018. Em 2026, sistema rodando PHP 5.x acumulou 7 anos sem patch oficial. Isso não significa que o sistema vai cair amanhã, significa que toda CVE descoberta de 2019 pra cá afeta seu sistema sem correção disponível.
+
+Sistemas comuns ainda em PHP 5.x: Magento 1.9, Joomla 2.5, WordPress muito antigo (3.x e 4.x), portais corporativos custom de 2010-2015.
+
+### PHP 7.x, fim de vida em novembro de 2022
+
+PHP 7.4 foi a última versão da linha 7.x e parou de receber patches em 28 de novembro de 2022. Em abril de 2026, são 3 anos e 5 meses sem suporte oficial. Em hospedagens compartilhadas como Hostinger e Cloudways, ainda é possível ativar PHP 7.x, mas várias vulnerabilidades não terão correção.
+
+Sistemas comuns em PHP 7.x: Magento 2.3 e anterior, Joomla 3.x, WordPress 5.x sem upgrade, sistemas Laravel 5/6, portais e apps custom de 2017-2021.
+
+### O que é "moderno" em 2026
+
+PHP 8.1 (suporte ativo até novembro de 2025, security até novembro de 2026), PHP 8.2 (security até dezembro de 2026), PHP 8.3 (active até novembro de 2026, security até novembro de 2027), PHP 8.4 (active até dezembro de 2027). Refactor de legado deve mirar **PHP 8.3 mínimo** para ter pelo menos 18-24 meses de suporte garantido.
+
+## Riscos reais de rodar PHP 5.x e 7.x em produção
+
+Não é apocalipse imediato. É bomba relógio com pavio aceso. Três categorias de risco.
+
+### CVEs críticas conhecidas
+
+CVEs específicas que afetam sistemas legacy PHP em produção:
+
+- **CVE-2019-11043** - RCE no PHP-FPM com Nginx. Afeta PHP 5.x, 7.0, 7.1, 7.2, 7.3. Permite execução remota de código via URL malformada. Exploit público desde 2019.
+- **CVE-2022-31625** - heap corruption na extensão PostgreSQL. Afeta 7.x e 8.0 anteriores ao patch.
+- **CVE-2023-3823** - leitura de arquivos arbitrários via XML parsing. Afeta 7.x sem patch.
+- **CVE-2024-2756** - bypass de cookie security em PHP 7.x e 8.x antigo.
+
+Cada uma dessas tem exploit público no GitHub e está sendo varrida ativamente por bots em hospedagens compartilhadas. Sistema PHP legacy em servidor exposto na internet recebe centenas de tentativas por dia.
+
+### Compliance LGPD em sistema sem patch
+
+A LGPD (artigo 46) exige medidas de segurança técnicas e administrativas adequadas. ANPD já se manifestou: rodar software com vulnerabilidade pública conhecida e sem mitigação configura falha de segurança. Em caso de incidente com vazamento de dados, esse é fator agravante na multa, que pode chegar a 2% do faturamento limitado a R$ 50 milhões por infração.
+
+Em 2026, com a maturidade da fiscalização da ANPD, ignorar PHP fora de suporte deixou de ser problema técnico, virou problema jurídico. Para checar onde sua operação está em relação a LGPD, vale o checklist de [adequação LGPD do sistema da empresa](/blog/lgpd-sistema-empresa-adequar-2026).
+
+### Custo crescente de manutenção
+
+Cada ano que passa, a comunidade de devs PHP que ainda lembra da sintaxe e quirks do PHP 5.x diminui. Em 2026, freelancer júnior PHP nem reconhece mais código procedural pesado de 2012. Encontrar quem aceita o caso fica progressivamente mais caro: o que você pagava R$ 80/hora em 2018 hoje custa R$ 250-400/hora porque o pool de oferta minguou.
+
+## Quem aceita suporte de PHP legacy em 2026
+
+Em 2026, o mercado se dividiu em três grupos.
+
+**Grupo 1 - Software houses especializadas em legado.** Empresas que fizeram nicho de manter Magento 1, Joomla 3 e PHP custom antigo. Cobram caro (R$ 250-500/hora ou R$ 5-10k/mês de contrato), mas têm equipe que conhece os pitfalls. Encontra buscando "manutenção magento 1 brasil" ou "suporte joomla legacy".
+
+**Grupo 2 - Devs sêniores que aceitam pelo desafio.** Devs com 10-15 anos de carreira que começaram em PHP 5 e topam casos pontuais por valor premium. Cobram R$ 300-600/hora, mas só aceitam projetos curtos (refactor incremental ou migração).
+
+**Grupo 3 - Software houses generalistas que cobram a mais.** Quase todas as software houses modernas evitam PHP legacy. Quando aceitam, cobram 50-100% acima do preço normal porque sabem que vai ter retrabalho. Faixa: R$ 400-800/hora.
+
+O que **não funciona em 2026**: agência genérica WordPress, freelancer júnior, dev frontend sem experiência server-side. PHP legacy exige conhecimento de PHP-FPM, configuração de Apache/Nginx clássico, MySQL antigo, e quirks da linguagem que não estão na documentação atual.
+
+## Custo de plantão 24x7 PHP legacy
+
+Tabela de referência 2026 para fornecedores especializados em PHP legacy:
+
+| Modelo | Custo (R$) | SLA típico |
+|--------|------------|------------|
+| Plantão avulso por hora (sem contrato) | 350 a 600/hora | 2-4h primeiro contato |
+| Pacote mensal mínimo (10h) | 3.000 a 5.000/mês | 4-8h crítico |
+| Contrato 24x7 com SLA | 5.000 a 10.000/mês | 2-4h crítico |
+| Refactor incremental (projeto fechado) | 30.000 a 150.000 total | 3-9 meses |
+
+A faixa cresce com a criticidade do sistema (e-commerce com R$ 1M/mês de faturamento paga mais que portal interno) e com a complexidade do legado (Magento 1 com 50 plugins é mais caro que portal PHP custom simples).
+
+## Refactor incremental, não é reescrita
+
+Cliente que ouve "refactor" pensa em "reescrever do zero". Está errado e vai te custar caro. Refactor de legado em 2026 é **incremental, com sistema em produção continuando a operar**. O padrão que aplico é o strangler fig.
+
+### Strangler fig pattern aplicado a PHP legacy
+
+Conceito: você coloca um proxy reverso na frente do sistema legacy. Esse proxy direciona requisições para o sistema antigo (PHP 5.x ou 7.x) por padrão. Conforme você desenvolve a versão nova (PHP 8.3 ou outra stack), você muda regra do proxy para direcionar rotas específicas para o novo. Aos poucos, o sistema novo "sufoca" o antigo até substituí-lo.
+
+Stack típica:
+
+- **Proxy reverso**: Nginx ou Caddy
+- **Sistema antigo**: continua no servidor original (Hostinger, VPS legacy)
+- **Sistema novo**: PHP 8.3 + Laravel 11, ou Node.js, ou outra stack moderna
+- **Banco de dados**: o mesmo (MySQL legado), com migração de schema sendo feita via migrations versionadas
+
+Vantagens: zero downtime durante a migração, possibilidade de testar feature por feature, rollback simples (volta a regra do proxy para a rota antiga). Se você quer entender o caminho geral de modernização sem reescrever tudo, leia [integrar sistemas legados sem reescrever](/blog/integrar-sistemas-legados-sem-reescrever), strangler fig é uma das estratégias listadas lá.
+
+### Caso Magento 1: para onde migrar em 2026
+
+Magento 1 chegou ao fim de vida em junho de 2020. Adobe não vai mais lançar patch oficial nem por dinheiro. Em 2026, três caminhos válidos:
+
+1. **Migrar para Magento 2 (Adobe Commerce open source)**: viável se a operação justifica o overhead. Custo: R$ 80-300k. Prazo: 6-12 meses.
+2. **Migrar para Shopify**: caminho mais comum em 2026 para PME e médio porte. Custo: R$ 30-120k de implementação + mensalidade Shopify. Prazo: 3-6 meses.
+3. **Reescrever em stack moderna headless (Next.js + Medusa ou Vendure)**: para quem precisa de performance máxima e features sob medida. Custo: R$ 100-400k. Prazo: 6-12 meses.
+
+Para o setor de moda e beleza brasileiro, o caminho Shopify cobre 80% dos casos. Para distribuidoras B2B, Magento 2 ainda é defensável. Headless é nicho.
+
+### Caso Joomla 3: modernizar ou trocar
+
+Joomla 3 chegou ao fim de suporte em agosto de 2023. Joomla 4 e 5 existem mas exigem refactor pesado de extensões e templates. Em 2026, dois caminhos:
+
+1. **Migração para Joomla 5** (PHP 8.1+), válida se você tem extensões custom valiosas. Custo: R$ 25-80k.
+2. **Reescrever em WordPress moderno + Bedrock + tema custom** ou em **Next.js headless com CMS** (Sanity, Strapi), caminho mais comum em 2026. Custo: R$ 30-150k.
+
+Para portais institucionais e blogs corporativos, o caminho WordPress moderno ou headless cobre praticamente todos os casos. Manter Joomla 3 em 2026 é decisão difícil de justificar.
+
+> Se você tem sistema PHP legacy crítico em produção e não sabe se faz sentido refatorar ou trocar, posso fazer um diagnóstico técnico de 60 minutos analisando código, hospedagem e operação. Conversa direta no [WhatsApp](https://forjadesistemas.com.br/contato).
+
+## Como evitar lock-in de fornecedor
+
+Quem assume sistema legacy em 2026 pode tentar te aprisionar. Três proteções obrigatórias.
+
+**Proteção 1 - Acesso completo ao código.** Repositório Git em servidor seu (GitHub, GitLab) com você como owner. Se o fornecedor pede pra hospedar no Git dele, recuse. Sem código na sua mão, você é refém.
+
+**Proteção 2 - Documentação versionada.** README atualizado, ADRs explicando decisões técnicas, lista de variáveis de ambiente, runbook de deploy. Tudo no repositório. Se o fornecedor diz "está na cabeça do meu time", isso é red flag.
+
+**Proteção 3 - Acesso direto a hospedagem e banco.** Senha do painel da hospedagem (Hostinger, Cloudways, VPS) e backup completo do banco em local que você controla. Se o fornecedor é o único que acessa, no dia que ele sumir, você não consegue nem fazer backup pra entregar pro próximo.
+
+> Se sua operação roda em PHP legacy crítico e você quer plano de refactor incremental sem parar a operação, fala comigo no [WhatsApp](https://forjadesistemas.com.br/contato), analiso código, hospedagem e cronograma sem cobrar a primeira conversa.
+
+## FAQ
+
+**1. PHP 7.4 ainda recebe patches de segurança em 2026?**
+
+Não, não pelo PHP Group. Algumas distros Linux (Ubuntu LTS, RHEL) e provedores comerciais como Zend by Perforce vendem suporte estendido pago para PHP 7.x até 2027-2028, mas custa caro (US$ 3.000-15.000/ano por servidor). Em 2026, vale apenas como ponte enquanto refactor é executado.
+
+**2. Posso continuar rodando PHP 5.6 sem risco de LGPD?**
+
+Risco existe e é alto. Em caso de incidente com vazamento de dados, ANPD considera "rodar versão fora de suporte com CVE conhecida" como agravante na multa. Não há proibição expressa, mas a defesa em caso de fiscalização é difícil. Recomendação: priorize o refactor para 8.x antes de rodar 5.6 por mais 6-12 meses.
+
+**3. Migrar Magento 1 para Magento 2 vale a pena ou é melhor ir para Shopify em 2026?**
+
+Para PME e médio porte (faturamento até R$ 30M/ano e operação relativamente padrão), Shopify costuma ser melhor relação custo-benefício. Para grande operação com features muito específicas (B2B com tabela de preço por cliente, marketplace multi-vendor, integrações fiscais brasileiras pesadas), Magento 2 ainda faz sentido. A decisão depende do quanto você usa de features custom hoje.
+
+**4. Quanto tempo leva refactor incremental de PHP 5.x para 8.3?**
+
+Depende do tamanho do código. Sistema com 30-50 mil linhas de PHP 5.x leva 4-6 meses de refactor incremental rodando em paralelo com o legado. Sistema com 100k+ linhas leva 9-18 meses. O fator decisivo não é a versão da linguagem, é a quantidade de regra de negócio acoplada que precisa ser entendida e migrada.
+
+**5. O Cloudways e a Hostinger ainda hospedam PHP 5.x e 7.x em 2026?**
+
+Cloudways (Digital Ocean managed) descontinuou PHP 5.x em 2023 e PHP 7.0/7.1/7.2 em 2024. Ainda permite PHP 7.4 mas sem patch. Hostinger ainda oferece PHP 7.x em planos compartilhados, com aviso claro de "fora de suporte". Para sistema legacy crítico, a recomendação é migrar para VPS dedicada (DigitalOcean, Hetzner, Contabo) onde você controla a versão e aplica patches conforme necessário, ou contratar suporte estendido pago.

@@ -1,0 +1,194 @@
+---
+title: "Urgent Web System: How to Launch Your Web Application in Weeks"
+slug: "urgent-web-system-fast-launch"
+date: "2026-04-25"
+description: "Need a web application live in 2-6 weeks? Realistic scope, prebuilt stack (Next.js + Supabase + Vercel), pricing in the US and the trade-offs that let you ship fast without painful debt."
+tags: ["urgent web system", "launch web app fast us", "web application 2 weeks", "mvp web app fast 2026", "fast custom software us"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "custom-systems"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Practical 2026 guide to shipping a real web system in 2-6 weeks: what fits, the prebuilt stack, US pricing tiers and the trade-offs you accept for speed."
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'sistema-web-urgente'
+seo_title: "Urgent Web System: How to Launch Your Web Application in"
+meta_description: "Need a web application live in 2-6 weeks? Realistic scope, prebuilt stack (Next.js + Supabase + Vercel), pricing in the US and the trade-offs that let you ship fast without painful debt."
+canonical: "https://forjadesistemas.com/blog/urgent-web-system-fast-launch"
+ogTitle: "Urgent Web System: How to Launch Your Web Application in"
+ogDescription: "Need a web application live in 2-6 weeks? Realistic scope, prebuilt stack (Next.js + Supabase + Vercel), pricing in the US and the trade-offs that let you ship"
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://forjadesistemas.com/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.com/blog/urgent-web-system-fast-launch"
+twitterCard: "summary_large_image"
+twitterTitle: "Urgent Web System: How to Launch Your Web Application in"
+twitterDescription: "Need a web application live in 2-6 weeks? Realistic scope, prebuilt stack (Next.js + Supabase + Vercel), pricing in the US and the trade-offs that let you ship"
+twitterImage: "https://forjadesistemas.com/images/blog/default-cover.png"
+primary_category: "custom-systems"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Urgent Web System: How to Launch Your Web Application in Weeks
+
+A real, useful web system in 2026 can ship in 2-6 weeks if scope is honest, the stack is prebuilt and decisions are made daily. Realistic ranges: a single-purpose internal tool with auth + 1 entity CRUD + dashboard ships in 2 weeks at $6,000-12,000. A multi-entity SMB system with auth, billing, role-based access and 3-5 modules ships in 4-6 weeks at $15,000-35,000. Anything beyond that needs proper scoping. The trade-offs: third-party services for auth (Clerk), email (Resend), payments (Stripe), hosting (Vercel) instead of building in-house.
+
+*By Pedro Corgnati -- founder of SystemForge, full-stack developer with 8+ years building custom software for SMBs. I have shipped 2-6 week production web systems for US and Brazilian clients on the Next.js + Supabase + Vercel stack covering internal ops tools, B2B portals and revenue-critical MVPs.*
+
+If you have a real deadline -- investor demo, RFP response, regulatory cutoff, season opening -- this guide is for you. Calm, structured, no upselling.
+
+## What "urgent" actually means in software
+
+"Urgent" gets thrown around. In software engineering, the honest meanings:
+
+- **Urgent S1 (2 weeks)**: a single-purpose tool, replacing a known spreadsheet or process, no integrations beyond auth and email.
+- **Urgent S2 (4 weeks)**: a multi-module system replacing 2-3 manual processes, with auth, payments, and 1-2 integrations.
+- **Urgent S3 (6 weeks)**: a customer-facing product replacing a competitor's tool or launching new SaaS, with auth, payments, role-based access, 3-5 modules.
+- **Past 6 weeks** is no longer "urgent" -- it's a project, and rushing through scoping is how you ship a system you rebuild in 6 months.
+
+If your real deadline is 8-12 weeks, do not pretend it's "urgent". You'll get a better system if you scope properly.
+
+## Realistic scope for 2, 4 and 6 weeks
+
+### 2-week scope ($6,000-12,000)
+
+- Auth (login, signup, password reset, email verification) via Clerk or Supabase Auth.
+- 1 main entity CRUD (e.g., Properties, Clients, Orders).
+- Dashboard with 4-6 metrics.
+- 2-3 list views with filters and pagination.
+- Email notifications via Resend (3-5 templates).
+- Export to CSV.
+- Mobile-responsive (not native mobile app).
+
+What you skip: payments, role-based access beyond admin/user, multi-tenancy, advanced reporting, SSO, multi-language.
+
+### 4-week scope ($15,000-25,000)
+
+- Everything in 2-week scope, plus:
+- Stripe payments (subscription or one-time).
+- 3-4 main entities with relationships.
+- Role-based access (3-4 roles).
+- Custom reports (3-5 reports with filters).
+- Webhook integration with 1 third-party (Stripe, HubSpot, Slack, etc.).
+- Audit log on critical actions.
+
+### 6-week scope ($25,000-35,000)
+
+- Everything in 4-week scope, plus:
+- Multi-tenancy (organizations, team members, invitations).
+- 5-7 main entities with relationships.
+- Embedded analytics (Metabase or PostHog).
+- 2-3 third-party integrations.
+- File upload to S3/Supabase Storage with image processing.
+- Notification center (in-app + email + optional SMS).
+- Public marketing site with SEO basics.
+
+## The prebuilt stack that lets you ship fast
+
+The reason these timelines work is that everything is prebuilt, well-documented and integrates by default.
+
+### Frontend: Next.js 15 + shadcn/ui + Tailwind
+
+Next.js App Router is the production default in 2026. shadcn/ui gives you copy-paste accessible components (button, input, dialog, table, dropdown, calendar, command palette). Tailwind keeps styling in markup. TypeScript everywhere.
+
+### Backend: Supabase or Neon + Drizzle ORM
+
+Supabase gives you Postgres, auth, storage, realtime, edge functions in one product. Neon gives you serverless Postgres with branching (you can fork the database for testing). Drizzle is the type-safe ORM I prefer over Prisma in 2026 (faster cold starts on Vercel).
+
+### Auth: Clerk, WorkOS or Supabase Auth
+
+Clerk is the fastest path for B2C and most B2B (multi-tenant orgs, team invitations, MFA, social login built in). WorkOS is the right choice for enterprise SAML/OIDC SSO. Supabase Auth is fine when you're already using Supabase and need basics.
+
+### Payments: Stripe
+
+Stripe Checkout for one-time or subscription. Stripe Customer Portal for self-serve plan changes. Webhooks via Vercel handlers or Inngest for async work.
+
+### Email: Resend or Postmark
+
+Resend integrates cleanly with Next.js (React Email templates). Postmark is the right call for transactional reliability at scale.
+
+### Hosting: Vercel
+
+Vercel deploys Next.js production-ready. Preview environments per pull request. Built-in analytics, edge middleware, ISR. Roughly $20-100/month at MVP scale.
+
+### Async jobs: Inngest or Trigger.dev
+
+For background work (sending emails, processing webhooks, generating PDFs) without standing up a queue server. Both have generous free tiers.
+
+## Real US pricing tiers in 2026
+
+| Scope | Cost | Timeline | Team size |
+|-------|------|----------|-----------|
+| 2-week MVP | $6,000-12,000 | 10-14 calendar days | 1 senior dev |
+| 4-week SMB system | $15,000-25,000 | 3-4 calendar weeks | 1 senior dev or 1 senior + 1 mid |
+| 6-week multi-module | $25,000-35,000 | 5-6 calendar weeks | 1 senior + 1 mid |
+| 8+ week proper project | $40,000+ | 8+ calendar weeks | 1 senior + 1 mid + 0.5 designer |
+
+Prices include design (Tailwind + shadcn provides 80% of the visual layer; a real designer for week 5+ adds $3,000-8,000), development, QA and deploy. They exclude infrastructure ($30-200/month at MVP scale) and ongoing maintenance.
+
+## Trade-offs you accept for speed
+
+Every fast launch has trade-offs. Be honest about them:
+
+- **Vendor lock-in** on Clerk, Supabase, Vercel, Stripe -- swapping out any of these is real work later.
+- **Limited customization on auth UX** -- Clerk's hosted pages are great but not 100% your brand.
+- **Stripe Checkout vs custom checkout** -- Checkout ships in hours, custom takes 2-4 weeks.
+- **Less test coverage** -- target 50-60% on critical paths, not 90% on everything.
+- **No CI gates beyond build + tests** -- mature CI/CD adds 1-2 weeks.
+- **Documentation is minimal** -- code-as-doc plus a README, not a Notion wiki.
+- **Single environment** at launch -- staging and production share infrastructure initially.
+
+These are acceptable for an MVP or internal tool. They are not acceptable for a regulated environment (HIPAA, PCI Level 1, SOX) where compliance work doubles the timeline.
+
+## When fast becomes "should rebuild in 6 months"
+
+Specific signs that what you shipped fast won't survive scaling:
+
+- 5+ days/month of bug-fixing instead of features.
+- Database queries timing out under real load (no indexes, N+1 queries).
+- No real auth audit log (regulators ask, you don't have it).
+- Manual deploys because CI/CD was skipped.
+- Third-party integrations breaking on minor version changes.
+- Customers asking for features that require schema rewrites.
+
+The right move is not to rewrite from scratch but to incrementally harden: add tests on critical paths, add proper indexes, move auth to a dedicated service if needed, add CI/CD, refactor the highest-friction modules. A good fast launch is rewritable. A bad one is not.
+
+For the broader build picture, see the [SaaS MVP in 30 days roadmap](/blog/saas-mvp-in-30-days-practical-roadmap), the [build a SaaS platform from scratch guide](/blog/build-saas-platform-from-scratch-2026), the [micro-SaaS build guide](/blog/how-to-build-a-micro-saas-2026-complete-guide), and the [urgent automation playbook](/blog/business-automation-urgent-scale-without-hiring).
+
+## Real 2-6 week engagements I have shipped
+
+Three anonymized examples that fit each tier.
+
+**2-week internal tool ($9,500).** Property management company replacing an Excel-based maintenance request workflow. Auth (Clerk), 1 entity (Maintenance Requests with photo upload to S3), assignment workflow, status board, email notifications to assignees, CSV export for billing. 1 senior dev for 11 calendar days. Live and adopted by 6 internal users in week 3.
+
+**4-week B2B portal ($22,000).** Wholesale food distributor offering self-serve ordering for 80 retail customers. Auth + multi-tenant orgs (Clerk), product catalog with per-customer pricing, cart and checkout (Stripe ACH), order history, account manager dashboard, daily order email digest. 1 senior + 1 mid for 4 weeks. Reduced phone-order time from 14 hours/week to 4.
+
+**6-week SaaS MVP ($31,500).** Founder launching a niche scheduling tool for veterinarians. Multi-tenant auth (Clerk orgs), 5 entities (Clinic, Vet, Patient, Appointment, Owner), Stripe subscriptions with 14-day trial, embedded analytics (PostHog), public marketing site, 3-language (en/pt-BR/es-ES), file upload for patient docs. 1 senior + 1 mid + 0.5 designer for 6 weeks. Launched with 14 paying clinics in week 8.
+
+The pattern: scope ruthlessly, prebuild relentlessly, decide daily.
+
+## FAQ
+
+**What can really be built in 2 weeks?**
+A single-purpose tool replacing a known spreadsheet: auth + 1 entity CRUD + dashboard + 3-5 email templates + CSV export + mobile-responsive. Not a marketplace. Not a multi-sided product. Not anything regulated.
+
+**What's the price difference between 2 and 6 weeks?**
+2-week: $6,000-12,000. 4-week: $15,000-25,000. 6-week: $25,000-35,000. The price grows roughly linearly with weeks because the team size grows.
+
+**What features should I cut to ship fast?**
+Cut: custom auth UX, custom checkout, complex role hierarchies, multi-language, native mobile app, white-label, enterprise SSO. Keep: core workflow, payments (via Checkout), email notifications, basic dashboard, mobile-responsive.
+
+**Is the prebuilt stack good enough for production?**
+Yes for MVP and SMB use cases. Vercel + Supabase + Clerk + Stripe powers thousands of production SaaS products from $0 to $10M+ ARR. The limits show at high scale (>100k DAU) or in regulated environments where you need finer control.
+
+**Can I extend the system later or do I need to rebuild?**
+A well-built fast launch is fully extendable. The architecture is the same as a multi-month build -- just with fewer features and less polish. Rebuilds are needed only when the fast launch was sloppy (no tests, no types, magic numbers, no separation of concerns).
+
+**How do I avoid the "fast now, painful later" trap?**
+Demand: TypeScript strict mode, end-to-end test on the 3 critical paths, CI/CD with automatic preview deploys, Sentry on day one, proper schema design with foreign keys and indexes, README + .env.example. Skip these and you build technical debt at the speed of features.
+
+---
+
+If you have a real deadline and want a second opinion on scope before you commit, [message me on WhatsApp](https://wa.me/5500000000000) -- no pitch, no commitment. Or see the [custom systems service](/services/custom-systems).

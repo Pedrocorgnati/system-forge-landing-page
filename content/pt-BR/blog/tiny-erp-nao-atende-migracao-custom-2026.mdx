@@ -1,0 +1,197 @@
+---
+title: "Tiny ERP não atende? Playbook de migração para ERP customizado 2026"
+slug: "tiny-erp-nao-atende-migracao-custom-2026"
+date: "2026-04-25"
+description: "Playbook técnico de migração Tiny ERP para sistema sob medida: export, mapeamento, paralelo, cutover, custos por fase e riscos reais em 2026."
+tags: ["migrar tiny erp", "tiny erp para sistema customizado", "migracao erp brasil", "cutover tiny erp", "sistema sob medida pme 2026"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sistemas-personalizados"
+locale: 'pt-BR'
+published: true
+exclusive: false
+excerpt: "Quando Tiny vira gargalo, a pergunta não é mais se migra. É como migrar sem parar a operação. Playbook das 5 fases reais, com custos e cronograma."
+hreflang_pair: []
+seo_title: "Tiny ERP não atende? Playbook de migração para ERP"
+meta_description: "Playbook técnico de migração Tiny ERP para sistema sob medida: export, mapeamento, paralelo, cutover, custos por fase e riscos reais em 2026."
+canonical: "https://forjadesistemas.com.br/blog/tiny-erp-nao-atende-migracao-custom-2026"
+ogTitle: "Tiny ERP não atende? Playbook de migração para ERP"
+ogDescription: "Playbook técnico de migração Tiny ERP para sistema sob medida: export, mapeamento, paralelo, cutover, custos por fase e riscos reais em 2026."
+ogType: "article"
+ogLocale: "pt_BR"
+ogImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.com.br/blog/tiny-erp-nao-atende-migracao-custom-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Tiny ERP não atende? Playbook de migração para ERP"
+twitterDescription: "Playbook técnico de migração Tiny ERP para sistema sob medida: export, mapeamento, paralelo, cutover, custos por fase e riscos reais em 2026."
+twitterImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+primary_category: "sistemas-personalizados"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Tiny ERP não atende? Playbook de migração para ERP customizado 2026
+
+Migrar do Tiny ERP para um sistema customizado leva entre 8 e 16 semanas em projetos PME, com investimento típico de R$ 25.000 a R$ 80.000 e cinco fases obrigatórias: export e auditoria, mapeamento de campos, desenvolvimento, período paralelo e cutover. O risco real não é técnico, é operacional. Empresa que tenta cutover sem paralelo perde 2 a 4 semanas de operação. Antes de começar, confirme que migrar faz sentido lendo o comparativo direto entre [Tiny ERP e ERP personalizado](/blog/tiny-erp-vs-erp-personalizado), se as limitações estão claras, o playbook abaixo é o mesmo que aplico em projetos reais.
+
+Sou Pedro Corgnati, dev full-stack e fundador da SystemForge. Já conduzi migração de Tiny para sistema sob medida em e-commerce de moda, distribuidora de autopeças e indústria de embalagens. As três tinham o mesmo padrão: cresceram dentro do Tiny até bater no teto de regras de negócio, ficaram 6 meses tentando "dar jeito" com planilhas e Zapier, e só então decidiram migrar. Esse atraso custa caro. Este artigo mostra o que fazer da decisão até o cutover, fase por fase.
+
+## Antes de migrar, confirme que vale a pena
+
+Migrar de Tiny ERP para sistema customizado é decisão de via única. Uma vez feito o cutover, voltar atrás custa mais que o projeto inicial. Antes de começar, três sinais precisam estar claros:
+
+**Sinal 1 - Retrabalho manual recorrente.** Sua equipe gasta mais de 10 horas por semana ajustando o que o Tiny não faz: comissão escalonada calculada na planilha, conciliação financeira batida fora do sistema, relatório customizado gerado no Excel a partir de export.
+
+**Sinal 2 - Regra de negócio que o Tiny não suporta.** Comissionamento por margem, produção MRP, estoque com rastreabilidade de lote, multi-filial com consolidação financeira, regra fiscal específica do seu setor.
+
+**Sinal 3 - Custo crescente de integrações pontuais.** Você já paga Zapier, Make, integradores custom, planilhas Google Sheets sincronizadas, e ainda assim a operação trava em pontos que dependeriam de uma única consulta SQL. Se já comparou opções, talvez tenha visto a discussão de [construir vs comprar ERP para pequenas empresas](/blog/erp-pequenas-empresas-construir-vs-comprar), esse mesmo trade-off aparece aqui.
+
+Se você tem dois desses três sinais, a migração se paga em 12-18 meses. Se tem só um, leia o hub Tiny vs custom antes, talvez um app complementar resolva sem migrar.
+
+## Fase 1: Export e auditoria dos dados do Tiny ERP
+
+A primeira pergunta que todo cliente faz é "o Tiny exporta tudo?" A resposta honesta é "exporta quase tudo, mas com qualidade variada". Vale entender o que vem pronto e o que precisa ser reconstruído.
+
+### O que o Tiny exporta nativamente
+
+O Tiny tem export CSV/Excel disponível para as entidades principais via interface web e via API REST. As entidades exportáveis sem dor:
+
+- **Produtos**: código, descrição, NCM, preço, estoque atual, categoria
+- **Clientes**: razão social, CNPJ, endereço, contatos, condição de pagamento
+- **Pedidos de venda**: número, data, cliente, itens, valor total, status
+- **Notas fiscais emitidas**: XML completo via API (últimos 5 anos por padrão)
+- **Contas a pagar e a receber**: descrição, valor, vencimento, status
+- **Movimentações de estoque**: entrada, saída, transferência
+
+O que **não** exporta limpo:
+
+- **Histórico de alterações** (quem alterou qual produto e quando)
+- **Anexos de pedidos** (PDFs, fotos do cliente), vêm como links que expiram
+- **Configurações de impressão** e templates de NFe customizados
+- **Regras de comissão** e descontos por cliente, esses ficam no `localStorage` do usuário
+- **Dados de integrações ativas** (mapeamento Mercado Livre, Shopify), precisam ser refeitos no destino
+
+### Auditoria de qualidade de dados
+
+Antes de mapear, audite os dados. Em 90% das migrações que conduzo, encontro:
+
+1. Produtos duplicados (mesmo SKU cadastrado duas vezes com nome ligeiramente diferente)
+2. Clientes com CNPJ inválido ou endereço pela metade
+3. Preços com casas decimais zoadas (ex: R$ 19.990 em vez de R$ 199.90)
+4. Códigos de NCM antigos ou inexistentes na tabela atual
+5. Pedidos órfãos (cliente excluído mas pedido ainda no sistema)
+
+Esse passivo é seu, não do Tiny. Migrar sem limpar é importar a sujeira para o customizado e perder a oportunidade de zerar o histórico. Reserve 1-2 semanas para auditoria de dados. Em projetos pequenos, é a fase mais rápida. Em distribuidora com 40 mil SKUs, é a mais cara.
+
+## Fase 2: Mapeamento de campos e regras de negócio
+
+Aqui mora o trabalho técnico real. Cada campo do Tiny precisa ter um destino no sistema customizado. Cada regra que hoje vive numa planilha ou na cabeça do funcionário precisa virar código.
+
+### Campos diretos vs campos derivados
+
+**Campos diretos** são 1:1, `Tiny.produto.codigo` vira `custom.produto.sku`, ponto. Listo, mapeio, importo via script. Esses são 70-80% do trabalho de mapeamento e devem rodar em uma única migration script idempotente.
+
+**Campos derivados** exigem regra. Exemplo real: o Tiny armazena `preco_venda` como número simples. No sistema customizado da minha cliente distribuidora, o preço final depende de tabela de margem por categoria + frete embutido + ICMS-ST por estado. O campo de origem é um, o de destino são quatro, e a regra precisa ser implementada antes de importar.
+
+### Regras de comissionamento, impostos e descontos
+
+Três tipos de regras precisam ser explicitadas antes do desenvolvimento:
+
+1. **Comissionamento**: escalonado por meta? Por margem? Por categoria? Por vendedor? No Tiny, geralmente está em planilha externa.
+2. **Tributação**: ICMS-ST, ICMS interestadual, DIFAL, Simples Nacional, Lucro Presumido. O Tiny calcula o básico, mas regras específicas (ex: substituição tributária por estado) podem ter sido feitas manualmente.
+3. **Política de desconto**: desconto por volume? Por cliente VIP? Por forma de pagamento? Documente em planilha antes de codificar.
+
+Sem essa documentação, o customizado vira uma cópia ruim do Tiny e a equipe vai dizer "no Tiny era melhor".
+
+> Se você quer ajuda real com isso, posso fazer o diagnóstico técnico da sua operação Tiny e levantar o escopo de migração em uma sessão de 60 minutos. Fale comigo no [WhatsApp](https://forjadesistemas.com.br/contato).
+
+## Fase 3: Desenvolvimento do customizado em paralelo ao Tiny
+
+O sistema customizado é desenvolvido enquanto o Tiny continua rodando 100% da operação. Essa é a regra de ouro. Nenhum cliente vai topar parar de vender por 8 semanas para você desenvolver.
+
+Cronograma típico de 8-12 semanas para PME média:
+
+- Semanas 1-2: levantamento técnico final, ADRs, modelo de dados
+- Semanas 3-6: desenvolvimento dos módulos core (produtos, pedidos, NFe, financeiro)
+- Semanas 7-8: integrações (Mercado Livre, Shopify, gateway de pagamento, transportadora)
+- Semanas 9-10: testes internos, ajustes, primeira importação completa em ambiente de homologação
+- Semanas 11-12: treinamento da equipe e preparação do paralelo
+
+O importante nessa fase é ter um ambiente de homologação espelho da produção do Tiny. Os dados importados precisam ser conferidos pela equipe operacional, o vendedor que usa Tiny todo dia vai encontrar bugs que o dev nunca veria.
+
+## Fase 4: Período paralelo (2-4 semanas)
+
+Aqui está o ponto que determina se a migração vai dar certo ou se vai virar pesadelo. **Período paralelo significa lançar a operação real nos dois sistemas ao mesmo tempo.** Vendeu, lança no Tiny e lança no customizado. Emitiu NFe, emite nos dois. Movimentou estoque, movimenta nos dois.
+
+Sim, é trabalho dobrado. Sim, vai ter resistência. Sim, vai dar erro de divergência todo dia. **Esse é o objetivo.** O paralelo existe pra encontrar e corrigir os erros antes do cutover.
+
+Duração ideal:
+- E-commerce simples: 2 semanas
+- Distribuidora B2B com 50+ pedidos/dia: 3-4 semanas
+- Indústria com produção: 4-6 semanas
+
+Custo do paralelo: a equipe gasta 30-40% mais tempo nesse período. Em uma equipe de 5 pessoas, isso equivale a R$ 8.000-15.000 de hora extra ou produtividade perdida. Caro? Sim. Mais caro que o erro de cutover sem paralelo? Não, esse erro custa em média R$ 50.000-200.000 em vendas perdidas e clientes que reclamaram.
+
+## Fase 5: Cutover e congelamento do Tiny
+
+No dia D, o Tiny vira read-only e o customizado assume 100% da operação. Cutover é evento, não processo. Idealmente em final de semana, com a equipe técnica em standby. Se a sua operação tem componente legado adjacente (sistemas auxiliares antigos), vale revisar antes a abordagem de [migração de sistema legado](/blog/migracao-sistema-legado) para alinhar janelas e evitar conflito.
+
+Checklist mínimo de cutover:
+
+1. **Snapshot final** do Tiny (export completo + backup de banco se possível via API)
+2. **Importação delta** dos dados que mudaram durante o paralelo
+3. **Reconciliação financeira**: saldo de contas, estoque físico vs estoque sistema
+4. **Cancelamento das integrações** apontando para Tiny (Mercado Livre, gateway, etc) e ativação no customizado
+5. **Ajuste de DNS / URLs** se o Tiny estiver em subdomínio
+6. **Comunicação para a equipe**: quem usa o quê, em qual horário, em qual fluxo
+7. **Plano de rollback**: se em 48h o customizado falhar, como reativamos o Tiny
+
+O Tiny continua acessível por 90 dias como referência histórica (read-only). Depois disso, cancele a assinatura.
+
+## Custos por fase em 2026
+
+Tabela de referência baseada em projetos PME (50-300 funcionários, faturamento R$ 5-50M/ano):
+
+| Fase | Duração | Custo (R$) |
+|------|---------|------------|
+| 1, Export e auditoria | 1-2 semanas | 3.000 a 8.000 |
+| 2, Mapeamento e regras | 1-2 semanas | 4.000 a 10.000 |
+| 3, Desenvolvimento | 6-10 semanas | 15.000 a 50.000 |
+| 4, Paralelo | 2-4 semanas | 5.000 a 12.000 (custo operacional) |
+| 5, Cutover | 1 fim de semana | 2.000 a 5.000 |
+| **Total** | **10-18 semanas** | **R$ 29.000 a R$ 85.000** |
+
+Essa faixa cobre 80% dos casos. Operações mais complexas (multi-filial, indústria com MRP, integrações fiscais avançadas) escalam para R$ 100.000-200.000 e exigem 6+ meses.
+
+## Riscos comuns e como mitigar
+
+**Risco 1 - Dependência de funcionário-chave que conhece o Tiny.** Se uma única pessoa entende as regras "não documentadas", essa pessoa vira gargalo. Mitigação: workshop de 4 horas com gravação para extrair tudo antes do desenvolvimento.
+
+**Risco 2 - Customizado tenta replicar tudo do Tiny.** Resultado: prazo dobra e o sistema fica burocrático. Mitigação: na Fase 2, marque cada feature como "essencial / nice-to-have / não migrar". Migrar só essencial. O resto entra em backlog.
+
+**Risco 3 - Cutover em pico de operação.** Black Friday, fechamento fiscal, virada de mês. Mitigação: cutover em janela de baixo movimento (segunda quinzena de janeiro, após Páscoa, julho).
+
+**Risco 4 - Falta de plano de rollback.** Se o customizado falhar em produção, voltar para o Tiny precisa ser executável em 4 horas. Mitigação: manter Tiny ativo por 30 dias pós-cutover, contratos de integração suspensos mas reativáveis. Em paralelo, contrate [manutenção de sistema](/blog/manutencao-de-sistema-urgente) para o customizado novo desde o dia 1, bug crítico nas primeiras semanas é regra, não exceção.
+
+> Se sua equipe está pronta para sair do Tiny mas trava na execução, posso te ajudar a estruturar o playbook de migração específico pra sua operação. Conversa direta no [WhatsApp](https://forjadesistemas.com.br/contato), sem formulário.
+
+## FAQ
+
+**1. Posso migrar do Tiny ERP em menos de 8 semanas?**
+
+Em PME pequena (até 20 funcionários, operação simples de e-commerce, sem integração complexa) é possível em 6 semanas. Abaixo disso, normalmente significa pular o paralelo, e isso quase sempre dá ruim. Não recomendo.
+
+**2. O Tiny exporta histórico completo de NFe emitida?**
+
+Sim, via API REST com paginação. O export padrão da interface web limita aos últimos 6 meses. Para extrair todo o histórico (5+ anos), use a API com script próprio ou contrate o trabalho de extração separado. Custo típico do export histórico: R$ 1.500-4.000.
+
+**3. Quanto custa o período paralelo em horas extras?**
+
+Depende do tamanho da equipe. Em equipe de 5 operadores ganhando R$ 3.000/mês, o overhead de 30-40% por 3 semanas equivale a R$ 4.500-6.000 em produtividade perdida ou hora extra. Some 1-2 dias de consultoria para acompanhar divergências (R$ 2.000-5.000) e o paralelo total custa R$ 6.500-11.000.
+
+**4. Posso migrar só parte do Tiny (ex: estoque) e manter o resto?**
+
+Sim, mas raramente vale a pena. Manter Tiny + customizado convivendo cria sincronização permanente, e isso vira um sistema fantasma que ninguém quer manter. A exceção válida é manter o Tiny só para emissão de NFe (ele é muito bom nisso) e migrar o resto. Aí o customizado integra com a API do Tiny apenas para emitir.
+
+**5. E se o customizado falhar no cutover?**
+
+Por isso existe plano de rollback. Mantenha o Tiny ativo (read-write) por 30 dias após o cutover. Se em 24-48h o customizado tiver bug crítico, retorne a operação para o Tiny e use as próximas 2 semanas para corrigir antes de tentar de novo. Custo do rollback: zero, se o plano estava montado. Catastrófico, se você cancelou o Tiny no cutover.
