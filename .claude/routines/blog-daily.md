@@ -395,24 +395,53 @@ Regras:
   - abrir issue
 
 13. COMMIT:MULTILANGUAGE
-- antes do commit:
-  - git status --short
-  - confirmar que somente estes caminhos mudaram:
-    - content/pt-BR/blog/
-    - content/it-IT/blog/
-    - content/en/blog/
-    - content/es-ES/blog/
-    - .claude/blog/data/
-    - .claude/routine-reports/
-- se qualquer arquivo fora dessa allowlist estiver modificado:
-  - abortar
-  - abrir issue
+Execute as fases abaixo em ordem. Qualquer BLOCK aborta imediatamente, nao commita e abre issue. Qualquer WARN registra no relatorio e continua automaticamente — NUNCA pausar para perguntar.
+
+FASE A — Verificar allowlist de paths:
+- git status --short
+- confirmar que somente estes caminhos mudaram:
+  - content/pt-BR/blog/
+  - content/it-IT/blog/
+  - content/en/blog/
+  - content/es-ES/blog/
+  - .claude/blog/data/
+  - .claude/routine-reports/
+- se qualquer arquivo fora dessa allowlist estiver modificado: BLOCK — abortar, abrir issue
+
+FASE B — Instalar dependencias para validacao:
+- npm ci --prefer-offline 2>&1
+- se falhar: BLOCK — abortar, abrir issue com output do erro
+
+FASE C — Scan de secrets no staging area:
+- git diff --cached --name-only | xargs grep -l -E '(sk-|pk-|Bearer |password\s*=\s*["\x27][^"\x27]{8,}|api[_-]?key\s*=\s*["\x27][^"\x27]{8,})' 2>/dev/null
+- se encontrar matches: BLOCK — abortar, abrir issue listando os arquivos
+
+FASE D — Validacao de frontmatter MDX:
+- npm run validate:frontmatter 2>&1
+- se script nao existir, validar manualmente:
+  para cada arquivo em content/{locale}/blog/ modificado neste lote:
+    verificar presenca dos campos obrigatorios: title, description, date, locale, slug, canonical
+    verificar que date == BATCH_DATE
+    verificar que locale corresponde ao diretorio
+  se qualquer campo ausente ou invalido: BLOCK — abortar, abrir issue com lista dos arquivos afetados
+
+FASE E — Type-check:
+- npm run type-check 2>&1
+- se script nao existir: npx tsc --noEmit 2>&1
+- se houver erros de tipo: BLOCK — abortar, abrir issue com os primeiros 30 erros
+
+FASE F — Lint:
+- npm run lint 2>&1
+- se exit code != 0 (erros, nao apenas warnings): BLOCK — abortar, abrir issue com output
+- se apenas warnings (exit 0): WARN — registrar no relatorio e continuar
+
+FASE G — Commit e push:
 - montar mensagem canonica:
-  - content(multilanguage): add 20 articles — daily batch BATCH_DATE
-- executar:
-  - git add content/ .claude/blog/data/ .claude/routine-reports/
-  - git commit -m "content(multilanguage): add 20 articles — daily batch BATCH_DATE"
-  - git push origin main
+  content(multilanguage): add 20 articles — daily batch BATCH_DATE
+- git add content/ .claude/blog/data/ .claude/routine-reports/
+- git status --short  (verificacao final — confirmar apenas arquivos da allowlist)
+- git commit -m "content(multilanguage): add 20 articles — daily batch BATCH_DATE"
+- git push origin main
 
 [PUSH FAILURE HANDLER]
 Se o git push falhar por conflito ou non-fast-forward:
