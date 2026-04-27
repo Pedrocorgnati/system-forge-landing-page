@@ -1,0 +1,151 @@
+{
+  "locale": "pt-BR",
+  "generated_at": "2026-04-25",
+  "source_file": ".claude/blog/data/pt-BR/prioritized-topics/prioritized-daily-2026-04-25.json",
+  "existing_articles_scanned": 261,
+  "total_clusters_avaliados": 14,
+  "summary": {
+    "keep_as_is": 8,
+    "drop": 0,
+    "merge": 0,
+    "rewrite_angle": 6,
+    "ja_gerados": 0
+  },
+  "approval_rate_percent": 100.0,
+  "clusters": [
+    {
+      "cluster_id": "tiny-erp-limitacoes-migracao-custom-2026",
+      "slug": "tiny-erp-nao-atende-migracao-custom-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "tiny-erp-vs-erp-personalizado.mdx",
+      "collision_title": "Tiny ERP vs ERP Personalizado: Qual Escolher em 2026?",
+      "reason": "Hub existente cobre comparativo Tiny vs custom. Novo cluster precisa focar em playbook de migracao (export, mapeamento, paralelo, cutover) NAO em comparativo basico.",
+      "rewrite_instructions": "Remover comparativo Tiny vs custom (ja coberto pelo hub). Focar em: passo a passo de migracao (export Tiny, mapeamento de campos, periodo paralelo, treinamento, cutover), riscos comuns, custos por fase. Link interno OBRIGATORIO para tiny-erp-vs-erp-personalizado como pre-requisito de leitura."
+    },
+    {
+      "cluster_id": "bug-producao-sexta-noite-dev-madrugada-2026",
+      "slug": "bug-producao-sexta-noite-dev-madrugada-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Hub sistema-producao-bug-urgente-dev-disponivel.mdx existe mas e generico. Novo cluster e variant especifica (sexta a noite + dev madrugada) — long tail distinct.",
+      "required_differentiators": [
+        "Foco em janela de tempo: sexta noite, sabado, madrugada",
+        "Quem realmente atende fora do horario comercial (lista pratica)",
+        "Link interno obrigatorio para sistema-producao-bug-urgente-dev-disponivel como hub"
+      ]
+    },
+    {
+      "cluster_id": "suporte-software-emergencial-24h-php-legacy-2026",
+      "slug": "suporte-software-24x7-sistema-legacy-php-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "suporte-de-software-urgente.mdx",
+      "collision_title": "Suporte de Software Urgente: Como Conseguir Ajuda Tecnica Rapida Para Seu Sistema",
+      "reason": "Hub generico ja cobre suporte urgente. Novo cluster deve focar exclusivamente em legacy PHP (5.x/7.x), sem repetir comparativo geral.",
+      "rewrite_instructions": "Remover discussao generica de 'como conseguir suporte'. Focar em: PHP legacy (5.x/7.x, deprecated), riscos de seguranca (CVEs PHP antigos), suporte tecnico especializado em PHP, refactor incremental, cases reais de Magento 1, Joomla 3, WordPress legacy. Link interno OBRIGATORIO para suporte-de-software-urgente."
+    },
+    {
+      "cluster_id": "agente-ia-whatsapp-business-api-custom-2026",
+      "slug": "agente-ia-whatsapp-business-api-personalizado-preco-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "chatbot-whatsapp-ia-atendimento-empresa.mdx + atendimento-automatico-whatsapp-ia-empresa.mdx",
+      "collision_title": "Chatbot WhatsApp IA atendimento empresa",
+      "reason": "Existentes cobrem chatbot no-code (Take Blip, Botmaker etc). Novo cluster deve atacar exclusivamente AGENTE customizado via WhatsApp Business API + LLM proprio.",
+      "rewrite_instructions": "NAO usar termo 'chatbot'. Usar 'agente IA via API'. Diferenciar de no-code (limites, custo escalavel, dependencia de terceiros). Stack tecnico: WhatsApp Business API (Meta direta ou via 360dialog), backend Node/Python, LLM proprio (Claude/GPT-5), RAG empresa. Comparar TCO 24 meses no-code vs custom. Link interno para chatbot-whatsapp-ia-atendimento-empresa como hub no-code."
+    },
+    {
+      "cluster_id": "ia-generativa-erp-pme-2026",
+      "slug": "ia-generativa-erp-pme-como-integrar-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Tema novo — nenhum artigo existente cobre IA generativa embarcada no ERP de PME (apenas chatbots WhatsApp existem).",
+      "required_differentiators": [
+        "Foco em ERP PME (nao chatbot)",
+        "Casos: copilot de relatorios, NLP de NF, sumarizacao de tickets, predicao estoque",
+        "Link interno para agente-ia-whatsapp-business-api-personalizado-preco-2026 como cross-sell"
+      ]
+    },
+    {
+      "cluster_id": "rag-empresarial-base-privada-2026",
+      "slug": "rag-empresarial-vs-openai-assistants-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nenhum artigo pt-BR cobre comparativo RAG custom vs Assistants 2.0.",
+      "required_differentiators": [
+        "Foco em decisao tecnica RAG proprio vs Assistants",
+        "Custo, lock-in, latencia, controle de embeddings, multi-tenant"
+      ]
+    },
+    {
+      "cluster_id": "pix-automatico-recorrencia-saas-custom-2026",
+      "slug": "pix-automatico-recorrencia-saas-proprio-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Tema novo regulatorio (Pix Automatico em vigor 2026). Nenhum artigo existente cobre.",
+      "required_differentiators": [
+        "Foco em SaaS proprio (nao gateway terceiro)",
+        "Integracao PSP autorizado, manejo de mandatos, retry policy",
+        "Substituicao de cartao recorrente: economia de MDR"
+      ]
+    },
+    {
+      "cluster_id": "sistema-web-express-2-semanas-sp-2026",
+      "slug": "sistema-web-express-2-semanas-sp-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "sistema-web-urgente.mdx",
+      "collision_title": "Sistema Web Urgente: Como Ter Sua Aplicação Online em Semanas",
+      "reason": "Hub urgente generico ja existe. Novo cluster deve focar em geo SP + janela 2 semanas exata.",
+      "rewrite_instructions": "Remover discussao generica de urgencia. Focar em: SP geo modifier (presencial, kickoff, agencias na regiao), janela exata 2 semanas (cronograma dia a dia), tradeoffs (escopo congelado, sem features novas). Link interno OBRIGATORIO para sistema-web-urgente como pillar."
+    },
+    {
+      "cluster_id": "freelancer-vs-software-house-mvp-2026",
+      "slug": "freelancer-vs-software-house-mvp-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "software-house-vs-freelancer-qual-escolher.mdx",
+      "collision_title": "Software House ou Freelancer: Quando Escolher Cada Um (Com Tabela de Custo)",
+      "reason": "Hub existente cobre comparativo geral. Novo cluster deve focar em CONTEXTO MVP + atualizacao 2026 (mercado, salarios, freelancer com IA).",
+      "rewrite_instructions": "Remover comparativo basico de custos (ja no hub). Focar em: MVP fase pre-PMF (validacao rapida vs escala), impacto de IA codepilots na produtividade do freelancer 2026, riscos especificos de MVP (debt code, single point of failure, handoff), tabela de custos atualizada 2026. Link interno OBRIGATORIO para software-house-vs-freelancer-qual-escolher como pillar."
+    },
+    {
+      "cluster_id": "vercel-ai-sdk-custo-nextjs-producao-2026",
+      "slug": "vercel-ai-sdk-custo-nextjs-producao-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nenhum artigo cobre custo real do AI SDK 5.x em producao."
+    },
+    {
+      "cluster_id": "supabase-realtime-escala-10k-conexoes-2026",
+      "slug": "supabase-realtime-escala-10k-conexoes-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Tema tecnico novo — Realtime v2 GA abril 2026."
+    },
+    {
+      "cluster_id": "lgpd-ia-treinamento-dados-clientes-2026",
+      "slug": "lgpd-ia-treinamento-dados-clientes-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Tema regulatorio novo — parecer ANPD sobre IA em 2026. Nenhum artigo existente."
+    },
+    {
+      "cluster_id": "shadcn-registry-empresa-privado-2026",
+      "slug": "shadcn-registry-privado-empresa-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nicho dev — nenhum artigo existente cobre registry shadcn privado."
+    },
+    {
+      "cluster_id": "deploy-nextjs-node-server-hostinger-2026",
+      "slug": "deploy-nextjs-node-server-hostinger-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Tutorial pratico — nenhum artigo existente cobre Next 16 + Node server Hostinger."
+    }
+  ],
+  "expansions": [],
+  "merges": []
+}

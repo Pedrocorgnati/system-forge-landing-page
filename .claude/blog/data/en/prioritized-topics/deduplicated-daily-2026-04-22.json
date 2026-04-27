@@ -1,0 +1,104 @@
+{
+  "locale": "en",
+  "generated_at": "2026-04-22",
+  "source_file": ".claude/blog/data/en/prioritized-topics/prioritized-daily-2026-04-22.json",
+  "existing_articles_scanned": 170,
+  "total_clusters_avaliados": 9,
+  "summary": {
+    "keep_as_is": 7,
+    "drop": 1,
+    "merge": 0,
+    "rewrite_angle": 1,
+    "ja_gerados": 0
+  },
+  "approval_rate_percent": 88.89,
+  "clusters": [
+    {
+      "cluster_id": "hipaa-telemedicine-patient-portal",
+      "slug": "hipaa-telemedicine-patient-portal-ehr-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "Existing medical-clinic-software-requirements-hipaa-gdpr-compliance focuses on clinic software requirements. Telemedicine platform with patient portal and EHR is distinct long-tail.",
+      "required_differentiators": [
+        "Video consultation + secure streaming (telemedicine-specific)",
+        "Patient portal with appointment booking",
+        "HL7 FHIR integration detail",
+        "Internal link to medical-clinic-software-requirements-hipaa-gdpr-compliance"
+      ]
+    },
+    {
+      "cluster_id": "construction-management-software-smb",
+      "slug": "custom-construction-management-software-small-contractor-2026",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "custom-software-construction-company.mdx",
+      "collision_title": "Custom Software for Construction Companies: Project Management, Field Service & Dispatch",
+      "reason": "Existing article covers custom construction software cost ($20k-$100k+), job scheduling, field service, project management, Procore comparison. New cluster replicates intent."
+    },
+    {
+      "cluster_id": "custom-online-course-platform-vs-teachable",
+      "slug": "custom-online-course-platform-vs-teachable-kajabi-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing LMS/Teachable/Kajabi article in English. Open niche."
+    },
+    {
+      "cluster_id": "franchise-management-system-multi-location",
+      "slug": "custom-franchise-management-system-multi-location-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing franchise/multi-location article in English."
+    },
+    {
+      "cluster_id": "amazon-shopify-ebay-erp-integration",
+      "slug": "amazon-shopify-ebay-erp-integration-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "generate-with-differentiated-angle",
+      "collision_with": "marketplace-integration-amazon-ebay-etsy-api.mdx",
+      "collision_title": "Marketplace API Integration: Amazon, eBay and Etsy",
+      "reason": "Existing covers Amazon+eBay+Etsy API integration with catalog/inventory/orders. New cluster adds Shopify (not in existing) and explicit ERP angle. Must rewrite to avoid keyword overlap on Amazon/eBay alone.",
+      "rewrite_instructions": "Focus exclusively on ERP middleware architecture: unified inventory across Amazon + Shopify + eBay into existing ERP (SAP/NetSuite/Odoo), sync patterns, idempotency, reconciliation. Do NOT re-explain API basics of Amazon/eBay (link to existing article instead). Title should emphasize 'ERP unified inventory', not 'API integration'."
+    },
+    {
+      "cluster_id": "custom-barber-shop-app-loyalty",
+      "slug": "custom-barber-shop-booking-loyalty-app-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing barber shop article in English."
+    },
+    {
+      "cluster_id": "coworking-space-management-software",
+      "slug": "coworking-space-management-software-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing coworking article in English."
+    },
+    {
+      "cluster_id": "custom-bi-dashboard-nextjs-vs-powerbi",
+      "slug": "power-bi-vs-custom-nextjs-dashboard-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing Power BI comparison. Dashboard articles cover multi-tenant and UX, not BI tool comparison."
+    },
+    {
+      "cluster_id": "soc2-compliance-small-saas-cost",
+      "slug": "soc2-compliance-small-saas-cost-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generate",
+      "reason": "No existing SOC 2 cost article in English."
+    }
+  ],
+  "dropped_topics": [
+    {"slug": "custom-construction-management-software-small-contractor-2026", "reason": "duplicate of custom-software-construction-company"}
+  ],
+  "approved_for_generation": [
+    "hipaa-telemedicine-patient-portal-ehr-2026",
+    "custom-online-course-platform-vs-teachable-kajabi-2026",
+    "custom-franchise-management-system-multi-location-2026",
+    "amazon-shopify-ebay-erp-integration-2026",
+    "custom-barber-shop-booking-loyalty-app-2026",
+    "coworking-space-management-software-2026",
+    "power-bi-vs-custom-nextjs-dashboard-2026",
+    "soc2-compliance-small-saas-cost-2026"
+  ]
+}

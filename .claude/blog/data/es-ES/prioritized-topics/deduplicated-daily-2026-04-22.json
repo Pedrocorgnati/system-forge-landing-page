@@ -1,0 +1,68 @@
+{
+  "locale": "es-ES",
+  "generated_at": "2026-04-22",
+  "source_file": ".claude/blog/data/es-ES/prioritized-topics/prioritized-daily-2026-04-22.json",
+  "existing_articles_scanned": 170,
+  "total_clusters_avaliados": 5,
+  "summary": {
+    "keep_as_is": 4,
+    "drop": 0,
+    "merge": 0,
+    "rewrite_angle": 1,
+    "ja_gerados": 0
+  },
+  "approval_rate_percent": 100.0,
+  "clusters": [
+    {
+      "cluster_id": "telemedicina-portal-paciente-rgpd-espana",
+      "slug": "telemedicina-portal-paciente-rgpd-espana-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generar",
+      "reason": "Existente (software-clinicas-requisitos-compliance-omc) cubre software clinico generico. Telemedicina + portal paciente + RGPD es nicho especifico distinto.",
+      "required_differentiators": [
+        "Videoconsulta y streaming seguro",
+        "Portal del paciente (historial, recetas, citas)",
+        "Enlace interno a software-clinicas-requisitos-compliance-omc"
+      ]
+    },
+    {
+      "cluster_id": "plataforma-cursos-online-a-medida-vs-hotmart",
+      "slug": "plataforma-propia-cursos-online-vs-hotmart-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generar",
+      "reason": "No existe articulo sobre LMS/Teachable/Hotmart en es-ES. Nicho abierto."
+    },
+    {
+      "cluster_id": "integracion-amazon-shopify-erp-espana",
+      "slug": "integracion-amazon-shopify-erp-espana-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "generar-con-angulo-diferenciado",
+      "collision_with": "integracion-marketplaces-amazon-ebay-zalando.mdx",
+      "collision_title": "Integración con marketplaces: Amazon, eBay y Zalando",
+      "reason": "Existente cubre integracion Amazon+eBay+Zalando (catalogo, stock, pedidos). Nuevo cluster anade Shopify y angulo ERP. Debe reescribirse para no canibalizar keyword principal 'integracion Amazon Espana'.",
+      "rewrite_instructions": "Enfocar en arquitectura ERP middleware: inventario unificado Amazon + Shopify en ERP existente (SAP Business One, Holded, Odoo), patrones de sync, idempotencia, reconciliacion contable. NO repetir como integrar Amazon API basico (enlazar al existente). Titulo destacar 'ERP espana' y 'Shopify', no 'Amazon API'."
+    },
+    {
+      "cluster_id": "dashboard-nextjs-vs-powerbi-pyme-espana",
+      "slug": "power-bi-vs-dashboard-nextjs-pyme-espana-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generar",
+      "reason": "No existe comparativa Power BI vs Next.js en es-ES."
+    },
+    {
+      "cluster_id": "migracion-legacy-on-premise-cloud-aws-espana",
+      "slug": "migracion-legacy-on-premise-cloud-aws-espana-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "generar",
+      "reason": "No existe articulo sobre migracion on-premise a AWS en es-ES."
+    }
+  ],
+  "dropped_topics": [],
+  "approved_for_generation": [
+    "telemedicina-portal-paciente-rgpd-espana-2026",
+    "plataforma-propia-cursos-online-vs-hotmart-2026",
+    "integracion-amazon-shopify-erp-espana-2026",
+    "power-bi-vs-dashboard-nextjs-pyme-espana-2026",
+    "migracion-legacy-on-premise-cloud-aws-espana-2026"
+  ]
+}

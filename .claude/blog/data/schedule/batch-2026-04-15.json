@@ -1,0 +1,119 @@
+{
+  "batch_id": "daily-2026-04-15",
+  "generated_at": "2026-04-15T09:17:29",
+  "total_articles": 15,
+  "articles_by_locale": {
+    "it-IT": {
+      "count": 5,
+      "articles": [
+        {
+          "slug": "crm-con-ia-per-vendite-pmi-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "erp-piccola-impresa-costi-confronto-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "mvp-app-costi-tempi-validazione",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "no-code-vs-sviluppo-su-misura",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "quanto-costa-sito-web-piccola-impresa-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        }
+      ]
+    },
+    "en": {
+      "count": 5,
+      "articles": [
+        {
+          "slug": "crm-with-ai-for-smb-sales-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "erp-small-business-cost-comparison-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "mvp-app-cost-timeline-validation",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "no-code-vs-custom-software-development",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "how-much-does-website-cost-small-business-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        }
+      ]
+    },
+    "es-ES": {
+      "count": 5,
+      "articles": [
+        {
+          "slug": "crm-con-ia-para-ventas-pymes-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "erp-pequena-empresa-costes-comparativa-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "mvp-app-coste-plazo-validacion",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "no-code-vs-desarrollo-a-medida",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        },
+        {
+          "slug": "cuanto-cuesta-web-pequena-empresa-2026",
+          "status": "approved",
+          "publish_date": "2026-04-15"
+        }
+      ]
+    }
+  },
+  "parity_impact": {
+    "before": {
+      "pt-BR": 242,
+      "it-IT": 140,
+      "en": 140,
+      "es-ES": 140
+    },
+    "after": {
+      "pt-BR": 242,
+      "it-IT": 145,
+      "en": 145,
+      "es-ES": 145
+    },
+    "gap_reduction": "102 -> 97 per spoke (-5)",
+    "parity_invariant": "gap did NOT grow (PASS)"
+  },
+  "deploy_trigger": "github-actions",
+  "build_commands": {
+    "it-IT": "npm run build:it",
+    "en": "npm run build:en",
+    "es-ES": "npm run build:es"
+  }
+}

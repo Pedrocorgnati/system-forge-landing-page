@@ -1,0 +1,148 @@
+{
+  "locale": "pt-BR",
+  "generated_at": "2026-04-22",
+  "source_file": ".claude/blog/data/pt-BR/prioritized-topics/prioritized-daily-2026-04-22.json",
+  "existing_articles_scanned": 252,
+  "total_clusters_avaliados": 13,
+  "summary": {
+    "keep_as_is": 5,
+    "drop": 6,
+    "merge": 0,
+    "rewrite_angle": 2,
+    "ja_gerados": 0
+  },
+  "approval_rate_percent": 53.85,
+  "clusters": [
+    {
+      "cluster_id": "sistema-rede-franquias-multiunidade",
+      "slug": "sistema-rede-franquias-multiunidade",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "sistema-gestao-rede-franquias-brasil-2026.mdx",
+      "collision_title": "Sistema de Gestão para Franquias: Controle Multi-Unidade e Quanto Custa em 2026",
+      "reason": "Intent identico — royalties, multiunidade, custo sob medida para rede de franquias ja totalmente coberto pelo artigo existente"
+    },
+    {
+      "cluster_id": "plataforma-cursos-online-whitelabel-ia",
+      "slug": "plataforma-propria-cursos-online-whitelabel-ia-2026",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "plataforma-ead-propria-vs-hotmart-custo-2026.mdx",
+      "collision_title": "Plataforma EAD Própria vs Hotmart: Custo e Break-even 2026",
+      "reason": "Existente cobre EAD propria vs Hotmart + break-even. Novo cluster deve focar exclusivamente em whitelabel com IA (autograder, geracao de quizzes, transcricao, recomendacao) SEM repetir comparativo de custo Hotmart",
+      "rewrite_instructions": "Remover toda comparacao com Hotmart/Kiwify do novo artigo. Focar em: arquitetura LMS whitelabel, recursos de IA embutidos (quizzes auto, resumo de aula, tutor IA), licenciamento whitelabel para treinamento corporativo, cases B2B. Link interno obrigatorio para plataforma-ead-propria-vs-hotmart-custo-2026 como artigo de comparacao de custo."
+    },
+    {
+      "cluster_id": "telemedicina-portal-paciente-lgpd-cfm",
+      "slug": "telemedicina-portal-paciente-lgpd-cfm-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Intent especifico de telemedicina + portal do paciente com LGPD e CFM. Existentes (software-clinicas-requisitos-compliance-cfm, sistema-gestao-clinica-medica-saude) focam em gestao de clinica, nao plataforma de telemedicina com portal. Distinct long tail.",
+      "required_differentiators": [
+        "Secao obrigatoria sobre videoconsulta e transmissao segura (distinct de clinica)",
+        "Portal do paciente: cadastro, historico, receitas digitais",
+        "Link interno para software-clinicas-requisitos-compliance-cfm como suporte"
+      ]
+    },
+    {
+      "cluster_id": "sistema-provedor-internet-billing-radius",
+      "slug": "sistema-provedor-internet-isp-billing-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nenhum artigo existente sobre ISP, billing ou Radius. Nicho totalmente novo e defensavel."
+    },
+    {
+      "cluster_id": "sistema-corretora-seguros-cotacao-online",
+      "slug": "sistema-corretora-seguros-cotacao-online-2026",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nenhum artigo existente cobre corretora de seguros. Nicho novo."
+    },
+    {
+      "cluster_id": "app-barbearia-agendamento-comissao",
+      "slug": "app-barbearia-agendamento-comissao-2026",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "sistema-para-barbearia.mdx + sistema-barbearia-com-ia.mdx",
+      "collision_title": "Sistema para Barbearia em 2026: IA, Agendamento Online e Quanto Custa + Sistema com IA para Barbearia 2026: Agendamento e Fidelizacao",
+      "reason": "DOIS artigos ja cobrem barbearia: agendamento, fidelizacao, custos. Adicionar terceiro com angulo 'comissao de barbeiros' ainda canibaliza a query principal 'app barbearia agendamento'. Melhor expandir existentes com secao de comissoes."
+    },
+    {
+      "cluster_id": "software-construtora-incorporadora-obras",
+      "slug": "software-construtora-incorporadora-obras-2026",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "sistema-construtora-gestao-obras-personalizado.mdx",
+      "collision_title": "Sistema para Construtora e Gestão de Obras: O Que Avaliar em 2026",
+      "reason": "Intent identico: software construtora + incorporadora + obras + custo sob medida + Sienge. Existente ja cobre cronograma, medicao, app canteiro, incorporadora."
+    },
+    {
+      "cluster_id": "integracao-mercado-livre-shopee-erp",
+      "slug": "integracao-mercado-livre-shopee-erp-2026",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "integracao-marketplaces-ml-shopee-amazon.mdx",
+      "collision_title": "Integração com Mercado Livre, Shopee e Amazon",
+      "reason": "Existente ja cobre integracao ML + Shopee + Amazon com ERP (catalogo, estoque, pedidos, ERP, armadilhas tecnicas). Novo cluster replica o mesmo conjunto de keywords e intencao."
+    },
+    {
+      "cluster_id": "app-fidelidade-pontos-cashback-varejo",
+      "slug": "app-fidelidade-pontos-cashback-loja-fisica",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "sistema-fidelidade-loja-pequena-quanto-custa.mdx",
+      "collision_title": "Sistema de Fidelidade para Loja Pequena: Quanto Custa e Como Implementar em 2026",
+      "reason": "Existente cobre pontos, cashback, custo para loja pequena/fisica. Mesma intencao comercial — substituir cartao de papel por app."
+    },
+    {
+      "cluster_id": "dashboard-customizado-nextjs-vs-powerbi",
+      "slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Nenhum artigo compara Power BI vs dashboard Next.js customizado. Comparacao tecnica defensavel."
+    },
+    {
+      "cluster_id": "sistema-dark-kitchen-food-truck",
+      "slug": "app-dark-kitchen-food-truck-vs-ifood",
+      "classification": "REWRITE_ANGLE",
+      "action": "gerar-com-angulo-diferenciado",
+      "collision_with": "app-delivery-proprio-restaurante-custo.mdx",
+      "collision_title": "App Delivery Proprio para Restaurante: Vale Sair do iFood?",
+      "reason": "Existente cobre restaurante tradicional vs iFood. Novo deve focar EXCLUSIVAMENTE em dark kitchen e food truck (operacao sem salao, multiple brands em uma cozinha, roteirizacao para food truck) para evitar canibalizacao.",
+      "rewrite_instructions": "Titulo nao mencionar 'restaurante'. Focar em: operacao multi-marca numa mesma kitchen, custo de app proprio para dark kitchen (diferente de restaurante com salao), food truck com localizacao dinamica e push notification de posicao. Link interno obrigatorio para app-delivery-proprio-restaurante-custo."
+    },
+    {
+      "cluster_id": "migracao-on-premise-para-cloud-aws",
+      "slug": "migracao-on-premise-para-cloud-aws-2026",
+      "classification": "DROP",
+      "action": "skip",
+      "collision_with": "migracao-sistema-local-para-nuvem-pme-brasil.mdx + migracao-sistema-legado.mdx",
+      "collision_title": "Migração para a Nuvem para PMEs Brasileiras: Custos, Riscos e Como Fazer em 2026",
+      "reason": "Artigo existente ja cobre exatamente: migrar sistema local para nuvem, custo, riscos, AWS vs Azure vs GCP, como fazer sem parar o negocio. Intent 100% coberto."
+    },
+    {
+      "cluster_id": "arquitetura-multi-tenant-saas",
+      "slug": "multi-tenant-vs-single-tenant-saas-arquitetura",
+      "classification": "KEEP_AS_IS",
+      "action": "gerar",
+      "reason": "Existente (multi-tenant-dashboard-separar-dados) foca em isolamento de dados em dashboards. Novo cluster e sobre arquitetura de SaaS (multi vs single tenant) — decisao arquitetural distinta. Cobertura complementar."
+    }
+  ],
+  "dropped_topics": [
+    {"slug": "sistema-rede-franquias-multiunidade", "reason": "duplicata de sistema-gestao-rede-franquias-brasil-2026"},
+    {"slug": "app-barbearia-agendamento-comissao-2026", "reason": "duplicata dupla: sistema-para-barbearia + sistema-barbearia-com-ia"},
+    {"slug": "software-construtora-incorporadora-obras-2026", "reason": "duplicata de sistema-construtora-gestao-obras-personalizado"},
+    {"slug": "integracao-mercado-livre-shopee-erp-2026", "reason": "duplicata de integracao-marketplaces-ml-shopee-amazon"},
+    {"slug": "app-fidelidade-pontos-cashback-loja-fisica", "reason": "duplicata de sistema-fidelidade-loja-pequena-quanto-custa"},
+    {"slug": "migracao-on-premise-para-cloud-aws-2026", "reason": "duplicata de migracao-sistema-local-para-nuvem-pme-brasil"}
+  ],
+  "approved_for_generation": [
+    "telemedicina-portal-paciente-lgpd-cfm-2026",
+    "sistema-provedor-internet-isp-billing-2026",
+    "sistema-corretora-seguros-cotacao-online-2026",
+    "power-bi-vs-dashboard-customizado-nextjs-pme",
+    "multi-tenant-vs-single-tenant-saas-arquitetura",
+    "plataforma-propria-cursos-online-whitelabel-ia-2026",
+    "app-dark-kitchen-food-truck-vs-ifood"
+  ]
+}

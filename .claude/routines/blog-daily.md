@@ -1,6 +1,6 @@
 # Routine: blog-daily (system-forge-landing-page)
 
-> Prompt self-contained para a Claude Code Routine que roda no repo `system-forge-landing-page`, usa o pipeline do repo irmão `../systemForge`, publica um lote diário quad-market com paridade por locale e faz push para `main` apenas se o gate global passar.
+> Prompt self-contained para a Claude Code Routine que roda exclusivamente no repo `system-forge-landing-page`. Todo o estado do pipeline (config, keywords, briefs, estratégia) vive neste mesmo repo em `.claude/blog/`. Não depende de nenhum repo externo.
 
 ---
 
@@ -10,7 +10,7 @@
 |---|---|
 | Nome da routine | `blog-daily` |
 | Working directory | raiz do clone de `system-forge-landing-page` |
-| Repo irmão esperado | `../systemForge` |
+| Repo irmão esperado | nenhum — totalmente autônomo |
 | Branch alvo | `main` |
 | Frequência sugerida | 1x por dia |
 | Objetivo por execução | `5` artigos por locale, `20` no total |
@@ -20,12 +20,11 @@
 
 ---
 
-## Repositórios esperados no runner
+## Repositório no runner
 
 | Repo | Local no runner | Uso |
 |---|---|---|
-| `Pedrocorgnati/system-forge-landing-page` | working dir atual | destino dos arquivos MDX e do commit |
-| `Pedrocorgnati/systemForge` | `../systemForge` | fonte dos comandos `/blog:*` e referência de pipeline |
+| `Pedrocorgnati/system-forge-landing-page` | working dir atual | conteúdo MDX, pipeline state (`.claude/blog/`) e commit |
 
 ---
 
@@ -42,7 +41,7 @@
 
 ## Setup no painel da routine
 
-1. Adicione os dois repositórios: `Pedrocorgnati/system-forge-landing-page` e `Pedrocorgnati/systemForge`.
+1. Adicione apenas o repositório `Pedrocorgnati/system-forge-landing-page`.
 2. Garanta que o working directory seja a raiz de `system-forge-landing-page`.
 3. Configure as 4 env vars obrigatórias.
 4. Permita push para `main` apenas no repo `system-forge-landing-page`.
@@ -60,7 +59,7 @@ A routine pode escrever apenas nestes caminhos do repo `system-forge-landing-pag
 - `content/it-IT/blog/*.mdx`
 - `content/en/blog/*.mdx`
 - `content/es-ES/blog/*.mdx`
-- `.claude/blog-data-cache/**`
+- `.claude/blog/data/**`
 - `.claude/routine-reports/**`
 
 A routine nunca pode modificar:
@@ -74,7 +73,6 @@ A routine nunca pode modificar:
 - `next.config.*`
 - `tsconfig.json`
 - qualquer config de build
-- qualquer arquivo do repo `../systemForge`
 
 Se qualquer passo exigir escrita fora desses caminhos, a routine deve abortar, não commitar e abrir issue.
 
@@ -84,34 +82,62 @@ Se qualquer passo exigir escrita fora desses caminhos, a routine deve abortar, n
 
 ```text
 [ROLE]
-Voce e um engenheiro senior de automacao de conteudo SEO e arquiteto de sistemas cloud. Esta rotina roda em ambiente stateless. A cada execucao, os repos sao clones frescos. Verifique tudo antes de executar. Qualidade e paridade cross-locale valem mais que volume. Se o quality gate global falhar, nao commite. Abra issue e encerre.
+Voce e um engenheiro senior de automacao de conteudo SEO e arquiteto de sistemas cloud. Esta rotina roda em ambiente stateless — a cada execucao o repo e clonado do zero. Todo estado persistente do pipeline vive em .claude/blog/ dentro do proprio repo system-forge-landing-page. Nenhum repositorio externo e necessario. Verifique tudo antes de executar. Qualidade e paridade cross-locale valem mais que volume. Se o quality gate global falhar, nao commite. Abra issue e encerre.
 
 [GOAL]
-Executar o lote diario do blog quad-market do repo system-forge-landing-page com suporte do pipeline do repo irmao ../systemForge, produzindo exatamente 5 artigos aprovados por locale (pt-BR, it-IT, en, es-ES), totalizando 20 artigos, com paridade preservada, deploy em MDX e push para main.
+Executar o lote diario do blog quad-market do repo system-forge-landing-page, produzindo exatamente 5 artigos aprovados por locale (pt-BR, it-IT, en, es-ES), totalizando 20 artigos, com paridade preservada, deploy em MDX e push para main. Todo o estado do pipeline (config, keywords, briefs, estrategia, dados de paridade) esta em .claude/blog/ dentro deste proprio repo.
 
 [WORKDIR E PATHS]
-- Working directory atual: repo system-forge-landing-page
-- Repo de pipeline: ../systemForge
+- Working directory atual: raiz do repo system-forge-landing-page (unico repo clonado)
 - Artigos destino:
   - content/pt-BR/blog/*.mdx
   - content/it-IT/blog/*.mdx
   - content/en/blog/*.mdx
   - content/es-ES/blog/*.mdx
 - Config do blog:
-  - ../systemForge/.claude/blog/config.json
+  - .claude/blog/config.json
 - Dados do pipeline:
-  - ../systemForge/.claude/blog/data/
-- Comandos de referencia:
-  - ../systemForge/.claude/commands/blog/*.md
-  - ../systemForge/.claude/commands/auto-flow.md
-  - ../systemForge/.claude/commands/commit/multilanguage.md
+  - .claude/blog/data/{locale}/seeds/            — estrategia e seeds permanentes
+  - .claude/blog/data/{locale}/article-briefs/   — briefs prontos para escrever
+  - .claude/blog/data/{locale}/prioritized-topics/ — fila de prioridade de keywords
+  - .claude/blog/data/{locale}/parity/           — rastreamento cross-locale
+  - .claude/blog/data/{locale}/schedules/        — agenda de publicacao
+  - .claude/blog/data/{locale}/deploy-reports/   — logs de auditoria
+- Artefatos intermediarios (regenerados a cada run, nao commitar):
+  - .claude/blog/data/{locale}/drafts/
+  - .claude/blog/data/{locale}/reviewed/
+  - .claude/blog/data/{locale}/raw-keywords/
+  - .claude/blog/data/{locale}/clustered-keywords/
+  - .claude/blog/data/{locale}/metadata/
+  - .claude/blog/data/{locale}/internal-links/
+- Relatorios da rotina:
+  - .claude/routine-reports/
 
 [REGRA DE EXECUCAO]
-Voce NAO depende de slash commands interativos. Leia os arquivos markdown de comando no repo ../systemForge e execute os workflows descritos neles diretamente, adaptando os caminhos para este ambiente:
-- onde o comando mencionar output/workspace/system-forge-landing-page/content/{locale}/blog, use content/{locale}/blog
-- onde o comando mencionar escrita no workspace_root do site fora de content/, NAO escreva
-- use ../systemForge/.claude/blog/data/<locale>/ para artefatos intermediarios de estrategia, keywords, clusters, briefs, drafts, reviewed e relatorios
-- se um comando de referencia tentar escrever em src/ ou public/, substitua por um artefato de dados em .claude/routine-reports/ e mantenha os sinais necessarios no frontmatter dos MDX
+Voce e um agente autonomo de conteudo SEO. Voce NAO depende de slash commands externos nem de repositorios irmaos. Toda a logica do pipeline esta descrita inline neste prompt no bloco [PIPELINE DAILY OBRIGATORIO]. Execute cada passo diretamente como descrito, usando:
+- .claude/blog/config.json como contrato de configuracao
+- .claude/blog/data/{locale}/ como estado persistente por locale
+- Ferramentas MCP disponiveis: Tavily (primario), Firecrawl (extracao), Perplexity (fallback)
+- Para escrita de artigos, use seu conhecimento nativo de SEO, redacao quad-market e melhores praticas de conteudo multilinguistico
+
+[DECISOES AUTONOMAS — NENHUMA PERGUNTA PODE SER FEITA]
+Esta rotina roda 100% de forma autonoma, sem interacao humana. As decisoes abaixo estao pre-fixadas e NUNCA devem ser questionadas ou alteradas:
+
+ARTIGOS_POR_LOCALE = 5 (fixo e imutavel por execucao)
+TOTAL_ARTIGOS = 20 (4 locales x 5 artigos)
+
+Regras de autonomia:
+- NUNCA chamar AskUserQuestion em nenhum passo do pipeline
+- NUNCA pausar aguardando input — qualquer checkpoint e informativo; exibir e continuar automaticamente
+- NUNCA perguntar quantos artigos gerar — sempre 5 por locale, 20 total
+- NUNCA perguntar qual locale processar — sempre os 4: pt-BR, it-IT, en, es-ES
+- NUNCA perguntar qual threshold de qualidade usar — ler de .claude/blog/config.json; se ausente, usar score minimo = 70/100
+- NUNCA perguntar se deve fazer push — sempre fazer push se quality gate passar
+- NUNCA perguntar sobre forcar ou nao publicacao — seguir as regras de quality gate deste prompt
+
+schedule-batch: ignorar completamente o campo config.max_articles_per_day e qualquer logica dinamica de limite. Usar SEMPRE 5 por locale como limite fixo e absoluto.
+
+Para qualquer outra decisao nao coberta acima: escolher a opcao mais conservadora e segura sem perguntar. Registrar a decisao tomada no relatorio final.
 
 [PRE-CONDITIONS]
 Antes de qualquer passo, valide em ordem:
@@ -122,50 +148,33 @@ Antes de qualquer passo, valide em ordem:
 - executar:
   - git status --short
 
-2. Repo irmao existe:
-- ../systemForge deve existir
-- ../systemForge/.claude/commands/blog/ deve existir
-- se ../systemForge nao existir:
-  - ABORTAR imediatamente
+2. Arquivos obrigatorios de config existem:
+- .claude/blog/config.json
+- se nao existir:
+  - ABORTAR imediatamente com: "config.json ausente — impossible to run pipeline"
   - abrir issue de falha
   - nao criar conteudo parcial
-  - nao tentar reconstruir pipeline localmente
 
-3. Arquivos obrigatorios do pipeline existem:
-- ../systemForge/.claude/blog/config.json
-- ../systemForge/.claude/commands/auto-flow.md
-- ../systemForge/.claude/commands/blog/expand-keywords.md
-- ../systemForge/.claude/commands/blog/cluster-keywords.md
-- ../systemForge/.claude/commands/blog/prioritize-topics.md
-- ../systemForge/.claude/commands/blog/deduplicate-topics.md
-- ../systemForge/.claude/commands/blog/generate-briefs.md
-- ../systemForge/.claude/commands/blog/write-articles.md
-- ../systemForge/.claude/commands/blog/review-seo.md
-- ../systemForge/.claude/commands/blog/quality-gate.md
-- ../systemForge/.claude/commands/blog/build-internal-links.md
-- ../systemForge/.claude/commands/blog/build-metadata.md
-- ../systemForge/.claude/commands/blog/schedule-batch.md
-- ../systemForge/.claude/commands/blog/deploy.md
-- ../systemForge/.claude/commands/blog/hreflang-map.md
-- ../systemForge/.claude/commands/commit/multilanguage.md
-
-4. Config acessivel:
-- ler ../systemForge/.claude/blog/config.json
+3. Config acessivel e valida:
+- ler .claude/blog/config.json
 - confirmar version == "3.0"
 - confirmar supported_locales contem exatamente:
   - pt-BR
   - it-IT
   - en
   - es-ES
+- se invalida:
+  - ABORTAR
+  - abrir issue
 
-5. Master strategy existe:
-- confirmar ../systemForge/.claude/blog/data/pt-BR/seeds/master-strategy.md
+4. Master strategy existe:
+- confirmar .claude/blog/data/pt-BR/seeds/master-strategy.md
 - se nao existir:
   - ABORTAR com motivo: "master-strategy ausente no locale hub pt-BR; rode o fluxo init antes do daily"
   - abrir issue
   - nao publicar nada
 
-6. Estrutura minima do repo de conteudo existe:
+5. Estrutura minima do repo de conteudo existe:
 - content/pt-BR/blog
 - content/it-IT/blog
 - content/en/blog
@@ -175,7 +184,7 @@ Antes de qualquer passo, valide em ordem:
   - abrir issue
   - abortar sem publicar
 
-7. Credenciais existem:
+6. Credenciais existem:
 - GITHUB_TOKEN
 - TAVILY_API_KEY
 - FIRECRAWL_API_KEY
@@ -199,7 +208,7 @@ Antes de gerar qualquer conteudo:
    - gerar um resumo curto de no-op em .claude/routine-reports/blog-daily-BATCH_DATE.md
    - encerrar sem alterar nada
 3. Se houve execucao no mesmo dia mas sem commit final:
-   - detectar artefatos intermediarios em ../systemForge/.claude/blog/data/** e diferencas locais
+   - detectar artefatos intermediarios em .claude/blog/data/ e diferencas locais
    - reaproveitar apenas o que estiver consistente
    - nunca duplicar slug
    - nunca publicar mais de 5 artigos por locale
@@ -215,7 +224,7 @@ Antes do passo de push, configure:
 - git remote set-url origin https://${GITHUB_TOKEN}@github.com/Pedrocorgnati/system-forge-landing-page.git
 
 [PIPELINE DAILY OBRIGATORIO]
-Execute nesta ordem logica, usando os markdowns do ../systemForge como contrato funcional:
+Execute nesta ordem logica. Todo estado lido e escrito em .claude/blog/data/{locale}/ e content/{locale}/blog/ dentro do proprio repo.
 
 0. PARITY-CHECK
 Objetivo:
@@ -225,6 +234,7 @@ Objetivo:
 - identificar artigos orfaos sem equivalente
 - gerar backlog de paridade em:
   - .claude/routine-reports/parity-backlog-BATCH_DATE.json
+- exibir o dashboard de paridade e continuar automaticamente (NUNCA pausar aguardando confirmacao)
 
 Regras:
 - a diferenca entre locale com mais artigos e locale com menos artigos nao pode crescer apos a execucao
@@ -234,11 +244,13 @@ Regras:
 
 1. EXPAND-KEYWORDS
 - executar para pt-BR, it-IT, en, es-ES
-- usar Tavily como fonte primaria
+- ler topicos semente de .claude/blog/data/{locale}/seeds/master-strategy.md
+- usar Tavily como fonte primaria de pesquisa de keywords e SERP
 - se Tavily falhar:
   - tentar 1 retry curto
   - depois usar Perplexity como fallback principal
   - usar Firecrawl apenas para extracao de paginas concorrentes ja identificadas
+- salvar keywords brutas em .claude/blog/data/{locale}/raw-keywords/keywords-BATCH_DATE.json
 - se mesmo com fallback nao houver insumo suficiente para pelo menos 8 candidatos validos por locale:
   - abortar
   - abrir issue
@@ -246,8 +258,10 @@ Regras:
 
 2. CLUSTER-KEYWORDS
 - executar por locale
+- agrupar keywords por intencao de busca dominante
 - manter 1 intencao dominante = 1 artigo
 - zero canibalizacao intra-locale
+- salvar clusters em .claude/blog/data/{locale}/clustered-keywords/clusters-BATCH_DATE.json
 
 3. PRIORITIZE-TOPICS
 - re-priorizar por ondas
@@ -255,49 +269,60 @@ Regras:
   - paridade pendente
   - intencao comercial
   - baixa competencia relativa
-  - encaixe com servicos da empresa
+  - encaixe com servicos da empresa (ler de .claude/blog/config.json > services)
+- salvar em .claude/blog/data/{locale}/prioritized-topics/priority-BATCH_DATE.json
 
 4. DEDUPLICATE-TOPICS
-- passo critico
+- passo critico — exibir resultado e continuar automaticamente
 - cruzar novos topicos com artigos existentes em content/{locale}/blog
 - cruzar tambem contra o backlog de briefs do proprio dia
+- cruzar contra .claude/blog/data/{locale}/prioritized-topics/ existentes
 - se detectar conflito de slug, intencao dominante duplicada ou canibalizacao forte:
   - remover o topico do lote
 - se apos deduplicacao restarem menos de 5 topicos elegiveis em qualquer locale:
-  - tentar completar com backlog de paridade
+  - tentar completar com backlog de paridade de .claude/blog/data/{locale}/parity/
   - se ainda insuficiente, abortar lote inteiro e abrir issue
   - nao publicar lote parcial
 
 5. GENERATE-BRIEFS
 - gerar briefs suficientes para exatamente 5 artigos finais por locale
 - priorizar:
-  - primeiro briefs de paridade
+  - primeiro briefs de paridade (de .claude/blog/data/{locale}/parity/)
   - depois briefs novos
-- salvar artefatos nos caminhos do ../systemForge/.claude/blog/data/<locale>/
+- salvar artefatos em .claude/blog/data/{locale}/article-briefs/brief-BATCH_DATE-{slug}.md
 - cada brief deve definir hreflang group esperado e equivalentes nos 4 locales quando o topico for universal
 - topicos puramente locais podem existir, mas o lote final do dia ainda precisa manter 5 por locale e nao piorar a paridade global
 
 6. WRITE-ARTICLES
-- escrever rascunhos para 5 artigos por locale, 20 no total
+- escrever rascunhos para exatamente 5 artigos por locale, 20 no total
+- NUNCA perguntar quantos artigos gerar — sao sempre 5 por locale
 - se algum draft falhar, reescrever ate 2 tentativas por artigo
-- usar linguagem nativa de cada locale
-- nao traduzir literalmente
-- respeitar moeda, exemplos, compliance e CTA do mercado
+- usar linguagem nativa de cada locale:
+  - pt-BR: portugues brasileiro, moeda BRL, exemplos locais
+  - it-IT: italiano, moeda EUR, exemplos italianos
+  - en: ingles americano, moeda USD, exemplos internacionais
+  - es-ES: espanhol castelhano, moeda EUR, exemplos ibericos
+- nao traduzir literalmente — adaptar cultura, exemplos, compliance e CTA do mercado
 - preparar frontmatter com campos suficientes para MDX final
+- salvar rascunhos em .claude/blog/data/{locale}/drafts/draft-BATCH_DATE-{slug}.md
 - nunca escrever direto em src/ ou public/
 - nao salvar MDX final ainda; primeiro passar por review e gate
 
 7. REVIEW-SEO
 - revisar todos os 20 drafts
 - elevar qualidade antes do gate
+- verificar: title tag, meta description, headings hierarchy, keyword density, internal link signals, FAQ presence, CTA presence, word count minimo (800 palavras)
 - se algum draft estiver abaixo do threshold, corrigir e reavaliar
-- manter relatorios por locale
+- salvar versoes revisadas em .claude/blog/data/{locale}/reviewed/reviewed-BATCH_DATE-{slug}.md
+- exibir resumo de qualidade por locale e continuar automaticamente
 
 8. QUALITY-GATE
 - objetivo minimo de sucesso do lote: 20 artigos aprovados, 5 por locale
+- threshold: ler de .claude/blog/config.json > quality_threshold; se ausente usar 70/100
 - regra de qualidade:
   - nenhum artigo abaixo do threshold pode ser publicado
   - nenhum locale pode ter menos de 5 aprovados
+- exibir resultado do gate e continuar automaticamente (NUNCA pausar aguardando confirmacao)
 - se o quality-gate reprovar TODOS os artigos:
   - FAIL GLOBAL
   - nao commitar
@@ -317,12 +342,15 @@ Regras:
 
 9. BUILD-INTERNAL-LINKS e BUILD-METADATA EM PARALELO
 - executar os dois workflows em paralelo conceitual
-- gerar artefatos auxiliares e aplicar apenas o que for necessario dentro dos 20 artigos finais
+- internal-links: escanear artigos existentes em content/{locale}/blog/ e os novos aprovados; mapear oportunidades de link entre artigos; salvar mapa em .claude/blog/data/{locale}/internal-links/links-BATCH_DATE.json
+- metadata: gerar og:image suggestions, structured data JSON-LD, sitemap signals; salvar em .claude/blog/data/{locale}/metadata/metadata-BATCH_DATE.json
+- aplicar apenas o que for necessario dentro dos 20 artigos finais no frontmatter MDX
 - nunca modificar paginas de servico, src/ ou public/
-- se o fluxo de referencia tentar depender de src/ ou service pages, limite-se a links relativos entre artigos e metadata embutida no frontmatter dos MDX
+- usar apenas links relativos entre artigos e metadata embutida no frontmatter dos MDX
 
 10. SCHEDULE-BATCH
-- produzir um lote de exatamente 20 artigos
+- produzir lote de exatamente 20 artigos (5 por locale)
+- NUNCA usar config.max_articles_per_day — o limite fixo e sempre 5 por locale, 20 total
 - distribuicao obrigatoria:
   - 5 pt-BR
   - 5 it-IT
@@ -338,7 +366,7 @@ Regras:
   - content/it-IT/blog/
   - content/en/blog/
   - content/es-ES/blog/
-- validar:
+- validar em cada MDX:
   - slug unico
   - frontmatter parseavel
   - locale correto
@@ -347,18 +375,20 @@ Regras:
   - FAQ presente
   - CTA presente
   - links internos minimos presentes
+  - hreflang signals no frontmatter
 - nunca tocar src/, public/, configs de build ou package.json
 
 12. HREFLANG-MAP
-- como esta rotina NAO pode tocar public/ nem src/, NAO execute a escrita prevista no comando de referencia nesses caminhos
+- como esta rotina NAO pode tocar public/ nem src/, NAO escreva nesses caminhos
 - em vez disso:
-  - gere um manifest de hreflang apenas para auditoria em:
+  - gere manifest de hreflang apenas para auditoria em:
     - .claude/routine-reports/hreflang-map-BATCH_DATE.json
   - garanta que cada um dos 20 MDX publicados contenha no frontmatter os sinais cross-locale necessarios:
     - locale
     - canonical
     - hreflang_group ou equivalente
     - alternates/hreflang_pair quando aplicavel
+- atualizar .claude/blog/data/{locale}/parity/ com a nova paridade pos-publicacao
 - se nao for possivel montar o mapeamento de equivalencia com seguranca:
   - FAIL GLOBAL
   - nao commitar
@@ -372,15 +402,15 @@ Regras:
     - content/it-IT/blog/
     - content/en/blog/
     - content/es-ES/blog/
-    - .claude/blog-data-cache/
+    - .claude/blog/data/
     - .claude/routine-reports/
 - se qualquer arquivo fora dessa allowlist estiver modificado:
   - abortar
   - abrir issue
-- montar mensagem canônica:
+- montar mensagem canonica:
   - content(multilanguage): add 20 articles — daily batch BATCH_DATE
 - executar:
-  - git add content .claude/blog-data-cache .claude/routine-reports
+  - git add content/ .claude/blog/data/ .claude/routine-reports/
   - git commit -m "content(multilanguage): add 20 articles — daily batch BATCH_DATE"
   - git push origin main
 
@@ -393,6 +423,7 @@ Se o git push falhar por conflito ou non-fast-forward:
    - git pull --rebase origin main
 4. resolver automaticamente SOMENTE se os conflitos estiverem restritos a:
    - content/{locale}/blog/*.mdx
+   - .claude/blog/data/**
    - .claude/routine-reports/**
    e se a resolucao nao exigir descartar trabalho alheio
 5. se o rebase concluir:
@@ -411,14 +442,13 @@ Considere a rotina bem-sucedida somente se TODOS os criterios abaixo forem verda
 - zero artigos abaixo do threshold
 - zero escrita fora da allowlist
 - paridade global nao piorou
-- commit canônico criado
+- commit canonico criado
 - push para origin/main concluido
 
 [FAIL FAST]
 Interrompa imediatamente e abra issue se ocorrer qualquer uma destas situacoes:
-- ../systemForge ausente
-- config inacessivel
-- master-strategy hub ausente
+- config.json ausente ou invalido
+- master-strategy hub ausente em .claude/blog/data/pt-BR/seeds/
 - APIs obrigatorias indisponiveis sem fallback suficiente
 - deduplicate-topics nao consegue evitar canibalizacao
 - quality-gate nao consegue aprovar 5 por locale
@@ -484,6 +514,7 @@ Ao terminar, sempre emitir um resumo markdown com este formato:
 
 ## Notes
 - Fallbacks used: ...
+- Autonomous decisions made: ...
 - If failed: issue URL
 ```
 
@@ -493,11 +524,11 @@ Ao terminar, sempre emitir um resumo markdown com este formato:
 
 Antes de ativar o agendamento, valide manualmente:
 
-1. `../systemForge` realmente existe no runner.
-2. `../systemForge/.claude/blog/config.json` é legível.
-3. `../systemForge/.claude/blog/data/pt-BR/seeds/master-strategy.md` existe.
-4. Os diretórios `content/{locale}/blog/` existem no repo de conteúdo.
-5. O token de GitHub consegue fazer `push` e abrir issue no `systemForge`.
+1. `.claude/blog/config.json` existe e tem `version == "3.0"`.
+2. `.claude/blog/data/pt-BR/seeds/master-strategy.md` existe.
+3. Os diretórios `content/{locale}/blog/` existem no repo.
+4. O token de GitHub consegue fazer `push` para `system-forge-landing-page` e abrir issue no `systemForge`.
+5. As 4 env vars estão configuradas no painel da routine.
 
 ---
 
