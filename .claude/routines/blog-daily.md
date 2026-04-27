@@ -418,21 +418,40 @@ FASE C — Scan de secrets no staging area:
 
 FASE D — Validacao de frontmatter MDX:
 - npm run validate:frontmatter 2>&1
-- se script nao existir, validar manualmente:
-  para cada arquivo em content/{locale}/blog/ modificado neste lote:
-    verificar presenca dos campos obrigatorios: title, description, date, locale, slug, canonical
-    verificar que date == BATCH_DATE
-    verificar que locale corresponde ao diretorio
-  se qualquer campo ausente ou invalido: BLOCK — abortar, abrir issue com lista dos arquivos afetados
+- se script nao existir, validar manualmente cada arquivo MDX do lote:
+    campos obrigatorios: title, description, date, locale, slug, canonical
+    date deve ser == BATCH_DATE
+    locale deve corresponder ao diretorio
+- se houver erros de frontmatter:
+  TENTATIVA DE CORRECAO AUTOMATICA (1x):
+    para cada arquivo com erro: ler o arquivo, identificar campos ausentes/invalidos,
+    corrigir inline (preencher campos obrigatorios com valores coerentes derivados do
+    conteudo do artigo ja escrito), reescrever o arquivo
+    rodar npm run validate:frontmatter novamente (ou revalidar manualmente)
+    se ainda houver erros apos correcao: BLOCK — abortar, abrir issue com lista dos arquivos e erros restantes
+    se correcao bem-sucedida: WARN — registrar correcoes no relatorio e continuar
 
 FASE E — Type-check:
 - npm run type-check 2>&1
 - se script nao existir: npx tsc --noEmit 2>&1
-- se houver erros de tipo: BLOCK — abortar, abrir issue com os primeiros 30 erros
+- se houver erros de tipo relacionados a arquivos MDX do lote:
+  TENTATIVA DE CORRECAO AUTOMATICA (1x):
+    ler os arquivos apontados pelos erros, corrigir os campos de frontmatter que causam
+    incompatibilidade de tipo (ex: campo date como numero em vez de string, campo booleano
+    como string, etc.), reescrever os arquivos
+    rodar type-check novamente
+    se ainda houver erros: BLOCK — abortar, abrir issue com os primeiros 30 erros
+    se correcao bem-sucedida: WARN — registrar no relatorio e continuar
+- se erros de tipo em arquivos fora do lote (src/, etc.): BLOCK imediato — abortar, abrir issue
 
 FASE F — Lint:
 - npm run lint 2>&1
-- se exit code != 0 (erros, nao apenas warnings): BLOCK — abortar, abrir issue com output
+- se exit code != 0 (erros, nao apenas warnings):
+  TENTATIVA DE CORRECAO AUTOMATICA (1x):
+    npm run lint -- --fix 2>&1
+    npm run lint 2>&1
+    se ainda exit code != 0: BLOCK — abortar, abrir issue com output residual
+    se correcao bem-sucedida: WARN — registrar no relatorio e continuar
 - se apenas warnings (exit 0): WARN — registrar no relatorio e continuar
 
 FASE G — Commit e push:
