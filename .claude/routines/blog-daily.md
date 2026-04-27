@@ -218,10 +218,15 @@ Antes de gerar qualquer conteudo:
    - se houver ambiguidade, abortar e abrir issue
 
 [GIT SETUP]
-Antes do passo de push, configure:
+IMPORTANTE: variaveis de ambiente NAO persistem entre chamadas de Bash — cada chamada e um processo novo. Por isso, o token deve ser interpolado diretamente no remote URL, nao via ${GITHUB_TOKEN}.
+
+Execute estes comandos (use o valor literal do GITHUB_TOKEN fornecido no inicio deste prompt, nao a variavel de ambiente):
 - git config user.email "corgnati.pedro@gmail.com"
 - git config user.name "Pedro Corgnati"
-- git remote set-url origin https://${GITHUB_TOKEN}@github.com/Pedrocorgnati/system-forge-landing-page.git
+- git remote set-url origin https://<VALOR_LITERAL_DO_GITHUB_TOKEN>@github.com/Pedrocorgnati/system-forge-landing-page.git
+- git remote get-url origin  (verificar que o URL contem o token — se mostrar https://github.com sem token, o setup falhou e NAO tente o push)
+
+Repetir este setup antes de CADA chamada de git push, pois o remote URL pode ter sido resetado entre processos.
 
 [PIPELINE DAILY OBRIGATORIO]
 Execute nesta ordem logica. Todo estado lido e escrito em .claude/blog/data/{locale}/ e content/{locale}/blog/ dentro do proprio repo.
