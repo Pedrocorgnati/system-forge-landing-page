@@ -1,0 +1,155 @@
+---
+title: "MVP Startup España: Costes y Plazos Reales 2026"
+slug: "mvp-startup-coste-plazos-2026"
+date: "2026-04-27"
+locale: "es-ES"
+description: "MVP sencillo en España: €15.000–€45.000 en 6–12 semanas. MVP medio: €45.000–€80.000. SaaS Barcelona: €38.000 en 10 semanas, 22 clientes pagantes. Guía 2026."
+excerpt: "Cuánto cuesta desarrollar un MVP en España en 2026: rangos de precio por complejidad, comparativa freelancer vs empresa de software y caso real de startup barcelonesa."
+tags: ["MVP startup España", "coste desarrollo MVP", "empresa software española", "desarrollo web startup", "MVP SaaS costes", "freelancer vs agencia", "startup tecnológica 2026"]
+coverImage: "/images/blog/mvp-startup-coste-plazos-2026.webp"
+author: "Pedro Corgnati"
+relatedService: "desarrollo-web"
+---
+
+# MVP de Startup en 2026: Cuánto Cuesta Realmente y Cuánto Tarda (Guía Honesta)
+
+Un MVP de startup en España cuesta entre **15.000€ y 45.000€** si es simple (web app + auth + un flujo principal + pagos), y entre **50.000€ y 120.000€** si es medio (multi-rol, integraciones, panel admin, app móvil, infraestructura escalable). El plazo realista va de **8 semanas** para un MVP simple bien acotado a **16-20 semanas** para uno medio con dependencias externas. Lo que dispara el coste no suele ser la tecnología: son las decisiones que el fundador no ha tomado antes de empezar.
+
+Soy Pedro Corgnati, fundador de SystemForge. He construido MVPs para fundadores en Madrid, Barcelona, Bilbao y Valencia, desde marketplaces de servicios hasta SaaS B2B. Lo que vas a leer no son cifras de "tarifa estándar de agencia": es el desglose real de lo que entra en presupuesto cuando alguien me trae una idea y quiere salir al mercado.
+
+## Qué incluye un MVP (y qué no)
+
+Un MVP no es una versión "barata" del producto final. Es la versión más pequeña que valida una hipótesis de negocio con usuarios reales. Si quitas algo y la hipótesis no se puede probar, era esencial. Si quitas algo y se prueba igual, sobraba.
+
+**Lo que sí incluye un MVP serio:**
+
+- Flujo principal end-to-end (registro → uso → pago si aplica)
+- Autenticación funcional con recuperación de contraseña
+- Panel mínimo de administración (ver usuarios, contenido, métricas básicas)
+- Pasarela de pagos si el modelo es transaccional (Stripe normalmente)
+- Mobile-first (no app nativa, pero web responsive impecable)
+- Despliegue en infraestructura real (no localhost)
+- Métricas de producto (PostHog, Plausible o similar)
+- Política de privacidad y consentimiento GDPR
+
+**Lo que NO debe incluir un MVP (y aun así muchos lo meten y duplican el coste):**
+
+- App nativa iOS + Android desde el día 1 (web mobile-first basta)
+- Internacionalización a 5 idiomas (lanza en uno)
+- Marketplace bilateral completo con sistema de reputación (céntrate en un lado)
+- Panel admin con 40 reportes (3 métricas bien hechas valen más)
+- Integración con 8 herramientas externas (1-2 críticas)
+- Tests automatizados al 90% de cobertura (los críticos sí, el resto vendrá)
+
+## Freelancer vs agencia para MVP en España: comparativa
+
+| Opción | Rango de coste | Plazo | Riesgos | Cuándo elegirlo |
+|--------|----------------|-------|---------|-----------------|
+| Freelancer junior | 8.000–18.000€ | 12-20 semanas | Bus factor 1, calidad variable, sin diseño | Si tienes producto/diseño claros y validación previa |
+| Freelancer senior | 20.000–40.000€ | 8-14 semanas | Disponibilidad limitada, sin escalado de equipo | Si el MVP es muy técnico y acotado |
+| Agencia/estudio pequeño | 25.000–60.000€ | 8-12 semanas | Calidad depende mucho del estudio | Buen punto medio si validas referencias reales |
+| Agencia grande | 80.000–200.000€ | 16-24 semanas | Sobreingeniería, comerciales que no construyen | Solo si necesitas equipo grande paralelo |
+| Equipo in-house | 50.000–100.000€/3 meses | 12-20 semanas | Coste fijo, gestión de RRHH | Si vas a iterar 2+ años |
+
+Pago por horas vs precio cerrado: pide siempre **precio cerrado por entregables** con scope documentado. "Por horas" sin tope acaba siempre por encima del presupuesto y deja al fundador presionando para que se cierre algo.
+
+## 5 cosas que duplican el coste del MVP
+
+**1. Cambios de scope sin protocolo.** El fundador ve algo, "ya que estamos hagamos también X". Cada X que no estaba en el scope inicial añade entre 1.500€ y 8.000€. La solución no es decir no, es tener un proceso: scope-change formal, recotización, decisión consciente.
+
+**2. Falta de wireframes/diseño antes de codificar.** Si entras en desarrollo sin pantallas definidas, vas a rehacer cada módulo 2-3 veces. El presupuesto de diseño y arquitectura previa (3.000-8.000€) ahorra 15.000-30.000€ de retrabajo.
+
+**3. Decisiones técnicas tomadas por el desarrollador sin contexto de negocio.** "He elegido microservicios y Kubernetes" en un MVP que aún no tiene 100 usuarios. La complejidad innecesaria es el cáncer de los presupuestos.
+
+**4. Integraciones con sistemas legacy del fundador.** Conectar con un ERP propio mal documentado, una API que no existe en producción o un Excel "que tenemos que mantener". Cada una de éstas son 5.000-15.000€ extra y plazos abiertos.
+
+**5. Multi-rol con permisos complejos sin spec.** Admin, manager, editor, viewer, externo, invitado... Si los roles no están escritos antes de codificar, el módulo de permisos se rehace tres veces.
+
+## Señales de alarma al recibir presupuestos
+
+- **No te piden ver competidores ni hacen preguntas de negocio.** Si solo hablan de tecnología, van a construir lo que pidas, no lo que necesitas.
+- **El presupuesto no detalla entregables.** "Desarrollo MVP — 25.000€" sin desglose es una factura sin contrato real.
+- **Plazo de 4 semanas para algo medio.** Mienten o lo van a hacer mal. Un MVP medio decente no baja de 8 semanas.
+- **No hablan de despliegue, monitorización ni mantenimiento.** Te van a entregar un zip y desaparecer.
+- **No piden acceso a stakeholders del negocio.** Si solo hablan contigo y nunca con tus clientes potenciales, el producto saldrá desconectado del mercado.
+- **Cero referencias verificables.** Pide hablar con 2 clientes anteriores. Si no pueden, hay un problema.
+
+## En la práctica — caso real en España
+
+Un fundador en Barcelona quería lanzar un SaaS para gestión de pisos turísticos: registro de huéspedes (cumpliendo normativa Mossos d'Esquadra), check-in digital, comunicación con limpieza. Llegó tras dos presupuestos de **75.000€** y **110.000€** de agencias grandes con plazos de 6-8 meses.
+
+Acotamos el MVP a un único caso: anfitriones con 1-5 propiedades en Barcelona ciudad, integración solo con la plataforma policial autonómica, sin app móvil nativa (web mobile-first). Cortamos el dashboard analítico a 4 KPIs en lugar de 20. Pospusimos el módulo de facturación electrónica para v1.5.
+
+Resultado:
+
+- Inversión MVP: **38.000€**.
+- Plazo: **10 semanas** (incluyendo 1 de diseño y 1 de pilotaje con 8 anfitriones reales).
+- Stack: Next.js 15 + Supabase + Stripe + Vercel.
+- Lanzamiento: 22 anfitriones de pago en los primeros 60 días.
+
+A los 5 meses sumaron el módulo de facturación con los ingresos generados, sin volver a inversión externa.
+
+## Cómo SystemForge lo resuelve
+
+Cuando un fundador nos llama para un MVP, dedicamos la primera reunión (gratuita, 60-90 min) a **dudar del scope que trae**. La mayoría llega con una lista del 200% de lo que necesita validar. Nuestro trabajo es separar lo que valida la hipótesis (in) de lo que es ego o ansiedad de fundador (fuera, para v1.5).
+
+**Nuestro proceso de MVP:**
+
+**Semana 0 — Discovery (1.500-3.500€).** Documentamos hipótesis a validar, persona real, flujo crítico, métrica de éxito. Definimos in/out scope con firma. Sin esto no aceptamos proyecto.
+
+**Semana 1-2 — Diseño y arquitectura (3.000-6.000€ incluidos en presupuesto cerrado).** Wireframes, prototipo navegable Figma, decisiones técnicas (stack, hosting, base de datos), modelo de datos, contrato de APIs.
+
+**Semana 3-7/12 — Construcción (60-70% del presupuesto).** Pipeline DCP por módulos: cada módulo entra en producción funcionando antes de empezar el siguiente. Demos semanales con el fundador. Cero "te lo enseño todo al final".
+
+**Semana última — Pilotaje + lanzamiento.** Despliegue en producción real, primeros usuarios reales, monitorización activa, ajustes finales. Documentación de handoff para que puedas seguir tú o con otro equipo.
+
+**Stack típico en 2026:** Next.js 15, TypeScript, Supabase o PostgreSQL gestionado, Stripe, Vercel/Hostinger según volumen, PostHog para producto, Sentry para errores. Todo GDPR-compliant con servidores en la UE.
+
+**Rangos cerrados:**
+
+- MVP simple validable (un flujo, un rol): **15.000–28.000€**, 8-10 semanas.
+- MVP medio (multi-rol, pagos, panel admin): **35.000–65.000€**, 10-14 semanas.
+- MVP complejo (marketplace, integraciones, app + web): **75.000–120.000€**, 14-20 semanas.
+
+Pide un [presupuesto sin compromiso por WhatsApp](/contacto). Si el scope no cuadra con tu objetivo, lo decimos antes del presupuesto, no después.
+
+Más detalle en [desarrollo web](/servicios/desarrollo-web) y [sistemas personalizados](/servicios/sistemas-personalizados).
+
+## Errores más comunes al lanzar un MVP
+
+**1. Construir antes de hablar con 10 usuarios potenciales.** Si no has hecho 10 entrevistas, no sabes el problema. Construir es siempre más caro que preguntar.
+
+**2. Confundir MVP con prototipo bonito.** Un Figma navegable no es un MVP. Un MVP cobra dinero o registra usuarios reales que vuelven.
+
+**3. Diseñar para el escalado antes de tener tracción.** Optimizar para 1 millón de usuarios cuando tienes 0 es la receta para no llegar nunca a 100.
+
+**4. No medir nada desde el día 1.** Lanzar sin analytics es lanzar a ciegas. Mínimo: registro, activación, retención semana 1 y semana 4, conversión a pago.
+
+**5. Subcontratar al más barato sin ver código previo.** Pedir acceso a un repositorio anterior dice más que cualquier portfolio comercial.
+
+## Conclusión
+
+Un MVP no se mide en líneas de código sino en hipótesis validadas por euro invertido. La diferencia entre un proyecto que cuesta 30.000€ y uno que cuesta 120.000€ casi nunca es la tecnología: es el rigor del scope, la calidad del diseño previo y la honestidad del equipo a la hora de decir que no a lo que sobra. [Solicita un diagnóstico gratuito](/contacto) y te decimos en 45 minutos qué cabe en tu presupuesto y qué no.
+
+## Preguntas Frecuentes
+
+**¿Puedo lanzar un MVP por menos de 10.000€?**
+Sí, si es muy acotado: una landing con formulario inteligente, una calculadora, una herramienta de un único uso. Por debajo de eso, no es un MVP de startup, es un experimento. Y está bien, pero hay que llamarlo así.
+
+**¿Cuánto tarda un MVP "real" en desarrollarse?**
+Ocho a doce semanas para uno simple bien acotado. Más rápido suele significar mala calidad o scope falsamente reducido. Más lento suele significar scope inflado o equipo sin método.
+
+**¿Vale la pena hacer app móvil nativa en el MVP?**
+Casi nunca. Web mobile-first responde el 90% de los casos en 2026, y App Stores añaden semanas de aprobación, mantenimiento doble y costes de cuenta de desarrollador. Empieza web, valida, luego decides nativa.
+
+**¿Quién es dueño del código del MVP?**
+Tú, siempre. Exige código en tu repositorio (GitHub propio), credenciales en tu nombre, infraestructura a tu nombre. Cualquier proveedor que no te dé esto es una bandera roja.
+
+**¿Y si tras el MVP necesito iterar mucho?**
+Lo normal. Reservamos en presupuesto un sprint post-lanzamiento (2-4 semanas) para ajustes con datos reales. A partir de ahí, mensualidad de evolución según tracción.
+
+## Ver también
+
+- [Incluir un Agente IA en el MVP: ROI desde el Lanzamiento](/blog/agente-ia-pequena-empresa-coste-roi-2026)
+- [Accesibilidad Digital WCAG en el MVP: Requisito Legal](/blog/accesibilidad-digital-pymes-2026)
+- [Automatizar los Flujos del MVP Sin Escribir Código](/blog/automatizar-tareas-empresa-sin-programar)
