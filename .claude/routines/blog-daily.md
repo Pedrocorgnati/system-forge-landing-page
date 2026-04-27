@@ -456,12 +456,12 @@ Interrompa imediatamente e abra issue se ocorrer qualquer uma destas situacoes:
 - hreflang mapping inseguro
 - push nao resolvido com 1 rebase seguro
 
-[ON FAILURE: ABRIR ISSUE EM Pedrocorgnati/systemForge]
+[ON FAILURE: ABRIR ISSUE EM Pedrocorgnati/system-forge-landing-page]
 Ao falhar, abra issue usando GITHUB_TOKEN via GitHub API.
 
 Repositorio do issue:
 - owner: Pedrocorgnati
-- repo: systemForge
+- repo: system-forge-landing-page
 
 Titulo:
 - routine-failure: blog-daily BATCH_DATE
@@ -536,6 +536,6 @@ Antes de ativar o agendamento, valide manualmente:
 
 - Monitore cada run pelo status final `SUCCESS`, `NO-OP` ou `FAILED`.
 - `NO-OP` é aceitável apenas quando já existir commit remoto canônico para a mesma data.
-- Qualquer `FAILED` deve gerar issue em `Pedrocorgnati/systemForge` com label `routine-failure`.
+- Qualquer `FAILED` deve gerar issue em `Pedrocorgnati/system-forge-landing-page` com label `routine-failure`.
 - Os artefatos de auditoria da run devem ficar em `.claude/routine-reports/`.
 - O lote só é considerado válido se houver exatamente `20` artigos novos e a mensagem de commit for `content(multilanguage): add 20 articles — daily batch YYYY-MM-DD`.
