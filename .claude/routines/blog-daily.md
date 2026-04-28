@@ -218,15 +218,27 @@ Antes de gerar qualquer conteudo:
    - se houver ambiguidade, abortar e abrir issue
 
 [GIT SETUP]
-IMPORTANTE: variaveis de ambiente NAO persistem entre chamadas de Bash — cada chamada e um processo novo. Por isso, o token deve ser interpolado diretamente no remote URL, nao via ${GITHUB_TOKEN}.
+IMPORTANTE: variaveis de ambiente NAO persistem entre chamadas de Bash — cada chamada e um processo novo. Alem disso, o cloud runner pode ter um credential helper que intercepta o push e usa credenciais internas de somente leitura, ignorando o token no remote URL. Por isso, e necessario desativar o credential helper E usar o token literal no remote URL.
 
-Execute estes comandos (use o valor literal do GITHUB_TOKEN fornecido no inicio deste prompt, nao a variavel de ambiente):
-- git config user.email "corgnati.pedro@gmail.com"
-- git config user.name "Pedro Corgnati"
-- git remote set-url origin https://<VALOR_LITERAL_DO_GITHUB_TOKEN>@github.com/Pedrocorgnati/system-forge-landing-page.git
-- git remote get-url origin  (verificar que o URL contem o token — se mostrar https://github.com sem token, o setup falhou e NAO tente o push)
+Execute estes comandos em uma unica chamada de Bash, imediatamente antes de cada git push (substituindo <TOKEN> pelo valor literal do GITHUB_TOKEN fornecido no inicio deste prompt):
 
-Repetir este setup antes de CADA chamada de git push, pois o remote URL pode ter sido resetado entre processos.
+  git config --global credential.helper ""
+  git config --local credential.helper ""
+  git config user.email "corgnati.pedro@gmail.com"
+  git config user.name "Pedro Corgnati"
+  git remote set-url origin https://<TOKEN>@github.com/Pedrocorgnati/system-forge-landing-page.git
+  git remote get-url origin
+
+A saida do ultimo comando DEVE mostrar o token no URL. Se mostrar https://github.com sem token, o setup falhou — NAO tente o push, abra issue com o diagnostico.
+
+Ao executar o push, usar:
+  GIT_TERMINAL_PROMPT=0 git push origin main
+
+Se ainda retornar 403 apos esses passos:
+  - registrar no relatorio: "push bloqueado pelo runner — credential helper nao pode ser desativado"
+  - NAO tentar force push
+  - abrir issue em Pedrocorgnati/system-forge-landing-page com label routine-failure
+  - incluir no body: output de git remote get-url origin, output do git push com -v (verbose), git config --list | grep credential
 
 [PIPELINE DAILY OBRIGATORIO]
 Execute nesta ordem logica. Todo estado lido e escrito em .claude/blog/data/{locale}/ e content/{locale}/blog/ dentro do proprio repo.
