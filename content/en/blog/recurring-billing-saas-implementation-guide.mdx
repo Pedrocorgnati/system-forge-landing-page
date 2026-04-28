@@ -1,0 +1,143 @@
+---
+title: "Recurring Billing for SaaS: The Implementation Guide You Actually Need"
+slug: "recurring-billing-saas-implementation-guide"
+date: "2026-04-28"
+description: "How to implement recurring billing in your SaaS: gateway selection, dunning, proration, and tax compliance. Practical guide with costs and tool comparisons for 2026."
+excerpt: "How to implement recurring billing in your SaaS: gateway selection, dunning, proration, and tax compliance. Practical guide with costs and tool comparisons for 2026."
+tags: ["recurring billing SaaS", "SaaS billing", "subscription management", "dunning", "payment gateway SaaS", "proration SaaS", "MRR churn"]
+coverImage: "/images/blog/recurring-billing-saas-implementation-guide.webp"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'en'
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'cobranca-recorrente-saas-como-implementar'
+  - locale: 'it-IT'
+    slug: 'fatturazione-ricorrente-saas-come-implementare'
+  - locale: 'es-ES'
+    slug: 'facturacion-recurrente-saas-implementacion'
+---
+
+# Recurring Billing for SaaS: The Implementation Guide You Actually Need in 2026
+
+Recurring billing in a SaaS is the automated process of charging customers periodically — monthly, quarterly, or annually — without manual intervention per cycle. Getting it right is the difference between a SaaS that scales and one that leaks: poorly managed involuntary churn can consume 10-20% of MRR, and plan changes without automation become an operational nightmare past 100 customers.
+
+I'm Pedro Corgnati, founder of SystemForge and full-stack developer. I've built the billing module for three different SaaS products — one reached 800+ active subscribers. Each taught me something new about edge cases that gateway documentation glosses over.
+
+## How recurring billing works in a SaaS
+
+Recurring billing involves four components that need to work together: **plans and subscriptions** (pricing and period definitions), **payment gateway** (charge processing), **dunning** (failed charge recovery), and **customer portal** (upgrade, downgrade, and self-service cancellation).
+
+The basic flow: customer selects a plan → provides payment method → system creates a subscription in the gateway → gateway charges automatically on the cycle date → system receives success or failure webhook → on failure, dunning kicks in.
+
+The most common mistake early-stage SaaS founders make is treating billing as a simple feature. Billing is a critical domain with many edge cases: expired cards, chargebacks, pro-rated charges on mid-cycle upgrades, pauses and reactivations, tax by state or country, integrated invoice generation.
+
+## Gateway selection: comparison for the US market
+
+### Stripe
+
+Stripe is the most robust choice for SaaS with international ambitions. It offers Stripe Billing with native subscription support, smart dunning, customer portal, and reliable webhooks. Rates: 2.9% + $0.30 per successful card charge. For SaaS planning to expand internationally, Stripe is the industry standard.
+
+The ecosystem advantage: Stripe Sigma for analytics, Stripe Tax for automated tax compliance, and a massive third-party integration library.
+
+### Paddle
+
+Paddle operates as a Merchant of Record — meaning Paddle handles sales tax, VAT, and compliance globally on your behalf. This is invaluable if you're selling to EU customers (VAT) or across US states (sales tax). Higher effective rates (5-10% of transaction), but you avoid the complexity and liability of tax compliance in 50+ jurisdictions.
+
+### Chargebee
+
+Chargebee is a dedicated subscription management platform that sits on top of gateways (Stripe, Braintree, PayPal). It adds advanced billing logic: multiple subscription items, usage-based billing, revenue recognition, and dunning customization. Pricing from $599/month for growing plans. Worth it when billing complexity outpaces what Stripe Billing offers natively.
+
+### Recurly
+
+Direct competitor to Chargebee. Strong for high-volume SaaS with complex upgrade/downgrade rules and advanced analytics. From $299/month. Has better native dunning analytics than Chargebee in my experience.
+
+### Lemon Squeezy
+
+Budget-friendly Merchant of Record alternative to Paddle. Handles tax compliance globally. Rates: 5% + $0.50/transaction. Best for bootstrapped SaaS that doesn't want to deal with tax complexity from day one.
+
+## Implementing dunning: recover 40-60% of failed charges
+
+Dunning is the process of recovering failed billing attempts. Without it, a SaaS loses 5-15% of MRR to involuntary churn (expired cards, exceeded credit limits, temporary bank issues).
+
+An effective dunning sequence for SaaS B2B:
+
+1. **Day 0 (failure):** automated email notifying of payment failure, link to update payment method
+2. **Day 2:** second automatic charge attempt, follow-up email
+3. **Day 5:** third attempt, email with increased urgency
+4. **Day 10:** product access suspended (not canceled), suspension notification email
+5. **Day 30:** permanent cancellation if nothing is resolved
+
+Stripe Billing handles automatic dunning with Smart Retries — an algorithm that picks the optimal retry time based on historical success patterns. Chargebee and Recurly allow fully custom dunning sequences.
+
+For B2B SaaS with high ticket sizes, adding a personal outreach (email, LinkedIn, or call) between Day 7 and Day 14 for large accounts can recover customers who missed your automated emails.
+
+## Proration: handling mid-cycle plan changes correctly
+
+Proration is calculating what the customer owes (or gets credited) when they change plans mid-billing cycle.
+
+**Example:** customer pays $200/month for the Basic plan. On Day 15 of their cycle (halfway through), they upgrade to the Pro plan at $400/month. What do you charge?
+
+- Credit for 15 remaining days of Basic: $100
+- Charge for 15 days of Pro: $200
+- Net charge immediately: $100
+
+Stripe handles this automatically. Chargebee and Recurly offer configurable proration rules. If you build on raw gateway APIs without a billing library, you'll need to implement this logic yourself — and it's easy to get wrong.
+
+Decide your upgrade/downgrade policy before launch: immediate charge or apply at next renewal? Credit or proportional discount? Document it clearly and surface it in the checkout flow.
+
+## Tax compliance: SaaS sales tax in the US is complicated
+
+US SaaS faces a patchwork of state tax rules. As of 2026, most states that impose sales tax do so on SaaS transactions, but rules vary by state: some tax all digital services, some only specific categories, some have thresholds by revenue.
+
+**Practical approaches:**
+- **Stripe Tax:** automated tax calculation and remittance, $0.50 per transaction. Best if you're already on Stripe and want hands-off compliance.
+- **Paddle/Lemon Squeezy:** as Merchant of Record, they handle all tax — you never touch it.
+- **TaxJar or Avalara:** dedicated tax platforms that integrate with your billing stack. From $19/month (TaxJar) or $99/month (Avalara).
+- **Manual + Accountant:** viable below $50k ARR if you're only selling in a few states with nexus.
+
+Ignoring sales tax is not a valid strategy past $100k ARR. States are increasingly aggressive about collecting back taxes from SaaS businesses.
+
+## Customer portal: self-service reduces churn and support volume
+
+A self-service portal where customers can update their payment method, change plans, view invoice history, and cancel (with a retention flow) reduces support ticket volume by 40-60% and decreases frustration-driven churn.
+
+Stripe has the Stripe Customer Portal ready to use at no additional cost. For Chargebee and Recurly, white-label portals are included in paid plans. If you build on raw APIs, a basic customer portal takes 40-80 hours to develop.
+
+For more on the business impact of billing on SaaS health, see [how to identify and reduce SaaS churn](/blog/saas-churn-how-to-identify-and-reduce) and [building a SaaS platform from scratch](/blog/build-saas-platform-from-scratch-2026). For pricing strategy, check out the [complete custom CRM guide](/blog/complete-custom-crm-guide-2026) for examples of pricing structures that work in practice.
+
+## Frequently Asked Questions
+
+### Which payment gateway should I use for SaaS recurring billing?
+
+For most US-market SaaS: Stripe is the default choice — best developer experience, most integrations, and Stripe Billing handles most subscription complexity natively. If you sell globally and want to offload tax compliance, use Paddle or Lemon Squeezy as Merchant of Record. For high-volume or complex billing logic, add Chargebee or Recurly on top of Stripe.
+
+### How do I calculate the financial impact of failed payment recovery?
+
+Straightforward: MRR × failure rate = monthly revenue at risk. If MRR is $50,000 and 8% of charges fail without dunning, you're losing $4,000/month. A good dunning system recovers 50-65% of failed charges, recovering $2,000-2,600/month.
+
+### Is it mandatory to collect sales tax on SaaS in the US?
+
+It depends on state and revenue thresholds. As of 2026, most states with economic nexus laws require SaaS companies to collect and remit sales tax once they cross revenue or transaction count thresholds (typically $100k revenue or 200 transactions per state). Consult a SaaS-focused tax advisor to understand your obligations.
+
+### Can I offer a free trial with automatic recurring billing?
+
+Yes. The standard flow: customer provides payment method during trial → system creates subscription in the gateway without charging → at trial end, billing starts automatically. Stripe, Chargebee, and Recurly all support this natively with trial period configuration on the subscription.
+
+### How does annual vs. monthly pricing affect billing implementation?
+
+Annual subscribers pay upfront for 12 months (reducing monthly billing overhead) but create complexity for mid-year upgrades, downgrades, and cancellations. You'll need to handle pro-rated refunds on cancellations (required in some jurisdictions) and calculate upgrade differences correctly. Most billing platforms handle this, but test edge cases thoroughly before launch.
+
+### What are the most common billing mistakes in SaaS?
+
+The most frequent: not implementing dunning (losing involuntary churn), not building a customer portal (drives support volume), miscalculating proration on plan changes, ignoring sales tax compliance, and not testing the full cancellation and reactivation flow before launch.
+
+## Conclusion
+
+Recurring billing done right is the foundation your SaaS is built on. Getting it wrong costs MRR every month, generates customer disputes, and creates technical debt that's hard to fix after scaling. Pick the right gateway for your market, implement dunning on day one, and build the customer portal before you need it.
+
+Want help choosing the right billing stack or implementing the billing module for your SaaS? [Talk to an expert on WhatsApp](https://wa.me/5500000000000) — we'll analyze your use case and recommend the right approach.
+
+*Updated April 2026*

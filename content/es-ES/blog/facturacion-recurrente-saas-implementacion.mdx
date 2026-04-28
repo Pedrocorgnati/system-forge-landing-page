@@ -1,0 +1,129 @@
+---
+title: "Facturación Recurrente para SaaS: Cómo Implementarla desde el Primer Día"
+slug: "facturacion-recurrente-saas-implementacion"
+date: "2026-04-28"
+description: "Cómo implementar la facturación recurrente en tu SaaS: pasarelas de pago, dunning, cambios de plan y cumplimiento fiscal en España. Guía práctica 2026."
+excerpt: "Cómo implementar la facturación recurrente en tu SaaS: pasarelas de pago, dunning, cambios de plan y cumplimiento fiscal en España. Guía práctica 2026."
+tags: ["facturación recurrente", "billing SaaS", "pago recurrente", "suscripción digital", "pasarela de pago España", "dunning SaaS", "MRR"]
+coverImage: "/images/blog/facturacion-recurrente-saas-implementacion.webp"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'es-ES'
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: 'pt-BR'
+    slug: 'cobranca-recorrente-saas-como-implementar'
+  - locale: 'it-IT'
+    slug: 'fatturazione-ricorrente-saas-come-implementare'
+  - locale: 'en'
+    slug: 'recurring-billing-saas-implementation-guide'
+---
+
+# Facturación Recurrente para SaaS: Cómo Implementarla desde el Primer Día en 2026
+
+La facturación recurrente en un SaaS es el proceso automatizado de cobrar a los clientes periódicamente — mensual, trimestral o anual — sin intervención manual en cada ciclo. Implementarla bien es la diferencia entre un SaaS que escala y uno que se atasca: la morosidad involuntaria mal gestionada puede consumir el 10-20% del MRR, y los cambios de plan sin automatización se convierten en una pesadilla operativa a partir de los 100 clientes.
+
+Soy Pedro Corgnati, fundador de SystemForge y desarrollador full-stack. He construido el módulo de billing para tres productos SaaS diferentes — uno llegó a 750 suscriptores activos. Cada proyecto enseñó algo nuevo sobre los casos extremos que la documentación de las pasarelas no cubre.
+
+## Cómo funciona la facturación recurrente en un SaaS
+
+La facturación recurrente involucra cuatro componentes que deben funcionar juntos: **planes y suscripciones** (definición de precios y periodos), **pasarela de pago** (procesamiento de los cobros), **dunning** (recuperación de cobros rechazados) y **portal del cliente** (cambio de plan, actualización de tarjeta y cancelación en autoservicio).
+
+El flujo básico: el cliente elige un plan → facilita sus datos de pago → el sistema crea una suscripción en la pasarela → la pasarela cobra automáticamente en la fecha del ciclo → el sistema recibe el webhook de éxito o fracaso → si hay fracaso, entra en acción el dunning.
+
+El error más común de los founders de SaaS al principio es tratar el billing como una funcionalidad sencilla. El billing es un dominio crítico con muchos casos extremos: tarjeta caducada, contracargo, cobros prorrateados en upgrades a mitad de ciclo, pausas y reactivaciones, IVA por país, emisión de factura integrada.
+
+## Elección de la pasarela: comparativa para el mercado español
+
+### Stripe
+
+Stripe es la opción más robusta para SaaS con ambición internacional. Dispone de Stripe Billing con soporte nativo a suscripciones, smart dunning, portal de clientes y webhooks fiables. Tarifa: 1,5% + €0,25 por transacción con tarjeta europea; 2,9% + €0,25 para tarjetas no europeas. Para SaaS que planea expandirse a otros países, Stripe es el estándar del sector.
+
+Ventaja del ecosistema: Stripe Tax para el cálculo automático del IVA en la UE, Stripe Sigma para análisis y una enorme biblioteca de integraciones de terceros.
+
+### Redsys (con intermediario)
+
+Redsys es el sistema de pago interbancario español dominante. Para suscripciones recurrentes, se accede a través de intermediarios como BBVA, CaixaBank, PayComet o Stripebank. El coste suele ser inferior al de Stripe para volúmenes altos. La integración directa es más compleja; PayComet ofrece la API más amigable para SaaS sobre Redsys.
+
+### Mollie
+
+Mollie está fuertemente orientada al mercado europeo y soporta métodos de pagos locales: SEPA Direct Debit, iDEAL, Bancontact. Para SaaS B2B que quiere ofrecer domiciliación bancaria SEPA a clientes empresariales españoles, Mollie supera a Stripe en este aspecto. Tarifa: 1,8% + €0,25 por tarjeta.
+
+### Facturación electrónica obligatoria en España (Verifactu)
+
+En España, la Ley Crea y Crece y el sistema VeriFACTU (obligatorio para grandes empresas desde 2024, en implantación para el resto) requieren que las facturas se registren en la AEAT. Para SaaS que factura a clientes con CIF, las facturas deben cumplir con los requisitos de la facturación electrónica.
+
+Solución práctica: usa Holded, Quipu o integra directamente con un software de facturación electrónica certificado. Los webhooks de la pasarela activan automáticamente la emisión de la factura al confirmar el pago.
+
+## Implementar el dunning: recuperar el 40-60% de los cobros rechazados
+
+El dunning es el proceso de recuperar los cobros fallidos. Sin él, un SaaS pierde entre el 5-15% del MRR por morosidad involuntaria (tarjeta caducada, límite superado, problema temporal del banco).
+
+Una secuencia de dunning eficaz para SaaS B2B en España:
+
+1. **Día 0 (fallo):** email automático avisando del fallo, enlace para actualizar la tarjeta
+2. **Día 2:** segundo intento automático de cobro, nuevo email de aviso
+3. **Día 5:** tercer intento, email con mayor urgencia
+4. **Día 10:** acceso al producto suspendido (no cancelado), email informativo
+5. **Día 30:** cancelación definitiva si no se regulariza nada
+
+Stripe Billing gestiona el dunning automático con Smart Retries — un algoritmo que elige el momento óptimo para un nuevo intento en función del historial de éxito. Mollie permite configurar la secuencia manualmente.
+
+Para SaaS B2B con ticket alto, vale la pena añadir contacto personal (email directo, LinkedIn o llamada) entre el día 7 y el 14 para los clientes con contratos importantes.
+
+## Prorrateo: gestionar cambios de plan a mitad de ciclo
+
+El prorrateo es el cálculo de cuánto debe pagar el cliente (o recibir como crédito) cuando cambia de plan a mitad del ciclo de facturación.
+
+**Ejemplo:** el cliente paga €150/mes por el plan Básico. El día 15 del mes (mitad del ciclo) hace un upgrade al plan Pro de €300/mes. ¿Qué cobrar?
+
+- Crédito por los 15 días restantes del Básico: €75
+- Cobro por los 15 días del Pro: €150
+- Diferencia a cobrar inmediatamente: €75
+
+Stripe calcula esto automáticamente. Con Mollie, hay que implementar esta lógica manualmente o usar los créditos de la plataforma.
+
+Define la política de upgrade/downgrade antes del lanzamiento: ¿cobro inmediato o en la próxima renovación? ¿Crédito o descuento proporcional? Documéntalo y comunícalo claramente en el checkout.
+
+## Portal del cliente: el autoservicio reduce el churn y el soporte
+
+Un portal de autoservicio donde el cliente puede actualizar la tarjeta, cambiar de plan, consultar el historial de facturas y cancelar (con un flujo de retención) reduce el volumen de tickets de soporte en un 40-60% y disminuye el churn por frustración.
+
+Stripe tiene el Stripe Customer Portal listo para usar sin coste adicional. Con Mollie, hay que construir este portal consumiendo su API. El esfuerzo de desarrollo es de 40-80 horas para un portal básico.
+
+Para profundizar en el impacto del billing en la salud del SaaS, lee nuestra [guía sobre churn en SaaS](/blog/churn-saas-como-identificar-y-reducir) y [Hubspot vs CRM propio](/blog/hubspot-vs-crm-propio-cual-elegir-2026). Si estás construyendo tu SaaS desde cero, consulta también [cómo construir un SaaS en España en 2026](/blog/construir-saas-espana-guia-completa-2026).
+
+## Preguntas Frecuentes
+
+### ¿Qué pasarela usar para la facturación recurrente de un SaaS en España?
+
+Depende del perfil de tu SaaS. Para SaaS con clientes que prefieren domiciliación bancaria SEPA, usa Mollie. Para SaaS con clientes internacionales o que pagan con tarjeta, Stripe es la elección más robusta. Para volúmenes altos con clientes bancarios españoles, evalúa Redsys vía PayComet.
+
+### ¿Cómo calcular el impacto de la morosidad en el MRR?
+
+Sencillo: MRR × tasa de morosidad = valor perdido al mes. Si tu MRR es €40.000 y el 8% de los cobros falla sin dunning, pierdes €3.200/mes. Con un buen dunning, recuperas el 50-65% de esos €3.200.
+
+### ¿Es obligatorio emitir factura electrónica para cobros SaaS en España?
+
+Sí, para todas las facturas a clientes con CIF. La Ley Crea y Crece exige la facturación electrónica entre empresas. No emitir factura expone a sanciones fiscales e impide a los clientes empresariales deducir el gasto.
+
+### ¿Puedo ofrecer un periodo de prueba gratuito con facturación recurrente?
+
+Sí. El flujo estándar es: el cliente introduce la tarjeta durante el trial → el sistema crea la suscripción en la pasarela sin cobrar → al finalizar el trial, el cobro se activa automáticamente. Stripe, Mollie y Chargebee soportan este flujo de forma nativa con la configuración del periodo de prueba en la suscripción.
+
+### ¿Qué es el SEPA Direct Debit y cuándo usarlo?
+
+El SEPA Direct Debit es la domiciliación bancaria europea: el cliente autoriza el mandato SEPA una vez (firma digital o aprobación en app) y la pasarela cargará automáticamente en su cuenta bancaria en cada vencimiento. Ventaja frente a la tarjeta: no caduca y no tiene problemas de límite. Desventaja: el cliente puede disputar el cargo hasta 8 semanas después (consumidores) o 2 días (empresas).
+
+### ¿Cuáles son los principales errores de billing en un SaaS?
+
+Los más frecuentes: no implementar el dunning (pérdida de MRR involuntaria), no tener portal de autoservicio (genera alto volumen de soporte), no calcular bien el prorrateo en cambios de plan, no emitir facturas electrónicas conformes y no probar el flujo completo de cancelación y reactivación antes del lanzamiento.
+
+## Conclusión
+
+La facturación recurrente bien implementada es la base sobre la que se construye el SaaS. Equivocarse en el billing cuesta MRR mes a mes, genera disputas con los clientes y crea deuda técnica difícil de resolver después de escalar. Elige la pasarela adecuada para tu mercado, implementa el dunning desde el primer día y construye el portal del cliente antes de necesitarlo.
+
+¿Quieres ayuda para elegir la pasarela correcta o implementar el módulo de billing de tu SaaS? [Habla con un experto por WhatsApp](https://wa.me/5500000000000) — analizamos tu caso sin compromiso.
+
+*Actualizado en abril de 2026*

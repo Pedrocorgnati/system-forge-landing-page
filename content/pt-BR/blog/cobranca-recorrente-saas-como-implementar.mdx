@@ -1,0 +1,137 @@
+---
+title: "Cobrança Recorrente para SaaS: Como Implementar do Zero em 2026"
+slug: "cobranca-recorrente-saas-como-implementar"
+date: "2026-04-28"
+description: "Como implementar cobrança recorrente no seu SaaS: gateways, dunning, upgrade/downgrade e compliance. Guia técnico-prático com custos e comparativo de soluções."
+excerpt: "Como implementar cobrança recorrente no seu SaaS: gateways, dunning, upgrade/downgrade e compliance. Guia técnico-prático com custos e comparativo de soluções."
+tags: ["cobrança recorrente", "billing SaaS", "pagamento recorrente", "assinatura digital", "gateway de pagamento", "dunning"]
+coverImage: "/images/blog/cobranca-recorrente-saas-como-implementar.webp"
+author: "Pedro Corgnati"
+relatedService: "saas"
+locale: 'pt-BR'
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: 'it-IT'
+    slug: 'fatturazione-ricorrente-saas-come-implementare'
+  - locale: 'en'
+    slug: 'recurring-billing-saas-implementation-guide'
+  - locale: 'es-ES'
+    slug: 'facturacion-recurrente-saas-implementacion'
+---
+
+# Cobrança Recorrente para SaaS: Como Implementar do Zero em 2026
+
+Cobrança recorrente em SaaS é o processo automatizado de cobrar clientes periodicamente — mensal, trimestral ou anual — sem intervenção manual em cada ciclo. Implementar cobrança recorrente corretamente é a diferença entre um SaaS que escala e um que quebra: inadimplência mal gerenciada pode consumir 10-20% do MRR, e upgrade/downgrade sem automação vira pesadelo operacional depois de 100 clientes.
+
+Sou Pedro Corgnati, fundador da SystemForge e desenvolvedor full-stack. Já construí o módulo de billing de três produtos SaaS diferentes — um deles chegou a 800 assinantes ativos. Cada um ensinou algo novo sobre edge cases que a documentação dos gateways não cobre.
+
+## Como funciona a cobrança recorrente num SaaS
+
+A cobrança recorrente envolve quatro componentes que precisam funcionar juntos: **planos e assinaturas** (definição de preços e períodos), **gateway de pagamento** (processamento das cobranças), **dunning** (recuperação de cobranças recusadas) e **portal do cliente** (upgrade, downgrade e cancelamento self-service).
+
+O fluxo básico: cliente escolhe um plano → fornece dados do cartão → sistema cria uma assinatura no gateway → gateway cobra automaticamente na data do ciclo → sistema recebe webhook de sucesso ou falha → em caso de falha, dunning entra em ação.
+
+O erro mais comum de founders de SaaS iniciantes é tratar billing como feature simples. Billing é domínio crítico com muitos edge cases: cartão expirado, charge-back, cobranças pro-rated em upgrade mid-cycle, pausas e reativações, impostos por estado ou país, emissão de nota fiscal integrada.
+
+## Escolha do gateway: comparativo para o mercado brasileiro
+
+### Stripe Brasil
+
+O Stripe chegou ao Brasil em 2024 e é a opção mais robusta para SaaS com ambição internacional. Possui o Stripe Billing com suporte nativo a assinaturas, smart dunning, portal de clientes e webhooks confiáveis. Taxa: 3,4% + R$ 0,60 por transação no cartão. Para SaaS que planeja expandir para outros países, o Stripe é o mais indicado.
+
+Limitações: não processa Pix nativamente para recorrência (apenas como pagamento único) e o suporte em português ainda é limitado.
+
+### Asaas
+
+O Asaas é o gateway mais completo para SaaS brasileiro com necessidade de Pix recorrente. Suporta boleto, Pix, cartão e débito automático em cobrança recorrente. Taxa: 2,9% + R$ 0,60 no cartão; Pix a 1,49%. O maior diferencial é a cobrança recorrente via Pix — ideal para PMEs brasileiras que preferem Pix a cartão.
+
+Limitações: API menos madura que Stripe, webhooks às vezes atrasam em picos.
+
+### Vindi
+
+O Vindi é especializado em billing recorrente. Tem features que o Stripe não tem nativamente para o Brasil: emissão de NFS-e integrada, régua de cobrança configurável e split de pagamentos. Planos a partir de R$ 149/mês fixo + taxas por transação. Indicado para SaaS com necessidade de emissão de nota fiscal automatizada.
+
+### Pagar.me (Stone)
+
+Boa opção para quem já tem relação com o ecossistema Stone/Ton. API bem documentada, suporte sólido e taxas competitivas. Não é especializado em SaaS como Vindi, mas funciona bem para casos mais simples.
+
+## Implementando o dunning: recuperar 40-60% das cobranças recusadas
+
+Dunning é o processo de recuperar cobranças que falharam. Sem dunning, um SaaS perde 5-15% do MRR por inadimplência involuntária (cartão expirado, limite excedido, problema temporário no banco).
+
+Uma régua de dunning eficaz para SaaS B2B:
+
+1. **D+0 (falha):** e-mail automático avisando sobre falha na cobrança, link para atualizar cartão
+2. **D+2:** segunda tentativa automática de cobrança, novo e-mail de alerta
+3. **D+5:** terceira tentativa, e-mail com urgência maior
+4. **D+10:** acesso ao produto é suspenso (não cancelado), e-mail informando suspensão
+5. **D+30:** cancelamento definitivo se nada for regularizado
+
+O Stripe Billing faz dunning automático com Smart Retries — algoritmo que escolhe o melhor horário para nova tentativa com base no histórico de sucesso. Asaas e Vindi permitem configurar a régua manualmente.
+
+Para SaaS B2B com ticket alto, vale acrescentar ligação ou WhatsApp manual entre D+7 e D+14 para clientes com contratos maiores.
+
+## Pro-rating: como lidar com upgrade e downgrade mid-cycle
+
+Pro-rating é o cálculo de quanto o cliente deve pagar (ou receber de crédito) quando muda de plano no meio do ciclo de cobrança.
+
+**Exemplo:** cliente paga R$ 200/mês em plano Basic. No dia 15 do mês (metade do ciclo), faz upgrade para o plano Pro de R$ 400/mês. O que cobrar?
+
+- Crédito pelos 15 dias restantes do Basic: R$ 100
+- Cobrança pelos 15 dias do Pro: R$ 200
+- Diferença a cobrar imediatamente: R$ 100
+
+O Stripe calcula isso automaticamente. No Asaas e Vindi, você precisa implementar essa lógica manualmente ou usar os créditos da plataforma.
+
+Definir a política de upgrade/downgrade antes de lançar evita dor de cabeça: cobrança imediata ou na próxima renovação? Crédito ou desconto proporcional? Documente a política e comunique claramente no checkout.
+
+## Compliance fiscal: NFS-e e retenção de ISS
+
+Todo SaaS brasileiro que cobra por assinatura é prestador de serviço e precisa emitir NFS-e (Nota Fiscal de Serviço Eletrônica). O ISS varia de 2% a 5% dependendo do município onde a empresa está registrada, e em alguns casos há retenção na fonte pelo tomador do serviço.
+
+A Vindi integra com emissores de NFS-e diretamente. Para Stripe e Asaas, você precisará integrar com um emissor separado (Nibo, Omie, ou emissor municipal diretamente) via webhooks — quando o pagamento é confirmado, dispara a emissão da nota.
+
+Ignorar a emissão de NFS-e é risco fiscal real. Clientes corporativos frequentemente exigem nota para lançar a despesa na contabilidade.
+
+## Portal do cliente: self-service reduz churn e suporte
+
+Um portal self-service onde o cliente pode atualizar o cartão, trocar de plano, ver histórico de faturas e cancelar (com fluxo de retenção) reduz o volume de chamados de suporte em 40-60% e diminui o churn por frustração.
+
+O Stripe tem o Stripe Customer Portal pronto para usar. Para Asaas e Vindi, você precisará construir esse portal consumindo as APIs deles. O esforço de desenvolvimento fica entre 40 e 80 horas para um portal básico.
+
+Para entender melhor o impacto do billing na saúde do SaaS, consulte o [guia de churn em SaaS](/blog/churn-saas-como-identificar-e-reduzir) e o [pricing SaaS B2B](/blog/pricing-saas-b2b-guia-pratico). Se você está construindo seu SaaS do zero, confira também [como construir uma plataforma SaaS no Brasil em 2026](/blog/construir-plataforma-saas-zero-brasil-2026).
+
+## Perguntas Frequentes
+
+### Qual gateway usar para cobrança recorrente de SaaS no Brasil?
+
+Depende do perfil do seu SaaS. Para SaaS com clientes que preferem Pix, use Asaas. Para SaaS com clientes internacionais ou que usa cartão, o Stripe é a escolha mais robusta. Para SaaS que precisa de emissão de NFS-e integrada, o Vindi resolve mais out-of-the-box.
+
+### Como calcular o impacto da inadimplência no MRR?
+
+Simples: MRR × taxa de inadimplência = valor perdido por mês. Se seu MRR é R$ 50.000 e 8% das cobranças falham sem dunning, você perde R$ 4.000/mês. Com dunning bem configurado, recupera 50-65% desses R$ 4.000, ou seja, R$ 2.000-2.600 por mês.
+
+### É obrigatório emitir NFS-e para cobranças de SaaS?
+
+Sim, se sua empresa está registrada como prestadora de serviços no Brasil. A emissão é obrigatória independentemente do valor ou da forma de pagamento. A não emissão expõe a empresa à autuação fiscal e impede que clientes empresariais realizem a dedução da despesa.
+
+### Como funciona a cobrança recorrente via Pix?
+
+O Pix recorrente funciona via débito agendado no banco do cliente ou por cobrança Pix gerada automaticamente pelo gateway com QR code único por ciclo. O cliente autoriza uma vez e o débito acontece automaticamente nos ciclos seguintes. Asaas e Gerencianet suportam Pix recorrente no Brasil.
+
+### Posso oferecer trial grátis com cobrança recorrente?
+
+Sim. O fluxo padrão é: cliente fornece cartão durante o trial → sistema cria assinatura no gateway sem cobrar → ao fim do trial, a cobrança é disparada automaticamente. O Stripe, Asaas e Vindi suportam esse fluxo nativamente com configuração de período de trial na assinatura.
+
+### Quais são os principais erros de billing em SaaS?
+
+Os mais comuns: não implementar dunning (perder inadimplência involuntária), não ter portal self-service (gera volume de suporte), não calcular pro-rating corretamente em mudanças de plano, não emitir NFS-e e não testar o fluxo de cancelamento e reativação antes do lançamento.
+
+## Conclusão
+
+Cobrança recorrente bem implementada é fundação do SaaS. Errar no billing custa MRR mês a mês, gera litígios com clientes e cria dívida técnica difícil de resolver depois de escalar. Escolha o gateway certo para seu mercado, implemente dunning desde o dia 1 e construa o portal do cliente antes de precisar.
+
+Quer ajuda para escolher o gateway certo ou implementar o módulo de billing do seu SaaS? [Fale com um especialista no WhatsApp](https://wa.me/5500000000000) — analisamos seu caso gratuitamente.
+
+*Atualizado em abril/2026*
