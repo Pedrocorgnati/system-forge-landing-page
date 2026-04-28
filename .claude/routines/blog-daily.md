@@ -218,27 +218,37 @@ Antes de gerar qualquer conteudo:
    - se houver ambiguidade, abortar e abrir issue
 
 [GIT SETUP]
-IMPORTANTE: variaveis de ambiente NAO persistem entre chamadas de Bash — cada chamada e um processo novo. Alem disso, o cloud runner pode ter um credential helper que intercepta o push e usa credenciais internas de somente leitura, ignorando o token no remote URL. Por isso, e necessario desativar o credential helper E usar o token literal no remote URL.
+IMPORTANTE: o cloud runner usa um credential helper de sistema que intercepta git push e aplica credenciais de somente leitura, ignorando qualquer git remote set-url. A unica forma confiavel de fazer push e usar o gh CLI para autenticar, pois ele registra seu proprio credential helper que tem precedencia sobre o do sistema.
 
-Execute estes comandos em uma unica chamada de Bash, imediatamente antes de cada git push (substituindo <TOKEN> pelo valor literal do GITHUB_TOKEN fornecido no inicio deste prompt):
+Execute este bloco em uma unica chamada de Bash antes de qualquer push (use o valor literal do GITHUB_TOKEN do inicio deste prompt em vez de <TOKEN>):
 
-  git config --global credential.helper ""
-  git config --local credential.helper ""
+  echo "<TOKEN>" | gh auth login --with-token --git-protocol https --hostname github.com
+  gh auth status
   git config user.email "corgnati.pedro@gmail.com"
   git config user.name "Pedro Corgnati"
-  git remote set-url origin https://<TOKEN>@github.com/Pedrocorgnati/system-forge-landing-page.git
-  git remote get-url origin
+  git remote set-url origin https://github.com/Pedrocorgnati/system-forge-landing-page.git
 
-A saida do ultimo comando DEVE mostrar o token no URL. Se mostrar https://github.com sem token, o setup falhou — NAO tente o push, abra issue com o diagnostico.
+Verificar que gh auth status mostra "Logged in to github.com". Se nao mostrar, BLOCK imediato — abrir issue.
 
-Ao executar o push, usar:
-  GIT_TERMINAL_PROMPT=0 git push origin main
+Ao fazer push:
+  git push origin main
 
-Se ainda retornar 403 apos esses passos:
-  - registrar no relatorio: "push bloqueado pelo runner — credential helper nao pode ser desativado"
-  - NAO tentar force push
-  - abrir issue em Pedrocorgnati/system-forge-landing-page com label routine-failure
-  - incluir no body: output de git remote get-url origin, output do git push com -v (verbose), git config --list | grep credential
+Se o gh nao estiver disponivel no runner (which gh retornar vazio):
+  - tentar como fallback: git remote set-url origin https://<TOKEN>@github.com/Pedrocorgnati/system-forge-landing-page.git && GIT_TERMINAL_PROMPT=0 git push origin main
+  - se ainda 403: usar a GitHub API diretamente via curl (ver [PUSH VIA API] abaixo)
+
+[PUSH VIA API — fallback final se git push falhar]
+Se tanto gh quanto git push retornarem 403, usar a GitHub Contents API para criar os commits via HTTP:
+  - Para cada arquivo MDX novo em content/{locale}/blog/:
+    BASE64=$(base64 -w0 {arquivo})
+    SHA=$(curl -s -H "Authorization: token <TOKEN>" https://api.github.com/repos/Pedrocorgnati/system-forge-landing-page/contents/{path_relativo} | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('sha',''))" 2>/dev/null || echo "")
+    curl -s -X PUT -H "Authorization: token <TOKEN>" -H "Content-Type: application/json" \
+      https://api.github.com/repos/Pedrocorgnati/system-forge-landing-page/contents/{path_relativo} \
+      -d "{\"message\":\"content: add {slug}\",\"content\":\"${BASE64}\",\"sha\":\"${SHA}\",\"branch\":\"main\"}"
+  - Para relatorios em .claude/routine-reports/:
+    Fazer o mesmo processo para cada arquivo de relatorio
+  - Se a API retornar 201 ou 200 para todos os arquivos: SUCESSO — registrar no relatorio
+  - Se qualquer arquivo falhar: abrir issue com o erro da API
 
 [PIPELINE DAILY OBRIGATORIO]
 Execute nesta ordem logica. Todo estado lido e escrito em .claude/blog/data/{locale}/ e content/{locale}/blog/ dentro do proprio repo.
