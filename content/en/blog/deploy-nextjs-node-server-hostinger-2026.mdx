@@ -1,0 +1,256 @@
+---
+title: "Deploy Next.js on a Node Server with Hostinger in 2026: Complete Guide"
+slug: "deploy-nextjs-node-server-hostinger-2026"
+date: "2026-04-29"
+description: "How to deploy Next.js on a Hostinger VPS with PM2, Nginx, and CI/CD via GitHub Actions. Real cost vs Vercel and when it makes sense to leave serverless."
+tags: ["deploy nextjs hostinger", "nextjs vps server self-hosted", "pm2 nextjs production", "nginx reverse proxy nextjs", "ci cd nextjs github actions"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "web-development"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "Deploying Next.js on a Hostinger VPS with PM2 and Nginx takes under 2 hours on first setup and costs $12–28/month flat — compared to Vercel Pro at $20/month per team member."
+hreflang_pair: [{"locale": "pt-BR", "slug": "deploy-nextjs-node-server-hostinger-2026"}, {"locale": "it-IT", "slug": "deploy-nextjs-server-node-hostinger-2026"}, {"locale": "es-ES", "slug": "deploy-nextjs-servidor-node-hostinger-2026"}]
+seo_title: "Deploy Next.js on a Node Server with Hostinger in 2026: Complete Guide"
+meta_description: "How to deploy Next.js on a Hostinger VPS with PM2, Nginx, and GitHub Actions. Real cost vs Vercel and when to leave serverless."
+canonical: "https://systemforgesoftware.com/blog/deploy-nextjs-node-server-hostinger-2026"
+ogTitle: "Deploy Next.js on a Node Server with Hostinger in 2026: Complete Guide"
+ogDescription: "Deploy Next.js on Hostinger VPS with PM2 and Nginx. $12–28/month flat vs Vercel Pro at $20/month per member."
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+ogUrl: "https://systemforgesoftware.com/blog/deploy-nextjs-node-server-hostinger-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Deploy Next.js on Hostinger VPS in 2026: PM2 + Nginx + GitHub Actions"
+twitterDescription: "Deploy Next.js on Hostinger VPS with PM2 and Nginx. $12–28/month flat vs Vercel Pro at $20/month per member."
+twitterImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+primary_category: "technology-development"
+schema_types: ["Article", "BlogPosting", "HowTo"]
+---
+
+# Deploy Next.js on a Node Server with Hostinger in 2026: Complete Guide
+
+Deploying Next.js on a Hostinger VPS with PM2 and Nginx takes under 2 hours on the first setup and costs $12–28/month flat — compared to Vercel Pro which starts at $20/month per team member and charges for bandwidth overages. The Hostinger VPS KVM 2 (2 vCPU, 8 GB RAM) handles Next.js applications with up to 500 concurrent requests comfortably and is the most common entry point for teams moving off Vercel's free tier without paying a steep platform fee.
+
+*By Pedro Corgnati — founder of SystemForge. I use this stack (VPS + PM2 + Nginx + GitHub Actions) in production across multiple client projects. This guide covers the complete setup from scratch, the real gotchas that cost hours of debugging, and an honest comparison with Vercel.*
+
+## When it makes sense to leave Vercel for your own VPS
+
+Vercel is excellent for prototypes and small teams on the Hobby (free) plan. The problem starts when:
+
+- **Team grows**: Vercel Pro costs $20/month per member. A 5-person team pays $100/month just for the platform.
+- **Bandwidth increases**: Pro includes 1 TB/month. Overages cost $0.15/GB — on image-heavy e-commerce this can be surprising.
+- **Edge Runtime restrictions**: not every Node.js feature runs on the Edge. Native modules, large buffers, streaming are limited.
+- **Predictable total cost**: VPS has a fixed monthly cost regardless of traffic, deploys, or team members.
+
+**When to stay on Vercel**: teams of 1–2 developers, prototypes, projects needing immediate auto-scaling, or when ops cost doesn't justify managing a server.
+
+## Real cost comparison (2026)
+
+| Configuration | Monthly cost (USD) |
+|---|---|
+| Vercel Hobby (1 dev) | Free |
+| Vercel Pro (3 devs) | $60/month |
+| Vercel Pro (5 devs) | $100/month |
+| Hostinger VPS KVM 1 (1 vCPU / 4 GB) | ~$12/month |
+| Hostinger VPS KVM 2 (2 vCPU / 8 GB) | ~$20/month |
+| Hostinger VPS KVM 4 (4 vCPU / 16 GB) | ~$38/month |
+
+Break-even is at 1–2 devs using Vercel Pro. From 3 devs upward, a VPS is cheaper and the savings matter for SMBs.
+
+## Prerequisites
+
+- Hostinger VPS with Ubuntu 22.04 LTS (or 24.04)
+- Domain pointing to the VPS IP (A or CNAME record)
+- SSH access to the server
+- Next.js repository on GitHub
+
+## Step 1: Install Node.js 20 via nvm
+
+```bash
+# Connect via SSH
+ssh root@<vps-ip>
+
+# Install nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+
+# Install Node.js 20 (LTS as of 2026)
+nvm install 20
+nvm use 20
+nvm alias default 20
+
+# Verify
+node --version  # v20.x.x
+```
+
+## Step 2: Install PM2 globally
+
+```bash
+npm install -g pm2
+
+# Configure PM2 to start automatically on boot
+pm2 startup systemd
+# Run the command PM2 prints
+```
+
+PM2 is the process manager that keeps your Next.js app running, restarts on crash, and manages multiple instances for zero-downtime deploys.
+
+## Step 3: Clone and build the application
+
+```bash
+mkdir -p /var/www
+cd /var/www
+
+git clone https://github.com/<your-user>/<your-repo>.git my-app
+cd my-app
+
+npm ci
+npm run build
+```
+
+## Step 4: Configure PM2 with an ecosystem file
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: 'my-app',
+      script: 'node_modules/.bin/next',
+      args: 'start',
+      cwd: '/var/www/my-app',
+      instances: 'max',
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+      },
+      max_memory_restart: '512M',
+      error_file: '/var/log/pm2/my-app-error.log',
+      out_file: '/var/log/pm2/my-app-out.log',
+    },
+  ],
+}
+```
+
+```bash
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+## Step 5: Configure Nginx as a reverse proxy
+
+```bash
+apt install nginx -y
+```
+
+Create `/etc/nginx/sites-available/my-app`:
+
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com www.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /_next/static/ {
+        alias /var/www/my-app/.next/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+```bash
+ln -s /etc/nginx/sites-available/my-app /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+```
+
+## Step 6: SSL with Certbot (Let's Encrypt)
+
+```bash
+apt install certbot python3-certbot-nginx -y
+certbot --nginx -d yourdomain.com -d www.yourdomain.com
+```
+
+Certbot configures HTTPS automatically and schedules renewal via cron. Free certificate, auto-renewed every 90 days.
+
+## Step 7: CI/CD with GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/my-app
+            git pull origin main
+            npm ci --production=false
+            npm run build
+            pm2 reload my-app --update-env
+```
+
+Configure secrets in GitHub: `VPS_HOST` (server IP) and `VPS_SSH_KEY` (private SSH key). Every push to `main` triggers an automatic zero-downtime deploy via `pm2 reload`.
+
+## Common production gotchas
+
+**Port 3000 already in use:** check with `lsof -i :3000`. May have an orphan instance from a previous test run — kill it with `pm2 delete all` before starting.
+
+**Environment variables:** `NEXT_PUBLIC_*` variables are baked into the build and do not change without a rebuild. Server-side variables can be passed via `.env.production` or injected into `ecosystem.config.js`. Never commit `.env` with secrets to Git.
+
+**Out-of-memory during build:** `npm run build` can need 2–3 GB of RAM. On KVM 1 (4 GB), the build may fail with OOM. Use swap or build locally and deploy just `.next/` via SCP.
+
+**PM2 logs:** `pm2 logs my-app --lines 100` for the last logs. Set up log rotation with `pm2 install pm2-logrotate` to avoid filling the disk.
+
+> Want to migrate your Next.js app from Vercel to VPS with zero-downtime and CI/CD configured? I can handle the migration in 1–2 days. [Message me on WhatsApp](https://wa.me/5500000000000) — I review the architecture before quoting anything.
+
+## FAQ
+
+**Does Next.js App Router work the same on VPS vs Vercel?**
+
+Almost. Server Components, Server Actions, Route Handlers, and Image Optimization all work normally. What doesn't work identically: Edge Runtime (Edge Functions don't run on a standard Node.js server), ISR with on-demand revalidation via Vercel's webhook, and automatic asset CDN. For the CDN, put Cloudflare in front of your VPS — free for reasonable volumes and improves global performance significantly.
+
+**How many concurrent requests can a KVM 2 VPS handle with PM2 in cluster mode?**
+
+A KVM 2 (2 vCPU, 8 GB RAM) with PM2 cluster mode (2 workers) comfortably handles 200–500 concurrent requests depending on route response time. For 1,000+ sustained concurrent requests, consider KVM 4 (4 vCPU) or a load balancer in front of two VPS instances.
+
+**How do I rollback if a deploy breaks production?**
+
+The simplest approach: keep the last two builds on the server. Before `git pull`, copy the current `.next/` to `.next.backup/`. If the new deploy fails on `pm2 reload`, copy the backup back and reload. For a more robust setup, use timestamped release directories with a `current` symlink that only gets updated after a successful build — the Capistrano/Deployer pattern.
+
+**Does Hostinger VPS support Docker for containerized Next.js?**
+
+Yes. Hostinger KVM VPS allows Docker installation. For Next.js in Docker, use the `node:20-alpine` base image and configure `output: 'standalone'` in `next.config.js`. Coolify (open-source deploy panel) is a popular self-hosted alternative to Vercel that works on any VPS.
+
+**Is it worth using Nginx to serve static files instead of Next.js?**
+
+Yes, and Step 5 already does this for `/_next/static/`. For large public assets (images, PDFs), also configure `location /uploads/ { alias /var/www/my-app/public/uploads/; }` in Nginx. This reduces load on the Node.js process. For larger scale, put Cloudflare CDN in front.
+
+See also [custom software development for SMBs](/blog/build-saas-platform-from-scratch-2026) and [technical consulting for software projects](/blog/freelancer-vs-software-development-agency).

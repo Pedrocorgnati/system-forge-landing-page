@@ -1,0 +1,282 @@
+---
+title: "Cómo construir un portal del cliente con Next.js y Supabase en 2026"
+slug: "portal-cliente-nextjs-supabase-construir-2026"
+date: "2026-04-29"
+description: "Portal del cliente con Next.js App Router, Supabase Auth y RLS: autenticación, área de documentos, tickets de soporte y acceso por roles. Coste real y plazos para PYMEs."
+tags: ["portal cliente nextjs", "area cliente supabase", "desarrollo portal cliente", "nextjs supabase rls", "portal b2b pymes espana"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sistemas-personalizados"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Un portal del cliente con Next.js y Supabase resuelve el problema de las empresas de servicios B2B que envían contratos por email y archivos por Dropbox. Coste: €7–22k. Plazo: 4–8 semanas."
+hreflang_pair: [{"locale": "pt-BR", "slug": "portal-cliente-nextjs-supabase-como-construir-2026"}, {"locale": "it-IT", "slug": "portale-clienti-nextjs-supabase-come-costruire-2026"}, {"locale": "en", "slug": "customer-portal-nextjs-supabase-how-to-build-2026"}]
+seo_title: "Cómo construir un portal del cliente con Next.js y Supabase en 2026"
+meta_description: "Portal del cliente con Next.js App Router, Supabase Auth y RLS: autenticación, documentos, tickets de soporte. Coste real y plazos para PYMEs españolas."
+canonical: "https://systemforge.es/blog/portal-cliente-nextjs-supabase-construir-2026"
+ogTitle: "Cómo construir un portal del cliente con Next.js y Supabase en 2026"
+ogDescription: "Portal del cliente con Next.js + Supabase: auth, documentos, tickets. Coste €7–22k, 4–8 semanas."
+ogType: "article"
+ogLocale: "es_ES"
+ogImage: "https://systemforge.es/images/blog/default-cover.png"
+ogUrl: "https://systemforge.es/blog/portal-cliente-nextjs-supabase-construir-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Cómo construir un portal del cliente con Next.js y Supabase en 2026"
+twitterDescription: "Portal del cliente con Next.js + Supabase: auth, documentos, tickets. Coste €7–22k, 4–8 semanas."
+twitterImage: "https://systemforge.es/images/blog/default-cover.png"
+primary_category: "sistemas-personalizados"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Cómo construir un portal del cliente con Next.js y Supabase en 2026
+
+Un portal del cliente construido con Next.js App Router y Supabase se puede entregar en 4–8 semanas y cuesta entre €7 000 y €22 000 según las funcionalidades. El portal resuelve un problema concreto que afecta a gestorías, consultoras, despachos de abogados, empresas de construcción y cualquier negocio de servicios B2B que actualmente envía contratos por email, actualizaciones de proyecto por WhatsApp y facturas en una carpeta de Dropbox compartida — todo fragmentado sin historial centralizado. Con Supabase Auth y Row Level Security (RLS), cada cliente accede solo a sus propios datos sin ninguna lógica de filtrado manual en la capa de aplicación.
+
+*Por Pedro Corgnati — fundador de SystemForge. He construido portales del cliente para una gestoría (35 clientes activos), una empresa de reformas (18 obras simultáneas) y una consultora de IT (20 contratos en curso). Los tres tenían el mismo patrón de problema y la misma solución arquitectónica.*
+
+## Quién necesita un portal del cliente
+
+Un portal del cliente tiene sentido cuando el negocio tiene:
+
+- **Base de clientes recurrente** (mínimo 10–15 clientes activos)
+- **Documentos o información específica por cliente** que se consulta con frecuencia
+- **Comunicación actual fragmentada** (hilos de email, carpetas compartidas, hojas de cálculo)
+- **Proceso manual** para enviar informes, facturas o actualizaciones de proyecto
+
+Casos de uso concretos en España:
+
+| Sector | Qué resuelve el portal |
+|---|---|
+| Gestoría / asesoría | Documentación fiscal, declaraciones, el cliente sube nóminas y extractos bancarios |
+| Empresa de construcción | Planning de obra, fotos de avance, informes de progreso, certificaciones |
+| Despacho de abogados | Estado del expediente, escritos, documentos para firma electrónica |
+| Consultora IT / software | Estado del desarrollo, aprobaciones, facturas de mantenimiento |
+| Clínica médica o dental | Informes, historial de visitas, presupuestos |
+
+## Arquitectura del portal
+
+```
+Next.js App Router (frontend + API backend)
+  ├── /login               → Supabase Auth (email + magic link)
+  ├── /dashboard           → Resumen de cuenta, notificaciones pendientes
+  ├── /documentos          → Listado + subir/descargar archivos
+  ├── /proyectos           → Estado y calendario de proyecto (si aplica)
+  ├── /soporte             → Tickets de soporte / solicitudes de servicio
+  └── /perfil              → Datos de contacto, cambio de contraseña
+
+Supabase
+  ├── Auth                 → Sesiones, JWT, roles
+  ├── Database (PostgreSQL)→ Datos de clientes, documentos, tickets
+  ├── Storage              → Archivos binarios (PDFs, imágenes)
+  └── Realtime             → Notificaciones en tiempo real de nuevos documentos/tickets
+```
+
+## Modelado de base de datos con RLS
+
+La parte más crítica del portal es garantizar que el cliente A nunca vea los datos del cliente B. Supabase lo hace mediante Row Level Security en PostgreSQL — la política se ejecuta en la base de datos, no en la aplicación.
+
+```sql
+-- Tabla de perfiles de cliente
+create table public.client_profiles (
+  id uuid references auth.users(id) primary key,
+  company_name text not null,
+  nif text,
+  created_at timestamptz default now()
+);
+
+-- Tabla de documentos
+create table public.documents (
+  id uuid default gen_random_uuid() primary key,
+  client_id uuid references client_profiles(id) not null,
+  title text not null,
+  file_path text not null,
+  document_type text, -- 'factura' | 'contrato' | 'informe' | etc
+  uploaded_by uuid references auth.users(id),
+  created_at timestamptz default now()
+);
+
+-- RLS: el cliente ve solo sus propios documentos
+alter table public.documents enable row level security;
+
+create policy "Cliente ve solo sus documentos"
+  on public.documents for select
+  using (client_id = (
+    select id from client_profiles where id = auth.uid()
+  ));
+
+-- Política para el equipo interno
+create policy "Staff ve todos los documentos"
+  on public.documents for all
+  using (
+    exists (
+      select 1 from auth.users
+      where id = auth.uid()
+      and raw_user_meta_data->>'role' = 'staff'
+    )
+  );
+```
+
+## Autenticación con Supabase Auth
+
+```typescript
+// app/login/page.tsx - Magic link (sin contraseña)
+'use client'
+import { createClient } from '@/lib/supabase/client'
+
+export default function LoginPage() {
+  const supabase = createClient()
+
+  async function handleLogin(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${location.origin}/auth/callback`,
+        shouldCreateUser: false // solo los clientes preregistrados pueden entrar
+      }
+    })
+    if (error) throw error
+  }
+  // ... JSX del formulario
+}
+```
+
+`shouldCreateUser: false` garantiza que solo los clientes registrados previamente por tu empresa pueden acceder — sin registro público abierto. Los clientes nuevos los crea el equipo interno desde el panel de administración.
+
+## Subida y descarga de documentos
+
+```typescript
+export async function subirDocumento(
+  archivo: File,
+  clientId: string,
+  tipoDocumento: string
+) {
+  const supabase = createClient()
+  const filePath = `${clientId}/${Date.now()}-${archivo.name}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('documentos-cliente')
+    .upload(filePath, archivo, { upsert: false })
+
+  if (uploadError) throw uploadError
+
+  const { data, error: dbError } = await supabase
+    .from('documents')
+    .insert({
+      client_id: clientId,
+      title: archivo.name,
+      file_path: filePath,
+      document_type: tipoDocumento
+    })
+    .select().single()
+
+  if (dbError) throw dbError
+  return data
+}
+
+export async function obtenerUrlDescarga(filePath: string) {
+  const supabase = createClient()
+  const { data } = await supabase.storage
+    .from('documentos-cliente')
+    .createSignedUrl(filePath, 3600) // URL válida 1 hora
+  return data?.signedUrl
+}
+```
+
+Las URLs firmadas con expiración garantizan que los archivos no sean accesibles permanentemente mediante URL pública — importante para contratos y documentos con datos sensibles sujetos al RGPD.
+
+## Tickets de soporte con notificaciones Realtime
+
+```typescript
+// Componente de tickets con actualización en tiempo real
+'use client'
+import { useEffect, useState } from 'react'
+import { createClient } from '@/lib/supabase/client'
+
+export function TicketList({ clientId }: { clientId: string }) {
+  const [tickets, setTickets] = useState<Ticket[]>([])
+  const supabase = createClient()
+
+  useEffect(() => {
+    // Carga inicial
+    supabase
+      .from('support_tickets')
+      .select('*')
+      .eq('client_id', clientId)
+      .order('created_at', { ascending: false })
+      .then(({ data }) => setTickets(data ?? []))
+
+    // Suscripción a cambios en tiempo real
+    const channel = supabase
+      .channel(`tickets-${clientId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'support_tickets',
+          filter: `client_id=eq.${clientId}`
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setTickets(prev => [payload.new as Ticket, ...prev])
+          } else if (payload.eventType === 'UPDATE') {
+            setTickets(prev =>
+              prev.map(t => t.id === payload.new.id ? payload.new as Ticket : t)
+            )
+          }
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [clientId])
+
+  return (
+    <ul>
+      {tickets.map(ticket => (
+        <li key={ticket.id}>
+          <span>{ticket.title}</span>
+          <span>{ticket.status}</span>
+        </li>
+      ))}
+    </ul>
+  )
+}
+```
+
+## Coste de desarrollo y plazos
+
+| Versión | Funcionalidades | Plazo | Coste |
+|---|---|---|---|
+| MVP | Auth, documentos, perfil | 3–4 semanas | €6–13k |
+| Estándar | MVP + tickets, notificaciones | 5–7 semanas | €13–20k |
+| Completo | Estándar + proyectos, integraciones | 8–12 semanas | €20–38k |
+
+Infraestructura mensual tras la entrega: Supabase Pro €23/mes, hosting Next.js €10–22/mes (Vercel o VPS propio). Total: €33–45/mes — independientemente del número de clientes.
+
+> ¿Gestionas una empresa de servicios y sigues enviando documentos por hilos de email? Puedo preparar la propuesta técnica completa de un portal del cliente para tu caso específico. [Escríbeme por WhatsApp](https://wa.me/5500000000000) — sin compromiso.
+
+## FAQ
+
+**¿Necesito un portal del cliente o bastarán soluciones genéricas como Google Drive o Notion?**
+
+Una solución genérica funciona con hasta ~10 clientes con necesidades simples. A partir de ahí, la falta de control de acceso granular (cualquier cliente puede entrar a la carpeta equivocada), la ausencia de notificaciones estructuradas y la imposibilidad de integrar con sistemas internos (ERP, facturación, CRM) justifican construir un portal propio. El coste de €8–15k se amortiza en trabajo manual reducido en 12–18 meses para la mayoría de empresas con 15+ clientes activos.
+
+**¿El portal del cliente necesita ser una app móvil o es suficiente con web responsive?**
+
+Para la mayoría de casos, web responsive (PWA) cubre el 90% del uso. Los clientes acceden desde móvil via navegador. Una app nativa (React Native) tiene sentido si necesitas funcionalidad offline, notificaciones push frecuentes o captura de cámara (por ejemplo, fotos de obra). La app nativa añade €12–25k al proyecto.
+
+**¿Cómo migramos los documentos existentes al portal?**
+
+La migración es parte del proyecto de desarrollo. Para Google Drive, la API de Drive permite listar y descargar archivos programáticamente. Para archivos locales, un script de carga masiva usa el SDK de Supabase Storage. Los documentos anteriores se catalogan con su fecha de creación original y metadatos. Generalmente 1–2 días de trabajo de migración para bases de hasta 1 000 documentos.
+
+**¿Supabase es fiable para datos confidenciales de clientes con RGPD?**
+
+Supabase almacena datos en AWS con opciones de región europea (Frankfurt). Para cumplimiento RGPD: (1) firma el DPA (Data Processing Agreement) con Supabase; (2) configura backups con retención adecuada; (3) implementa RLS para garantizar el aislamiento de datos; (4) activa auditoría de accesos en el plan Pro. Para datos especialmente sensibles (historiales médicos, datos tributarios), consulta con un DPO antes del lanzamiento.
+
+**¿Puede el portal integrarse con sistemas existentes como un ERP o software de facturación?**
+
+Sí, mediante webhooks y API Routes de Next.js. Cuando tu software de facturación genera una nueva factura, llama a un webhook en el portal que registra automáticamente el documento y notifica al cliente. Cada integración añade 1–3 semanas al proyecto según la complejidad del sistema externo. Las integraciones más comunes son con Holded, Sage, Odoo y soluciones de facturación electrónica.
+
+Para el contexto de cómo construir aplicaciones Next.js en producción, consulta también [deploy de Next.js en servidor VPS con Hostinger](/blog/deploy-nextjs-servidor-node-hostinger-2026) y [modelos de precios SaaS en 2026](/blog/modelos-precios-saas-como-definir-probar-2026).

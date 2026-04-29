@@ -1,0 +1,215 @@
+---
+title: "Come Costruire un Portale Clienti con Next.js e Supabase nel 2026"
+slug: "portale-clienti-nextjs-supabase-come-costruire-2026"
+date: "2026-04-29"
+description: "Portale clienti con Next.js App Router, Supabase Auth e RLS: autenticazione, area documenti, ticket di supporto e accesso per ruolo. Costo e tempi reali per PMI."
+tags: ["portale clienti nextjs", "area clienti supabase", "customer portal sviluppo", "nextjs supabase rls", "portale b2b pmi italia"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sistemi-personalizzati"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Portale clienti con Next.js + Supabase risolve il problema delle PMI italiane che mandano documenti e aggiornamenti via WhatsApp. Costo di sviluppo: €8–25k. Tempi: 4–8 settimane."
+hreflang_pair: [{"locale": "pt-BR", "slug": "portal-cliente-nextjs-supabase-como-construir-2026"}, {"locale": "en", "slug": "customer-portal-nextjs-supabase-how-to-build-2026"}, {"locale": "es-ES", "slug": "portal-cliente-nextjs-supabase-construir-2026"}]
+seo_title: "Come Costruire un Portale Clienti con Next.js e Supabase nel 2026"
+meta_description: "Portale clienti con Next.js App Router, Supabase Auth e RLS: autenticazione, documenti, ticket di supporto. Costo e tempi reali per PMI italiane."
+canonical: "https://systemforge.it/blog/portale-clienti-nextjs-supabase-come-costruire-2026"
+ogTitle: "Come Costruire un Portale Clienti con Next.js e Supabase nel 2026"
+ogDescription: "Portale clienti con Next.js + Supabase: autenticazione, documenti, ticket. Costo €8–25k, 4–8 settimane."
+ogType: "article"
+ogLocale: "it_IT"
+ogImage: "https://systemforge.it/images/blog/default-cover.png"
+ogUrl: "https://systemforge.it/blog/portale-clienti-nextjs-supabase-come-costruire-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Come Costruire un Portale Clienti con Next.js e Supabase nel 2026"
+twitterDescription: "Portale clienti con Next.js + Supabase: autenticazione, documenti, ticket. Costo €8–25k, 4–8 settimane."
+twitterImage: "https://systemforge.it/images/blog/default-cover.png"
+primary_category: "sistemi-e-erp"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Come Costruire un Portale Clienti con Next.js e Supabase nel 2026
+
+Un portale clienti con Next.js App Router e Supabase può essere consegnato in 4–8 settimane e costa tra €8 000 e €25 000 a seconda delle funzionalità. Il portale risolve un problema concreto che affligge studi commercialisti, studi legali, imprese edili e qualsiasi azienda di servizi B2B italiana che oggi invia contratti via WhatsApp, aggiornamenti di progetto via email e fatture su Google Drive condiviso — tutto frammentato e senza storico centralizzato. Con Supabase Auth e Row Level Security (RLS), ogni cliente accede solo ai propri dati senza necessità di logica di filtraggio manuale nell'applicazione.
+
+Sono Pedro Corgnati, fondatore di SystemForge. Ho costruito portali clienti per studi commercialisti (40 clienti), imprese edili (15 cantieri attivi) e studi di consulenza IT (25 contratti attivi). I tre casi avevano lo stesso schema di problema e la stessa soluzione architetturale.
+
+## Chi ha bisogno di un portale clienti
+
+Il portale clienti ha senso quando l'azienda ha:
+
+- **Base di clienti ricorrenti** (minimo 10–15 clienti attivi)
+- **Documenti o informazioni specifiche per cliente** da consultare frequentemente
+- **Comunicazione frammentata** (WhatsApp, email personale, Drive senza struttura)
+- **Processo manuale** di invio di report, fatture o aggiornamenti
+
+Casi d'uso concreti in Italia:
+
+| Settore | Cosa risolve il portale |
+|---|---|
+| Studio commercialista | Invio F24, bilanci, dichiarazioni; il cliente carica fatture ed estratti conto |
+| Impresa edile | Cronoprogramma, foto del cantiere, SAL, bollettini dell'opera |
+| Studio legale | Andamento processuale, atti, documenti da firmare |
+| Software house | Stato dello sviluppo, collaudi, fatture di manutenzione |
+| Studio medico/clinica | Referti, esami, storico visite (con conformità GDPR) |
+
+## Architettura del portale
+
+```
+Next.js App Router (frontend + backend API)
+  ├── /login               → Supabase Auth (email + magic link)
+  ├── /dashboard           → Riepilogo account, notifiche in sospeso
+  ├── /documenti           → Lista + upload/download file
+  ├── /progetti            → Stato e cronoprogramma (se applicabile)
+  ├── /supporto            → Ticket di supporto/richieste
+  └── /profilo             → Dati anagrafici, cambio password
+
+Supabase
+  ├── Auth                 → Sessione, JWT, ruoli
+  ├── Database (PostgreSQL)→ Dati cliente, documenti, ticket
+  ├── Storage              → File binari (PDF, immagini)
+  └── Realtime             → Notifiche live per nuovi documenti/ticket
+```
+
+## Modellazione del database con RLS
+
+La parte più critica del portale è garantire che il cliente A non veda mai i dati del cliente B. Supabase lo fa tramite Row Level Security in PostgreSQL — la policy viene eseguita nel database, non nell'applicazione.
+
+```sql
+-- Tabella profili clienti
+create table public.client_profiles (
+  id uuid references auth.users(id) primary key,
+  company_name text not null,
+  vat_number text,
+  created_at timestamptz default now()
+);
+
+-- Tabella documenti
+create table public.documents (
+  id uuid default gen_random_uuid() primary key,
+  client_id uuid references client_profiles(id) not null,
+  title text not null,
+  file_path text not null,
+  document_type text, -- 'fattura' | 'contratto' | 'report' | ecc.
+  uploaded_by uuid references auth.users(id),
+  created_at timestamptz default now()
+);
+
+-- RLS: il cliente vede solo i propri documenti
+alter table public.documents enable row level security;
+
+create policy "Cliente vede solo i propri documenti"
+  on public.documents for select
+  using (client_id = (
+    select id from client_profiles where id = auth.uid()
+  ));
+
+-- Policy per lo staff
+create policy "Staff vede tutti i documenti"
+  on public.documents for all
+  using (
+    exists (
+      select 1 from auth.users
+      where id = auth.uid()
+      and raw_user_meta_data->>'role' = 'staff'
+    )
+  );
+```
+
+## Autenticazione con Supabase Auth
+
+```typescript
+// app/login/page.tsx - Magic link (senza password)
+'use client'
+import { createClient } from '@/lib/supabase/client'
+
+export default function LoginPage() {
+  const supabase = createClient()
+
+  async function handleLogin(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${location.origin}/auth/callback`,
+        shouldCreateUser: false // solo i clienti già registrati possono accedere
+      }
+    })
+    if (error) throw error
+  }
+  // ... form JSX
+}
+```
+
+`shouldCreateUser: false` garantisce che solo i clienti precedentemente registrati dall'azienda possano fare login.
+
+## Upload e download documenti
+
+```typescript
+export async function uploadDocument(
+  file: File,
+  clientId: string,
+  documentType: string
+) {
+  const supabase = createClient()
+  const filePath = `${clientId}/${Date.now()}-${file.name}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('client-documents')
+    .upload(filePath, file, { upsert: false })
+
+  if (uploadError) throw uploadError
+
+  const { data, error: dbError } = await supabase
+    .from('documents')
+    .insert({ client_id: clientId, title: file.name, file_path: filePath, document_type: documentType })
+    .select().single()
+
+  if (dbError) throw dbError
+  return data
+}
+
+export async function getDownloadUrl(filePath: string) {
+  const supabase = createClient()
+  const { data } = await supabase.storage
+    .from('client-documents')
+    .createSignedUrl(filePath, 3600) // URL valida per 1 ora
+  return data?.signedUrl
+}
+```
+
+## Costo e tempi di sviluppo
+
+| Versione | Funzionalità | Tempi | Costo |
+|---|---|---|---|
+| MVP | Auth, documenti, profilo | 3–4 settimane | €7–13k |
+| Standard | MVP + ticket, notifiche | 5–7 settimane | €14–22k |
+| Completo | Standard + progetti/cronoprogramma, integrazioni | 8–12 settimane | €22–45k |
+
+Infrastruttura mensile dopo la consegna: Supabase Pro €25/mese, hosting Next.js €10–22/mese (Vercel o VPS). Totale: €35–50/mese — indipendentemente dal numero di clienti.
+
+> Hai un'azienda di servizi B2B e invii documenti via WhatsApp? Posso preparare la proposta tecnica completa di un portale clienti per il tuo caso specifico. Conversazione gratuita su [WhatsApp](https://wa.me/5500000000000).
+
+## FAQ
+
+**1. Ho bisogno di un portale clienti o basta una soluzione generica come Notion o Google Drive?**
+
+La soluzione generica funziona fino a ~10 clienti con esigenze semplici. Oltre quella soglia, la mancanza di controllo degli accessi granulare, l'assenza di notifiche strutturate e l'impossibilità di integrarsi con i sistemi interni (ERP, CRM, fatturazione) giustificano il portale proprio. Il costo di €8–15k si ripaga in riduzione del lavoro manuale entro 12–18 mesi per la maggior parte delle aziende con 15+ clienti.
+
+**2. Il portale clienti deve essere un'app mobile o basta il web?**
+
+Per la maggior parte dei casi, il web responsivo (PWA) copre il 90% dell'uso. L'app mobile nativa (React Native) ha senso se ci sono funzionalità offline, notifiche push frequenti o acquisizione tramite fotocamera (es. foto dei cantieri). Il costo di un'app mobile aggiunge €12–25k al progetto.
+
+**3. Come fare la migrazione dei documenti esistenti nel portale?**
+
+La migrazione fa parte del progetto. Per Google Drive esiste un'API per elencare e scaricare file programmaticamente. I documenti più vecchi vengono catalogati con la data di creazione originale e i metadati. In generale, 1–2 giorni di lavoro per basi fino a 1 000 documenti.
+
+**4. Supabase è affidabile per i dati riservati dei clienti con il GDPR?**
+
+Supabase archivia i dati su AWS con opzione datacenter in Europa (Francoforte). L'azienda è certificata SOC 2 Type II e i dati a riposo sono crittografati con AES-256. Per la conformità GDPR: (1) definire un accordo di elaborazione dei dati con Supabase; (2) configurare il backup con conservazione adeguata; (3) implementare RLS per garantire l'isolamento dei dati.
+
+**5. È possibile integrare il portale con i sistemi esistenti come ERP o sistema di fatturazione?**
+
+Sì, tramite webhook e API Routes di Next.js. Quando l'ERP genera una fattura, chiama un webhook nel portale che registra il documento automaticamente e notifica il cliente. Ogni integrazione aggiunge 1–3 settimane al progetto a seconda della complessità del sistema esterno.
+
+Vedi anche [sistemi personalizzati per studi commercialisti](/blog/software-studio-legale-commercialista-sdi-gdpr-2026) e [integrazione API per PMI italiane](/blog/webhook-sicuri-validazione-firma-idempotenza).

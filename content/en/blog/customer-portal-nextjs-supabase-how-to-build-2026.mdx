@@ -1,0 +1,217 @@
+---
+title: "How to Build a Customer Portal with Next.js and Supabase in 2026"
+slug: "customer-portal-nextjs-supabase-how-to-build-2026"
+date: "2026-04-29"
+description: "Customer portal with Next.js App Router, Supabase Auth, and RLS: authentication, document area, support tickets, and role-based access. Real cost and timeline for SMBs."
+tags: ["customer portal nextjs", "client area supabase", "customer portal development", "nextjs supabase rls", "b2b portal smb"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "custom-systems"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "A customer portal with Next.js + Supabase solves the problem of B2B service companies sending contracts over email and files on Dropbox. Development cost: $10–25k. Timeline: 4–8 weeks."
+hreflang_pair: [{"locale": "pt-BR", "slug": "portal-cliente-nextjs-supabase-como-construir-2026"}, {"locale": "it-IT", "slug": "portale-clienti-nextjs-supabase-come-costruire-2026"}, {"locale": "es-ES", "slug": "portal-cliente-nextjs-supabase-construir-2026"}]
+seo_title: "How to Build a Customer Portal with Next.js and Supabase in 2026"
+meta_description: "Customer portal with Next.js App Router, Supabase Auth, and RLS: auth, documents, support tickets. Real cost and timeline for SMBs."
+canonical: "https://systemforgesoftware.com/blog/customer-portal-nextjs-supabase-how-to-build-2026"
+ogTitle: "How to Build a Customer Portal with Next.js and Supabase in 2026"
+ogDescription: "Customer portal with Next.js + Supabase: auth, documents, tickets. Cost $10–25k, 4–8 weeks."
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+ogUrl: "https://systemforgesoftware.com/blog/customer-portal-nextjs-supabase-how-to-build-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "How to Build a Customer Portal with Next.js and Supabase in 2026"
+twitterDescription: "Customer portal with Next.js + Supabase: auth, documents, tickets. Cost $10–25k, 4–8 weeks."
+twitterImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+primary_category: "custom-systems"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# How to Build a Customer Portal with Next.js and Supabase in 2026
+
+A customer portal built with Next.js App Router and Supabase can be delivered in 4–8 weeks and costs between $10,000 and $25,000 depending on features. The portal solves a concrete problem that affects accounting firms, consultancies, law firms, construction companies, and any B2B service business that currently sends contracts via email, project updates via text, and invoices in a shared Dropbox folder — everything fragmented with no centralized history. With Supabase Auth and Row Level Security (RLS), each customer accesses only their own data without any manual filtering logic in the application layer.
+
+*By Pedro Corgnati — founder of SystemForge. I have built customer portals for an accounting firm (35 clients), a construction company (18 active projects), and an IT consulting firm (20 active contracts). All three had the same problem pattern and the same architectural solution.*
+
+## Who needs a customer portal
+
+A customer portal makes sense when the business has:
+
+- **Recurring customer base** (minimum 10–15 active customers)
+- **Customer-specific documents or information** accessed frequently
+- **Fragmented current communication** (email threads, shared folders, spreadsheets)
+- **Manual process** for sending reports, invoices, or project updates
+
+Concrete US use cases:
+
+| Industry | What the portal solves |
+|---|---|
+| CPA / accounting firm | Tax docs, financial statements, client uploads payroll and bank statements |
+| Construction company | Project schedule, site photos, progress reports, owner's draw invoices |
+| Law firm | Case status, court filings, documents for e-signature |
+| Managed IT / software firm | Development status, approvals, maintenance invoices |
+| Medical / dental practice | Lab results, visit history, billing statements |
+
+## Portal architecture
+
+```
+Next.js App Router (frontend + backend API)
+  ├── /login               → Supabase Auth (email + magic link)
+  ├── /dashboard           → Account summary, pending notifications
+  ├── /documents           → List + upload/download files
+  ├── /projects            → Project status and timeline (if applicable)
+  ├── /support             → Support tickets / service requests
+  └── /profile             → Contact info, password change
+
+Supabase
+  ├── Auth                 → Sessions, JWT, roles
+  ├── Database (PostgreSQL)→ Customer data, documents, tickets
+  ├── Storage              → Binary files (PDFs, images)
+  └── Realtime             → Live notifications for new documents/tickets
+```
+
+## Database modeling with RLS
+
+The most critical part of the portal is ensuring customer A never sees customer B's data. Supabase does this via Row Level Security in PostgreSQL — the policy runs in the database, not in the application.
+
+```sql
+-- Client profiles table
+create table public.client_profiles (
+  id uuid references auth.users(id) primary key,
+  company_name text not null,
+  ein text, -- employer identification number
+  created_at timestamptz default now()
+);
+
+-- Documents table
+create table public.documents (
+  id uuid default gen_random_uuid() primary key,
+  client_id uuid references client_profiles(id) not null,
+  title text not null,
+  file_path text not null,
+  document_type text, -- 'invoice' | 'contract' | 'report' | etc
+  uploaded_by uuid references auth.users(id),
+  created_at timestamptz default now()
+);
+
+-- RLS: customer sees only their own documents
+alter table public.documents enable row level security;
+
+create policy "Customer sees only own documents"
+  on public.documents for select
+  using (client_id = (
+    select id from client_profiles where id = auth.uid()
+  ));
+
+-- Staff policy
+create policy "Staff sees all documents"
+  on public.documents for all
+  using (
+    exists (
+      select 1 from auth.users
+      where id = auth.uid()
+      and raw_user_meta_data->>'role' = 'staff'
+    )
+  );
+```
+
+## Authentication with Supabase Auth
+
+```typescript
+// app/login/page.tsx - Magic link (passwordless)
+'use client'
+import { createClient } from '@/lib/supabase/client'
+
+export default function LoginPage() {
+  const supabase = createClient()
+
+  async function handleLogin(email: string) {
+    const { error } = await supabase.auth.signInWithOtp({
+      email,
+      options: {
+        emailRedirectTo: `${location.origin}/auth/callback`,
+        shouldCreateUser: false // only pre-registered customers can log in
+      }
+    })
+    if (error) throw error
+  }
+  // ... form JSX
+}
+```
+
+`shouldCreateUser: false` ensures only customers previously registered by your firm can log in — no public sign-up.
+
+## Document upload and download
+
+```typescript
+export async function uploadDocument(
+  file: File,
+  clientId: string,
+  documentType: string
+) {
+  const supabase = createClient()
+  const filePath = `${clientId}/${Date.now()}-${file.name}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('client-documents')
+    .upload(filePath, file, { upsert: false })
+
+  if (uploadError) throw uploadError
+
+  const { data, error: dbError } = await supabase
+    .from('documents')
+    .insert({ client_id: clientId, title: file.name, file_path: filePath, document_type: documentType })
+    .select().single()
+
+  if (dbError) throw dbError
+  return data
+}
+
+export async function getDownloadUrl(filePath: string) {
+  const supabase = createClient()
+  const { data } = await supabase.storage
+    .from('client-documents')
+    .createSignedUrl(filePath, 3600) // URL valid for 1 hour
+  return data?.signedUrl
+}
+```
+
+Signed URLs with expiration ensure files are not permanently accessible via public URL — important for contracts and sensitive documents.
+
+## Development cost and timeline
+
+| Version | Features | Timeline | Cost |
+|---|---|---|---|
+| MVP | Auth, documents, profile | 3–4 weeks | $8–15k |
+| Standard | MVP + tickets, notifications | 5–7 weeks | $16–24k |
+| Full | Standard + projects, integrations | 8–12 weeks | $24–45k |
+
+Monthly infrastructure after delivery: Supabase Pro $25/month, Next.js hosting $12–25/month (Vercel or VPS). Total: $37–50/month — regardless of number of customers.
+
+> Running a B2B services firm and sending documents via email threads? I can put together the complete technical proposal for a customer portal for your specific case. [Message me on WhatsApp](https://wa.me/5500000000000) — no commitment required.
+
+## FAQ
+
+**Do I need a customer portal or will a generic solution like Notion or Google Drive work?**
+
+A generic solution works up to ~10 customers with simple needs. Beyond that, the lack of granular access control (any customer can access the wrong folder), absence of structured notifications, and inability to integrate with internal systems (ERP, CRM, billing) justify building your own portal. The $10–15k cost pays back in reduced manual work time within 12–18 months for most firms with 15+ active customers.
+
+**Does the customer portal need to be a mobile app or is responsive web sufficient?**
+
+For most cases, responsive web (PWA) covers 90% of usage. Customers access from mobile via browser. A native mobile app (React Native) makes sense if you need offline functionality, frequent push notifications, or camera capture (e.g., construction site photos). Native mobile adds $15–30k to the project.
+
+**How do we migrate existing documents into the portal?**
+
+Migration is part of the development project. For Google Drive, the Drive API lets you list and download files programmatically. For local files, a batch upload script uses the Supabase Storage SDK. Older documents are cataloged with their original creation date and metadata. Generally 1–2 days of migration work for bases up to 1,000 documents.
+
+**Is Supabase reliable for confidential client data?**
+
+Supabase stores data on AWS (us-east-1 by default, with EU options). The company is SOC 2 Type II certified and data at rest is encrypted with AES-256. For compliance: (1) establish a Data Processing Agreement with Supabase; (2) configure backup with appropriate retention; (3) implement RLS to guarantee data isolation. For medical data (HIPAA scope), consult the specific requirements separately.
+
+**Can the portal integrate with existing systems like QuickBooks or a CRM?**
+
+Yes, via webhooks and Next.js API Routes. When QuickBooks generates an invoice, it calls a webhook in the portal that automatically registers the document and notifies the customer. Each integration adds 1–3 weeks to the project depending on the complexity of the external system.
+
+See also [custom software for law firms and accounting firms](/blog/website-software-law-firm) and [API integrations for SMBs](/blog/api-monitoring-in-production-metrics-alerts).

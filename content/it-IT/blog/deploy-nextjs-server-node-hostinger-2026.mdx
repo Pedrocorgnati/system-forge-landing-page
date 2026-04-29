@@ -1,0 +1,253 @@
+---
+title: "Deploy di Next.js su server Node proprio con Hostinger nel 2026: guida completa"
+slug: "deploy-nextjs-server-node-hostinger-2026"
+date: "2026-04-29"
+description: "Come fare il deploy di Next.js su VPS Hostinger con PM2, Nginx e CI/CD tramite GitHub Actions. Costo reale vs Vercel e quando conviene uscire dal serverless."
+tags: ["deploy nextjs hostinger", "nextjs server vps italia", "pm2 nextjs produzione", "nginx reverse proxy nextjs", "ci cd nextjs github actions"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "sviluppo-web"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Deploy di Next.js su VPS Hostinger con PM2 e Nginx si completa in meno di 2 ore e costa €10–25 al mese fisso, contro il piano Vercel Pro a €18/mese per membro del team."
+hreflang_pair: [{"locale": "pt-BR", "slug": "deploy-nextjs-node-server-hostinger-2026"}, {"locale": "en", "slug": "deploy-nextjs-node-server-hostinger-2026"}, {"locale": "es-ES", "slug": "deploy-nextjs-servidor-node-hostinger-2026"}]
+seo_title: "Deploy di Next.js su server Node proprio con Hostinger nel 2026"
+meta_description: "Come fare il deploy di Next.js su VPS Hostinger con PM2, Nginx e GitHub Actions. Costo reale vs Vercel e quando conviene uscire dal serverless."
+canonical: "https://systemforge.it/blog/deploy-nextjs-server-node-hostinger-2026"
+ogTitle: "Deploy di Next.js su server Node proprio con Hostinger nel 2026"
+ogDescription: "Deploy di Next.js su VPS Hostinger con PM2, Nginx e GitHub Actions. Costo €10–25/mese fisso."
+ogType: "article"
+ogLocale: "it_IT"
+ogImage: "https://systemforge.it/images/blog/default-cover.png"
+ogUrl: "https://systemforge.it/blog/deploy-nextjs-server-node-hostinger-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Deploy di Next.js su server Node proprio con Hostinger nel 2026"
+twitterDescription: "Deploy di Next.js su VPS Hostinger con PM2, Nginx e GitHub Actions. Costo €10–25/mese fisso vs Vercel Pro."
+twitterImage: "https://systemforge.it/images/blog/default-cover.png"
+primary_category: "tecnologia-e-sviluppo"
+schema_types: ["Article", "BlogPosting", "HowTo"]
+---
+
+# Deploy di Next.js su server Node proprio con Hostinger nel 2026: guida completa
+
+Il deploy di Next.js su VPS Hostinger con PM2 e Nginx richiede meno di 2 ore per il primo setup e costa €10–25 al mese fisso — contro Vercel Pro che parte da €18/mese per membro del team e addebita la banda eccedente. Il VPS KVM 2 di Hostinger (2 vCPU, 8 GB RAM) gestisce comodamente applicazioni Next.js con fino a 500 richieste simultanee ed è il punto di ingresso più comune per i team italiani che vogliono uscire dal piano gratuito di Vercel senza spendere molto.
+
+Sono Pedro Corgnati, fondatore di SystemForge. Utilizzo questo stack (VPS Hostinger + PM2 + Nginx + GitHub Actions) in produzione in più progetti per clienti PMI italiani ed europei. Questa guida copre il setup completo da zero, i problemi reali che costano ore di debug e il confronto onesto con Vercel.
+
+## Quando ha senso uscire da Vercel verso un VPS
+
+Vercel è ottima per prototipi e team piccoli nel piano gratuito (Hobby). Il problema inizia quando:
+
+- **Il team cresce**: Vercel Pro costa $20/mese per membro. Un team di 5 persone paga $100/mese solo di piattaforma.
+- **La banda aumenta**: il piano Pro include 1 TB/mese. L'eccedenza costa $0.15/GB.
+- **Restrizioni di Edge Runtime**: non tutte le funzionalità di Node.js girano sull'Edge.
+- **Conformità GDPR**: alcuni contratti richiedono che i dati vengano elaborati in server europei. VPS Hostinger ha datacenter in Germania e Paesi Bassi.
+- **Costo totale prevedibile**: il VPS ha un costo mensile fisso indipendentemente da traffico, deploy o membri.
+
+**Quando restare su Vercel**: team piccoli (1–2 dev), prototipi, auto-scaling immediato necessario.
+
+## Confronto dei costi reali (2026)
+
+| Configurazione | Costo mensile (EUR) |
+|---|---|
+| Vercel Hobby (1 dev) | Gratuito |
+| Vercel Pro (3 dev) | ~€55/mese |
+| Vercel Pro (5 dev) | ~€90/mese |
+| Hostinger VPS KVM 1 (1 vCPU / 4 GB) | ~€10/mese |
+| Hostinger VPS KVM 2 (2 vCPU / 8 GB) | ~€22/mese |
+| Hostinger VPS KVM 4 (4 vCPU / 16 GB) | ~€42/mese |
+
+Il break-even è a 1–2 dev usando Vercel Pro. Da 3 dev in su, il VPS proprio è più economico.
+
+## Prerequisiti
+
+- VPS Hostinger con Ubuntu 22.04 LTS (o 24.04)
+- Dominio puntato all'IP del VPS (record A o CNAME)
+- Accesso SSH al server
+- Repository Next.js su GitHub
+
+## Passo 1: Installare Node.js 20 tramite nvm
+
+```bash
+# Connettiti via SSH
+ssh root@<ip-del-vps>
+
+# Installa nvm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+source ~/.bashrc
+
+# Installa Node.js 20 (LTS attuale nel 2026)
+nvm install 20
+nvm use 20
+nvm alias default 20
+
+# Verifica
+node --version  # v20.x.x
+```
+
+## Passo 2: Installare PM2 globalmente
+
+```bash
+npm install -g pm2
+
+# Configura PM2 per partire automaticamente al boot
+pm2 startup systemd
+# Esegui il comando che PM2 stampa
+```
+
+PM2 è il process manager che mantiene l'app Next.js in esecuzione, fa restart automatico in caso di crash e gestisce più istanze per deploy a zero downtime.
+
+## Passo 3: Clonare e fare il build dell'applicazione
+
+```bash
+mkdir -p /var/www
+cd /var/www
+
+git clone https://github.com/<utente>/<repo>.git mia-app
+cd mia-app
+
+npm ci
+npm run build
+```
+
+## Passo 4: Configurare PM2 con ecosystem file
+
+```javascript
+// ecosystem.config.js
+module.exports = {
+  apps: [
+    {
+      name: 'mia-app',
+      script: 'node_modules/.bin/next',
+      args: 'start',
+      cwd: '/var/www/mia-app',
+      instances: 'max',
+      exec_mode: 'cluster',
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3000,
+      },
+      max_memory_restart: '512M',
+    },
+  ],
+}
+```
+
+```bash
+pm2 start ecosystem.config.js
+pm2 save
+```
+
+## Passo 5: Configurare Nginx come reverse proxy
+
+```bash
+apt install nginx -y
+```
+
+Crea `/etc/nginx/sites-available/mia-app`:
+
+```nginx
+server {
+    listen 80;
+    server_name tuo-dominio.it www.tuo-dominio.it;
+
+    location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    location /_next/static/ {
+        alias /var/www/mia-app/.next/static/;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+}
+```
+
+```bash
+ln -s /etc/nginx/sites-available/mia-app /etc/nginx/sites-enabled/
+nginx -t
+systemctl reload nginx
+```
+
+## Passo 6: SSL con Certbot (Let's Encrypt)
+
+```bash
+apt install certbot python3-certbot-nginx -y
+certbot --nginx -d tuo-dominio.it -d www.tuo-dominio.it
+```
+
+Certbot configura HTTPS automaticamente e pianifica il rinnovo tramite cron. Certificato gratuito, rinnovo automatico ogni 90 giorni.
+
+## Passo 7: CI/CD con GitHub Actions
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd /var/www/mia-app
+            git pull origin main
+            npm ci --production=false
+            npm run build
+            pm2 reload mia-app --update-env
+```
+
+Ogni push su `main` lancia il deploy automatico con zero downtime tramite `pm2 reload`.
+
+## Problemi frequenti in produzione
+
+**Porta 3000 già in uso:** verifica con `lsof -i :3000`. Potrebbe esserci un'istanza orfana da un test precedente.
+
+**Variabili d'ambiente:** le variabili `NEXT_PUBLIC_*` sono incorporate nel build. Non committare `.env` con segreti su Git.
+
+**Memoria insufficiente durante il build:** `npm run build` può richiedere 2–3 GB di RAM. Sul piano KVM 1 (4 GB), il build potrebbe fallire per OOM. Usa swap oppure fai il build in locale e distribuisci solo `.next/` via SCP.
+
+> Vuoi migrare la tua applicazione Next.js da Vercel a VPS con zero downtime e CI/CD configurato? Posso farlo in 1–2 giorni. Scrivimi su [WhatsApp](https://wa.me/5500000000000) — analizzo l'architettura prima di quotarti.
+
+## FAQ
+
+**1. Next.js con App Router funziona uguale su VPS rispetto a Vercel?**
+
+Quasi tutto sì: Server Components, Server Actions, Route Handlers e Image Optimization. Ciò che non funziona allo stesso modo: Edge Runtime, ISR con revalidazione on-demand via webhook Vercel, e CDN automatica degli asset. Per quest'ultima, metti Cloudflare davanti al VPS — gratuito fino a volumi ragionevoli.
+
+**2. Quante richieste simultanee regge un VPS KVM 2 con PM2 in cluster mode?**
+
+Tra 200 e 500 richieste simultanee a seconda del tempo di risposta di ogni route. Per 1 000+ simultanee sostenute, considera KVM 4 (4 vCPU) o un load balancer davanti a 2 VPS.
+
+**3. Come fare rollback se un deploy rompe qualcosa?**
+
+La soluzione più semplice: tenere gli ultimi 2 build sul server. Prima del `git pull`, copia `.next/` in `.next.backup/`. Se il nuovo deploy fallisce, ripristina il backup e ricarica con PM2.
+
+**4. VPS Hostinger supporta Docker per Next.js containerizzato?**
+
+Sì. I VPS KVM di Hostinger permettono l'installazione di Docker. Per Next.js in Docker, usa l'immagine base `node:20-alpine` e configura `output: 'standalone'` in `next.config.js`. Coolify (pannello open-source di deploy) è un'ottima alternativa self-hosted a Vercel.
+
+**5. Vale la pena usare Nginx per servire i file statici invece di Next.js?**
+
+Sì, ed è già quello che fa il Passo 5 per la route `/_next/static/`. Per asset pubblici pesanti, aggiungi anche `location /uploads/ { alias /var/www/mia-app/public/uploads/; }` nel config Nginx. Questo riduce il carico sul processo Node.js.
+
+Per confrontare con altre opzioni di hosting Next.js, leggi anche [sviluppo web per PMI italiane](/blog/sviluppo-app-mobile-pmi-italiana-guida) e [consulenza tecnica cloud vs on-premise](/blog/consulenza-tecnica-cloud-azienda).

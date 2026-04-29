@@ -1,0 +1,187 @@
+---
+title: "Supabase Realtime alla scala: come gestire 10 000 connessioni simultanee nel 2026"
+slug: "supabase-realtime-scala-10k-connessioni-2026"
+date: "2026-04-29"
+description: "Supabase Realtime regge 10k connessioni simultanee? Broadcast, Presence e Postgres Changes spiegati con limiti per piano e strategie architetturali per la scala reale."
+tags: ["supabase realtime scala", "websocket nextjs", "realtime database pmi", "supabase pro connessioni", "broadcast presence postgres changes"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "consulenza-tecnica"
+locale: 'it-IT'
+published: true
+exclusive: false
+excerpt: "Supabase Realtime ha tre tipi di canale distinti: Broadcast, Presence e Postgres Changes. Ognuno ha limiti e trade-off diversi. Capire come scalare senza sorprese in fattura."
+hreflang_pair: [{"locale": "pt-BR", "slug": "supabase-realtime-escala-10k-conexoes-2026"}, {"locale": "en", "slug": "supabase-realtime-scaling-10k-connections-2026"}, {"locale": "es-ES", "slug": "supabase-realtime-escala-10k-conexiones-2026"}]
+seo_title: "Supabase Realtime alla scala: come gestire 10 000 connessioni simultanee"
+meta_description: "Supabase Realtime regge 10k connessioni? Broadcast, Presence e Postgres Changes spiegati con limiti per piano e strategie per la scala reale."
+canonical: "https://systemforge.it/blog/supabase-realtime-scala-10k-connessioni-2026"
+ogTitle: "Supabase Realtime alla scala: come gestire 10 000 connessioni simultanee"
+ogDescription: "Supabase Realtime regge 10k connessioni? Broadcast, Presence e Postgres Changes spiegati con limiti per piano e strategie per la scala reale."
+ogType: "article"
+ogLocale: "it_IT"
+ogImage: "https://systemforge.it/images/blog/default-cover.png"
+ogUrl: "https://systemforge.it/blog/supabase-realtime-scala-10k-connessioni-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Supabase Realtime alla scala: 10 000 connessioni simultanee nel 2026"
+twitterDescription: "Broadcast, Presence, Postgres Changes: limiti per piano e come architettare per la scala reale con Supabase Realtime."
+twitterImage: "https://systemforge.it/images/blog/default-cover.png"
+primary_category: "tecnologia-e-sviluppo"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Supabase Realtime alla scala: come gestire 10 000 connessioni simultanee nel 2026
+
+Supabase Realtime nel piano Pro supporta fino a 500 connessioni simultanee per impostazione predefinita. Per arrivare a 10 000 connessioni è necessario un Compute Add-on (da 8 vCPU / 32 GB RAM), una segmentazione intelligente dei canali e, in alcuni casi d'uso, la sostituzione di Postgres Changes con Broadcast per gli eventi ad alta frequenza. Il piano Free limita a 200 connessioni. Senza una configurazione adeguata, l'app cade silenziosamente al raggiungimento del limite — nessun errore esplicito sul client, solo disconnessioni intermittenti.
+
+Sono Pedro Corgnati, fondatore di SystemForge. Ho messo in produzione Supabase Realtime in progetti con picchi di 3–8 000 connessioni simultanee: dashboard B2B in tempo reale, sistemi di chat interni per cliniche e piattaforme di tracciamento logistico. Questo articolo è quello che avrei voluto leggere prima di imparare le parti difficili dalla pratica.
+
+## I tre tipi di canale Realtime e quando usarli
+
+Supabase Realtime non è una cosa sola. Sono tre primitive con comportamenti, limiti e costi completamente diversi.
+
+### Broadcast: pub/sub effimero a bassa latenza
+
+Broadcast è un messaggio da client a client (o da server a client) via canale nominato. Il messaggio **non viene persistito nel database**. È il canale più leggero e con la latenza più bassa: adatto per cursori collaborativi, indicatori di digitazione, eventi di presenza leggera e aggiornamenti UI di breve durata.
+
+Limiti pratici: il server Realtime di Supabase elabora fino a 100 messaggi al secondo per canale nel piano Pro. Oltre questo valore si ha throttling silenzioso. Per casi d'uso ad alta frequenza, implementare backpressure sul client.
+
+### Presence: tracciamento degli utenti online
+
+Presence mantiene una mappa sincronizzata di "chi è in questo canale adesso". Ogni client fa `track()` con metadati arbitrari (user_id, avatar, posizione del cursore) e Presence sincronizza questo stato per tutti i membri del canale, usando CRDT internamente per gestire le partizioni di rete.
+
+Il costo di Presence scala con il numero di membri nel canale e la frequenza degli aggiornamenti. Un canale con 500 membri che fanno `track()` ogni secondo genera traffico considerevole. Per casi con più di 200 membri attivi simultanei per canale, valuta di separare il canale Presence da quello Broadcast.
+
+### Postgres Changes: CDC diretto dal database
+
+Postgres Changes usa la Logical Replication di PostgreSQL per emettere eventi di INSERT, UPDATE e DELETE da tabelle specifiche ai client WebSocket connessi. È il canale più potente e il più costoso in termini di risorse server.
+
+**Regola critica:** non usare mai `table: '*'` (wildcard) in produzione. Questo crea un listener che emette ogni evento di ogni tabella a tutti i sottoscrittori del canale. Usare sempre filtri espliciti:
+
+```typescript
+const channel = supabase
+  .channel('ordini-utente')
+  .on(
+    'postgres_changes',
+    {
+      event: '*',
+      schema: 'public',
+      table: 'orders',
+      filter: `user_id=eq.${userId}`
+    },
+    (payload) => handleOrderUpdate(payload)
+  )
+  .subscribe()
+```
+
+Senza filtro, un canale Postgres Changes con 1 000 sottoscrittori che ricevono eventi da una tabella movimentata satura il server Realtime e il WAL di PostgreSQL.
+
+## Limiti per piano nel 2026
+
+| Piano | Connessioni simultanee | Messaggi/giorno | Compute |
+|---|---|---|---|
+| Free | 200 | 2 milioni | Shared (nano) |
+| Pro (€25/mese) | 500 | 5 milioni | Shared |
+| Pro + Compute S (8 vCPU/32GB) | ~2 000–3 000 | Illimitato* | Dedicato |
+| Pro + Compute M (16 vCPU/64GB) | ~5 000–8 000 | Illimitato* | Dedicato |
+| Pro + Compute L (32 vCPU/128GB) | ~10 000+ | Illimitato* | Dedicato |
+
+*Illimitato con fair use policy. I Compute Add-on costano €90–360/mese aggiuntivi.
+
+I limiti di connessione non sono hard limit con errore esplicito — il server Realtime inizia a mettere in coda e poi a rifiutare le connessioni silenziosamente quando è saturo. Monitorare sempre `supabase_realtime_connected_clients` tramite endpoint Prometheus (disponibile dal piano Pro).
+
+## Pattern architetturali per 10k connessioni
+
+### Pattern 1: segmentazione dei canali per entità
+
+Invece di avere un canale globale `app-events` con 10 000 sottoscrittori, creare canali granulari per entità di business:
+
+```typescript
+// Canale globale — da evitare
+const channel = supabase.channel('global-updates')
+
+// Canale per azienda (tenant in SaaS multi-tenant)
+const channel = supabase.channel(`company-${companyId}-updates`)
+
+// Canale per utente — per dati sensibili
+const channel = supabase.channel(`user-${userId}-notifications`)
+```
+
+Con 10 000 utenti attivi su 10 000 canali individuali, il carico di messaggi per canale è quasi zero. Il costo di memoria del server cresce linearmente ma in modo gestibile.
+
+### Pattern 2: riconnessione con exponential backoff
+
+Il client JavaScript di Supabase fa riconnessione automatica, ma senza configurazione adeguata può causare "thundering herd" — tutti i client che tentano di riconnettersi contemporaneamente dopo un restart del server Realtime.
+
+```typescript
+const supabase = createClient(url, key, {
+  realtime: {
+    reconnectAfterMs: (tries) => {
+      return Math.min(tries * 2000 + Math.random() * 1000, 30000)
+    }
+  }
+})
+```
+
+Il jitter casuale distribuisce le riconnessioni nel tempo ed evita picchi di carico.
+
+### Pattern 3: polling per dati a bassa frequenza
+
+Per dati che cambiano ogni 5–30 secondi, il polling via `setInterval` è più efficiente che mantenere una connessione WebSocket permanente con Postgres Changes:
+
+```typescript
+useEffect(() => {
+  const interval = setInterval(async () => {
+    const { data } = await supabase
+      .from('dashboard_summary')
+      .select('*')
+      .eq('company_id', companyId)
+      .single()
+    setDashboardData(data)
+  }, 10000)
+  return () => clearInterval(interval)
+}, [companyId])
+```
+
+Questo libera connessioni Realtime per i dati veramente ad alta frequenza.
+
+## Monitoraggio in produzione
+
+Per sistemi con più di 1 000 connessioni simultanee, configurare alert prima di raggiungere il limite:
+
+1. **Supabase Dashboard → Observability → Realtime**: connessioni attive, messaggi/minuto, errori di canale
+2. **Endpoint Prometheus** (piano Pro+): scrape di `https://<project-ref>.supabase.co/realtime/v1/metrics`
+3. **Alert su Grafana o BetterStack**: notifica quando le connessioni attive superano l'80% del limite del piano
+
+## Quando Supabase Realtime non è la risposta giusta
+
+**Garanzia di consegna:** Supabase Realtime non garantisce la consegna. Per notifiche critiche (pagamento approvato, allerta di sicurezza), usare code con conferma esplicita — SQS, BullMQ con Redis o Inngest.
+
+**Throughput estremo:** oltre 10 000 messaggi al secondo per progetto, valutare Ably, Pusher o un server WebSocket proprietario con Redis pub/sub.
+
+**Righe con payload grande:** Postgres Changes emette il payload completo della riga aggiornata. Per tabelle con aggiornamenti frequenti e righe pesanti, creare una tabella di eventi separata con solo i campi necessari.
+
+> Se stai costruendo un prodotto con Supabase e vuoi una revisione architetturale prima di scalare — numero di connessioni, costo previsto, pattern di canale — posso fare una diagnosi tecnica di 60 minuti senza costo iniziale. Scrivimi su [WhatsApp](https://wa.me/5500000000000).
+
+## FAQ
+
+**1. Supabase Realtime funziona con Next.js Server Components?**
+
+No, direttamente. I Server Components non mantengono stato persistente e non eseguono codice sul client. Supabase Realtime (WebSocket) deve essere configurato in Client Components all'interno di un `useEffect`. Per i Server Components, usa SWR o React Query con polling.
+
+**2. Qual è il costo reale di Supabase Realtime per un prodotto con 5 000 utenti attivi simultanei?**
+
+Con 5 000 utenti attivi, serve almeno il piano Pro (€25/mese) + Compute Add-on Small o Medium (€90–180/mese). Totale stimato: €115–205/mese. Ably alla stessa scala costerebbe €450–1 350/mese. Supabase è significativamente più economico per i tipici casi d'uso SaaS.
+
+**3. Come evitare che Postgres Changes esponga dati di altri utenti?**
+
+Usare sempre Row Level Security (RLS) in PostgreSQL insieme al filtro nel canale Realtime. RLS garantisce che anche se un client tenta di sottoscriversi agli eventi di un altro utente, PostgreSQL non emette quegli eventi. Non fare mai affidamento solo sul filtro del client.
+
+**4. Cosa succede quando il server Realtime si riavvia?**
+
+Il client JavaScript si riconnette automaticamente. Postgres Changes riprende dalla posizione corrente del WAL — gli eventi emessi durante il downtime sono persi. Per sistemi che non possono perdere eventi, implementare logica di re-fetch alla riconnessione.
+
+**5. È possibile usare Supabase Realtime con worker Node.js in background?**
+
+Sì. Il client `@supabase/supabase-js` funziona in Node.js. Per i worker di backend, usare il client con la `service_role key`. I worker Node.js contano come connessioni nel limite del piano.
+
+Per l'architettura completa delle applicazioni Supabase in produzione, vedi anche [sviluppo di sistemi personalizzati per PMI](/blog/sviluppo-software-su-misura-pmi-italiana-guida) e [consulenza tecnica per startup italiane](/blog/chi-sviluppa-app-mobile-software-su-misura-italia).

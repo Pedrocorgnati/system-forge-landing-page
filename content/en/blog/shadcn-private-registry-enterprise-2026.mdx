@@ -1,0 +1,199 @@
+---
+title: "Shadcn/UI Private Registry for Enterprise: Build Your Team Design System in 2026"
+slug: "shadcn-private-registry-enterprise-2026"
+date: "2026-04-29"
+description: "How to create a private shadcn/ui component registry for teams. CLI installation, versioning, hosting, and why it beats publishing to npm for internal design systems."
+tags: ["shadcn private registry", "design system nextjs enterprise", "team component library", "shadcn custom registry", "corporate ui library"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "web-development"
+locale: 'en'
+published: true
+exclusive: false
+excerpt: "With shadcn/ui v2.5+ registry support, you host custom components at any URL and teams install via CLI without publishing to npm. Setup takes under 30 minutes."
+hreflang_pair: [{"locale": "pt-BR", "slug": "shadcn-registry-privado-empresa-2026"}, {"locale": "it-IT", "slug": "shadcn-registry-privato-azienda-2026"}, {"locale": "es-ES", "slug": "shadcn-registry-privado-empresa-espana-2026"}]
+seo_title: "Shadcn/UI Private Registry for Enterprise: Build Your Team Design System in 2026"
+meta_description: "How to create a private shadcn/ui component registry for teams. CLI installation, versioning, hosting, and why it beats publishing to npm for internal design systems."
+canonical: "https://systemforgesoftware.com/blog/shadcn-private-registry-enterprise-2026"
+ogTitle: "Shadcn/UI Private Registry for Enterprise: Build Your Team Design System"
+ogDescription: "Host custom shadcn components at any URL. Teams install via CLI without npm. Setup under 30 minutes."
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+ogUrl: "https://systemforgesoftware.com/blog/shadcn-private-registry-enterprise-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Shadcn/UI Private Registry for Enterprise: Team Design System 2026"
+twitterDescription: "Host custom shadcn components at any URL. Teams install via CLI without npm. Setup under 30 minutes."
+twitterImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+primary_category: "technology-development"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Shadcn/UI Private Registry for Enterprise: Build Your Team Design System in 2026
+
+A private shadcn/ui registry lets any developer on the team install custom components with a single command: `npx shadcn@latest add https://registry.yourcompany.com/ui/data-table`. No publishing to npm, no package version management, no monorepo required. The custom registry feature arrived in shadcn/ui in the v2.5 cycle (2025) and in 2026 it is the standard approach for teams maintaining multiple Next.js products with a shared visual identity.
+
+*By Pedro Corgnati — founder of SystemForge. I have implemented private registries for teams of 3–15 developers maintaining 2–6 simultaneous Next.js applications. The problem it solves is real: without a registry, each app copies components manually, divergences appear after 2–3 months, and refactoring the design system becomes a multi-week project.*
+
+## Why private registry instead of a private npm package
+
+The fundamental difference: npm delivers **compiled code** with dependencies you don't control directly. The shadcn registry delivers **source code** that lands in your repository, in your folder structure, with your conventions.
+
+| Aspect | Private npm package | Shadcn private registry |
+|---|---|---|
+| Code ownership | Partial (post-install) | 100% in your repo |
+| Post-install customization | Requires fork or override | Edit directly in project |
+| Versioning | SemVer, complex breaking changes | Versioned JSON file |
+| Initial setup | npm publish, CI to publish | Static JSON on any URL |
+| Infrastructure cost | Private npm registry ($7/mo+) | Static CDN/S3 (< $1/mo) |
+
+For internal components — domain-specific data tables, forms with company-standard Zod validation, layouts with brand identity — the registry is far more practical.
+
+## Registry structure
+
+A shadcn registry is a JSON file accessible via URL. The minimum structure:
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "my-company-ui",
+  "homepage": "https://registry.mycompany.com",
+  "items": [
+    {
+      "name": "data-table-server",
+      "type": "registry:ui",
+      "title": "Data Table with server-side pagination",
+      "description": "Data table with server-side pagination, sorting, and filters integrated with our API standard.",
+      "dependencies": ["@tanstack/react-table"],
+      "registryDependencies": ["button", "input"],
+      "files": [
+        {
+          "path": "components/ui/data-table-server.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "hooks/use-data-table.ts",
+          "type": "registry:hook"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Hosting the registry
+
+The registry is a static JSON file. Any CDN or HTTP server works:
+
+**Option 1: GitHub Pages** (free, public or private repo with GitHub Pro)
+- Create a `company-ui-registry` repository
+- Place `registry.json` and component files there
+- Enable GitHub Pages on the `gh-pages` branch
+- URL: `https://yourcompany.github.io/company-ui-registry/registry.json`
+
+**Option 2: S3 + CloudFront or R2 + Cloudflare CDN** (< $1/month)
+
+**Option 3: Vercel or Netlify** (free on Hobby plan) — a simple Next.js repo with an API route `/api/registry/[name]` returning the component JSON
+
+For company-internal registries where code cannot be public, S3 with a private bucket and IP allowlist or VPN access is the standard.
+
+## Creating a registry component
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-server",
+  "type": "registry:ui",
+  "title": "Data Table Server-Side",
+  "description": "Table with server-side pagination and TanStack Query.",
+  "dependencies": ["@tanstack/react-table", "@tanstack/react-query"],
+  "registryDependencies": ["button", "input", "badge"],
+  "files": [
+    {
+      "path": "components/ui/data-table-server.tsx",
+      "content": "// component source code as string",
+      "type": "registry:ui",
+      "target": "components/ui/data-table-server.tsx"
+    }
+  ]
+}
+```
+
+In production, use a build script that reads `.tsx` files and auto-populates the JSON — avoids manual content maintenance.
+
+## Registry build script
+
+```typescript
+import { readFileSync, writeFileSync } from 'fs'
+import { glob } from 'glob'
+
+const items = []
+
+const files = glob.sync('src/registry/components/*.tsx')
+for (const file of files) {
+  const name = file.split('/').pop()!.replace('.tsx', '')
+  const content = readFileSync(file, 'utf-8')
+  items.push({
+    name,
+    type: 'registry:ui',
+    files: [{ path: `components/ui/${name}.tsx`, content, type: 'registry:ui' }]
+  })
+}
+
+writeFileSync('public/registry.json', JSON.stringify({ items }, null, 2))
+console.log(`Registry built: ${items.length} components`)
+```
+
+Run this in CI before publishing to keep the registry always current.
+
+## Installing components from the private registry
+
+Configure the registry in the consuming project's `components.json`:
+
+```json
+{
+  "registries": [
+    {
+      "name": "company-ui",
+      "url": "https://registry.mycompany.com"
+    }
+  ]
+}
+```
+
+Then: `npx shadcn@latest add company-ui/data-table-server` — no full URL needed.
+
+## Versioning and governance
+
+shadcn registry has no native semantic versioning. Recommended team practices:
+
+1. **Version branches**: `registry-v1/`, `registry-v2/` as branches or tags in Git
+2. **Versioned URL**: `registry.mycompany.com/v1/registry.json` and `v2/registry.json`
+3. **Markdown changelog**: explicit breaking changes in `CHANGELOG.md`
+4. **Review process**: PRs to the registry repository reviewed by tech lead before merge — approved component = component in registry
+
+> Need a standardized design system across multiple Next.js apps? I can architect the full private registry, including CI/CD pipeline and developer documentation. [Message me on WhatsApp](https://wa.me/5500000000000).
+
+## FAQ
+
+**Does the shadcn private registry work with Next.js 13/14 or only Next.js 15?**
+
+The `npx shadcn@latest add <url>` command works with any Next.js version from 13 onward. The registry itself is framework-agnostic — it is just JSON with TypeScript source code.
+
+**How do I protect the registry from unauthorized access?**
+
+Three approaches: IP allowlist on the CDN/server; authentication token in the request header via the `headers` field in the `registries` config in `components.json`; short-lived signed URLs for highly sensitive registries. For most companies, an IP allowlist is sufficient.
+
+**What is the difference between registry:ui, registry:hook, registry:block, and registry:lib?**
+
+`registry:ui` are React components (`.tsx`). `registry:hook` are custom hooks. `registry:block` are larger blocks combining multiple components (e.g., a full login screen). `registry:lib` are utility/helper files without JSX. The type defines the default destination folder in the installing project.
+
+**Can registry components depend on other private registry components?**
+
+Yes. Use the `registryDependencies` field. You can reference both official shadcn registry components (e.g., `"button"`) and your own private registry components (e.g., `"company-ui/input-mask"`). The CLI installs all dependencies recursively.
+
+**Is it worth using Storybook alongside the private registry?**
+
+Yes — they are complementary. The registry distributes components (install via CLI). Storybook documents and demonstrates them interactively. Typical setup: registry repository with Storybook published as an internal site at `stories.mycompany.com`. Each component has usage stories and the registry JSON for installation.
+
+For context on building long-lived Next.js frontends, see also [TypeScript as the standard in 2025](/blog/typescript-2025-why-we-adopted-it-as-standard) and [custom web development for SMBs](/blog/build-saas-platform-from-scratch-2026).

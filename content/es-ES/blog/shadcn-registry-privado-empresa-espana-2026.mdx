@@ -1,0 +1,193 @@
+---
+title: "Shadcn/UI Registry Privado para Empresas: cómo crear tu design system en 2026"
+slug: "shadcn-registry-privado-empresa-espana-2026"
+date: "2026-04-29"
+description: "Cómo crear un registry privado de componentes shadcn/ui para equipos. Instalación por CLI, versionado, hosting y por qué es mejor que publicar en npm."
+tags: ["shadcn registry privado", "design system nextjs empresa", "componentes ui equipo", "shadcn custom registry", "ui library corporativa"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "desarrollo-web"
+locale: 'es-ES'
+published: true
+exclusive: false
+excerpt: "Con el registry de shadcn/ui v2.5+, alojas tus componentes personalizados en cualquier URL y los equipos los instalan por CLI sin publicar en npm. Setup en menos de 30 minutos."
+hreflang_pair: [{"locale": "pt-BR", "slug": "shadcn-registry-privado-empresa-2026"}, {"locale": "it-IT", "slug": "shadcn-registry-privato-azienda-2026"}, {"locale": "en", "slug": "shadcn-private-registry-enterprise-2026"}]
+seo_title: "Shadcn/UI Registry Privado para Empresas: cómo crear tu design system en 2026"
+meta_description: "Cómo crear un registry privado de componentes shadcn/ui para equipos. Instalación por CLI, versionado, hosting y por qué es mejor que publicar en npm."
+canonical: "https://systemforge.es/blog/shadcn-registry-privado-empresa-espana-2026"
+ogTitle: "Shadcn/UI Registry Privado para Empresas: design system en 2026"
+ogDescription: "Registry privado shadcn/ui para equipos: instalación por CLI sin npm, setup en 30 minutos."
+ogType: "article"
+ogLocale: "es_ES"
+ogImage: "https://systemforge.es/images/blog/default-cover.png"
+ogUrl: "https://systemforge.es/blog/shadcn-registry-privado-empresa-espana-2026"
+twitterCard: "summary_large_image"
+twitterTitle: "Shadcn/UI Registry Privado para Empresas: design system en 2026"
+twitterDescription: "Registry privado shadcn/ui para equipos: instalación por CLI sin npm, setup en 30 minutos."
+twitterImage: "https://systemforge.es/images/blog/default-cover.png"
+primary_category: "tecnologia-desarrollo"
+schema_types: ["Article", "BlogPosting"]
+---
+
+# Shadcn/UI Registry Privado para Empresas: cómo crear tu design system en 2026
+
+Un registry privado de shadcn/ui permite que cualquier desarrollador del equipo instale componentes personalizados con un solo comando: `npx shadcn@latest add https://registry.tuempresa.es/ui/data-table`. Sin publicar en npm, sin gestionar versiones de paquetes, sin monorepo obligatorio. La funcionalidad de registry personalizado llegó a shadcn/ui en el ciclo v2.5 (2025) y en 2026 es el estándar para equipos que construyen varios productos Next.js con identidad visual compartida.
+
+Soy Pedro Corgnati, fundador de SystemForge. He implementado registries privados para equipos de 3 a 15 desarrolladores que mantienen 2–6 aplicaciones Next.js simultáneamente. El problema que resuelve es real: sin registry, cada app copia componentes manualmente, las divergencias aparecen a los 2–3 meses y refactorizar el design system se convierte en un proyecto de semanas.
+
+## Por qué registry privado en lugar de paquete npm
+
+La diferencia fundamental: npm entrega **código compilado** con dependencias que no controlas directamente. El registry de shadcn entrega **código fuente** que va a tu repositorio, en tu estructura de carpetas, con tus convenciones.
+
+| Aspecto | Paquete npm privado | Shadcn registry privado |
+|---|---|---|
+| Propiedad del código | Parcialmente (post-instalación) | Sí, 100% en tu repo |
+| Personalización post-install | Requiere fork u override | Edita directamente en el proyecto |
+| Versionado | SemVer, breaking changes complejos | Archivo JSON versionado |
+| Setup inicial | Publicación npm, CI para publicar | JSON estático en cualquier URL |
+| Coste de infraestructura | npm registry privado (€6/mes+) | CDN/S3 estático (< €1/mes) |
+
+Para componentes internos — tablas de datos específicas del dominio, formularios con validación Zod estándar de la empresa, layouts con identidad visual — el registry es mucho más práctico.
+
+## Estructura del registry
+
+Un registry shadcn es un JSON accesible por URL. La estructura mínima:
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "mi-empresa-ui",
+  "homepage": "https://registry.miempresa.es",
+  "items": [
+    {
+      "name": "data-table-server",
+      "type": "registry:ui",
+      "title": "Data Table con paginación server-side",
+      "description": "Tabla de datos con paginación server-side, ordenación y filtros integrados con nuestro estándar de API.",
+      "dependencies": ["@tanstack/react-table"],
+      "registryDependencies": ["button", "input"],
+      "files": [
+        {
+          "path": "components/ui/data-table-server.tsx",
+          "type": "registry:ui"
+        },
+        {
+          "path": "hooks/use-data-table.ts",
+          "type": "registry:hook"
+        }
+      ]
+    }
+  ]
+}
+```
+
+## Hosting del registry
+
+El registry es un archivo JSON estático. Cualquier CDN o servidor HTTP es suficiente:
+
+**Opción 1: GitHub Pages** (gratis, repo público o privado con GitHub Pro)
+
+**Opción 2: S3 + CloudFront o R2 + Cloudflare CDN** (< €1/mes)
+
+**Opción 3: Vercel o Netlify** (gratis en el plan Hobby) — un repositorio Next.js sencillo con la ruta API `/api/registry/[name]`
+
+Para registries corporativos donde el código no puede ser público, S3 con bucket privado y acceso por IP allowlist o VPN es el estándar.
+
+## Crear un componente para el registry
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "data-table-server",
+  "type": "registry:ui",
+  "title": "Data Table Server-Side",
+  "description": "Tabla con paginación server-side y TanStack Query.",
+  "dependencies": ["@tanstack/react-table", "@tanstack/react-query"],
+  "registryDependencies": ["button", "input", "badge"],
+  "files": [
+    {
+      "path": "components/ui/data-table-server.tsx",
+      "content": "// código fuente del componente como string",
+      "type": "registry:ui",
+      "target": "components/ui/data-table-server.tsx"
+    }
+  ]
+}
+```
+
+En producción, usa un script de build que lea los archivos `.tsx` y pueble el JSON automáticamente.
+
+## Script de build del registry
+
+```typescript
+import { readFileSync, writeFileSync } from 'fs'
+import { glob } from 'glob'
+
+const items = []
+
+const files = glob.sync('src/registry/components/*.tsx')
+for (const file of files) {
+  const name = file.split('/').pop()!.replace('.tsx', '')
+  const content = readFileSync(file, 'utf-8')
+  items.push({
+    name,
+    type: 'registry:ui',
+    files: [{ path: `components/ui/${name}.tsx`, content, type: 'registry:ui' }]
+  })
+}
+
+writeFileSync('public/registry.json', JSON.stringify({ items }, null, 2))
+console.log(`Registry generado: ${items.length} componentes`)
+```
+
+## Instalar componentes del registry privado
+
+En el `components.json` del proyecto consumidor:
+
+```json
+{
+  "registries": [
+    {
+      "name": "empresa-ui",
+      "url": "https://registry.miempresa.es"
+    }
+  ]
+}
+```
+
+Después: `npx shadcn@latest add empresa-ui/data-table-server` — sin URL completa.
+
+## Versionado y gobernanza
+
+Prácticas recomendadas para equipos:
+
+1. **Ramas por versión**: `registry-v1/`, `registry-v2/` como ramas o tags en Git
+2. **URL versionada**: `registry.miempresa.es/v1/registry.json`
+3. **Changelog en Markdown**: con breaking changes explícitos
+4. **Proceso de revisión**: PRs al repositorio del registry, revisados por el tech lead antes del merge — componente aprobado = componente en el registry
+
+> ¿Necesitas un design system estandarizado para varias aplicaciones Next.js de tu equipo? Puedo diseñar la arquitectura completa del registry, incluida la pipeline de CI/CD y la documentación para los devs. [Escríbeme por WhatsApp](https://wa.me/5500000000000).
+
+## FAQ
+
+**¿El registry privado de shadcn funciona con Next.js 13/14 o solo con Next.js 15?**
+
+El comando `npx shadcn@latest add <url>` funciona con cualquier versión de Next.js a partir de la 13. El registry es agnóstico al framework — es solo JSON con código TypeScript.
+
+**¿Cómo proteger el registry de accesos no autorizados?**
+
+Tres enfoques: IP allowlist en el CDN/servidor; token de autenticación en el header de la petición vía el campo `headers` en la configuración `registries` del `components.json`; URLs firmadas con corta expiración para registries muy sensibles. Para la mayoría de empresas, la IP allowlist es suficiente.
+
+**¿Cuál es la diferencia entre registry:ui, registry:hook, registry:block y registry:lib?**
+
+`registry:ui` son componentes React (`.tsx`). `registry:hook` son hooks personalizados. `registry:block` son bloques más grandes que combinan varios componentes. `registry:lib` son utilidades/helpers sin JSX. El tipo define la carpeta de destino predeterminada en el proyecto que instala.
+
+**¿Pueden los componentes del registry privado depender de otros componentes del mismo registry?**
+
+Sí. Usa el campo `registryDependencies`. Puedes referenciar tanto componentes del registry oficial de shadcn (ej: `"button"`) como del tuyo privado (ej: `"empresa-ui/input-mask"`). El CLI instala todas las dependencias recursivamente.
+
+**¿Vale la pena usar Storybook junto con el registry privado?**
+
+Sí, son complementarios. El registry distribuye los componentes. Storybook los documenta y demuestra de forma interactiva. Setup típico: repositorio del registry con Storybook publicado como sitio interno en `stories.miempresa.es`.
+
+Para el contexto de cómo construir frontends Next.js de largo recorrido, lee también [TypeScript como estándar en 2025](/blog/typescript-2025-por-que-lo-adoptamos-como-estandar) y [desarrollo web para PYMEs españolas](/blog/como-elegir-empresa-desarrollo-web-espana-confiable).
