@@ -4,7 +4,7 @@
  * Server Component — sem 'use client'.
  */
 import Link from 'next/link'
-import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { BlogCoverImage } from '@/components/blog/BlogCoverImage'
 import { ROUTES } from '@/lib/constants/routes'
 import type { ArticleFrontmatter } from '@/lib/types'
 import { formatDate } from '@/lib/utils'
@@ -18,7 +18,6 @@ interface ArticleCardProps {
 
 export function ArticleCard({ article, variant = 'default', index = 0 }: ArticleCardProps) {
   const m = loadMessages()
-  const coverSrc = article.coverImage || '/images/blog/default-cover.png'
   const primaryTag = article.tags[0]
   const isFeatured = variant === 'featured'
   const formattedDate = formatDate(article.date)
@@ -43,12 +42,11 @@ export function ArticleCard({ article, variant = 'default', index = 0 }: Article
         tabIndex={-1}
         aria-hidden="true"
       >
-        <OptimizedImage
-          src={coverSrc}
+        <BlogCoverImage
+          src={article.coverImage}
+          slug={article.slug}
           alt={article.title}
           fill
-          width={0}
-          height={0}
           sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 33vw"
           className="w-full h-full object-cover transition-transform duration-500 hover:scale-[1.04]"
         />

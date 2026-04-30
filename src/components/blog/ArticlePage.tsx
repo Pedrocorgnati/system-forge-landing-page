@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { Container } from '@/components/ui/Container'
 import { MDXContent } from '@/components/blog/MDXContent'
-import { OptimizedImage } from '@/components/ui/OptimizedImage'
+import { BlogCoverImage } from '@/components/blog/BlogCoverImage'
 import { CTAContextual } from '@/components/blog/CTAContextual'
 import { SidebarCTA } from '@/components/blog/SidebarCTA'
 import { ArticleCard } from '@/components/blog/ArticleCard'
@@ -71,10 +71,13 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
             <header data-testid="article-page-header" className="mb-8">
               {/* Cover image */}
               <div className="relative aspect-video rounded-xl overflow-hidden mb-6">
-                <OptimizedImage
-                  src={article.coverImage || '/images/blog/default-cover.png'}
+                <BlogCoverImage
+                  src={article.coverImage}
+                  slug={article.slug}
                   alt={article.title}
                   fill
+                  sizes="(max-width: 1024px) 100vw, 760px"
+                  priority
                   className="object-cover"
                 />
               </div>
