@@ -241,12 +241,12 @@ describe('JsonLdBlogPosting', () => {
   })
 
   it('uses coverImage when provided', () => {
-    const post = { ...basePost, coverImage: '/images/cover.webp' }
+    const post = { ...basePost, coverImage: '/images/cover.png' }
     const { container } = render(
       <JsonLdBlogPosting post={post} siteConfig={baseSiteConfig as never} />
     )
     const schema = extractJsonLd(container)
-    expect(schema.image).toBe('https://systemforgesoftware.com/images/cover.webp')
+    expect(schema.image).toBe('https://systemforgesoftware.com/images/cover.png')
   })
 
   it('renders author as Organization (not Person)', () => {
