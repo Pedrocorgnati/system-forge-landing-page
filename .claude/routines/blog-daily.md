@@ -12,11 +12,11 @@
 | Working directory | raiz do clone de `system-forge-landing-page` |
 | Repo irmão esperado | nenhum — totalmente autônomo |
 | Branch alvo | `main` |
-| Frequência sugerida | 1x por dia |
-| Objetivo por execução | `5` artigos por locale, `20` no total |
+| Frequência sugerida | 1x por dia (reexecuções no mesmo dia são permitidas para testes — sem trava de idempotência por data) |
+| Objetivo por execução | `5` artigos por locale, `20` no total (fixo e imutável por run, independente de quantas vezes rodar no dia) |
 | Locales obrigatórios | `pt-BR`, `it-IT`, `en`, `es-ES` |
 | Hub de paridade | `pt-BR` |
-| Mensagem de commit canônica | `content(multilanguage): add N articles — daily batch YYYY-MM-DD` |
+| Mensagem de commit canônica | `content(multilanguage): add N articles — daily batch YYYY-MM-DD` (admite múltiplos commits no mesmo dia quando há reexecuções) |
 
 ---
 
@@ -194,28 +194,25 @@ Antes de qualquer passo, valide em ordem:
   - abrir issue
   - nao gerar conteudo
 
-[IDEMPOTENCIA E DUPLA EXECUCAO NO MESMO DIA]
-Use a data UTC corrente no formato YYYY-MM-DD como BATCH_DATE.
+[REEXECUCAO NO MESMO DIA — SEM TRAVA POR DATA]
+Use a data UTC corrente no formato YYYY-MM-DD como BATCH_DATE. Defina BATCH_RUN_ID = BATCH_DATE + "T" + HHMMSS UTC do inicio da run, para distinguir reports de runs concorrentes.
+
+REGRA CENTRAL: nao existe trava de "ja rodou hoje". Sempre que esta rotina for invocada, ela DEVE produzir um novo lote completo de 5 artigos por locale (20 no total), independentemente de quantas vezes ja rodou no mesmo dia. O limite de 5 por locale e por EXECUCAO, nao por dia.
 
 Antes de gerar qualquer conteudo:
 1. Rode:
    - git fetch origin main
-   - git log origin/main --since="BATCH_DATE 00:00:00" --format=%s -n 20
-2. Se ja existir em origin/main uma mensagem exatamente no padrao:
-   - content(multilanguage): add 20 articles — daily batch BATCH_DATE
-   entao:
-   - considerar a rotina do dia como concluida
-   - gerar um resumo curto de no-op em .claude/routine-reports/blog-daily-BATCH_DATE.md
-   - encerrar sem alterar nada
-3. Se houve execucao no mesmo dia mas sem commit final:
-   - detectar artefatos intermediarios em .claude/blog/data/ e diferencas locais
-   - reaproveitar apenas o que estiver consistente
-   - nunca duplicar slug
-   - nunca publicar mais de 5 artigos por locale
-4. Se houver arquivos MDX locais novos com date == BATCH_DATE sem commit remoto canonico:
-   - tratar como tentativa incompleta
-   - validar se pertencem ao lote atual
-   - se houver ambiguidade, abortar e abrir issue
+2. NUNCA aborte por encontrar commit canonico do dia. Multiplos commits "content(multilanguage): add 20 articles — daily batch BATCH_DATE" no mesmo dia sao permitidos e esperados em cenarios de teste.
+3. Se houver execucao previa do mesmo dia (commitada ou nao):
+   - inventariar todos os slugs ja publicados em content/{locale}/blog/ (incluindo os do dia)
+   - garantir que os 20 novos artigos do lote atual NAO colidam com nenhum slug ja existente — se houver colisao no DEDUPLICATE-TOPICS, gerar slug variante (sufixo numerico ou keyword diferente)
+   - reaproveitar APENAS artefatos intermediarios (raw-keywords, clusters, drafts) se estiverem integros e do mesmo BATCH_DATE; em duvida, regenerar do zero
+   - cada execucao publica 5 NOVOS artigos por locale, somando-se aos ja publicados; nunca substituir ou sobrescrever artigos commitados
+4. Se houver arquivos MDX locais nao commitados com date == BATCH_DATE:
+   - tratar como tentativa incompleta da run anterior
+   - validar integridade; descartar com `git clean -fd content/` apenas se claramente orfaos e fora de qualquer commit
+   - em ambiguidade, abortar e abrir issue antes de gerar conteudo novo
+5. Reports da run em .claude/routine-reports/ DEVEM usar BATCH_RUN_ID no nome para nao sobrescrever reports de runs anteriores no mesmo dia (ex.: blog-daily-{BATCH_RUN_ID}.md, parity-backlog-{BATCH_RUN_ID}.json, hreflang-map-{BATCH_RUN_ID}.json, publish-batch-{BATCH_RUN_ID}.json).
 
 [GIT SETUP]
 IMPORTANTE: o cloud runner usa um credential helper de sistema que intercepta git push e aplica credenciais de somente leitura, ignorando qualquer git remote set-url. A unica forma confiavel de fazer push e usar o gh CLI para autenticar, pois ele registra seu proprio credential helper que tem precedencia sobre o do sistema.
@@ -260,7 +257,7 @@ Objetivo:
 - identificar gap vs hub
 - identificar artigos orfaos sem equivalente
 - gerar backlog de paridade em:
-  - .claude/routine-reports/parity-backlog-BATCH_DATE.json
+  - .claude/routine-reports/parity-backlog-BATCH_RUN_ID.json
 - exibir o dashboard de paridade e continuar automaticamente (NUNCA pausar aguardando confirmacao)
 
 Regras:
@@ -384,7 +381,7 @@ Regras:
   - 5 en
   - 5 es-ES
 - salvar resumo em:
-  - .claude/routine-reports/publish-batch-BATCH_DATE.json
+  - .claude/routine-reports/publish-batch-BATCH_RUN_ID.json
 
 11. DEPLOY
 - converter os 20 aprovados em MDX finais
@@ -409,7 +406,7 @@ Regras:
 - como esta rotina NAO pode tocar public/ nem src/, NAO escreva nesses caminhos
 - em vez disso:
   - gere manifest de hreflang apenas para auditoria em:
-    - .claude/routine-reports/hreflang-map-BATCH_DATE.json
+    - .claude/routine-reports/hreflang-map-BATCH_RUN_ID.json
   - garanta que cada um dos 20 MDX publicados contenha no frontmatter os sinais cross-locale necessarios:
     - locale
     - canonical
@@ -564,11 +561,12 @@ Ao terminar, sempre emitir um resumo markdown com este formato:
 # Blog Daily - BATCH_DATE
 
 ## Result
-- Status: SUCCESS | NO-OP | FAILED
+- Status: SUCCESS | FAILED
 - Articles published: N
 - Per locale: pt-BR=N, it-IT=N, en=N, es-ES=N
 - Commit: SHA ou "none"
-- Push: OK | NO-OP | FAILED
+- Push: OK | FAILED
+- Run ID: BATCH_RUN_ID
 
 ## Parity
 | Locale | Before | After | Gap vs pt-BR |
@@ -609,8 +607,8 @@ Antes de ativar o agendamento, valide manualmente:
 
 ## Monitoramento
 
-- Monitore cada run pelo status final `SUCCESS`, `NO-OP` ou `FAILED`.
-- `NO-OP` é aceitável apenas quando já existir commit remoto canônico para a mesma data.
+- Monitore cada run pelo status final `SUCCESS` ou `FAILED`.
+- Reexecuções no mesmo dia são permitidas (cenários de teste). Não existe estado `NO-OP` por trava de data — toda invocação tenta produzir 20 novos artigos.
 - Qualquer `FAILED` deve gerar issue em `Pedrocorgnati/system-forge-landing-page` com label `routine-failure`.
-- Os artefatos de auditoria da run devem ficar em `.claude/routine-reports/`.
-- O lote só é considerado válido se houver exatamente `20` artigos novos e a mensagem de commit for `content(multilanguage): add 20 articles — daily batch YYYY-MM-DD`.
+- Os artefatos de auditoria da run ficam em `.claude/routine-reports/` e são nomeados com `BATCH_RUN_ID` (`YYYY-MM-DDTHHMMSS`) para não sobrescrever runs anteriores do mesmo dia.
+- O lote só é considerado válido se houver exatamente `20` artigos novos no run e a mensagem de commit for `content(multilanguage): add 20 articles — daily batch YYYY-MM-DD` (a mesma data pode aparecer em múltiplos commits no histórico se houver mais de uma execução no dia).
