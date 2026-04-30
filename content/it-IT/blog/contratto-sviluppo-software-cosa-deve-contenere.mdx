@@ -1,0 +1,182 @@
+---
+title: "Contratto di sviluppo software: 9 clausole che non possono mancare"
+slug: "contratto-sviluppo-software-cosa-deve-contenere"
+date: "2026-04-30"
+locale: "it-IT"
+description: "Un contratto di sviluppo software senza le clausole giuste è una garanzia di conflitti. Le 9 clausole essenziali, gli errori più comuni e cosa esigere prima di firmare."
+excerpt: "Un contratto software senza scope dettagliato, proprietà intellettuale, SLA e criteri di accettazione è un invito aperto ai conflitti. Queste 9 clausole sono il minimo per proteggere chi commissiona — e per distinguere i fornitori seri da quelli che scompaiono con i tuoi soldi."
+tags: ["contratto sviluppo software", "clausole contratto software", "proprietà intellettuale software", "criteri accettazione software", "SLA contratto software", "come commissionare software"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "consulenza-tecnica"
+published: true
+exclusive: false
+primary_category: "dicas-para-contratar"
+canonical: "https://systemforge.it/blog/contratto-sviluppo-software-cosa-deve-contenere"
+seo_title: "Contratto di sviluppo software: 9 clausole essenziali"
+meta_description: "Senza queste 9 clausole, il tuo contratto software è pericolosamente debole. Scope, PI, SLA, criteri di accettazione e garanzia — cosa esigere prima di firmare."
+ogTitle: "Contratto di sviluppo software: 9 clausole che non possono mancare"
+ogDescription: "Scope, proprietà intellettuale, SLA, criteri di accettazione e garanzia: le 9 clausole che ogni contratto serio deve avere."
+ogType: "article"
+ogLocale: "it_IT"
+ogImage: "https://systemforge.it/images/blog/default-cover.png"
+ogUrl: "https://systemforge.it/blog/contratto-sviluppo-software-cosa-deve-contenere"
+twitterCard: "summary_large_image"
+twitterTitle: "Contratto di sviluppo software: 9 clausole essenziali"
+twitterDescription: "Scope, proprietà intellettuale, SLA, criteri di accettazione — cosa esigere prima di firmare qualsiasi contratto software."
+twitterImage: "https://systemforge.it/images/blog/default-cover.png"
+schema_types: ["Article", "BlogPosting"]
+hreflang_pair: [{"locale": "pt-BR", "slug": "contrato-desenvolvimento-software-o-que-precisa-ter"}, {"locale": "en", "slug": "software-development-contract-what-must-include"}, {"locale": "es-ES", "slug": "contrato-desarrollo-software-que-debe-incluir"}]
+---
+
+# Contratto di sviluppo software: 9 clausole che non possono mancare
+
+**Risposta diretta:** Un contratto di sviluppo software che non definisce scope, criteri di accettazione, proprietà intellettuale e SLA post-consegna è quasi una garanzia di conflitto. Le 9 clausole di questa guida sono il minimo per proteggere chi commissiona — e per distinguere i fornitori seri da quelli che scompariranno con il tuo denaro.
+
+Sono Pedro Corgnati, fondatore di SystemForge. Ho visto aziende perdere €60.000 per contratti mal scritti — il fornitore è scomparso, il codice non è mai stato consegnato, senza alcuna tutela. Questa guida è ciò che condivido con ogni cliente prima di firmare qualsiasi cosa con qualsiasi fornitore.
+
+## Perché i contratti software sono diversi dagli altri contratti di servizio
+
+Un contratto di servizio standard (pulizie, contabilità, manutenzione) ha scope relativamente oggettivo: o il servizio è stato eseguito o no. Il software è diverso.
+
+Cosa rende i contratti software complessi:
+
+1. **Lo scope è interpretabile:** "sistema di gestione clienti" può significare cose completamente diverse per chi commissiona e per chi sviluppa
+2. **La qualità è soggettiva senza criteri:** un sistema che funziona ma è lento, ha bug intermittenti o è impossibile da manutenere — è stato consegnato?
+3. **La proprietà intellettuale è astratta:** chi è proprietario del codice sorgente? Chi può usare la tecnologia creata?
+4. **L'evoluzione è implicitamente attesa:** il cliente vuole modifiche; lo sviluppatore vuole scope fisso
+
+Senza clausole esplicite per ciascuno di questi punti, il contratto protegge molto più il fornitore che il cliente.
+
+## Le 9 clausole essenziali
+
+### 1. Scope dettagliato (Allegato Tecnico obbligatorio)
+
+La clausola di scope più pericolosa è: *"sviluppo software secondo le necessità del cliente."* Non significa nulla giuridicamente.
+
+Il contratto deve fare riferimento a un **Allegato Tecnico** che elenca esplicitamente:
+- Funzionalità incluse nel prezzo concordato
+- Funzionalità esplicitamente escluse (evita il "pensavo fosse incluso")
+- Integrazioni con sistemi di terze parti incluse e quelle fatturate separatamente
+- Volume di dati atteso e scalabilità prevista
+
+Senza questo allegato, ogni discussione su "il sistema non fa X" diventa una disputa su cosa è stato concordato verbalmente.
+
+### 2. Criteri di accettazione
+
+Quando il sistema si considera consegnato? Questa è la clausola che genera più conflitti perché molti contratti si limitano a dire "consegnato quando in produzione" — il che non significa nulla di concreto.
+
+Un contratto ben scritto definisce:
+- **Ambiente di collaudo:** il cliente testa nell'ambiente del fornitore prima della produzione
+- **Periodo di testing:** tipicamente 10–20 giorni lavorativi dopo la consegna in collaudo
+- **Criteri di accettazione funzionale:** lista di funzionalità che devono funzionare come specificato
+- **Criteri di performance:** tempi di risposta massimi (es: "le pagine si caricano in meno di 3 secondi")
+- **Processo di segnalazione bug:** come vengono segnalati i bug e in che tempi vengono corretti prima dell'accettazione formale
+
+### 3. Proprietà intellettuale del codice sorgente
+
+Questa clausola determina chi è proprietario del sistema. Senza di essa, in Italia il codice appartiene all'autore (sviluppatore) per la Legge sul software (L. 633/1941, artt. 64-bis e seguenti), salvo accordo contrario scritto.
+
+I tre modelli principali:
+
+| Modello | Cosa significa | Quando usare |
+|---|---|---|
+| **Proprietà totale del cliente** | Tutto il codice appartiene al cliente dopo il pagamento integrale | Progetti su misura dove il cliente vuole piena indipendenza |
+| **Licenza d'uso perpetua** | Fornitore mantiene la PI, cliente ha licenza irrevocabile d'uso | Prodotti SaaS del fornitore adattati |
+| **Proprietà condivisa** | Entrambi detengono il codice e possono usarlo liberamente | Raramente vantaggioso per il cliente; da evitare |
+
+Per sviluppo su misura, esigi **proprietà totale dopo pagamento integrale** e consegna del codice sorgente sul repository del cliente (GitHub, GitLab o equivalente).
+
+### 4. Consegna del codice sorgente e accesso al repository
+
+Separata dalla proprietà intellettuale, questa clausola tratta la **consegna fisica del codice.** Ho visto aziende che "possiedono" tecnicamente il codice ma non riescono ad accedervi perché il fornitore mantiene il repository.
+
+Esigi:
+- Accesso al repository Git durante tutto lo sviluppo (non solo alla consegna finale)
+- Consegna finale con storico completo dei commit
+- Documentazione minima: README con istruzioni di setup, variabili d'ambiente necessarie, architettura generale
+- Assenza di dipendenze proprietarie del fornitore che impediscano il funzionamento autonomo
+
+### 5. Cronogramma pagamenti legato ai milestone di consegna
+
+Pagamento totale anticipato è un segnale d'allarme. Il pagamento legato ai milestone di consegna è la struttura corretta.
+
+Un cronogramma tipico per un progetto da €40.000:
+
+| Milestone | Deliverable | % del pagamento |
+|---|---|---|
+| Avvio progetto | Firma contratto + kickoff tecnico | 20% (€8.000) |
+| Approvazione design/wireframe | Prototipo funzionante approvato | 20% (€8.000) |
+| Consegna in collaudo | Sistema completo per testing | 30% (€12.000) |
+| Accettazione formale | Firma verbale di collaudo | 20% (€8.000) |
+| Go-live + 30 giorni | Periodo di stabilizzazione post-produzione | 10% (€4.000) |
+
+### 6. SLA post-consegna e periodo di garanzia
+
+Il sistema è stato consegnato e accettato. Un mese dopo, appare un bug critico in produzione. Chi lo corregge? In che tempi? A quale costo?
+
+Il contratto deve definire il **periodo di garanzia** (tipicamente 60–90 giorni dopo l'accettazione) durante il quale le correzioni di bug sono obbligatorie e gratuite.
+
+Durante la garanzia, lo SLA deve specificare:
+- **Bug critici** (sistema down, dati corrotti): risoluzione entro 4–8 ore lavorative
+- **Bug gravi** (funzionalità principale non funziona): risoluzione entro 24–48 ore lavorative
+- **Bug minori** (problemi estetici, funzionalità secondarie): risoluzione entro 5–10 giorni lavorativi
+
+### 7. Riservatezza e NDA
+
+Il fornitore avrà accesso alle informazioni aziendali — processi interni, dati clienti, informazioni finanziarie, credenziali di sistemi terzi. Il NDA (Accordo di Non Divulgazione) protegge queste informazioni.
+
+Cosa deve coprire il NDA:
+- Informazioni aziendali condivise durante lo sviluppo
+- Dati di utenti e clienti del sistema
+- Credenziali di accesso a sistemi terzi
+- Strategie di prodotto e roadmap
+
+Periodo tipico di riservatezza: 2–5 anni dalla fine del contratto.
+
+### 8. Clausola di non concorrenza e esclusività del codice
+
+Se stai sviluppando un prodotto software con vantaggio competitivo specifico, esigi che il fornitore non utilizzi il codice o l'architettura sviluppata appositamente per te in progetti concorrenti diretti.
+
+Questa clausola deve essere bilanciata — non è ragionevole impedire al fornitore di usare React o PostgreSQL. È ragionevole impedire l'uso del tuo specifico algoritmo di pricing o del tuo modello dati proprietario in un concorrente diretto.
+
+### 9. Foro competente e legge applicabile
+
+Definisci:
+- **Foro competente:** la sede preferita per la risoluzione delle controversie (tipicamente la sede del cliente)
+- **Metodo di risoluzione preferito:** mediazione, arbitrato o via giudiziaria
+- **Legge applicabile:** diritto italiano (Codice Civile, L. sul Software, D.Lgs. 231/2002)
+
+Per contratti con fornitori esteri, legge e foro competente diventano ancora più critici — e spesso più complessi da far valere.
+
+## Cosa omettono i contratti problematici
+
+Le omissioni più comuni che proteggono il fornitore a spese del cliente:
+
+- **Nessun Allegato Tecnico:** tutto diventa "come concordato verbalmente"
+- **Tempistica di consegna vaga:** "sistema consegnato entro 6 mesi, soggetto a variazioni di scope"
+- **Penale per ritardo inesistente o simbolica:** 3 mesi di ritardo senza conseguenze per il fornitore
+- **Pagamento integrale prima dell'accettazione:** il cliente paga tutto prima di vedere il sistema funzionante
+- **Proprietà intellettuale non definita:** il contratto non affronta il tema — e la legge protegge lo sviluppatore
+- **Nessuna clausola di garanzia:** "sistema consegnato as-is, nessuna responsabilità per bug post-consegna"
+
+## FAQ — Contratto di Sviluppo Software
+
+**Posso usare un modello di contratto trovato online?**
+I modelli generici sono un punto di partenza, non una soluzione. Ogni progetto ha specificità che un template non cattura — in particolare scope, criteri di accettazione e proprietà intellettuale. Usa il modello come base e adattalo con un avvocato esperto in diritto IT o negozia i punti chiave direttamente con il fornitore.
+
+**Il fornitore rifiuta di inserire la clausola di proprietà intellettuale. Cosa fare?**
+È un segnale d'allarme grave. I fornitori seri non hanno problemi a cedere la proprietà intellettuale di un progetto su misura. Il rifiuto di solito significa che il fornitore vuole rivendere lo stesso codice a più clienti. Negozia o cambia fornitore.
+
+**Cosa succede se il fornitore non consegna nei tempi?**
+Dipende da cosa è nel contratto. Un contratto ben scritto include una penale per ritardo (tipicamente 0,5–1% al giorno sul valore totale, limitata al 20–30%). Senza quella clausola, l'unico rimedio è la risoluzione contrattuale e il procedimento giudiziario — entrambi lenti e costosi.
+
+**Posso recedere dal contratto a metà progetto?**
+Sì, se c'è una clausola di recesso. Deve definire come funziona il pagamento per i moduli già consegnati, cosa succede al codice sviluppato fino a quel punto, e i tempi di preavviso. Senza questa clausola, il recesso diventa una disputa su quanto è stato effettivamente sviluppato e quale valore ha.
+
+**Qual è il valore minimo di un progetto che giustifica un contratto formale?**
+Qualsiasi progetto sopra €5.000 merita un contratto scritto. Per progetti sopra €25.000, considera di far revisionare il contratto da un avvocato specializzato in diritto informatico prima di firmare.
+
+---
+
+Hai bisogno di aiuto per valutare un contratto software prima di firmarlo, o vuoi sviluppare un sistema con contratto trasparente e scope dettagliato? [Contatta SystemForge su WhatsApp](https://wa.me/5500000000000) — sviluppiamo software su misura per PMI italiane con contratti progettati per tutelare entrambe le parti.

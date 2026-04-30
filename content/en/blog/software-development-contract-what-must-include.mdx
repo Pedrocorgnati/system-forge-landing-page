@@ -1,0 +1,188 @@
+---
+title: "Software Development Contract: 9 Clauses That Must Be Included"
+slug: "software-development-contract-what-must-include"
+date: "2026-04-30"
+locale: "en"
+description: "A software development contract without the right clauses guarantees disputes. Here are the 9 essential clauses, the most common omissions, and what to require before signing."
+excerpt: "A software contract without detailed scope, IP ownership, SLA, and acceptance criteria is an open invitation to conflict. These 9 clauses are the minimum for protecting the client — and for separating serious vendors from those who disappear with your money."
+tags: ["software development contract", "software contract clauses", "IP ownership software", "software acceptance criteria", "SLA software contract", "how to contract software development"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "technical-consulting"
+published: true
+exclusive: false
+primary_category: "dicas-para-contratar"
+canonical: "https://systemforgesoftware.com/blog/software-development-contract-what-must-include"
+seo_title: "Software Development Contract: 9 Essential Clauses to Include"
+meta_description: "Without these 9 clauses, your software contract is dangerously weak. Scope, IP, SLA, acceptance criteria, and warranty — what to require before signing with any vendor."
+ogTitle: "Software Development Contract: 9 Clauses That Must Be Included"
+ogDescription: "Scope, IP ownership, SLA, acceptance criteria, and warranty: the 9 clauses any serious contract must have."
+ogType: "article"
+ogLocale: "en_US"
+ogImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+ogUrl: "https://systemforgesoftware.com/blog/software-development-contract-what-must-include"
+twitterCard: "summary_large_image"
+twitterTitle: "Software Development Contract: 9 Essential Clauses"
+twitterDescription: "Scope, IP ownership, SLA, acceptance criteria — what to require before signing any software contract."
+twitterImage: "https://systemforgesoftware.com/images/blog/default-cover.png"
+schema_types: ["Article", "BlogPosting"]
+hreflang_pair: [{"locale": "pt-BR", "slug": "contrato-desenvolvimento-software-o-que-precisa-ter"}, {"locale": "it-IT", "slug": "contratto-sviluppo-software-cosa-deve-contenere"}, {"locale": "es-ES", "slug": "contrato-desarrollo-software-que-debe-incluir"}]
+---
+
+# Software Development Contract: 9 Clauses That Must Be Included
+
+**Direct answer:** A software development contract that doesn't define scope, acceptance criteria, intellectual property ownership, and post-delivery SLA is almost guaranteed to end in conflict. The 9 clauses in this guide are the minimum to protect the client — and to distinguish serious vendors from those who will disappear with your payment.
+
+I'm Pedro Corgnati, founder of SystemForge. I've seen businesses lose $80,000 on poorly written contracts — the developer disappeared, the code was never delivered, and there was no recourse. This guide is what I hand to every client before they sign anything with any vendor.
+
+## Why software contracts are different from standard service agreements
+
+A standard service contract (janitorial, accounting, facilities maintenance) has relatively objective scope: either the service happened or it didn't. Software is different.
+
+What makes software contracts uniquely complex:
+
+1. **Scope is interpretable:** "customer management system" can mean entirely different things to the client and the developer
+2. **Quality is subjective without criteria:** a system that works but is slow, has intermittent bugs, or is impossible to maintain — was it delivered?
+3. **Intellectual property is abstract:** who owns the source code? Who can use the technology created?
+4. **Evolution is implicitly expected:** the client wants changes; the developer wants fixed scope
+
+Without explicit clauses for each of these, the contract protects the vendor far more than the client.
+
+## The 9 essential clauses
+
+### 1. Detailed scope (Technical Annex required)
+
+The most dangerous scope clause is: *"software development per client requirements."* That means nothing legally.
+
+The contract must reference a **Technical Annex** (also called: functional specification, requirements document, or backlog) that explicitly lists:
+- Functionality included in the agreed price
+- Functionality explicitly excluded (prevents the "I thought that was included" dispute)
+- Third-party integrations included and those billed separately
+- Expected data volume and scalability assumptions
+
+Without this annex, every "the system doesn't do X" becomes a dispute about what was verbally agreed.
+
+### 2. Acceptance criteria
+
+When is the system considered delivered? This clause causes the most conflict because many contracts simply say "delivered when live in production" — which means nothing concrete.
+
+A well-written contract defines:
+- **Staging environment:** the client tests in a vendor-managed environment before production
+- **Testing window:** typically 10–20 business days after staging delivery
+- **Functional acceptance criteria:** list of features that must work as specified
+- **Performance criteria:** maximum response times (e.g., "pages load in under 3 seconds")
+- **Bug reporting process:** how bugs are reported and the timeline for fixes before formal acceptance
+
+If the client doesn't test within the window, the system is deemed accepted. If the system fails criteria, the vendor has X days to fix before further consequences apply.
+
+### 3. Intellectual property ownership of source code
+
+This clause determines who owns the system. Without it explicit, the code may belong to the developer under US copyright law (the work-for-hire doctrine applies only in specific employment contexts — not automatically to contractors).
+
+The three main models:
+
+| Model | What it means | When to use |
+|---|---|---|
+| **Full client ownership** | All code belongs to the client after full payment | Custom projects where the client wants full independence |
+| **Perpetual license** | Vendor retains IP, client gets irrevocable license to use | SaaS products adapted for the client |
+| **Joint ownership** | Both parties hold the code and can use it freely | Rarely advantageous for the client; avoid |
+
+For custom development, require **full ownership after full payment** and that the vendor delivers the source code with minimum documentation to the client's own repository (GitHub, GitLab, or equivalent).
+
+### 4. Source code delivery and repository access
+
+Separate from IP ownership, this clause handles the **physical delivery of the code.** I've seen companies that technically "own" the code but can't access it because the vendor maintains the repository.
+
+Require:
+- Access to the Git repository throughout development (not just at final delivery)
+- Final delivery with full commit history (not just the final code snapshot)
+- Minimum documentation: README with setup instructions, required environment variables, architecture overview
+- No proprietary vendor dependencies that would prevent independent operation
+
+### 5. Payment schedule tied to delivery milestones
+
+100% payment upfront is a major red flag. Payment tied to delivery milestones is the correct structure.
+
+A typical schedule for a $50,000 project:
+
+| Milestone | Deliverable | Payment % |
+|---|---|---|
+| Project start | Contract signed + technical kickoff | 20% ($10,000) |
+| Design/wireframes approved | Working prototype approved | 20% ($10,000) |
+| Staging delivery | Complete system for testing | 30% ($15,000) |
+| Formal acceptance | Signed acceptance document | 20% ($10,000) |
+| Go-live + 30 days | Post-production stabilization period | 10% ($5,000) |
+
+If the vendor asks for more than 30% upfront without a concrete tied deliverable, negotiate.
+
+### 6. Post-delivery SLA and warranty period
+
+The system was delivered and accepted. A month later, a critical bug appears in production. Who fixes it? In what timeframe? At what cost?
+
+The contract must define the **warranty period** (typically 60–90 days after acceptance) during which bug fixes are mandatory and at no additional cost. After that, either a maintenance contract or time-and-materials billing applies.
+
+During the warranty period, SLA should specify:
+- **Critical bugs** (system down, data corruption): resolution within 4–8 business hours
+- **Major bugs** (core feature non-functional): resolution within 24–48 business hours
+- **Minor bugs** (cosmetic issues, secondary features): resolution within 5–10 business days
+
+### 7. Confidentiality and NDA
+
+The vendor will have access to your business information — internal processes, customer data, financial records, third-party system credentials. The NDA protects this information.
+
+What the NDA must cover:
+- Business information shared during development
+- User and customer data in the system
+- Access credentials to third-party systems
+- Product strategies and roadmap
+
+Typical confidentiality period: 2–5 years after contract termination.
+
+### 8. Non-compete and code exclusivity
+
+If you're building a product with competitive differentiation, require that the vendor not use the code or architecture built specifically for you in direct competitor projects.
+
+This clause must be balanced — it's not reasonable to prohibit the vendor from using React or PostgreSQL. It is reasonable to prohibit using your specific pricing algorithm, business logic, or proprietary data model in a direct competitor's product.
+
+### 9. Governing law and dispute resolution
+
+Define:
+- **Jurisdiction:** the preferred location for dispute resolution (typically where the client company is incorporated)
+- **Preferred resolution method:** mediation, arbitration, or litigation
+- **Applicable law:** state law (for US companies, specify which state)
+
+For contracts with international vendors, jurisdiction and governing law become even more critical — and often more complex to enforce.
+
+## What problematic contracts typically omit
+
+The most common omissions that protect the vendor at the client's expense:
+
+- **No Technical Annex:** everything becomes "as verbally agreed"
+- **Vague delivery timeline:** "system delivered within 6 months, subject to scope changes"
+- **Minimal late delivery penalty:** 3-month delays with no real consequence for the vendor
+- **Full payment before acceptance:** client pays everything before seeing the system work
+- **Intellectual property undefined:** the contract doesn't address ownership — law defaults to vendor
+- **No warranty clause:** "system delivered as-is; no responsibility for post-delivery bugs"
+
+Any of these in a real contract means you should negotiate before signing.
+
+## FAQ — Software Development Contracts
+
+**Can I use a contract template from the internet?**
+Generic contract templates are a starting point, not a solution. Each project has specifics that a template can't capture — especially scope, acceptance criteria, and IP. Use the template as a base and adapt it with a software-experienced attorney or negotiate the key points directly with the vendor.
+
+**The vendor refuses to include an IP ownership clause. What should I do?**
+That's a serious red flag. Serious vendors have no problem assigning IP of a custom project to the client. A refusal usually means the vendor wants to reuse the same code for multiple clients. Negotiate or find a different vendor.
+
+**What project value justifies a formal contract?**
+Any project over $5,000 deserves a written contract. Below that, a detailed email exchange with confirmed scope and timeline provides some protection. For projects over $30,000, consider having a software attorney review the contract before signing.
+
+**What happens if the vendor doesn't deliver on time?**
+Depends on what's in the contract. A well-written contract includes a late delivery penalty (typically 0.5–1% per day on the total value, capped at 20–30%). Without that clause, the only recourse is contract rescission and litigation — both slow and expensive.
+
+**Can I terminate the contract mid-project?**
+Yes, if there's a termination clause. It should define how payment works for modules already delivered, what happens to code developed to that point, and notice periods. Without this clause, termination becomes a dispute over how much was actually completed and what it's worth.
+
+---
+
+Need help evaluating a software contract before signing, or looking to build a system with transparent scope and milestone-based delivery? [Contact SystemForge](https://wa.me/5500000000000) — we build custom software for SMBs with contracts designed to protect both parties.

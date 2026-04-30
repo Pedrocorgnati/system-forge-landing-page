@@ -1,0 +1,188 @@
+---
+title: "Contrato de desenvolvimento de software: 9 cláusulas que não podem faltar"
+slug: "contrato-desenvolvimento-software-o-que-precisa-ter"
+date: "2026-04-30"
+locale: "pt-BR"
+description: "Contrato de desenvolvimento de software sem as cláusulas certas é garantia de conflito. Veja as 9 cláusulas essenciais, os erros mais comuns e o que exigir antes de assinar."
+excerpt: "Um contrato de software sem escopo detalhado, cláusula de propriedade intelectual, SLA e critérios de aceite é um convite para litígio. Veja as 9 cláusulas que qualquer contrato sério precisa ter — e o que as empresas desonestas tentam esconder nas entrelinhas."
+tags: ["contrato desenvolvimento software", "contrato software empresa", "clausulas contrato software", "propriedade intelectual software", "aceite software contrato"]
+coverImage: "/images/blog/default-cover.png"
+author: "Pedro Corgnati"
+relatedService: "consultoria-tecnica"
+published: true
+exclusive: false
+primary_category: "dicas-para-contratar"
+canonical: "https://forjadesistemas.com.br/blog/contrato-desenvolvimento-software-o-que-precisa-ter"
+seo_title: "Contrato de desenvolvimento de software: 9 cláusulas essenciais"
+meta_description: "Sem essas 9 cláusulas, seu contrato de software é fragilíssimo. Escopo, PI, SLA, aceite, garantia — o que exigir antes de assinar com qualquer fornecedor."
+ogTitle: "Contrato de desenvolvimento de software: 9 cláusulas que não podem faltar"
+ogDescription: "Escopo, propriedade intelectual, SLA, critérios de aceite e garantia: as 9 cláusulas que qualquer contrato sério precisa ter."
+ogType: "article"
+ogLocale: "pt_BR"
+ogImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+ogUrl: "https://forjadesistemas.com.br/blog/contrato-desenvolvimento-software-o-que-precisa-ter"
+twitterCard: "summary_large_image"
+twitterTitle: "Contrato de software: 9 cláusulas essenciais antes de assinar"
+twitterDescription: "Escopo, propriedade intelectual, SLA, aceite — o que exigir em qualquer contrato de desenvolvimento."
+twitterImage: "https://forjadesistemas.com.br/images/blog/default-cover.png"
+schema_types: ["Article", "BlogPosting"]
+hreflang_pair: [{"locale": "en", "slug": "software-development-contract-what-must-include"}, {"locale": "it-IT", "slug": "contratto-sviluppo-software-cosa-deve-contenere"}, {"locale": "es-ES", "slug": "contrato-desarrollo-software-que-debe-incluir"}]
+---
+
+# Contrato de desenvolvimento de software: 9 cláusulas que não podem faltar
+
+**Resposta direta:** Um contrato de desenvolvimento de software que não define escopo, critérios de aceite, propriedade intelectual e SLA de manutenção é quase garantia de conflito. As 9 cláusulas deste guia são o mínimo para proteger quem contrata — e separar uma empresa séria de uma empresa que vai desaparecer com seu dinheiro.
+
+Sou Pedro Corgnati, fundador da SystemForge. Já vi empresas perderem R$ 80.000 por contratos mal feitos — o desenvolvedor sumiu, o código ficou com ele, e o sistema nunca foi entregue. Este guia é o que eu entrego para todo cliente antes de assinar qualquer coisa.
+
+## Por que contratos de software são diferentes de outros contratos de serviço
+
+Um contrato de prestação de serviço convencional (limpeza, contabilidade, manutenção predial) tem escopo relativamente objetivo: ou o serviço foi feito ou não foi. Software é diferente.
+
+O que torna contratos de software complexos:
+
+1. **Escopo é interpretável:** "sistema de gestão de clientes" pode significar coisas completamente diferentes para quem contrata e para quem desenvolve
+2. **Qualidade é subjetiva na ausência de critérios:** um sistema que funciona, mas é lento, tem bugs intermitentes ou é impossível de manter — foi entregue?
+3. **Propriedade intelectual é abstrata:** quem é dono do código-fonte? Quem pode usar a tecnologia criada?
+4. **Evolução é implicitamente esperada:** o cliente quer mudanças; o desenvolvedor quer escopo fixo
+
+Sem cláusulas explícitas para cada um desses pontos, o contrato protege muito mais o fornecedor do que o cliente.
+
+## As 9 cláusulas essenciais
+
+### 1. Escopo detalhado (Anexo Técnico obrigatório)
+
+A cláusula de escopo mais perigosa que existe é: *"desenvolvimento de sistema conforme necessidade do cliente."* Isso não significa nada juridicamente.
+
+O contrato precisa referenciar um **Anexo Técnico** (pode ter outro nome: especificação funcional, documento de requisitos, backlog) que lista explicitamente:
+- Funcionalidades incluídas no preço combinado
+- Funcionalidades explicitamente fora do escopo (evita o "achei que estava incluído")
+- Integrações com sistemas de terceiros incluídas e as que são cobradas à parte
+- Volume de dados inicial e escalabilidade prevista
+
+Sem esse anexo, toda discussão sobre "o sistema não faz X" vira disputa sobre o que foi combinado verbalmente.
+
+### 2. Critérios de aceite
+
+Quando o sistema é considerado entregue? Esta é a cláusula que mais gera conflito porque muitos contratos simplesmente dizem "entregue quando em produção" — o que não significa nada.
+
+Um contrato bem feito define:
+- **Ambiente de homologação:** o cliente testa no ambiente do fornecedor antes de ir a produção
+- **Prazo de homologação:** normalmente 10-20 dias úteis após a entrega em homologação
+- **Critérios de aceite funcional:** lista de funcionalidades que precisam funcionar conforme especificado
+- **Critérios de performance:** tempo de resposta máximo (ex: "páginas carregam em menos de 3 segundos")
+- **Processo de reporte de bugs:** como bugs são reportados e em que prazo são corrigidos antes do aceite
+
+Se o cliente não testa dentro do prazo, o sistema é considerado aceito. Se o sistema não passa nos critérios, o fornecedor tem X dias para corrigir antes de novas sanções.
+
+### 3. Propriedade intelectual do código-fonte
+
+Esta é a cláusula que determina quem é dono do sistema. Sem ela explícita, o código pode pertencer ao desenvolvedor pela Lei do Software (Lei nº 9.609/98).
+
+Existem três modelos principais:
+
+| Modelo | O que significa | Quando usar |
+|---|---|---|
+| **Propriedade total do cliente** | Todo código pertence ao cliente após pagamento integral | Projetos sob medida onde o cliente quer independência total |
+| **Licença de uso perpétuo** | Fornecedor mantém o IP, cliente tem licença irrevogável de uso | SaaS customizado, produto do fornecedor adaptado |
+| **Propriedade compartilhada** | Ambos detêm o código e podem usar livremente | Raramente vantajoso para o cliente; evitar |
+
+Para desenvolvimento sob medida, exija **propriedade total após pagamento integral** e que o fornecedor entregue o código-fonte com documentação mínima no repositório do cliente (GitHub, GitLab ou equivalente).
+
+### 4. Entrega do código-fonte e repositório
+
+Separada da propriedade intelectual, esta cláusula trata da **entrega física do código.** Já vi empresas que "possuem" o código mas não conseguem acessá-lo porque o fornecedor mantém o repositório.
+
+Exija:
+- Acesso ao repositório Git durante todo o desenvolvimento (não apenas na entrega final)
+- Entrega final com histórico de commits (não apenas o código final)
+- Documentação mínima: README com instruções de setup, variáveis de ambiente necessárias, arquitetura geral
+- Ausência de dependências proprietárias do fornecedor que bloqueiem a operação independente
+
+### 5. Cronograma e marcos de pagamento
+
+Pagamento total adiantado é um sinal de alerta. Pagamento vinculado a marcos de entrega é a estrutura correta.
+
+Um cronograma típico para projeto de R$ 50.000:
+
+| Marco | Entregável | % do pagamento |
+|---|---|---|
+| Início do projeto | Assinatura + kickoff técnico | 20% (R$ 10.000) |
+| Aprovação do design/wireframes | Protótipo funcional aprovado | 20% (R$ 10.000) |
+| Entrega em homologação | Sistema completo para testes | 30% (R$ 15.000) |
+| Aceite formal | Assinatura do termo de aceite | 20% (R$ 10.000) |
+| Go-live + 30 dias | Período de estabilização pós-produção | 10% (R$ 5.000) |
+
+Se o fornecedor pede mais de 30% adiantado sem uma entrega concreta vinculada, negocie.
+
+### 6. SLA de manutenção pós-entrega (garantia)
+
+O sistema foi entregue e aceito. Um mês depois, um bug grave aparece em produção. Quem corrige? Em que prazo? Com que custo?
+
+O contrato precisa definir o **período de garantia** (normalmente 60-90 dias após o aceite) durante o qual correções de bugs são obrigatórias e gratuitas. Depois desse período, define-se se há um contrato de manutenção (separado) ou se o cliente está por conta própria.
+
+Durante a garantia, o SLA deve especificar:
+- **Bugs críticos** (sistema fora do ar, dados corrompidos): resolução em 4-8 horas úteis
+- **Bugs graves** (funcionalidade principal não funciona): resolução em 24-48 horas úteis
+- **Bugs menores** (problemas cosméticos, funcionalidades secundárias): resolução em 5-10 dias úteis
+
+### 7. Confidencialidade e NDA
+
+O fornecedor vai ter acesso a dados do seu negócio — processos internos, base de clientes, dados financeiros, credenciais de sistemas. O NDA (Acordo de Não-Divulgação) protege essas informações.
+
+O que o NDA deve cobrir:
+- Informações do negócio compartilhadas durante o desenvolvimento
+- Dados de usuários e clientes do sistema
+- Credenciais de acesso a sistemas de terceiros
+- Estratégias de produto e roadmap
+
+Período típico de confidencialidade: 2-5 anos após o término do contrato.
+
+### 8. Cláusula de não-concorrência e exclusividade do código
+
+Se você está desenvolvendo um produto de software com diferencial competitivo, exija que o fornecedor não use o código ou a arquitetura desenvolvida especificamente para você em projetos concorrentes.
+
+Esta cláusula deve ser equilibrada — não é razoável pedir que o fornecedor não use Next.js ou React. É razoável pedir que o algoritmo de precificação dinâmica ou o modelo de dados específico do seu negócio não seja replicado para um concorrente direto.
+
+### 9. Foro e lei aplicável
+
+No Brasil, a maioria dos contratos de TI termina em mediação extrajudicial ou pequenas causas. Defina:
+- Foro: a cidade de preferência para resolver disputas (normalmente a cidade da empresa contratante)
+- Método de resolução preferido: mediação, arbitragem ou via judicial
+- Lei aplicável: Lei Brasileira (Lei do Software, Código Civil, CDC se aplicável)
+
+Para contratos com fornecedores internacionais, lei e foro são ainda mais críticos.
+
+## O que contratos problemáticos geralmente omitem
+
+Nos contratos que analisei ao longo dos anos, as omissões mais comuns que protegem o fornecedor às custas do cliente:
+
+- **Sem anexo técnico:** tudo vira "conforme combinado verbalmente"
+- **Prazo de entrega vago:** "sistema entregue em até 6 meses, sujeito a alterações de escopo"
+- **Multa por atraso inexistente ou simbólica:** atraso de 3 meses sem consequência para o fornecedor
+- **Pagamento integral antes do aceite:** o cliente paga tudo antes de ver o sistema funcionando
+- **Propriedade intelectual indefinida:** o contrato não menciona o tema — e a lei protege o desenvolvedor
+- **Sem cláusula de garantia:** "sistema entregue, sem responsabilidade por bugs pós-entrega"
+
+Qualquer dessas omissões em um contrato real é um sinal de que você precisa negociar antes de assinar.
+
+## FAQ — Contrato de Desenvolvimento de Software
+
+**Posso usar um modelo de contrato da internet?**
+Modelos de contrato genéricos são um ponto de partida, não uma solução. Cada projeto tem especificidades que um template não captura — especialmente em escopo, critérios de aceite e propriedade intelectual. Use o modelo como base e adapte com um advogado especializado em TI ou com o próprio fornecedor.
+
+**O fornecedor se recusa a incluir cláusula de propriedade intelectual. O que fazer?**
+É um sinal de alerta grave. Fornecedores sérios não têm problema em ceder a propriedade intelectual de um projeto sob medida. A recusa geralmente significa que o fornecedor quer revender o mesmo código para múltiplos clientes. Negocie ou mude de fornecedor.
+
+**Qual o valor mínimo que justifica um contrato formal?**
+Qualquer projeto acima de R$ 5.000 merece um contrato formal. Abaixo disso, um e-mail com escopo e prazo confirmado já oferece alguma proteção. Para projetos acima de R$ 30.000, considere contratar um advogado para revisar o contrato antes de assinar.
+
+**O que acontece se o fornecedor não entregar dentro do prazo?**
+Depende do que está no contrato. Um contrato bem feito tem multa por atraso (geralmente 0,5-1% ao dia sobre o valor total, limitada a 20-30%). Sem essa cláusula, o único recurso é rescisão contratual e ação judicial — que é lenta e cara.
+
+**Posso rescindir o contrato no meio do projeto?**
+Sim, se houver cláusula de rescisão. Ela deve definir como funciona o pagamento pelos módulos já entregues, o que acontece com o código desenvolvido até então, e prazos de aviso prévio. Sem essa cláusula, a rescisão vira disputa sobre quanto já foi desenvolvido e quanto vale.
+
+---
+
+Precisa de ajuda para avaliar um contrato de software antes de assinar, ou quer desenvolver um sistema com contrato transparente e escopo detalhado? [Fale com a SystemForge no WhatsApp](https://wa.me/5500000000000) — fazemos consultoria técnica e desenvolvimento sob medida para PMEs brasileiras.
