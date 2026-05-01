@@ -18,7 +18,7 @@ export const esConfig: SiteConfig = {
     'Desarrollamos software a medida: SaaS, apps móviles, landing pages, e-commerce, dashboards y automatizaciones con IA. Equipo especializado, entrega en semanas.',
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@systemforge.es',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+393508751885',
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_ES ?? '+393508751885',
   calendly: '',
   budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=es-ES`,
   address: 'España / Latinoamérica',

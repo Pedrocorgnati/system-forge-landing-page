@@ -18,7 +18,10 @@ export const brConfig: SiteConfig = {
     'Desenvolvemos software sob medida: SaaS, apps mobile, landing pages, e-commerce, dashboards e automações com IA. Time especializado, entrega em semanas.',
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '+5512934859127',
+  // Per-locale: NEXT_PUBLIC_WHATSAPP_NUMBER (sem sufixo) era compartilhado entre
+  // todos os builds e fazia BR/IT/EN/ES caírem no mesmo número. Cada locale tem
+  // sua própria env var; o fallback hardcoded vence se a env não estiver setada.
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_BR ?? '+5512934859127',
   calendly: '',
   budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=pt-BR`,
   address: 'Curitiba/PR, Brasil',

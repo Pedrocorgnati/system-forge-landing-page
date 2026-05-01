@@ -1,7 +1,59 @@
 import { defineCollection, defineConfig, s } from 'velite'
 import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
+import { existsSync } from 'node:fs'
+import path from 'node:path'
 import { ServiceCategory } from './src/lib/types'
+
+// Build-time cover fallback (espelha src/lib/blog/cover-fallback.ts).
+// Mantido inline porque velite roda fora do bundler do Next; importar via
+// alias '@/...' não funciona aqui.
+const NEUTRAL_COVER_FALLBACKS = [
+  '/images/blog/fallbacks/neutral-1.png',
+  '/images/blog/fallbacks/neutral-2.png',
+  '/images/blog/fallbacks/neutral-3.png',
+  '/images/blog/fallbacks/neutral-4.png',
+  '/images/blog/fallbacks/neutral-5.png',
+  '/images/blog/fallbacks/neutral-6.png',
+  '/images/blog/fallbacks/neutral-7.png',
+  '/images/blog/fallbacks/neutral-8.png',
+] as const
+const LAST_RESORT_COVER = '/images/blog/default-cover.png'
+
+function pickFallbackForSlug(slug: string): string {
+  let h = 0
+  for (let i = 0; i < slug.length; i++) h = (h * 31 + slug.charCodeAt(i)) | 0
+  return NEUTRAL_COVER_FALLBACKS[Math.abs(h) % NEUTRAL_COVER_FALLBACKS.length]!
+}
+
+// Resolve coverImage para um caminho que existe em public/. Caminhos remotos
+// (http/https) passam direto. Caminhos relativos ao site root ('/...') são
+// validados contra public/; ausentes caem no fallback determinístico por slug,
+// e em último caso no default-cover. Necessário porque com output:'export' +
+// images.unoptimized, o onError client-side de BlogCoverImage não dispara antes
+// de a 404 já ter "queimado" o <img> SSR'd.
+// Schema default usado quando frontmatter omite coverImage — tratamos como
+// "missing" para forçar variedade visual via neutral-N em vez de uma única capa.
+const SCHEMA_DEFAULT_COVER = '/images/blog/default-cover.png'
+
+function resolveCoverImage(cover: string, slug: string): string {
+  if (/^https?:\/\//i.test(cover)) return cover
+  if (cover !== SCHEMA_DEFAULT_COVER) {
+    // decodeURIComponent normaliza %20/unicode antes do existsSync — caminho
+    // servido pelo Next em runtime já é o decodificado.
+    let decoded: string
+    try {
+      decoded = decodeURIComponent(cover)
+    } catch {
+      decoded = cover
+    }
+    const publicPath = path.join(process.cwd(), 'public', decoded.replace(/^\//, ''))
+    if (existsSync(publicPath)) return cover
+  }
+  const fallback = pickFallbackForSlug(slug)
+  const fallbackFs = path.join(process.cwd(), 'public', fallback.replace(/^\//, ''))
+  return existsSync(fallbackFs) ? fallback : LAST_RESORT_COVER
+}
 
 /**
  * velite.config.ts — Configuração locale-aware do pipeline MDX.
@@ -130,6 +182,7 @@ const posts = defineCollection({
       const { _raw, ...rest } = data
       return {
         ...rest,
+        coverImage: resolveCoverImage(data.coverImage, data.slug),
         readingTime: Math.max(1, Math.ceil(words / WORDS_PER_MINUTE)),
         wordCount: words,
         permalink: `/blog/${data.slug}`,
