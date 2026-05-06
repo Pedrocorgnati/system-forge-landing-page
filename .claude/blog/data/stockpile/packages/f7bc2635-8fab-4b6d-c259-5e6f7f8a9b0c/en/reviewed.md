@@ -1,0 +1,113 @@
+---
+title: "Custom ISP Billing System in 2026: RADIUS, Billing, FCC Compliance and Cost for Regional Providers"
+excerpt: "Custom ISP management system: $35,000–130,000. RADIUS authentication, automated billing, FCC Form 477, subscriber self-service portal. When to build vs buy (SONAR, Splynx, Visp). 2026 guide."
+slug: "custom-isp-billing-management-system-2026"
+locale: "en"
+publishedAt: "2026-05-06"
+dateModified: "2026-05-06"
+canonical: "https://systemforgesoftware.com/blog/custom-isp-billing-management-system-2026"
+published: false
+tags: ["isp billing system", "isp management software", "radius billing", "fcc form 477", "custom isp software"]
+relatedService: "custom-systems"
+stockpile_origin:
+  equivalence_id: "f7bc2635-8fab-4b6d-c259-5e6f7f8a9b0c"
+  package_version: 1
+  generated_at: "2026-05-06T12:40:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Custom ISP Billing System in 2026: RADIUS, Billing, FCC Compliance and Cost
+
+A custom ISP management and billing system for a regional US provider costs **$35,000–130,000** in 2026, plus $600–2,500/month in infrastructure. The system integrates subscriber billing (ACH, credit card, check), RADIUS authentication (FreeRADIUS or integrated with Mikrotik), FCC Form 477 reporting, automated suspension for non-payment, and a subscriber self-service portal. Commercial platforms — SONAR at $800–3,000/month, Splynx at $600–2,000/month, Visp — work well for standard operations; custom wins for non-standard billing structures, deep network integration, or when vendor lock-in becomes a growth constraint.
+
+## What an ISP Management System Must Do
+
+Five core areas cover the functional scope:
+
+### Billing and Collections
+
+**ACH and credit card** are the primary US billing methods. ACH (via Stripe ACH or Plaid) is cheaper per transaction ($0.25–0.80 vs 2.5–3.5% for card) but has a 2–5 day settlement window and higher return rates. Credit card has instant settlement and lower returns — best for higher-value business accounts. A custom system handles both simultaneously, with automatic retry logic for failed ACH (return codes R01/R09/R10 map to different recovery workflows).
+
+**Automated suspension.** At due date + 3 days: bandwidth throttle to 1 Mbps (with notice). At +7 days: redirect to captive portal with payment link. At +14 days: full suspension via RADIUS attribute or Mikrotik API. Restoration is immediate upon payment webhook confirmation — no manual intervention. This automation alone often justifies the build cost for ISPs managing 500+ subscribers manually.
+
+**Usage-based billing.** Fixed-price plans dominate residential ISP billing. But business accounts with burst bandwidth or data caps need metered billing: read usage from RADIUS accounting records, apply tier pricing, add overages to the invoice. Custom systems calculate this nightly from raw RADIUS accounting data.
+
+### RADIUS Integration
+
+**FreeRADIUS** is the most common open-source RADIUS server for regional ISPs. The custom system interacts via SQL backend (FreeRADIUS reads auth/acct from a shared MariaDB or PostgreSQL database) rather than RADIUS protocol directly — faster to implement and easier to maintain.
+
+Key operations:
+- **Authentication**: when subscriber connects PPPoE, FreeRADIUS queries the database for username/password and reply attributes (speed profile, IP assignment)
+- **Accounting**: session start/stop/interim records written to accounting tables — source of truth for usage data
+- **Suspension**: insert/delete `radreply` record to change reply attributes (throttle, captive portal redirect)
+
+**Mikrotik RouterOS API** (port 8728) for ISPs using Mikrotik as their gateway. Direct API calls create/modify PPPoE profiles, apply Queue Trees for QoS, and query active sessions. More granular than RADIUS for real-time operations but requires error handling for connection timeouts.
+
+### FCC Reporting (Form 477 and BDC)
+
+**FCC Form 477** (now replaced by Broadband Data Collection / BDC) requires semiannual reporting of broadband deployment by census block, technology type, and speed tier. Non-compliance: $20,000/day civil penalties after notice.
+
+A custom system:
+- Maps subscriber addresses to census block codes (FIPS codes) via geocoding API
+- Aggregates deployment coverage by technology (fixed wireless, cable, fiber, DSL)
+- Generates the CSV/Excel format required by FCC BDC portal
+- Tracks submission deadlines (March 1 and September 1 each year)
+
+**BEAD program data.** If you're applying for BEAD (Broadband Equity, Access, and Deployment) funding, your FCC BDC data is the foundation. Custom systems with clean census block mapping have significant advantages in funding applications.
+
+## Off-the-Shelf vs Custom: Real Comparison
+
+| Factor | SONAR | Splynx | Custom |
+|--------|-------|--------|--------|
+| Monthly cost (500 subscribers) | $800–1,200 | $600–900 | $400–700 infra |
+| Monthly cost (3,000 subscribers) | $2,500–4,000 | $1,800–2,800 | $700–1,200 infra |
+| Custom billing structures | Limited | Limited | Full |
+| RADIUS integration | Built-in | Built-in | Custom |
+| FCC BDC reporting | Partial | Partial | Configurable |
+| Build cost | $0 | $0 | $35K–130K |
+| Break-even (3,000 subscribers) | — | — | ~22 months |
+
+Above 3,000 subscribers, SONAR costs $36,000–48,000/year in licensing. Custom infrastructure at $12,000/year saves $24,000–36,000 annually. A $100K build pays for itself in 3–4 years purely on licensing — the real ROI is faster at higher subscriber counts.
+
+## Real 2026 Pricing
+
+**Foundation ($35,000–55,000):** Billing (ACH + card), FreeRADIUS integration, subscriber portal, automated suspension, FCC BDC data generation, basic reporting. Build: 14–20 weeks.
+
+**Professional ($60,000–90,000):** All Foundation plus Mikrotik API integration (QoS profiles), usage-based billing for business accounts, advanced FCC BDC census block mapping, ticket/support system, network monitoring integration (Zabbix/LibreNMS). Build: 20–28 weeks.
+
+**Enterprise ($95,000–130,000):** All Professional plus multi-office/multi-region, field technician mobile app (work orders, on-site connectivity tests), BI dashboard (revenue, churn, ARR), BEAD funding data exports. Build: 28–40 weeks.
+
+Infrastructure: $600–2,500/month (dedicated server or VPS cluster, API costs, backups).
+
+## Infrastructure Sizing
+
+| Active subscribers | Server spec | Monthly infra cost |
+|-------------------|-------------|-------------------|
+| 100–500 | 4 vCPU, 8GB RAM VPS | $80–160 |
+| 500–2,000 | 8 vCPU, 16GB RAM | $150–300 |
+| 2,000–8,000 | Dedicated 16-core, 32GB | $300–600 |
+| 8,000+ | HA cluster (2+ servers) | $600–1,500 |
+
+FreeRADIUS handles 10,000+ authentications/hour on a 4-core server. The bottleneck is almost always the database layer — proper indexing on `radacct` (accounting) table is critical. Partition by `acctstarttime` monthly to prevent full table scans on usage queries.
+
+## FAQ
+
+**Is it worth building custom at 1,000 subscribers?**
+SONAR/Splynx at 1,000 subscribers costs $800–1,500/month ($9,600–18,000/year). Custom infrastructure: $400–600/month ($5,000–7,200/year). Annual savings: $4,600–10,800. A $60,000 build takes 6–13 years to pay off purely on licensing. The real driver for custom at 1,000 subscribers is control and billing flexibility, not cost savings.
+
+**How does automated suspension work without disconnecting business accounts incorrectly?**
+Business accounts get a separate suspension profile: longer grace period (30 vs 7 days), notification chain (email + phone call attempt before suspension), and a manual override flag that prevents automated suspension for accounts with an active escalation ticket. The suspension engine checks account type before applying any action.
+
+**FCC BDC: do I really need automatic reporting?**
+If you have over 1,000 fixed broadband subscribers, BDC non-compliance risk is real. The FCC issued $800,000+ in forfeitures in 2023–2024 for BDC errors. A custom system generating accurate census-block-level deployment data removes that risk and positions you for BEAD funding applications.
+
+**Can I keep FreeRADIUS and just build a billing frontend?**
+Yes, and that's the most common architecture. Your existing FreeRADIUS stays in place; the custom system gets a read/write connection to the FreeRADIUS SQL backend (same MariaDB/PostgreSQL). The billing system inserts subscriber profiles, reads session data, and inserts suspension attributes — FreeRADIUS continues serving authentication requests as before.
+
+**What happens when my database server goes down during peak hours?**
+FreeRADIUS has a `failsafe` mode: if it can't reach the SQL backend, it can either reject all auth (fail-closed) or permit all (fail-open). For ISPs, fail-open with an alert is usually preferred — temporary outage shouldn't disconnect all subscribers. Your custom system should send an alert within 60 seconds of DB connection failure and have automated failover if you run HA.
+
+---
+
+Managing subscriber billing manually at 500+ accounts? [Talk to an ISP systems specialist on WhatsApp](https://wa.me/5517981539795) — we scope custom builds for regional providers every week.

@@ -1,0 +1,121 @@
+---
+title: "Sistema para Provedor de Internet em 2026: Billing, Radius, Anatel e Quanto Custa"
+excerpt: "Sistema para provedor de internet (ISP): R$ 30k–120k + mensalidade. Billing PIX+boleto, FreeRADIUS/Mikrotik, coleta Anatel FCCT, inadimplência automática. Guia 2026 para ISPs regionais."
+slug: "sistema-provedor-internet-isp-billing-2026"
+locale: "pt-BR"
+publishedAt: "2026-05-06"
+dateModified: "2026-05-06"
+canonical: "https://forjadesistemas.com.br/blog/sistema-provedor-internet-isp-billing-2026"
+published: false
+tags: ["sistema provedor internet", "billing isp", "freeradius mikrotik", "sistema pppoe radius", "isp regional brasil"]
+relatedService: "sistemas-personalizados"
+stockpile_origin:
+  equivalence_id: "f7bc2635-8fab-4b6d-c259-5e6f7f8a9b0c"
+  package_version: 1
+  generated_at: "2026-05-06T12:40:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Sistema para Provedor de Internet em 2026: Billing, Radius, Anatel e Quanto Custa
+
+Um sistema próprio para provedor de internet regional (ISP) custa **R$ 30.000–120.000** no Brasil em 2026, mais R$ 500–3.000/mês de operação. O sistema integra billing (boleto, PIX, cartão), Radius (FreeRADIUS ou Mikrotik) para autenticação PPPoE, coleta Anatel (FCCT), bloqueio automático de inadimplência, NFSe municipal e CRM. SGP, IXC Soft, Sysly e Integrator dominam o mercado pronto; muitos ISPs entre 500 e 10.000 clientes preferem sistema próprio pelos custos recorrentes e flexibilidade operacional.
+
+## O Que um Sistema ISP Precisa Ter
+
+Um sistema de gestão para provedor regional precisar cobrir cinco áreas:
+
+### Billing e Inadimplência
+
+**Boleto e PIX** são os métodos primários no Brasil. O sistema gera boleto automático via API bancária (Sicoob, Inter, Itaú, Bradesco), envia por e-mail e WhatsApp no dia de geração, e reconcilia pagamento automaticamente quando o banco confirma. PIX com QR code ou chave aleatória gerada por transação é adicionado ao mesmo boleto digital.
+
+**Bloqueio gradual de inadimplência.** No vencimento: reduzir banda para 256Kbps (aviso ao cliente). Em D+5: redirecionar para página de captive portal com link de pagamento. Em D+10: bloquear completamente via API Mikrotik ou comando FreeRADIUS. A sequência é configurável por perfil de cliente (residencial vs empresarial).
+
+**Cartão de crédito recorrente.** PIX recorrente ainda está em maturação no Brasil (funcionamento depende do banco e do plano). Cartão de crédito recorrente via Stripe ou ASAAS funciona bem para ISPs que querem reduzir inadimplência estrutural — cliente com cartão tem taxa de inadimplência 3–5x menor que boleto.
+
+### Integração Radius (FreeRADIUS e Mikrotik)
+
+**FreeRADIUS** é a solução open-source mais usada para autenticação PPPoE em ISPs com equipamentos heterogêneos. O sistema próprio faz chamadas diretas à API do FreeRADIUS para:
+- Autenticar sessão PPPoE quando cliente conecta
+- Consultar status de sessão (IP, tempo conectado, dados consumidos)
+- Bloquear/desbloquear via attribute `Mikrotik-Rate-Limit` ou `Reply-Message` de bloqueio
+
+**Mikrotik API (RouterOS API).** ISPs com Mikrotik como gateway usam a API nativa do RouterOS (porta 8728). O sistema consegue:
+- Criar/modificar/remover perfis PPPoE
+- Aplicar políticas de QoS por perfil de cliente
+- Consultar sessões ativas e IPs atribuídos
+- Executar bloqueios de forma instantânea sem aguardar refresh do RADIUS
+
+### Coleta Anatel (FCCT)
+
+A Anatel exige que ISPs com mais de 5.000 acessos fixos reportem dados de qualidade via FCCT (Ferramenta de Coleta de Dados de Qualidade). Os dados incluem:
+- Taxa de disponibilidade mensal
+- Taxa de clientes com velocidade contratada
+- RTT médio de acesso
+- Jitter e perda de pacotes
+
+O sistema próprio automatiza a coleta via sondas (PING, iPerf3 para teste de banda) agendadas, agrega os dados no formato FCCT XML e envia automaticamente para o portal Anatel antes do prazo. ISPs que fazem isso manualmente em planilha frequentemente perdem o prazo ou enviam dados incorretos — multa de até R$ 50.000 por relatório incorreto.
+
+### NFSe Municipal
+
+ISP é prestador de serviço e emite NFSe (Nota Fiscal de Serviço Eletrônica) municipal. O problema: 5.570 municípios, cada um com seu sistema de NFS-e (algumas cidades usam ABRASF, outras têm sistema próprio, outras ainda usam sistema da prefeitura em PDF). O sistema próprio integra com emissores como Nfe.io, Notazz ou Omie para abstrair a complexidade de município e emitir automaticamente no faturamento de cada cliente.
+
+## SGP, IXC, Sysly vs Sistema Próprio
+
+| Critério | SGP | IXC Soft | Sysly | Sistema Próprio |
+|---------|-----|----------|-------|-----------------|
+| Mensalidade (1.000 clientes) | R$ 600–1.200 | R$ 800–1.500 | R$ 500–900 | R$ 400–800 infra |
+| Mensalidade (5.000 clientes) | R$ 1.500–2.500 | R$ 2.000–3.500 | R$ 1.200–2.000 | R$ 600–1.200 infra |
+| Customização | Limitada | Limitada | Limitada | Total |
+| Mikrotik API nativa | Sim | Sim | Sim | Customizável |
+| FCCT automatizado | Parcial | Parcial | Sim | Customizável |
+| PIX recorrente | Depende do plano | Depende | Depende | Implementável |
+| Integração própria com CRM | Limitada | Limitada | Limitada | Completa |
+
+**Quando o sistema próprio faz mais sentido:**
+- ISP com estrutura de planos muito específica (regional, por bairro, por tecnologia) que o sistema pronto não modela bem
+- ISP que quer integrar com sistema CRM já existente (vendas, suporte)
+- ISP que está crescendo e a mensalidade da plataforma pronta está subindo rápido com o volume
+- ISP que quer portabilidade total dos dados sem dependência de fornecedor
+
+## Custo Real 2026
+
+**MVP (R$ 30.000–50.000):** Billing (boleto + PIX), Radius básico (autenticação + bloqueio), portal do cliente, notificações WhatsApp, NFSe por município principal. Build: 12–18 semanas.
+
+**Padrão (R$ 55.000–85.000):** Tudo do MVP + FCCT Anatel, Mikrotik API avançada (QoS, múltiplos gateways), cartão recorrente, CRM básico, relatórios de inadimplência e receita, múltiplos municípios NFSe. Build: 18–26 semanas.
+
+**Enterprise (R$ 90.000–120.000):** Tudo do Padrão + múltiplas filiais, app mobile para técnicos (ordem de serviço, visita), integração com sistema de rede (SNMP/Zabbix), BI de receita e qualidade. Build: 26–36 semanas.
+
+Infraestrutura pós-build: R$ 500–1.500/mês (servidor dedicado/VPS, APIs bancárias, NFSe, WhatsApp API).
+
+## Dimensionamento de Infraestrutura
+
+| Clientes ativos | Servidor recomendado | Custo infra/mês |
+|----------------|---------------------|-----------------|
+| 100–500 | VPS 4 vCPU, 8GB RAM | R$ 150–300 |
+| 500–2.000 | VPS 8 vCPU, 16GB RAM | R$ 300–600 |
+| 2.000–10.000 | Dedicado 16 cores, 32GB | R$ 600–1.200 |
+| 10.000+ | Cluster (2+ servidores) | R$ 1.500–3.000 |
+
+FreeRADIUS em produção processa 10.000+ autenticações/hora em um servidor de 4 vCPUs. O gargalo raramente é o Radius — é o banco de dados (MariaDB/PostgreSQL) que precisa de índices corretos nas tabelas de sessão.
+
+## FAQ
+
+**Vale a pena sair do SGP/IXC para sistema próprio com 1.000 clientes?**
+Com 1.000 clientes, SGP ou IXC custam R$ 800–1.500/mês. Infraestrutura de sistema próprio: R$ 400–600/mês. A economia anual de R$ 2.400–10.800 justifica o build de R$ 40.000–60.000 em 4–25 anos dependendo da diferença — o ROI puro não é o driver principal. O driver real é customização e portabilidade de dados.
+
+**Como integrar com Mikrotik sem quebrar a autenticação?**
+A integração acontece via RouterOS API (porta 8728 TCP). Você conecta o sistema ao Mikrotik com credenciais de leitura+escrita, faz as operações via API (criação de perfis, bloqueio, QoS) e nunca modifica a configuração base do roteador via interface web. Em produção, o sistema deve ter timeout de 3 segundos na API e fallback: se o Mikrotik não responde, logar o erro e tentar novamente em 60 segundos.
+
+**FCCT Anatel: quais dados preciso enviar?**
+Dados de disponibilidade do serviço (uptime mensal), velocidade entregue vs contratada (medida por sonda ativa ou por relatório de sessão), RTT para a rede Anatel de referência, e dados de reclamações de clientes. O formato é XML com schema FCCT v2.1. O sistema coleta automaticamente via sondas ICMP (PING) e iPerf3 agendadas, agrega e envia.
+
+**Como bloquear cliente inadimplente sem suporte manual?**
+Fluxo automático: D+1 vencimento → API Mikrotik reduz QoS para 256Kbps → D+5 → API Mikrotik redireciona para captive portal (IP fixo com redirect HTTP) → D+10 → API Mikrotik bloqueia completamente. Quando cliente paga, webhook bancário aciona reversão imediata. Zero intervenção humana.
+
+**PIX recorrente já funciona bem para ISP?**
+Depende do banco emissor. O Pix Automático (aprovado pelo Bacen) está em rollout desde 2024 mas a adoção por bancos ainda é desigual. Para ISPs que querem garantia de funcionamento agora, cartão de crédito recorrente via ASAAS ou Stripe tem adoção universal e inadimplência estruturalmente menor.
+
+---
+
+Precisa de um sistema ISP sob medida para o seu provedor? [Fale com um especialista no WhatsApp](https://wa.me/5517981539795) — avaliamos o escopo completo em uma conversa.

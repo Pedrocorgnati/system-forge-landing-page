@@ -1,0 +1,126 @@
+---
+title: "Sistema Gestionale per ISP in 2026: RADIUS, Fatturazione, AgCom e Costi per Provider Regionali"
+excerpt: "Sistema gestionale per ISP regionale: €28.000–110.000. FreeRADIUS/Mikrotik, SDD SEPA, fattura elettronica SDI, reporting AgCom Misura Internet, sospensione automatica morosità. Guida 2026 Italia."
+slug: "sistema-gestionale-isp-radius-fatturazione-agcom-2026"
+locale: "it-IT"
+publishedAt: "2026-05-06"
+dateModified: "2026-05-06"
+canonical: "https://systemforge.it/blog/sistema-gestionale-isp-radius-fatturazione-agcom-2026"
+published: false
+tags: ["sistema gestionale isp", "radius fatturazione isp", "agcom misura internet", "freeradius mikrotik italia", "provider internet regionale"]
+relatedService: "sistemi-personalizzati"
+stockpile_origin:
+  equivalence_id: "f7bc2635-8fab-4b6d-c259-5e6f7f8a9b0c"
+  package_version: 1
+  generated_at: "2026-05-06T12:40:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Sistema Gestionale per ISP in 2026: RADIUS, Fatturazione, AgCom e Costi per Provider Regionali
+
+Un sistema gestionale su misura per un ISP regionale italiano costa **€28.000–110.000** nel 2026, più €500–2.200/mese di infrastruttura. Il sistema integra fatturazione (SDD SEPA, carta di credito, RID), autenticazione RADIUS (FreeRADIUS o Mikrotik RouterOS API), fattura elettronica via SDI, reporting qualità AgCom (Misura Internet), sospensione automatica morosi e portale clienti self-service. Le piattaforme commerciali per ISP esistono ma sono quasi tutte internazionali — per un operatore regionale italiano con requisiti normativi locali (FatturaPA, AgCom, CGUE privacy) il sistema su misura è spesso l'unica soluzione praticabile.
+
+## Cosa Deve Fare un Sistema Gestionale per ISP
+
+Cinque aree coprono lo scope funzionale completo:
+
+### Fatturazione e Gestione Morosità
+
+**SDD SEPA** (SEPA Direct Debit) è il metodo principale per ISP italiani con contratti residenziali ricorrenti. Il mandato SDD viene firmato digitalmente al momento dell'attivazione — il sistema archivia mandate reference e creditor identifier (ottenuto dalla propria banca), genera i file XML ISO 20022 per la presentazione in banca, e gestisce i rientri R-transaction (R03 account closed, R08 insufficient funds, R13 invalid account number) con workflow di recupero differenziato per ogni codice.
+
+**Carta di credito ricorrente.** Stripe o Nexi per i clienti business che preferiscono addebito su carta. Tasso di insolvenza strutturalmente più basso rispetto al SDD — il cliente business con carta ha generalmente ciclo di pagamento più prevedibile. Coesistenza dei due metodi nello stesso sistema, con logica di retry automatica separata.
+
+**Sospensione graduale morosi.** A scadenza + 3 giorni: riduzione banda a 512Kbps (con notifica via email e SMS). A +7 giorni: redirect a captive portal con link di pagamento. A +14 giorni: sospensione completa via API Mikrotik o attributo RADIUS. La riattivazione è immediata al ricevimento del pagamento via webhook bancario — zero intervento manuale. Per ISP con 500+ clienti gestiti manualmente, questa automazione sola giustifica il costo di sviluppo.
+
+### Integrazione RADIUS
+
+**FreeRADIUS** è la soluzione open-source più usata per autenticazione PPPoE in ISP con infrastruttura eterogenea (mix di Mikrotik, Cisco, ZTE). Il sistema su misura interagisce via backend SQL (FreeRADIUS legge auth/accounting da MariaDB o PostgreSQL condiviso) — più veloce da implementare e manutenere rispetto all'integrazione diretta via protocollo RADIUS.
+
+Operazioni chiave:
+- **Autenticazione**: quando il cliente connette PPPoE, FreeRADIUS interroga il database per username/password e attributi di risposta (profilo velocità, assegnazione IP)
+- **Accounting**: record start/stop/interim scritti nelle tabelle di accounting — fonte di verità per dati di consumo e uptime
+- **Sospensione**: inserimento/eliminazione record `radreply` per modificare attributi di risposta (throttle, redirect captive portal)
+
+**Mikrotik RouterOS API** (porta 8728 TCP) per ISP che usano Mikrotik come gateway PPPoE. Chiamate API dirette per creare/modificare profili PPPoE, applicare Queue Tree per QoS per cliente, e interrogare sessioni attive. Più granulare del RADIUS per operazioni in tempo reale — la sospensione via API Mikrotik è immediata, non attende il prossimo re-auth PPPoE.
+
+### Fattura Elettronica via SDI
+
+Tutti gli ISP italiani emettono fattura elettronica obbligatoriamente. Il sistema su misura integra con intermediari FatturaPA (Fatture in Cloud, Aruba, oppure XML diretto via SDI) per:
+- Generare automaticamente la fattura XML B2C/B2B al momento del rinnovo mensile
+- Inserire i dati fiscali corretti (codice fiscale, P.IVA, indirizzo PEC o codice destinatario)
+- Gestire le ricevute di consegna/accettazione/scarto dal SdI
+- Archiviare per 10 anni (obbligo di conservazione sostitutiva)
+
+Per ISP con migliaia di clienti consumer, l'automazione della fattura elettronica è critica — l'emissione manuale non è scalabile e le sanzioni per mancata emissione sono €250–2.000 per fattura.
+
+### Reporting Qualità AgCom (Misura Internet)
+
+AgCom richiede agli ISP con contratti di accesso a Internet fisso di aderire al programma **Misura Internet** — misurazione periodica della qualità del servizio attraverso la rete di sonde Ne.Me.Sys (NetMeter System). Gli obblighi variano per dimensione dell'operatore, ma ISP regionali con più di 10.000 accessi fissi rientrano nelle misurazioni periodiche.
+
+Un sistema su misura può:
+- Importare automaticamente i report Ne.Me.Sys dal portale AgCom
+- Correlare i dati di qualità con i ticket di assistenza aperti nello stesso periodo
+- Generare dashboard di qualità interna (RTT, jitter, packet loss, velocità media vs contrattuale) da fonti interne (SNMP/Zabbix/LibreNMS)
+- Preparare dati per eventuali contestazioni AgCom con evidenza storica
+
+### Portale Self-Service Clienti
+
+Attivazione online, modifica piano, storico fatture, pagamento arretrati, ticketing di primo livello. Riduce del 40–60% il volume di chiamate al supporto per ISP con portale funzionale. Il portale deve gestire autenticazione sicura (2FA via SMS/OTP) e rispettare GDPR per consensi marketing e diritto alla portabilità dei dati.
+
+## Piattaforme Pronte vs Sviluppo Su Misura
+
+| Fattore | SONAR (US) | Splynx (Int'l) | Su misura |
+|---------|-----------|----------------|-----------|
+| Costo mensile (500 clienti) | €700–1.100 | €550–850 | €350–600 infra |
+| Costo mensile (3.000 clienti) | €2.200–3.500 | €1.600–2.500 | €600–1.100 infra |
+| FatturaPA/SDI nativa | No | Parziale | Completa |
+| SDD SEPA nativo | Limitato | Parziale | Completo |
+| AgCom Misura Internet | No | No | Configurabile |
+| Lingua italiana | No | Parziale | Completa |
+| Costo sviluppo | €0 | €0 | €28K–110K |
+| Break-even (3.000 clienti) | — | — | ~20 mesi |
+
+La barriera principale delle piattaforme internazionali per il mercato italiano: non emettono FatturaPA nativa, non gestiscono SDD SEPA correttamente, e non parlano italiano. Un ISP regionale italiano che usa SONAR deve comunque affiancare un sistema di fatturazione italiano separato — di fatto gestisce due piattaforme con integrazioni fragili.
+
+## Prezzi Reali 2026
+
+**Foundation (€28.000–48.000):** Fatturazione (SDD + carta), FreeRADIUS integration via SQL, portale clienti, sospensione automatica morosi, fattura elettronica SDI, notifiche email/SMS, reportistica base. Build: 12–18 settimane.
+
+**Professional (€55.000–80.000):** Tutto il Foundation più API Mikrotik avanzata (QoS per cliente, multi-gateway), fatturazione usage-based per clienti business, dashboard qualità AgCom, sistema ticketing integrato, integrazione monitoraggio rete (Zabbix/LibreNMS). Build: 18–26 settimane.
+
+**Enterprise (€85.000–110.000):** Tutto il Professional più multi-sede/multi-regione, app mobile tecnici (ordini di lavoro, test connettività on-site), BI ricavi e churn, export dati per misurazioni AgCom, gestione CPE (router cliente) da remoto. Build: 26–36 settimane.
+
+Infrastruttura post-sviluppo: €500–2.200/mese (server dedicato o cluster VPS, API SDI, SMS gateway, backup).
+
+## Dimensionamento Infrastruttura
+
+| Clienti attivi | Specifiche server | Costo infra/mese |
+|---------------|-------------------|-----------------|
+| 100–500 | VPS 4 vCPU, 8GB RAM | €100–200 |
+| 500–2.000 | VPS 8 vCPU, 16GB RAM | €200–400 |
+| 2.000–8.000 | Dedicato 16 core, 32GB | €400–800 |
+| 8.000+ | Cluster HA (2+ server) | €800–2.200 |
+
+FreeRADIUS gestisce 10.000+ autenticazioni/ora su un server a 4 core. Il collo di bottiglia è quasi sempre il layer database — indicizzazione corretta su `radacct` (tabella di accounting) è critica. Partizionare per `acctstarttime` mensilmente per evitare full table scan sulle query di utilizzo.
+
+## FAQ
+
+**Vale la pena sviluppare su misura con 1.000 clienti?**
+Con 1.000 clienti, una piattaforma internazionale come Splynx costa €550–850/mese più il costo di un sistema FatturaPA separato (€80–200/mese). Infrastruttura su misura: €300–500/mese. Risparmio annuo: €4.000–9.000. Un build da €45.000 richiede 5–11 anni per ripagare solo sui costi. Il driver reale per il su misura a 1.000 clienti è conformità normativa completa (FatturaPA nativa, SDD SEPA corretto, GDPR) e indipendenza dal vendor.
+
+**Come gestisco la sospensione senza disconnettere clienti business per errore?**
+I clienti business hanno un profilo di sospensione separato: periodo di grazia maggiore (30 vs 7 giorni), catena di notifiche (email + chiamata telefonica prima della sospensione), e flag di override manuale che blocca la sospensione automatica per account con ticket attivo in escalation. Il motore di sospensione verifica il tipo di account prima di qualsiasi azione.
+
+**FatturaPA: devo integrare direttamente con SDI o tramite intermediario?**
+Per la maggior parte degli ISP regionali: intermediario (Aruba, Fatture in Cloud, Docutel). L'integrazione diretta con SDI è possibile ma richiede accreditamento AgID come utente SDI — processo lungo e oneroso. Gli intermediari hanno API REST documentate e gestiscono la trasmissione, le ricevute e la conservazione sostitutiva. Il costo è €0,01–0,05 per fattura — trascurabile su scala.
+
+**Come funziona il SDD SEPA in pratica?**
+Il tuo istituto bancario ti assegna un Creditor Identifier (CI). I mandati SDD vengono firmati digitalmente dai clienti all'attivazione. Il sistema genera file XML PAIN.008 per ogni ciclo di addebito e li trasmette in banca con il preavviso richiesto (D-5 per SDD Core, D-2 per SDD B2B). I rientri R-transaction arrivano come file CAMT.054 — il sistema li processa automaticamente e attiva il workflow di recupero appropriato per codice.
+
+**Cosa succede se il database va giù durante le autenticazioni PPPoE?**
+FreeRADIUS ha una modalità `failsafe`: se non riesce a raggiungere il backend SQL, può rifiutare tutte le autenticazioni (fail-closed) oppure permetterle tutte (fail-open). Per gli ISP, fail-open con alert immediato è preferibile — un'interruzione temporanea non deve disconnettere tutti i clienti. Il sistema deve inviare un alert entro 60 secondi dal mancato contatto con il DB e avere failover automatico in configurazione HA.
+
+---
+
+Gestisci la morosità manualmente su centinaia di clienti? [Parla con uno specialista su WhatsApp](https://wa.me/5517981539795) — progettiamo sistemi gestionali per ISP regionali ogni settimana.
