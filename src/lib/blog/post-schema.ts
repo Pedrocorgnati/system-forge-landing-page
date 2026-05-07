@@ -36,8 +36,13 @@ export type HreflangPair = z.infer<typeof hreflangPairSchema>
 /**
  * Schema completo para frontmatter de posts MDX.
  *
- * Campos obrigatórios: title, date, slug, locale, excerpt, tags.
- * Campos opcionais: coverImage, published, exclusive, hreflang_pair, author.
+ * Campos obrigatórios: title, slug, locale, excerpt, tags.
+ * Campos opcionais: coverImage, published, exclusive, hreflang_pair, author,
+ *                   date, publishedAt.
+ *
+ * Auto-fill de `date` (deploy-time): se ausente, usa `publishedAt` quando
+ * presente, senão usa o dia UTC do deploy (today). Aceita inputs gerados
+ * automaticamente pelo stockpile que emitem apenas `publishedAt`.
  *
  * superRefine valida:
  *   - exclusive=true NÃO pode ter hreflang_pair preenchido
@@ -52,7 +57,12 @@ export const PostFrontmatterSchema = z
       .max(120, 'Título máximo 120 chars'),
     date: z
       .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato: YYYY-MM-DD'),
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato: YYYY-MM-DD')
+      .optional(),
+    publishedAt: z
+      .string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato: YYYY-MM-DD')
+      .optional(),
     slug: z
       .string()
       .min(1, 'Slug é obrigatório')
@@ -110,5 +120,12 @@ export const PostFrontmatterSchema = z
       seen.add(loc)
     }
   })
+  .transform((data) => ({
+    ...data,
+    date:
+      data.date ||
+      data.publishedAt ||
+      new Date().toISOString().split('T')[0]!,
+  }))
 
 export type PostFrontmatter = z.infer<typeof PostFrontmatterSchema>
