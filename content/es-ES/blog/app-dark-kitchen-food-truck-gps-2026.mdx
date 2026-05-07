@@ -1,0 +1,79 @@
+---
+title: "App Propio para Dark Kitchen y Food Truck en 2026: Multi-Marca, GPS y Cuándo Dejar Glovo"
+excerpt: "App propio para dark kitchen (multi-marca, 1 cocina) y food truck (posición dinámica): 10.000–40.000 €. GPS en tiempo real, push de proximidad, cuándo salir de Glovo. Guía 2026 España."
+slug: "app-dark-kitchen-food-truck-gps-2026"
+locale: "es-ES"
+publishedAt: "2026-05-06"
+dateModified: "2026-05-06"
+canonical: "https://systemforge.es/blog/app-dark-kitchen-food-truck-gps-2026"
+published: true
+tags: ["app dark kitchen", "app food truck", "ghost kitchen software", "food truck gps españa", "alternativa glovo"]
+relatedService: "apps-moviles"
+stockpile_origin:
+  equivalence_id: "e6ab1524-7f9a-4a5c-b148-4d5e6e7f8a9b"
+  package_version: 1
+  generated_at: "2026-05-06T12:30:00Z"
+  promoted_at: "2026-05-07T17:24:22Z"
+  promoted_in_commit: null
+---
+
+# App Propio para Dark Kitchen y Food Truck en 2026: Multi-Marca, GPS y Cuándo Dejar Glovo
+
+Un app propio para dark kitchen (varias marcas, una cocina) o food truck (posición dinámica) cuesta **10.000–40.000 €** en 2026 — significativamente menos que un app completo para restaurante tradicional porque no necesita gestión de mesas, pedidos de camareros ni lista de espera. El caso contra Glovo y Uber Eats para estos formatos específicos: una dark kitchen con 4 marcas paga el 30% de comisión por marca en cada plataforma; un food truck no puede transmitir su posición GPS en tiempo real en ningún marketplace. Un app propio resuelve ambos problemas.
+
+## Dark Kitchen: Qué Cambia Técnicamente vs Restaurante Tradicional
+
+**Arquitectura multi-marca.** Una ghost kitchen que gestiona 3–6 conceptos (hamburguesas, sushi, ensaladas, pizza) desde una sola cocina necesita escaparates separados por marca, impresión unificada en cocina y analytics consolidadas. En Glovo cada marca aparece como un restaurante separado — cada uno pagando comisión completa. Tu app muestra "Burger Station" o "Sushi Lab" como marcas separadas mientras enruta todos los pedidos a la misma impresora de cocina.
+
+**Enrutamiento de cocina para marcas concurrentes.** Cuando llegan dos pedidos simultáneamente — uno de "Burger Station" y otro de "Sushi Lab" — el sistema debe enviar ambos a la misma impresora con etiquetado claro por marca y tiempos de preparación correctos. Los sistemas de display de cocina (KDS) personalizados integrados con tu app de pedidos eliminan la confusión de los tickets en papel en las horas punta.
+
+**Un app unificado vs apps separados por marca.** Para 2–3 marcas: un app multi-marca con selector de marca es más económico y simple. Para 5+ marcas con identidades muy distintas (fast food vs saludable vs asiático), PWAs separadas por marca mantienen identidad de marca más fuerte a coste de mantenimiento razonable.
+
+## Food Truck: Posición Dinámica — Lo que los Marketplaces No Hacen
+
+Glovo y Uber Eats requieren una dirección fija. No puedes publicitar "hoy estamos en Malasaña a las 11h y mañana en el Retiro a las 18h" automáticamente en estas plataformas.
+
+**GPS en tiempo real en tu app propio.** El smartphone del operador transmite la posición cada 30–60 segundos vía GPS. El cliente abre el app y ve el camión en el mapa con el tiempo estimado de llegada a su ubicación.
+
+**Notificaciones push de proximidad.** Cuando el truck está a menos de 500 metros del cliente (verificado vía geofence), el app lanza un push: "El Burger Callejero está a 5 minutos de ti — pide ahora." Esta combinación geofence + push es la funcionalidad de retención más potente de cualquier app de food truck, generando pedidos impulsivos que ningún marketplace puede replicar.
+
+**Calendario de posiciones.** Los food trucks frecuentan a menudo los mismos sitios — miércoles en el mercado, viernes en la plaza, sábado en el festival. Publicar el calendario semanal en el app mantiene a los clientes habituales informados sin necesidad de actualizaciones en Instagram o mensajes separados.
+
+## Precios Reales 2026
+
+**MVP — Dark Kitchen (10.000–16.000 €):** 1–3 marcas, pedido online por marca, pagos con tarjeta y Bizum, integración impresora cocina, notificaciones estado pedido, admin básico. Build: 8–12 semanas.
+
+**Estándar — Dark Kitchen (20.000–32.000 €):** Hasta 6 marcas, escaparates separados o unificados, integración mensajeros, analytics por marca, programa de fidelidad válido en todas las marcas. Build: 14–20 semanas.
+
+**Food Truck (12.000–24.000 €):** GPS en tiempo real, geofencing push, publicación agenda posiciones, pagos tarjeta y Bizum, edición de carta por el operador (artículos agotados), pedido anticipado con tiempo estimado. Build: 10–16 semanas.
+
+**Combinado (32.000–46.000 €):** Todas las funcionalidades, enrutamiento cocina multi-sede, analytics cruzadas. Build: 18–26 semanas.
+
+Infraestructura post-desarrollo: 220–580 €/mes (hosting, push, GPS, pagos).
+
+## Cuándo el Desarrollo Propio Supera la Economía de Glovo
+
+Una dark kitchen que factura 45.000 €/mes en 3 marcas en Glovo paga ~13.500 €/mes de comisión (30%). App propio con 400 €/mes de infraestructura ahorra 157.200 €/año. Un desarrollo de 28.000 € se paga en 2,1 meses de ahorro en comisiones — siempre que puedas atraer a los clientes de Glovo directamente.
+
+Tácticas que funcionan: descuento del 10% en el primer pedido en el app, programa de fidelidad inaccesible en marketplaces, notificaciones push para reactivar clientes.
+
+## FAQ
+
+**¿Un food truck puede operar con una licencia de actividad ambulante y app propio?**
+Sí. El app propio no cambia el régimen de licencias — sigues operando bajo la licencia de venta ambulante o de restauración en vía pública que corresponda a tu municipio. El app es simplemente el canal de pedido. Consulta con tu gestoría para asegurarte de que el epígrafe del IAE incluye la actividad digital.
+
+**GPS push: ¿consume mucha batería del smartphone del operador?**
+El GPS continuo consume aproximadamente el 10% de batería por hora. Con un cargador de coche en el camión (siempre disponible), el smartphone permanece cargado permanentemente. En la práctica no es un problema real.
+
+**¿PWA o app nativa para el food truck?**
+PWA para la mayoría de los food trucks. El cliente no instala nada — hace clic en el enlace, el app se abre en el navegador con mapa GPS y pedido. Las notificaciones push funcionan en iOS 16.4+ y Android sin App Store. La app nativa tiene sentido si quieres acceso a cámara o vender merchandising dentro del app.
+
+**¿Cómo gestiono artículos agotados en tiempo real?**
+El panel de administración (o interfaz de operador dedicada) permite marcar artículos como "agotados" — el cambio se refleja inmediatamente en la vista del cliente. Para dark kitchens, el personal de cocina lo hace vía tablet con display KDS.
+
+**¿Qué métodos de pago son imprescindibles?**
+Stripe o Stripe + PayLane para tarjeta, Apple Pay y Google Pay. Para food trucks, el "toca para pagar" con un lector físico (Stripe Terminal o SumUp Air) cubre a los clientes que se acercan en persona y no usan el app. Tu app debería manejar prepago online y cobro presencial como dos flujos distintos.
+
+---
+
+¿Pagando el 30% de comisión a Glovo en cada pedido? [Habla con un especialista por WhatsApp](https://wa.me/5517981539795) — construimos la alternativa adecuada para tu formato.

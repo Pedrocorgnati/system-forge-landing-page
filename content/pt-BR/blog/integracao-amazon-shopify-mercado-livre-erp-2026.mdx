@@ -1,0 +1,126 @@
+---
+title: "Integração Amazon, Shopify e Mercado Livre no ERP em 2026: Arquitetura Middleware"
+excerpt: "Unificar Amazon + Shopify + Mercado Livre no ERP (SAP, Odoo, Bling ERP): R$ 45k–180k. Middleware, idempotência, race conditions, reconciliação. Guia técnico 2026 para sellers multicanal."
+slug: "integracao-amazon-shopify-mercado-livre-erp-2026"
+locale: "pt-BR"
+publishedAt: "2026-05-06"
+dateModified: "2026-05-06"
+canonical: "https://forjadesistemas.com.br/blog/integracao-amazon-shopify-mercado-livre-erp-2026"
+published: true
+tags: ["integração marketplace erp", "mercado livre api erp", "amazon shopify middleware", "inventário multicanal", "integração shopify sap"]
+relatedService: "sistemas-personalizados"
+stockpile_origin:
+  equivalence_id: "d5fa0413-6e89-4f4b-af37-3c4d5d6e7f8a"
+  package_version: 1
+  generated_at: "2026-05-06T12:20:00Z"
+  promoted_at: "2026-05-07T17:24:22Z"
+  promoted_in_commit: null
+---
+
+# Integração Amazon, Shopify e Mercado Livre no ERP em 2026: Arquitetura Middleware
+
+Unificar Amazon, Shopify e Mercado Livre em um único ERP (SAP Business One, Odoo, Bling ERP, Tiny) custa **R$ 45.000–180.000** em 2026. A variação depende do volume de SKUs, volume de pedidos, qual ERP e quantos canais você vai integrar. A arquitetura que funciona é uma camada de middleware — não integrações ponto-a-ponto. Um message bus (RabbitMQ ou AWS SQS) conecta os webhooks dos marketplaces a handlers idempotentes no ERP. A alternativa — integração direta de cada marketplace para o ERP — falha em escala por causa de race conditions, limites de API e manutenibilidade.
+
+Este guia explica a arquitetura de middleware, os desafios específicos de cada API de marketplace no Brasil e como dimensionar o projeto.
+
+## Por Que a Integração Ponto-a-Ponto Falha
+
+Ponto-a-ponto significa: marketplace A escreve direto no ERP, marketplace B escreve direto no ERP, marketplace C escreve direto no ERP. Três problemas:
+
+**Race conditions no decremento de estoque.** Se Amazon e Mercado Livre têm o último item do SKU-123 no carrinho de dois clientes ao mesmo tempo, ambos disparam webhooks de pedido em milissegundos. Seu ERP recebe dois decrementos do mesmo item. Sem handlers idempotentes e bloqueio otimista, você vende o que não tem.
+
+**Rate limits se acumulam.** Amazon SP-API tem throttling por endpoint. Shopify tem limite de 2 requests/segundo por loja. Mercado Livre tem limites diários de chamada. Quando os três marketplaces atingem pico simultâneo (Black Friday, datas sazonais), integrações diretas batem no rate limit e falham silenciosamente — pedidos ficam na fila mas não entram no ERP.
+
+**Cada novo marketplace multiplica a dívida de integração.** Adicionar Shopee: precisa de uma conexão nova no ERP. Adicionar Magazine Luiza: outra. Com middleware, você adiciona um adapter por marketplace novo; a camada do ERP não muda.
+
+## A Arquitetura de Middleware
+
+O modelo correto:
+
+```
+[Amazon SP-API webhook]  ─┐
+[Shopify webhook]         ├─→ [Message Bus: SQS/RabbitMQ] → [Handler Idempotente] → [ERP]
+[ML webhook]             ─┘
+                                                             [Job de Reconciliação] → [ERP]
+```
+
+**Message bus** (AWS SQS ou RabbitMQ): recebe payloads de webhook de todos os marketplaces, armazena com durabilidade e entrega aos handlers exatamente-uma-vez (SQS FIFO) ou pelo-menos-uma-vez com deduplicação.
+
+**Handler idempotente**: antes de escrever no ERP, verifica se esse order ID já foi processado. Se sim, ignora. Se não, processa e marca como concluído. Isso é a proteção central contra processamento duplo de webhooks duplicados.
+
+**Padrão de reserva de estoque**: quando um pedido chega, o handler decrementa o inventário na coluna "reservado" em vez de "disponível". Um passo de fulfillment separado move de "reservado" para "enviado" e sincroniza de volta para todos os marketplaces. Isso previne a race condition.
+
+**Job de reconciliação**: roda a cada 15–60 minutos. Puxa o estoque real do ERP, calcula a diferença versus o que cada marketplace mostra, e envia correções. Esse é o backup para falhas de webhook, outages de API e edge cases.
+
+## Mercado Livre API: Especificidades para Brasil
+
+**ML Notifications API vs polling.** Mercado Livre suporta notificações por webhook (callback_url configurado via API). Diferente da Amazon, o ML não garante entrega exatamente-uma-vez — duplicatas são comuns durante instabilidades. Seu handler precisa de deduplicação por `resource_id` e `topic`.
+
+**Rate limits por aplicação.** Cada aplicação ML tem cota diária de chamadas. A cota padrão para vendedores qualificados é ~50.000 chamadas/dia. Um job de reconciliação rodando a cada 30 minutos consome ~96 chamadas/dia por chamada de inventário — dentro do limite. Mas picos de erro com retry podem aproximar o limite em dias ruins.
+
+**Fulfillment ML (MLB) vs estoque próprio.** Similar ao FBA da Amazon, o Mercado Envios Full (MEF) estoca em galpões próprios do ML. Seu middleware precisa rastrear estoque MEF versus estoque próprio separadamente e sincronizar cada um de forma adequada.
+
+**NFe e NFS-e automáticas para pedidos ML.** No Brasil, pedidos marketplaces precisam de emissão fiscal. Seu middleware precisa acionar a emissão de NFe (para produtos físicos) ou NFS-e (para serviços digitais) imediatamente após confirmação de pedido — isso envolve integração com a SEFAZ via contingência ou com um emissor fiscal como Nfe.io, Focus NFe ou Oobj. Esse fluxo fiscal é um diferencial da integração BR que não existe em versões internacionais.
+
+## Amazon SP-API no Brasil
+
+A Amazon Brasil usa a versão BR do SP-API (endpoint `sellingpartnerapi-na.amazon.com`). Pontos específicos:
+
+**Estoque FBA vs FBM diferente.** Produtos no Centro de Distribuição Amazon (FBA) têm contagem separada do estoque próprio. Seu middleware precisa controlar as duas contagens e sincronizar cada uma separadamente.
+
+**Throttling sem header Retry-After.** Amazon SP-API retorna HTTP 429 sem `Retry-After`. Implemente backoff exponencial com jitter (começa em 1 segundo, cap em 60 segundos).
+
+**Reconciliação de taxas Amazon no ERP.** Amazon fornece ledger financeiro via `listFinancialEventGroups`. Seu middleware pode parsear isso para lançamentos contábeis no ERP: COGS débito, despesa de taxa Amazon, crédito de recebíveis. Roda diariamente e posta automaticamente no módulo de AP do ERP.
+
+## Comparação de ERP no Contexto Brasileiro
+
+| ERP | Indicado para | Abordagem middleware | Custo integração |
+|-----|--------------|---------------------|-----------------|
+| SAP Business One | Mid-market, 50–500 funcionários | SAP B1 DI API ou Service Layer | R$ 45k–110k middleware |
+| Odoo | Flexibilidade, open-source | Odoo JSON-RPC ou REST API | R$ 35k–90k middleware |
+| Bling ERP | PMEs brasileiras | Bling REST API v3 | R$ 25k–60k middleware |
+| Tiny ERP | PMEs brasileiras | Tiny API REST | R$ 25k–55k middleware |
+| Totvs Protheus | Enterprise BR | Totvs REST API + RM | R$ 60k–150k middleware |
+
+**Bling e Tiny:** são ERPs populares entre PMEs brasileiras. Têm APIs REST documentadas e são mais simples de integrar que SAP ou Totvs. Para sellers com até 10.000 SKUs e 500 pedidos/dia, Bling ou Tiny com middleware customizado é a combinação mais custo-efetiva.
+
+## Valores Reais 2026
+
+**Starter (R$ 45.000–70.000):** 2 marketplaces (Shopify + ML ou Amazon + ML), 1 ERP, até 5.000 SKUs, idempotência básica, reconciliação a cada 60 min, emissão fiscal integrada. Build: 10–16 semanas.
+
+**Padrão (R$ 80.000–130.000):** 3 marketplaces (+ Amazon ou Shopee), 1 ERP, até 50.000 SKUs, padrão completo de reserva de estoque, reconciliação a cada 15 min, fulfillment ML/FBA separado, alertas. Build: 16–24 semanas.
+
+**Enterprise (R$ 140.000–180.000+):** 4+ marketplaces, múltiplos ERPs ou WMS, 100K+ SKUs, dashboard em tempo real, lógica customizada de reconciliação, SLA 99,9%. Build: 24–36 semanas.
+
+Infraestrutura: R$ 800–3.000/mês (message bus, compute, monitoramento, storage).
+
+## Observabilidade: Não É Opcional
+
+O modo de falha mais comum em integração é silencioso. Pedidos param de entrar no ERP, nenhum erro é lançado, nenhum alerta dispara — até a operação perceber um desconto manual de estoque três dias depois.
+
+Mínimo de observabilidade:
+- **Alerta de profundidade de fila:** se a fila SQS passa de 1.000 mensagens por 5+ minutos, algo quebrou
+- **Alerta de latência de processamento:** se o tempo de webhook até escrita no ERP ultrapassa 5 minutos, acionar alguém
+- **Alerta de delta de reconciliação:** se o job encontra mais de 50 unidades de discrepância em qualquer SKU, investigar
+- **Monitoramento de dead letter queue:** toda mensagem não processável vai para DLQ; DLQ não-vazia deve gerar alerta
+
+## FAQ
+
+**Dá pra fazer com Zapier ou Make?**
+Zapier/Make funcionam para notificação de pedidos em baixo volume (menos de 50 pedidos/dia). Quebram acima disso: sem idempotência real, sem retry com backoff, sem reconciliação, sem NFe. São ferramentas no-code; isso é um problema de engenharia.
+
+**Como tratar race conditions de estoque entre 3 marketplaces?**
+Padrão de reserva: quando pedido chega, decrementa "reservado" e não "disponível". Segundo pedido do mesmo SKU encontra "disponível" = 0 e é rejeitado. Fulfillment move de "reservado" para "enviado" e sincroniza com todos os marketplaces. A escrita no banco de dados precisa acontecer antes da escrita no ERP — a ordem de operações é crítica.
+
+**Posso usar os conectores nativos do Bling para ML e fazer custom só pra Amazon?**
+Sim, abordagens híbridas funcionam. Bling conecta nativamente ao ML via integração oficial. Seu middleware customizado trata Amazon + outros. O desafio: você precisa de reconciliação unificada entre os dois sistemas. Um job de reconciliação que puxa do Bling e compara contra todos os marketplaces ainda é a arquitetura mais limpa.
+
+**O que acontece quando o Mercado Livre fica fora por 2 horas?**
+Se o ML está fora, seu middleware não recebe notificações. Seu job de reconciliação vai rodar e encontrar dados ML desatualizados. Para outages de marketplace, o job de reconciliação deve pausar updates do ML (não postar dados desatualizados) e retomar quando o ML responder normalmente. O message bus loga a janela de outage para auditoria.
+
+**Como emitir NFe automaticamente para pedidos de marketplace?**
+O fluxo: webhook de pedido → handler idempotente → verificação de pedido confirmado → chamada para emissor fiscal (Nfe.io, Focus NFe, Oobj, Erpflex) → NFe emitida → chave de acesso gravada no ERP contra o pedido. O cancelamento funciona inversamente: webhook de cancelamento → cancelamento NFe na SEFAZ → atualização no ERP. Esse é um dos fluxos mais críticos e que mais causam problemas quando feito manualmente.
+
+---
+
+Inventário multicanal virando caos? [Fale com um especialista em integração ERP no WhatsApp](https://wa.me/5517981539795) — mapeamos o escopo e orçamos em 48 horas.
