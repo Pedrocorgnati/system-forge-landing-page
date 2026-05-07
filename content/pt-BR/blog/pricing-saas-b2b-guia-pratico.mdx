@@ -36,7 +36,7 @@ Freemium funciona bem quando três condições se alinham:
 
 **3. O produto tem efeito de rede ou viralidade embutida.** Ferramentas como Calendly ou Loom se espalham porque o usuário gratuito convida outras pessoas para interagir. Se o seu SaaS é usado em silos, o freemium é apenas um custo sem motor de aquisição.
 
-Para SaaS B2B com ticket médio alto (acima de R$ 500/mês por conta), o freemium raramente é o caminho certo. Um trial com cartão ou sem cartão, com prazo de 14 a 30 dias, tende a gerar conversões mais qualificadas.
+Para SaaS B2B com ticket médio alto (acima de R$ 550/mês por conta), o freemium raramente é o caminho certo. Um trial com cartão ou sem cartão, com prazo de 14 a 30 dias, tende a gerar conversões mais qualificadas.
 
 | Modelo | Conversão típica | Melhor para |
 |--------|-----------------|-------------|
@@ -56,11 +56,13 @@ O risco está na contenção artificial. Times que pagam por assento tendem a co
 Uma variação saudável é o **per-seat com desconto por volume**:
 
 ```
-Até 5 usuários:   R$ 199/usuário/mês
-6 a 20 usuários:  R$ 159/usuário/mês
-21 a 50 usuários: R$ 129/usuário/mês
+Até 5 usuários:   R$ 219/usuário/mês
+6 a 20 usuários:  R$ 179/usuário/mês
+21 a 50 usuários: R$ 149/usuário/mês
 Acima de 50:      Negociação enterprise
 ```
+
+*Valores atualizados para 2026, considerando inflação acumulada e custo de infraestrutura cloud no Brasil.*
 
 Esse modelo mantém o alinhamento de crescimento e reduz a resistência para expansão de licenças.
 
@@ -92,15 +94,55 @@ Algumas premissas essenciais:
 **Estrutura de proposta enterprise:**
 
 ```
-Licença anual (50 usuários): R$ 84.000/ano
-Implementação e onboarding:  R$ 12.000 (one-time)
-Suporte Premium (SLA 4h):     R$ 9.600/ano
+Licença anual (50 usuários): R$ 92.000/ano
+Implementação e onboarding:  R$ 14.000 (one-time)
+Suporte Premium (SLA 4h):     R$ 11.000/ano
 ---
-Total ano 1:                  R$ 105.600
-Renovação ano 2+:             R$ 93.600/ano
+Total ano 1:                  R$ 117.000
+Renovação ano 2+:             R$ 103.000/ano
 ```
 
+*Valores atualizados para 2026.*
+
 O contrato anual pago antecipado melhora o fluxo de caixa e blinda o churn. Ofereça desconto de 10% a 15% para pagamento antecipado como incentivo.
+
+## AI Credits: O Novo Modelo de Usage-Based em 2026
+
+Desde 2025, um novo padrão de pricing emergiu em SaaS B2B: o modelo de **AI credits**. Produtos que integram funcionalidades de inteligência artificial — geração de conteúdo, análise preditiva, assistentes virtuais — precisam de uma forma de cobrar pelo consumo de tokens de IA sem assustar o cliente com variações de custo.
+
+A solução que ganhou tração é separar a assinatura base do consumo de IA:
+
+- **Plano Base**: inclui acesso à plataforma, suporte e funcionalidades tradicionais (per-seat ou flat)
+- **AI Credits**: pacotes pré-pagos de créditos que o cliente consome conforme usa recursos de IA. Quando acaba, compra mais ou faz upgrade de pacote.
+
+Estrutura típica de AI credits em 2026:
+
+| Pacote | Créditos | Preço |
+|--------|----------|-------|
+| Starter | 10.000 créditos/mês | R$ 99/mês |
+| Growth | 50.000 créditos/mês | R$ 399/mês |
+| Enterprise | créditos ilimitados | sob consulta |
+
+Cada funcionalidade de IA consome uma quantidade diferente de créditos: uma resposta de chatbot pode custar 1 crédito, enquanto uma análise preditiva completa pode custar 500. A vantagem para o cliente é previsibilidade: ele sabe exatamente quanto vai gastar. A vantagem para o SaaS é margem protegida: os créditos são vendidos com um markup sobre o custo real da API de IA.
+
+Se você está construindo um SaaS com funcionalidades de IA, considere o modelo de credits desde o MVP. É mais fácil implementar do que tentar encaixar depois em uma arquitetura que não previu medição de consumo por feature.
+
+## FAQ
+
+**Quanto devo cobrar pelo meu SaaS B2B no Brasil?**
+Para SaaS B2B no Brasil em 2026, tickets médios saudáveis variam de R$ 150 a R$ 500 por usuário/mês para ferramentas de produtividade, e de R$ 800 a R$ 3.000/mês para SaaS vertical (específico de nicho como clínicas, construtoras ou logística). O valor certo depende do ROI que seu produto entrega.
+
+**Freemium ou trial: qual funciona melhor no Brasil?**
+No mercado brasileiro, trial de 14 a 30 dias geralmente converte melhor que freemium para B2B. Empresas brasileiras tendem a valorizar demonstrações de valor rápidas e suporte humano na fase de avaliação. Freemium funciona melhor para ferramentas de produtividade individual ou profissionais liberais.
+
+**Devo mostrar preços no site?**
+Sim, para tiers até enterprise. Preços transparentes filtram leads qualificados e reduzem tempo de vendas. Para enterprise, mostre "a partir de R$ X" e incentive contato para proposta personalizada. Esconder todos os preços aumenta o atrito e reduz conversão.
+
+**Como aumentar preços sem perder clientes?**
+Aumentos de preço são melhor aceitos quando acompanhados de valor novo: features adicionais, melhoria de performance ou novo módulo. Aplique o aumento primeiro em novos clientes, depois na base existente com 60 a 90 dias de aviso prévio. Clientes que usam ativamente o produto e veem ROI raramente churnam por aumentos de 10% a 15%.
+
+**Preciso de um gateway de pagamento brasileiro?**
+Para SaaS B2B no Brasil, sim. Stripe e outras soluções internacionais funcionam, mas PIX, boleto e parcelamento no cartão são esperados pelo mercado brasileiro. A combinação de gateway internacional (Stripe) com adaptações locais (PIX via intermediário) costuma ser a melhor estratégia.
 
 ## Conclusão com CTA
 

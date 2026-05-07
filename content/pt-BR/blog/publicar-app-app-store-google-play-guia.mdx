@@ -36,13 +36,13 @@ Antes de tudo, você precisa de contas ativas nas duas plataformas. Os modelos s
 
 **Google Play Console**
 - Custo: USD 25 (taxa única, não anual)
-- Desde 2023, contas novas precisam completar um período de teste fechado com pelo menos 20 testadores por 14 dias antes de poder publicar para o público geral
+- Desde 2024, contas novas precisam completar um período de teste fechado com pelo menos 12 testadores por 14 dias contínuos antes de poder publicar para o público geral. Esse número mudou de 20 para 12 em meados de 2024
 - Aceita submissão via interface web, sem necessidade de hardware específico
 
 | Plataforma | Custo | Tempo para ativar conta | Requisito especial |
 |---|---|---|---|
 | App Store (Apple) | USD 99/ano | 24–48h (PF) / até 30 dias (PJ com DUNS) | Xcode ou Transporter |
-| Google Play | USD 25 (único) | 24–48h | 20 testadores por 14 dias (contas novas) |
+| Google Play | USD 25 (único) | 24–48h | 12 testadores por 14 dias (contas novas) |
 
 Uma decisão importante: publicar como pessoa física ou jurídica? Para produtos comerciais, sempre prefira a conta organizacional. O nome da empresa aparece na loja, não o nome pessoal do desenvolvedor, o que transmite mais credibilidade.
 
@@ -98,6 +98,35 @@ As primeiras três linhas aparecem antes do "ver mais" — use esse espaço para
 
 **Palavras-chave (App Store)**
 A App Store tem um campo específico de keywords (100 caracteres) que não aparece para o usuário mas influencia o ranking. Use palavras que não estejam no título ou subtítulo. Não repita termos.
+
+## O Que Mudou em 2025 e 2026
+
+As lojas de apps evoluem constantemente. Dois pontos que atualizamos com frequência para clientes:
+
+**App Store e Notarization (iOS 17+)**
+A Apple reforçou o uso de Notarization para apps distribuídos fora da App Store (Enterprise e TestFlight externo). Se seu app usa distribuição enterprise, o processo de notarização agora é obrigatório e inclui verificação automática de malware. Para apps na loja pública, isso não muda o processo, mas reforça a importância de manter o código limpo e sem frameworks não declarados.
+
+**Google Play: novas políticas de dados e IA**
+Em 2025, o Google Play passou a exigir declaração explícita de uso de modelos de IA generativa dentro do app. Se seu produto usa recursos de IA — como geração de texto, imagem ou recomendação automática — é necessário declarar isso no formulário de dados do app e garantir que o conteúdo gerado esteja em conformidade com as políticas de segurança. Apps que não declaram uso de IA estão sujeitos a suspensão.
+
+Também vale lembrar: se você está construindo um app que vai operar no Brasil e precisa integrar com sistemas fiscais ou [automação empresarial](/blog/ia-aplicada-nichos), a arquitetura do app precisa considerar essas integrações desde o início — não como um patch depois do lançamento.
+
+## FAQ
+
+**Posso publicar sozinho ou preciso de uma empresa?**
+Ambas as plataformam permitem publicação como pessoa física. Para produtos comerciais, recomendamos conta empresarial. A conta PF tem limitações de branding e credibilidade.
+
+**Quanto tempo leva do desenvolvimento à loja?**
+O desenvolvimento em si varia de 8 a 16 semanas para um MVP funcional. A etapa de publicação, contas, review e ASO adiciona de 2 a 4 semanas. Planeje o lançamento com pelo menos 1 mês de margem.
+
+**O app foi rejeitado. Posso submeter de novo?**
+Sim. Cada submissão reinicia o ciclo de review. O ideal é corrigir todos os pontos apontados antes de reenviar — submissões repetidas com os mesmos erros podem resultar em banimento da conta.
+
+**Preciso de site para publicar o app?**
+Não é obrigatório, mas é fortemente recomendado. A Apple e o Google conferem a URL da política de privacidade. Um site institucional com [SEO bem feito](/blog/site-aparecer-google-seo) também aumenta a descoberta orgânica do app.
+
+**Quanto custa manter um app publicado?**
+Além da taxa anual da Apple (USD 99), considere custos de servidor, push notification, atualizações de compatibilidade com novas versões do iOS/Android e manutenção de dependências. Um app parado por mais de 6 meses geralmente precisa de trabalho de atualização antes de uma nova release.
 
 ## Conclusão com CTA da SystemForge
 

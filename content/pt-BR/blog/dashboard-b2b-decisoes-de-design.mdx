@@ -88,11 +88,68 @@ Um exemplo concreto: em vez de deixar o usuário escolher quais KPIs exibir, voc
 
 A tensão entre opinião e flexibilidade é onde a maioria dos dashboards B2B erra. Ou são tão flexíveis que não têm personalidade e cada time usa de um jeito diferente, ou são tão rígidos que os times criam planilhas paralelas para suprir o que o dashboard não cobre.
 
-## As Outras Cinco Decisões
+## Modo de Tema: Dark Mode, Light Mode e Contexto de Uso
 
-As demais cinco decisões que completam as dez essenciais são: **modo de tema** (dark mode para ambientes de monitoramento, light para executivos), **responsividade real vs adaptação** (mobile em dashboards B2B raramente funciona bem — seja honesto sobre isso), **loading states e dados ausentes** (o que mostrar quando uma query demora ou retorna vazio), **drill-down** (como aprofundar em um número sem perder o contexto geral) e **notificações e alertas** (o dashboard como sistema de alerta, não apenas de consulta).
+A escolha do tema não é estética — é ergonômica. Usuários que passam horas em frente a telas de monitoramento (NOC, suporte, trading) se beneficiam do dark mode porque reduz fadiga visual em ambientes com pouca luz. Executivos que consultam dashboards em reuniões ou em telas projetadas precisam de light mode, que tem melhor legibilidade em ambientes iluminados.
 
-Cada uma dessas decisões tem trade-offs que dependem do contexto específico do produto, do perfil dos usuários e da infraestrutura de dados disponível.
+A decisão não precisa ser binária. O ideal é oferecer ambos, com um default inteligente baseado no contexto de uso. Mas cuidado: manter dois temas multiplica o trabalho de design system. Cada cor de alerta, cada estado de hover, cada gradiente de gráfico precisa funcionar em ambos os temas. Se o time não tem capacidade de manter isso com consistência, escolha um tema e faça ele muito bem.
+
+## Responsividade Real vs Adaptação Honesta
+
+Mobile em dashboards B2B raramente funciona bem. Não por limitação técnica, mas por limitação de contexto: um dashboard denso de KPIs, tabelas e gráficos não cabe em uma tela de 375px de largura de forma útil.
+
+A decisão honesta é: o que o usuário mobile realmente precisa fazer? Em 90% dos casos, não é "usar o dashboard completo". É receber um alerta, aprovar uma exceção, consultar um número específico. Em vez de tentar adaptar 20 widgets para mobile, projetar uma experiência mobile-first que resolve 2 ou 3 casos de uso críticos gera mais valor do que um dashboard quebrado e inútil no celular.
+
+Se a demanda por mobile for real, considere um app complementar em vez de um dashboard responsivo. O custo de desenvolvimento é similar, mas o resultado é infinitamente melhor.
+
+## Loading States e Dados Ausentes
+
+O que mostrar quando uma query demora 8 segundos ou retorna vazio é uma decisão de design tão importante quanto o layout da tela cheia.
+
+Usuários de dashboards B2B desenvolvem uma relação de confiança com os números. Se o gráfico de receita some sem explicação, a confiança é quebrada. Estados de carregamento precisam ser explícitos: skeleton screens são melhores que spinners porque mantêm a estrutura da informação visível. Dados ausentes precisam de explicação: "Dados de vendas indisponíveis — sincronização com ERP em andamento" é melhor do que um gráfico em branco.
+
+A regra de ouro: nunca mostre zero sem contexto. Zero pode significar "nenhuma venda hoje" ou "a integração quebrou". O usuário precisa saber qual dos dois é verdade.
+
+## Drill-Down: Aprofundar sem Perder o Contexto
+
+Drill-down é a capacidade de clicar em um número e ver os dados que o compõem. Um KPI de "R$ 120 mil em vendas" vira uma lista de pedidos, que vira detalhes de cada pedido, que vira histórico do cliente.
+
+A decisão de design aqui é: como manter o contexto enquanto o usuário navega para baixo? As abordagens comuns são:
+
+- **Modal com overlay**: rápido, mas perde o contexto do dashboard se o modal for muito grande
+- **Painel lateral (side panel)**: mantém o dashboard visível ao fundo, melhor para comparações
+- **Navegação em abas**: cada nível de drill vira uma aba, permitindo comparar múltiplos níveis simultaneamente
+
+A pior abordagem é redirecionar para uma página completamente diferente. O usuário perde o contexto visual do número que clicou e precisa usar o browser back para retornar.
+
+## Notificações e Alertas: O Dashboard como Sistema de Aviso
+
+O dashboard não deve ser apenas um lugar onde o usuário vai buscar informação — ele deve trazer informação até o usuário quando algo importante acontece.
+
+Alertas bem projetados seguem três princípios:
+
+1. **Thresholds claros**: "Quando a taxa de churn ultrapassa 5%" é um alerta acionável. "Quando algo mudar" não é.
+2. **Escalonamento por severidade**: alertas críticos (sistema fora do ar) notificam imediatamente via múltiplos canais. Alertas informativos (meta de vendas atingida) ficam no dashboard para consulta.
+3. **Ação sugerida**: um alerta que diz "Estoque do produto X abaixo do mínimo" sem indicar como reabastecer é apenas mais uma notificação para ignorar. O ideal é incluir um link direto para a ação corretiva.
+
+O risco é a fadiga de alerta. Se tudo é urgente, nada é urgente. Defina no máximo 3 a 5 alertas críticos por dashboard. O resto vira ruído.
+
+## FAQ
+
+**Quanto custa desenvolver um dashboard B2B personalizado?**
+Depende da complexidade de dados e do número de integrações. Um dashboard com 5 a 8 visualizações e integração com uma fonte de dados custa a partir de R$ 15 mil. Dashboards com múltiplas fontes, alertas em tempo real e permissões por perfil podem chegar a R$ 50 mil ou mais. Para entender o escopo ideal para o seu caso, [solicite um diagnóstico gratuito](/contato).
+
+**React, Vue ou Angular para dashboards?**
+Para dashboards B2B complexos, React com bibliotecas como TanStack Table, Recharts ou Tremor tende a oferecer o melhor equilíbrio entre produtividade e flexibilidade. Next.js no App Router também é uma excelente escolha para dashboards que precisam de SSR e Server Actions para queries pesadas.
+
+**Preciso de um data engineer antes do dashboard?**
+Se seus dados já estão estruturados em um banco relacional ou em uma ferramenta como BigQuery, não necessariamente. O time de desenvolvimento pode criar as queries e otimizar a performance. Se os dados estão espalhados em planilhas, APIs desorganizadas e sistemas legados, um trabalho prévio de modelagem de dados pode reduzir o custo do dashboard em 30% a 50%.
+
+**Dashboard deve ter modo offline?**
+Para a maioria dos casos B2B, não. Dashboards são ferramentas de consulta que assumem conectividade. Se offline for crítico (ex: campo sem internet), considere um app mobile nativo em vez de uma PWA.
+
+**Como medir se o dashboard está sendo usado?**
+Métricas simples: frequência de login, tempo médio de sessão, taxa de retenção semanal e quais visualizações são mais acessadas. Se usuários estão exportando dados para Excel constantemente, é sinal de que o dashboard não está entregando o que precisam.
 
 ## Conclusão
 
