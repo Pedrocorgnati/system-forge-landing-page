@@ -66,10 +66,10 @@ A primeira alavanca é **seleção de modelo por tarefa**. Nem toda tarefa preci
 
 | Tarefa | Modelo recomendado | Custo relativo |
 |--------|-------------------|---------------|
-| Classificação de intenção | GPT-4o mini / Haiku | 1x |
-| Resumo de documentos | GPT-4o mini | 1x |
-| Geração de resposta final | GPT-4o / Claude Sonnet | 10-20x |
-| Análise jurídica / médica | Claude Opus / GPT-4o | 30-50x |
+| Classificação de intenção | GPT-5 mini / Claude 4 Haiku | 1x |
+| Resumo de documentos | GPT-5 mini | 1x |
+| Geração de resposta final | GPT-5 / Claude 4 Sonnet | 10-20x |
+| Análise jurídica / médica | Claude 4 Opus / GPT-5 Pro | 30-50x |
 
 A segunda alavanca é **controle de contexto**. A janela de contexto é cobrada em tokens. Se você está passando o histórico completo de uma conversa de 50 turnos em cada requisição, você está pagando por tokens que provavelmente não acrescentam nada. Implemente truncamento inteligente: mantenha os últimos N turnos e um resumo dos anteriores.
 
@@ -125,6 +125,20 @@ set_llm_cache(
 ```
 
 Com cache semântico bem configurado, é possível reduzir chamadas à API em 20-40% em sistemas de atendimento ao cliente com bases de perguntas frequentes.
+
+## Agentes de IA: O Novo Padrão em 2026
+
+Desde 2024, quando este artigo foi originalmente publicado, o mercado de IA evoluiu de "LLMs respondendo perguntas" para **agentes de IA executando tarefas completas**. Um agente não apenas gera texto — ele toma decisões, chama APIs, atualiza bancos de dados e interage com múltiplos sistemas de forma autônoma.
+
+Essa mudança transforma o cálculo de custos. Em vez de pagar por tokens de resposta, você paga por **execuções de workflow**. Um agente que processa um pedido completo no WhatsApp (recebe mensagem, consulta estoque, calcula frete, gera pagamento e atualiza o CRM) pode custar entre R$ 0,15 e R$ 0,80 por interação, mas substitui 3-5 minutos de trabalho humano.
+
+A arquitetura de agentes também exige novas camadas de controle:
+
+- **Observabilidade:** ferramentas como LangSmith, Langfuse e AgentOps rastreiam cada passo do agente, permitindo debug de decisões em produção
+- **Memória de longo prazo:** bancos vetoriais com contexto de semanas ou meses, não apenas da conversa atual
+- **Guardrails de segurança:** limites de gasto por execução, whitelists de APIs acessíveis e validação de outputs antes de ações irreversíveis
+
+Para times que já dominam LLMs em produção, a migração para agentes é o próximo passo natural. Para quem está começando, é mais eficiente projetar diretamente em arquitetura de agentes do que construir em cima de chatbots e depois refatorar.
 
 ## Conclusão com CTA SystemForge
 
