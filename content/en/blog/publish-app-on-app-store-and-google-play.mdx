@@ -36,13 +36,13 @@ First, you need active accounts on both platforms. The models are different, and
 
 **Google Play Console**
 - Cost: USD 25 (one-time fee, not annual)
-- Since 2023, new accounts must complete a closed testing period with at least 20 testers for 14 days before being able to publish to the general public
+- Since 2024, new accounts must complete a closed testing period with at least 12 testers for 14 consecutive days before being able to publish to the general public. This number changed from 20 to 12 in mid-2024
 - Accepts submission via web interface, no specific hardware required
 
 | Platform | Cost | Account activation time | Special requirement |
 |----------|------|------------------------|---------------------|
 | App Store (Apple) | USD 99/year | 24–48h (individual) / up to 30 days (organization with D-U-N-S) | Xcode or Transporter |
-| Google Play | USD 25 (one-time) | 24–48h | 20 testers for 14 days (new accounts) |
+| Google Play | USD 25 (one-time) | 24–48h | 12 testers for 14 days (new accounts) |
 
 An important decision: publish as individual or organization? For commercial products, always prefer the organizational account. The company name appears in the store, not the developer's personal name, which conveys more credibility.
 
@@ -98,6 +98,33 @@ The first three lines appear before "show more" — use that space to communicat
 
 **Keywords (App Store)**
 The App Store has a specific keywords field (100 characters) that isn't visible to users but influences ranking. Use words that aren't in the title or subtitle. Don't repeat terms.
+
+## What Changed in 2025 and 2026
+
+App stores evolve constantly. Two points we frequently update for clients:
+
+**App Store and Notarization (iOS 17+)**
+Apple reinforced the use of Notarization for apps distributed outside the App Store (Enterprise and external TestFlight). If your app uses enterprise distribution, the notarization process is now mandatory and includes automatic malware verification. For apps on the public store, this doesn't change the process, but reinforces the importance of keeping code clean and without undeclared frameworks.
+
+**Google Play: New Data and AI Policies**
+In 2025, Google Play began requiring explicit declaration of generative AI model usage within the app. If your product uses AI features — such as text generation, image generation, or automatic recommendations — you must declare this in the app's data form and ensure generated content complies with safety policies. Apps that don't declare AI usage are subject to suspension.
+
+## FAQ
+
+**Can I publish alone or do I need a company?**
+Both platforms allow publishing as an individual. For commercial products, we recommend a business account. Personal accounts have branding and credibility limitations.
+
+**How long does it take from development to the store?**
+Development itself varies from 8 to 16 weeks for a functional MVP. The publishing phase — accounts, review, and ASO — adds 2 to 4 weeks. Plan your launch with at least 1 month of margin.
+
+**My app was rejected. Can I resubmit?**
+Yes. Each submission restarts the review cycle. The ideal approach is to fix all flagged issues before resubmitting — repeated submissions with the same errors can result in account bans.
+
+**Do I need a website to publish the app?**
+It's not mandatory, but strongly recommended. Apple and Google check the privacy policy URL. An institutional website with good SEO also increases organic discovery of the app.
+
+**How much does it cost to maintain a published app?**
+Beyond Apple's annual fee (USD 99), consider server costs, push notifications, compatibility updates with new iOS/Android versions, and dependency maintenance. An app idle for more than 6 months generally requires update work before a new release.
 
 ## Conclusion
 

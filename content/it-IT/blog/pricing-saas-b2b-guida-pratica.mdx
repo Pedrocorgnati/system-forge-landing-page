@@ -36,7 +36,7 @@ Il freemium funziona bene quando tre condizioni si allineano:
 
 **3. Il prodotto ha effetto rete o viralità intrinseca.** Strumenti come Calendly o Loom si diffondono perché l'utente gratuito invita altre persone a interagire. Se il tuo SaaS viene usato in isolamento, il freemium è solo un costo senza motore di acquisizione.
 
-Per SaaS B2B con ticket medio alto (sopra EUR 500/mese per account), il freemium raramente è la strada giusta. Un trial con o senza carta, con durata di 14-30 giorni, tende a generare conversioni più qualificate.
+Per SaaS B2B con ticket medio alto (sopra EUR 550/mese per account), il freemium raramente è la strada giusta. Un trial con o senza carta, con durata di 14-30 giorni, tende a generare conversioni più qualificate.
 
 | Modello | Conversione tipica | Migliore per |
 |---------|-------------------|-------------|
@@ -56,11 +56,13 @@ Il rischio sta nel contenimento artificiale. I team che pagano per postazione te
 Una variazione sana è il **per-seat con sconto a volume**:
 
 ```
-Fino a 5 utenti:    EUR 199/utente/mese
-Da 6 a 20 utenti:   EUR 159/utente/mese
-Da 21 a 50 utenti:  EUR 129/utente/mese
+Fino a 5 utenti:    EUR 219/utente/mese
+Da 6 a 20 utenti:   EUR 179/utente/mese
+Da 21 a 50 utenti:  EUR 149/utente/mese
 Oltre 50:           Trattativa enterprise
 ```
+
+*Valori aggiornati al 2026, considerando l'inflazione accumulata e il costo dell'infrastruttura cloud in Italia.*
 
 Questo modello mantiene l'allineamento alla crescita e riduce la resistenza all'espansione delle licenze.
 
@@ -92,15 +94,55 @@ Alcune premesse essenziali:
 **Struttura della proposta enterprise:**
 
 ```
-Licenza annuale (50 utenti): EUR 84.000/anno
-Implementazione e onboarding: EUR 12.000 (una tantum)
-Supporto Premium (SLA 4h):   EUR 9.600/anno
+Licenza annuale (50 utenti): EUR 92.000/anno
+Implementazione e onboarding: EUR 14.000 (una tantum)
+Supporto Premium (SLA 4h):   EUR 11.000/anno
 ---
-Totale anno 1:                EUR 105.600
-Rinnovo anno 2+:              EUR 93.600/anno
+Totale anno 1:                EUR 117.000
+Rinnovo anno 2+:              EUR 103.000/anno
 ```
 
+*Valori aggiornati al 2026.*
+
 Il contratto annuale pagato anticipatamente migliora il flusso di cassa e protegge dal churn. Offri uno sconto del 10%-15% per il pagamento anticipato come incentivo.
+
+## AI Credits: Il Nuovo Modello Usage-Based nel 2026
+
+Dal 2025, un nuovo modello di pricing è emerso nei SaaS B2B: il modello di **AI credits**. I prodotti che integrano funzionalità di intelligenza artificiale — generazione di contenuti, analisi predittiva, assistenti virtuali — hanno bisogno di un modo per addebitare il consumo di token IA senza spaventare il cliente con variazioni di costo.
+
+La soluzione che ha preso trazione è separare l'abbonamento base dal consumo di IA:
+
+- **Piano Base**: include accesso alla piattaforma, supporto e funzionalità tradizionali (per-postazione o flat)
+- **AI Credits**: pacchetti prepagati di crediti che il cliente consuma man mano che usa le funzionalità IA. Quando finiscono, acquista altri o fa upgrade di pacchetto.
+
+Struttura tipica di AI credits nel 2026:
+
+| Pacchetto | Crediti | Prezzo |
+|-----------|---------|--------|
+| Starter | 10.000 crediti/mese | EUR 99/mese |
+| Growth | 50.000 crediti/mese | EUR 399/mese |
+| Enterprise | crediti illimitati | su consultazione |
+
+Ogni funzionalità di IA consuma una quantità diversa di crediti: una risposta di chatbot può costare 1 credito, mentre un'analisi predittiva completa può costare 500. Il vantaggio per il cliente è la prevedibilità: sa esattamente quanto spenderà. Il vantaggio per il SaaS è il margine protetto: i crediti sono venduti con un markup sul costo reale delle API di IA.
+
+Se stai costruendo un SaaS con funzionalità di IA, considera il modello di credits fin dall'MVP. È più facile da implementare che cercare di adattarlo dopo in un'architettura che non ha previsto la misurazione del consumo per feature.
+
+## FAQ
+
+**Quanto dovrei far pagare per il mio SaaS B2B in Italia?**
+Per SaaS B2B in Italia nel 2026, i ticket medi sani variano da EUR 150 a EUR 500 per utente/mese per strumenti di produttività, e da EUR 800 a EUR 3.000/mese per SaaS verticali (specifici di nicchia come studi medici, imprese edili o logistica). Il prezzo giusto dipende dal ROI che il tuo prodotto offre.
+
+**Freemium o trial: quale funziona meglio in Italia?**
+Nel mercato italiano, il trial di 14-30 giorni generalmente converte meglio del freemium per B2B. Le aziende italiane tendono a valorizzare dimostrazioni rapide del valore e supporto umano nella fase di valutazione. Il freemium funziona meglio per strumenti di produttività individuale o professionisti.
+
+**Dovrei mostrare i prezzi sul sito?**
+Sì, per i tier fino all'enterprise. Prezzi trasparenti filtrano lead qualificati e riducono il tempo di vendita. Per l'enterprise, mostra "a partire da EUR X" e incoraggia il contatto per una proposta personalizzata. Nascondere tutti i prezzi aumenta l'attrito e riduce la conversione.
+
+**Come aumentare i prezzi senza perdere clienti?**
+Gli aumenti di prezzo sono meglio accettati quando accompagnati da nuovo valore: feature aggiuntive, miglioramento delle performance o nuovo modulo. Applica l'aumento prima sui nuovi clienti, poi sulla base esistente con 60-90 giorni di preavviso. I clienti che usano attivamente il prodotto e vedono ROI raramente churnano per aumenti del 10%-15%.
+
+**Ho bisogno di un gateway di pagamento italiano?**
+Per SaaS B2B in Italia, sì. Stripe e altre soluzioni internazionali funzionano, ma il bonifico, la fatturazione elettronica e il pagamento rateizzo sono attesi dal mercato italiano. La combinazione di gateway internazionale (Stripe) con adattamenti locali (fatturazione elettronica) è generalmente la strategia migliore.
 
 ## Conclusione
 
