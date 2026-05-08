@@ -14,7 +14,6 @@ interface VitalMetric {
 
 function sendVital(metric: VitalMetric) {
   if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
     console.log(`[Web Vitals] ${metric.name}: ${Math.round(metric.value)}ms — ${metric.rating}`)
   }
 

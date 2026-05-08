@@ -198,12 +198,11 @@ describe('detectVolatilityClass — class-specific tests', () => {
   })
 
   it('classifica vendor com "vs"', () => {
-    const r = detectVolatilityClass({ title: 'React vs Vue vs Angular em 2025' })
     // "2025" → trend takes precedence; but "vs" → vendor... trend > versioned > vendor
     // Actually "2025" matches trend pattern; test should reflect that
     // Let's test a pure vs without year
-    const r2 = detectVolatilityClass({ title: 'Shopify vs WooCommerce: qual plataforma escolher' })
-    expect(r2.volatility_class).toBe('vendor')
+    const r = detectVolatilityClass({ title: 'Shopify vs WooCommerce: qual plataforma escolher' })
+    expect(r.volatility_class).toBe('vendor')
   })
 
   it('classifica vendor com "comparativo"', () => {
@@ -237,7 +236,7 @@ describe('detectVolatilityClass — class-specific tests', () => {
   it('ignora override inválido e aplica heurística normal', () => {
     const r = detectVolatilityClass({
       title: 'LGPD compliance para startups',
-      volatility_class_override: 'nao-existe' as any,
+      volatility_class_override: 'nao-existe' as unknown as 'evergreen' | 'regulatory' | 'pricing' | 'trending' | 'evergreen',
     })
     expect(r.volatility_class).toBe('regulatory')
   })
@@ -297,7 +296,7 @@ describe('FRESHNESS_POLICY_DEFAULTS', () => {
   })
 
   it('todos os valores coerentes (max_age >= re_review quando re_review > 0)', () => {
-    for (const [cls, policy] of Object.entries(FRESHNESS_POLICY_DEFAULTS)) {
+    for (const [, policy] of Object.entries(FRESHNESS_POLICY_DEFAULTS)) {
       if (policy.re_review_above_days > 0) {
         expect(policy.max_age_days).toBeGreaterThanOrEqual(policy.re_review_above_days)
       }

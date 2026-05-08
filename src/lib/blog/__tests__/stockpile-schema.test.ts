@@ -154,7 +154,8 @@ describe('StockpilePackageSchema', () => {
   })
 
   it('rejeita quando equivalence_id está ausente', () => {
-    const { equivalence_id: _, ...data } = validPackage
+    const { equivalence_id, ...data } = validPackage
+    void equivalence_id
     const result = StockpilePackageSchema.safeParse(data)
     expect(result.success).toBe(false)
   })
@@ -293,7 +294,8 @@ describe('LifecycleSchema', () => {
   })
 
   it('rejeita quality_gated_at ausente', () => {
-    const { quality_gated_at: _, ...data } = validLifecycle
+    const { quality_gated_at, ...data } = validLifecycle
+    void quality_gated_at
     const result = LifecycleSchema.safeParse(data)
     expect(result.success).toBe(false)
   })

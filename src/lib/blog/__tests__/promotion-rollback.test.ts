@@ -15,7 +15,7 @@ import { randomUUID } from 'crypto'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { acquireRunLock, releaseRunLock, acquirePackageLock } from '../stockpile-locks'
 import { evaluateFreshness } from '../freshness-gate'
-import { checkInvalidation, applyInvalidationToPackage } from '../stockpile-invalidation-check'
+import { checkInvalidation } from '../stockpile-invalidation-check'
 import { appendInvalidationEvent, readInvalidationLog } from '../invalidation-log'
 import type { InvalidationEvent, StockpilePackage } from '../stockpile-schema'
 
