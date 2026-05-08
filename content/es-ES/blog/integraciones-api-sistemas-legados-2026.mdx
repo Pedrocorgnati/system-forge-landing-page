@@ -1,0 +1,98 @@
+---
+{
+  "title": "Integraciones y APIs: cómo hacer que tus sistemas dejen de pelearse",
+  "description": "Por qué tus sistemas no se hablan, cómo conectarlos con APIs y webhooks, y casos reales de integración que transforman la operativa de una empresa.",
+  "slug": "integraciones-api-sistemas-legados-2026",
+  "date": "2026-05-07",
+  "dateModified": "2026-05-07",
+  "locale": "es-ES",
+  "hreflang_pair": [
+    "pt-BR",
+    "it-IT",
+    "en",
+    "es-ES"
+  ],
+  "canonical": "https://systemforge.es/blog/integraciones-api-sistemas-legados-2026",
+  "tags": [
+    "integración sistemas",
+    "API REST",
+    "webhook",
+    "middleware ecommerce",
+    "WhatsApp Business API"
+  ],
+  "author": "Pedro Corgnati",
+  "stockpile_origin": {
+    "equivalence_id": "f7fc52ea-97a1-4ade-af51-640cd81d06dd",
+    "quality_gated_at": "2026-05-07T21:58:05.896909",
+    "promoted_at": "2026-05-07T22:08:38.561411",
+    "volatility_class": "evergreen"
+  }
+}
+---
+
+# Integraciones y APIs: cómo hacer que tus sistemas dejen de pelearse
+
+En la mayoría de empresas españolas, la información vive en silos. El ERP tiene los datos de facturación, el CRM guarda a los clientes, la tienda online funciona por su cuenta, el Excel de almacén lo actualiza Juan los martes y el de RRHH ni siquiera sabe que existe un Excel de almacén. El resultado es un equipo que pasa horas copiando datos de un sitio a otro, cometiendo errores y tomando decisiones con información desactualizada.
+
+La buena noticia es que esto no es un destino inevitable. La mala noticia es que requiere dejar de ver cada sistema como una isla y empezar a pensar en tu empresa como un ecosistema donde la información fluye.
+
+## Por qué tus sistemas no se hablan (y cuánto te cuesta)
+
+El problema suele empezar con buenas intenciones. Compras un ERP porque lo necesitas para facturar. Luego un CRM para gestionar ventas. Después una tienda online porque hay que vender por internet. Cada uno resuelve un problema concreto, pero nadie se preguntó cómo encajan entre sí.
+
+El coste oculto es enorme. Estudios recientes indican que los empleados de oficina pierden entre un 20 % y un 30 % de su tiempo en tareas de integración manual: rellenar formularios con datos que ya existen en otro sistema, reconciliar inventarios, exportar CSVs y volver a subirlos, responder emails con información que el emisor podría haber consultado automáticamente.
+
+En una PYME de quince personas, eso puede equivaler a tres empleados a tiempo completo haciendo trabajo de robot. No es productivo, no es motivador y es propicio para errores que luego cuestan el doble en corregir.
+
+## APIs REST: el pegamento digital moderno
+
+Una API (Application Programming Interface) es, en términos sencillos, un punto de encuentro donde dos sistemas pueden hablar entre sí de forma estandarizada. La API REST es el estándar dominante: usa los mismos verbos que la web (GET para pedir información, POST para enviarla, PUT para actualizar, DELETE para eliminar) y devuelve datos en formato JSON, legible tanto para máquinas como para humanos.
+
+Cuando un sistema tiene API bien documentada, integrarlo con otro es relativamente sencillo. Un desarrollador puede construir un "middleware": un pequeño software que se sienta entre tus sistemas, escucha eventos en uno, transforma los datos si es necesario y los envía al otro.
+
+El problema suele estar en los sistemas antiguos. Muchos ERPs tradicionales no tienen API moderna, o la tienen pero es incompleta, mal documentada o inestable. En esos casos, la integración requiere más ingenio: desde leer directamente de la base de datos (con cuidado) hasta usar técnicas de "screen scraping" como último recurso.
+
+## Webhooks y eventos en tiempo real
+
+Las APIs son útiles, pero tienen una limitación: por defecte, el sistema que recibe no sabe cuándo hay datos nuevos. Tiene que preguntar periódicamente: "¿hay novedades? ¿hay novedades?". Eso se llama polling y es ineficiente.
+
+Los webhooks solucionan esto. En lugar de preguntar, el sistema origen avisa cuando algo pasa: "oye, se ha creado un pedido nuevo, aquí tienes los datos". El sistema receptor recibe la notificación al instante y actúa.
+
+Ejemplos prácticos de webhooks:
+
+- Tu tienda online avisa a tu ERP en cuanto se confirma un pago, para que reserve stock y genere albarán sin intervención humana.
+- Tu sistema de tickets de soporte avisa por Slack cuando llega una incidencia crítica.
+- Tu pasarela de pago avisa a tu plataforma de suscripción cuando un cliente cancela, para que desactive el acceso automáticamente.
+
+La clave de un webhook bien implementado es la seguridad (debe venir de quien dice venir), la idempotencia (si llega dos veces el mismo evento, no debe procesarse dos veces) y el manejo de errores (si el receptor no responde, el emisor debe reintentar con lógica clara).
+
+## Casos prácticos de integración que cambian el negocio
+
+Trabajamos a diario con integraciones y hay algunas que, bien ejecutadas, transforman completamente la operativa:
+
+**WhatsApp Business API con CRM.** Un cliente nuestro del sector servicios tenía un equipo comercial que respondía WhatsApps personales de clientes desde sus móviles. Nadie sabía qué se había prometido ni qué conversaciones estaban abiertas. Integramos WhatsApp Business API con su CRM: ahora cada conversación se asigna a un comercial, queda registrada en el histórico del cliente y los managers pueden ver estadísticas de respuesta. El tiempo de seguimiento se redujo un 40 %.
+
+**Ecommerce + ERP + transportista.** Una tienda de muebles vendía online pero procesaba pedidos a mano: recibían el pedido por email, lo metían en el ERP, luego entraban en la web del transportista para generar la etiqueta. Conectamos los tres sistemas: el pedido online genera entrada en ERP, el ERP genera albarán y avisa al transportista, el transportista devuelve el tracking que se envía automáticamente al cliente. Pasaron de quince minutos por pedido a cero.
+
+**Calendario + videollamada + CRM.** Un consultorio médico tenía citas en Google Calendar, videollamadas en Zoom y fichas en un CRM separado. Los médicos perdían tiempo buscando la ficha del paciente mientras este esperaba en la llamada. Unificamos todo: desde el CRM se reserva la cita (que aparece en el calendario del médico), se genera el enlace de videollamada automáticamente y al entrar el paciente, su ficha se abre sola.
+
+## Preguntas frecuentes
+
+**¿Cuánto cuesta integrar dos sistemas?**
+Entre 2.000 € y 10.000 € dependiendo de la complejidad, la calidad de las APIs disponibles y la lógica de transformación necesaria. Integraciones con sistemas antiguos sin API pueden costar más por el trabajo de ingeniería inversa.
+
+**¿Puedo integrar yo mismo dos sistemas con herramientas no-code?**
+Herramientas como Make o Zapier son excelentes para flujos sencillos entre plataformas populares. Pero cuando la lógica es compleja, los volúmenes son altos o los sistemas son propietarios, llegan a su límite. En ese punto, un desarrollo a medida es más robusto y económico a largo plazo.
+
+**¿Es seguro conectar mis sistemas con APIs?**
+Depende de cómo se haga. Las buenas prácticas incluyen autenticación con tokens seguros, cifrado en tránsito (HTTPS), rate limiting para evitar abusos y validación estricta de los datos que entran. Una integración mal hecha es un agujero de seguridad.
+
+**¿Cuánto tarda en implementarse una integración?**
+Desde una semana para flujos simples entre APIs bien documentadas, hasta seis u ocho semanas para integraciones complejas con lógica de negocio, transformaciones de datos y manejo de errores sofisticado.
+
+**¿Y si uno de los sistemas cambia su API?**
+Es un riesgo real. Las APIs de terceros evolucionan y a veces rompen compatibilidad. Por eso las integraciones bien diseñadas incluyen monitoreo: si una conexión falla, se alerta al equipo técnico y se puede actuar antes de que afecte a la operativa.
+
+---
+
+¿Tienes sistemas que no se hablan y un equipo perdiendo tiempo en tareas manuales? Escríbenos por [WhatsApp](https://wa.me/34600000000) o cuéntanos tu arquitectura en [nuestra página de contacto](/contacto). Te decimos qué se puede integrar y cuánto costaría.
