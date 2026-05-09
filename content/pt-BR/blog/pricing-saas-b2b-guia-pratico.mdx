@@ -56,9 +56,9 @@ O risco está na contenção artificial. Times que pagam por assento tendem a co
 Uma variação saudável é o **per-seat com desconto por volume**:
 
 ```
-Até 5 usuários:   R$ 219/usuário/mês
-6 a 20 usuários:  R$ 179/usuário/mês
-21 a 50 usuários: R$ 149/usuário/mês
+Até 5 usuários:   R$ 239/usuário/mês
+6 a 20 usuários:  R$ 199/usuário/mês
+21 a 50 usuários: R$ 169/usuário/mês
 Acima de 50:      Negociação enterprise
 ```
 
@@ -94,17 +94,27 @@ Algumas premissas essenciais:
 **Estrutura de proposta enterprise:**
 
 ```
-Licença anual (50 usuários): R$ 92.000/ano
-Implementação e onboarding:  R$ 14.000 (one-time)
-Suporte Premium (SLA 4h):     R$ 11.000/ano
+Licença anual (50 usuários): R$ 98.000/ano
+Implementação e onboarding:  R$ 16.000 (one-time)
+Suporte Premium (SLA 4h):     R$ 12.000/ano
 ---
-Total ano 1:                  R$ 117.000
-Renovação ano 2+:             R$ 103.000/ano
+Total ano 1:                  R$ 126.000
+Renovação ano 2+:             R$ 110.000/ano
 ```
 
 *Valores atualizados para 2026.*
 
 O contrato anual pago antecipado melhora o fluxo de caixa e blinda o churn. Ofereça desconto de 10% a 15% para pagamento antecipado como incentivo.
+
+## Pricing Localizado: Como o Mercado Brasileiro Muda as Regras
+
+SaaS B2B no Brasil tem peculiaridades que founders de outros mercados subestimam. A primeira é a forma de pagamento: enquanto nos EUA o cartão de crédito corporativo é padrão, no Brasil boletos, PIX e parcelamentos são esperados — e cada um deles tem custo de processamento diferente.
+
+A segunda é a sazonalidade. Janeiro e dezembro são meses de baixa conversão por causa de férias e orçamentos congelados. Muitos SaaS B2B brasileiros reportam queda de 20% a 30% em novas assinaturas nesses meses. Pricing que não leva em conta sazonalidade gera previsões de receita irreais.
+
+A terceira é a sensibilidade a moeda. Se sua infraestrutura é dolarizada (AWS, Stripe, APIs de IA) mas você cobra em reais, a margem pode derreter quando o dólar sobe. A solução prática é revisar preços trimestralmente ou indexar contratos enterprise ao dólar com teto e piso.
+
+Se você está construindo um SaaS no Brasil, nosso artigo sobre [como construir uma plataforma SaaS do zero](/blog/construir-plataforma-saas-zero-brasil-2026) detalha como planejar a arquitetura de cobrança desde o início.
 
 ## AI Credits: O Novo Modelo de Usage-Based em 2026
 
@@ -119,13 +129,27 @@ Estrutura típica de AI credits em 2026:
 
 | Pacote | Créditos | Preço |
 |--------|----------|-------|
-| Starter | 10.000 créditos/mês | R$ 99/mês |
-| Growth | 50.000 créditos/mês | R$ 399/mês |
+| Starter | 10.000 créditos/mês | R$ 119/mês |
+| Growth | 50.000 créditos/mês | R$ 449/mês |
 | Enterprise | créditos ilimitados | sob consulta |
 
 Cada funcionalidade de IA consome uma quantidade diferente de créditos: uma resposta de chatbot pode custar 1 crédito, enquanto uma análise preditiva completa pode custar 500. A vantagem para o cliente é previsibilidade: ele sabe exatamente quanto vai gastar. A vantagem para o SaaS é margem protegida: os créditos são vendidos com um markup sobre o custo real da API de IA.
 
 Se você está construindo um SaaS com funcionalidades de IA, considere o modelo de credits desde o MVP. É mais fácil implementar do que tentar encaixar depois em uma arquitetura que não previu medição de consumo por feature.
+
+## Métricas que Comprovam se o Pricing Está Funcionando
+
+Pricing não é arte — é ciência com números. Se você não está acompanhando essas métricas, está voando no escuro.
+
+**LTV/CAC ratio.** O lifetime value de um cliente deve ser pelo menos 3x o custo de aquisição. Se está abaixo de 3, seu pricing é muito baixo ou seu custo de aquisição é muito alto. Se está acima de 5, pode ser que você esteja deixando dinheiro na mesa.
+
+**Net Revenue Retention (NRR).** Clientes existentes estão gastando mais ou menos ao longo do tempo? NRR acima de 100% significa que expansão e upsell superam churn e downgrades. SaaS B2B saudáveis têm NRR entre 100% e 120%.
+
+**Payback period.** Quanto tempo leva para recuperar o custo de aquisição de um cliente? Em SaaS B2B, o ideal é entre 6 e 12 meses. Acima de 18 meses, o modelo de negócio fica vulnerável a oscilações de caixa.
+
+**Expansion revenue.** Qual porcentagem da receita mensal vem de clientes existentes aumentando de plano? SaaS com pricing bem calibrado têm 20% a 30% da receita vinda de expansão, não de novos clientes.
+
+Para implementar tracking dessas métricas de forma automática, vale a pena estudar como [implementar cobrança recorrente em SaaS](/blog/cobranca-recorrente-saas-como-implementar) com as ferramentas certas desde o início.
 
 ## FAQ
 
@@ -144,6 +168,12 @@ Aumentos de preço são melhor aceitos quando acompanhados de valor novo: featur
 **Preciso de um gateway de pagamento brasileiro?**
 Para SaaS B2B no Brasil, sim. Stripe e outras soluções internacionais funcionam, mas PIX, boleto e parcelamento no cartão são esperados pelo mercado brasileiro. A combinação de gateway internacional (Stripe) com adaptações locais (PIX via intermediário) costuma ser a melhor estratégia.
 
+**Quando devo contratar um especialista em pricing?**
+Se você já tem produto validado com pelo menos 50 clientes pagantes e sente que está deixando dinheiro na mesa, um especialista em pricing pode fazer a diferença. Antes disso, o custo provavelmente não compensa — use benchmarks de mercado e teste aumentos graduais em novos clientes.
+
+**Pricing pode ser o diferencial competitivo do meu SaaS?**
+Raramente. Pricing é um hygiene factor: se estiver errado, afasta clientes. Se estiver certo, é invisível. O diferencial competitivo real é o valor entregue. Pricing bem calibrado apenas captura uma parcela justa desse valor.
+
 ## Conclusão com CTA
 
 Pricing não é uma decisão que você toma uma vez e esquece. Os melhores SaaS revisam o modelo de cobrança a cada 12 a 18 meses, testam aumentos de preço em novos clientes antes de aplicar na base existente, e acompanham o impacto de cada mudança nas métricas de conversão e churn.
@@ -151,3 +181,5 @@ Pricing não é uma decisão que você toma uma vez e esquece. Os melhores SaaS 
 A boa notícia é que um pricing bem estruturado é construído junto com o produto — não depois. Quando a arquitetura do SaaS já prevê planos, limites e métricas de uso desde o MVP, a evolução do modelo de cobrança acontece sem retrabalho.
 
 Na **SystemForge**, construímos SaaS B2B com a monetização planejada desde o primeiro commit: estrutura de planos, integração com Stripe Billing, lógica de feature flags por tier e dashboards de MRR prontos para uso. Se você está começando ou reestruturando um produto, [fale com a gente](/contato) — a fundação certa desde o início poupa meses de retrabalho no futuro.
+
+*Atualizado em maio de 2026*

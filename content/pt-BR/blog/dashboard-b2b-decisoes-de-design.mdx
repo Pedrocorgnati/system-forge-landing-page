@@ -66,6 +66,8 @@ Filtros locais fazem sentido quando diferentes widgets representam entidades fun
 
 A armadilha é ter filtros globais que silenciosamente não se aplicam a alguns widgets. Se o usuário seleciona "Agosto" no filtro global mas um gráfico continua mostrando dados do ano todo sem indicação visual, a confiança no dashboard é destruída. Consistência e transparência no comportamento dos filtros são inegociáveis.
 
+Se você quer implementar filtros avançados com boa UX, nosso artigo sobre [filtros avançados em dashboards](/blog/filtros-avancados-dashboard-ux-implementacao) detalha padrões de interface que funcionam na prática.
+
 ## Configurabilidade: Deixar o Usuário Montar Seu Dashboard
 
 Dashboards configuráveis — onde o usuário pode adicionar, remover, reordenar e redimensionar widgets — são uma promessa sedutora. "Cada usuário monta o dashboard do jeito que precisa."
@@ -134,13 +136,39 @@ Alertas bem projetados seguem três princípios:
 
 O risco é a fadiga de alerta. Se tudo é urgente, nada é urgente. Defina no máximo 3 a 5 alertas críticos por dashboard. O resto vira ruído.
 
+## IA em Dashboards: De Visualização a Prescrição
+
+Em 2025 e 2026, dashboards B2B passaram por uma evolução significativa com a integração de inteligência artificial. O papel do dashboard deixou de ser apenas "mostrar o que aconteceu" e passou a incluir "sugerir o que fazer".
+
+**Análise preditiva.** Em vez de mostrar apenas vendas do mês passado, dashboards modernos usam modelos de machine learning para projetar vendas do próximo trimestre, identificar sazonalidades e alertar sobre desvios antes que aconteçam. Isso transforma o dashboard de ferramenta reativa em ferramenta proativa.
+
+**Insights automáticos.** Sistemas de IA podem escanear os dados do dashboard e gerar observações em linguagem natural: "A taxa de conversão da campanha X caiu 12% na última semana, coincidente com a mudança de landing page". Esse tipo de insight economiza horas de análise manual e direciona a atenção do usuário para o que realmente importa.
+
+**Chat com dados.** Interfaces conversacionais permitem que o usuário pergunte "quanto vendemos no Sul em agosto?" e receba a resposta diretamente, sem precisar navegar por filtros. Ferramentas como LangChain e frameworks de RAG (Retrieval Augmented Generation) tornaram isso acessível mesmo para PMEs.
+
+A implementação prática não exige uma equipe de cientistas de dados. Com bibliotecas como TensorFlow.js, modelos de forecast podem rodar no próprio browser. Para análise mais pesada, integrações com APIs de IA como OpenAI ou Anthropic podem gerar insights a partir dos dados já existentes no dashboard.
+
+Se você quer entender como integrar IA em sistemas existentes, leia nosso guia sobre [como integrar ChatGPT em um sistema existente via API](/blog/integrar-chatgpt-sistema-existente-api).
+
+## Design Tokens e Consistência em Equipes Distribuídas
+
+Dashboards B2B raramente são construídos por uma única pessoa. Times de design, frontend e produto trabalham em paralelo, e a consistência visual é um desafio constante.
+
+Design tokens são a solução. Em vez de definir cores, espaçamentos e tipografia diretamente no código, você define variáveis semânticas: `color-alert-critical`, `spacing-section-large`, `font-size-kpi`. Esses tokens são a única fonte de verdade e podem ser consumidos por designers (Figma), desenvolvedores (CSS variables, Tailwind config) e até documentação.
+
+Em 2026, com o amadurecimento de ferramentas como Style Dictionary e Tokens Studio, design tokens deixaram de ser luxo de grandes empresas e se tornaram padrão em projetos sérios. O benefício vai além da consistência: quando você precisa mudar a paleta de cores da marca ou adaptar o dashboard para um cliente white-label, a mudança acontece em um único lugar.
+
+Para times que usam React, a combinação de Tailwind CSS com variáveis CSS custom properties é o padrão mais produtivo. Para projetos Next.js 15, Shadcn/ui e Tremor fornecem componentes de dashboard pré-estilizados que respeitam design tokens e são altamente customizáveis.
+
+Se você está comparando opções de bibliotecas de visualização, nosso artigo sobre [Chart.js vs Recharts vs D3](/blog/chartjs-vs-recharts-vs-d3-qual-biblioteca) ajuda a escolher a ferramenta certa para o seu caso.
+
 ## FAQ
 
 **Quanto custa desenvolver um dashboard B2B personalizado?**
-Depende da complexidade de dados e do número de integrações. Um dashboard com 5 a 8 visualizações e integração com uma fonte de dados custa a partir de R$ 15 mil. Dashboards com múltiplas fontes, alertas em tempo real e permissões por perfil podem chegar a R$ 50 mil ou mais. Para entender o escopo ideal para o seu caso, [solicite um diagnóstico gratuito](/contato).
+Depende da complexidade de dados e do número de integrações. Um dashboard com 5 a 8 visualizações e integração com uma fonte de dados custa a partir de R$ 18 mil. Dashboards com múltiplas fontes, alertas em tempo real e permissões por perfil podem chegar a R$ 60 mil ou mais. Para entender o escopo ideal para o seu caso, [solicite um diagnóstico gratuito](/contato).
 
 **React, Vue ou Angular para dashboards?**
-Para dashboards B2B complexos, React com bibliotecas como TanStack Table, Recharts ou Tremor tende a oferecer o melhor equilíbrio entre produtividade e flexibilidade. Next.js no App Router também é uma excelente escolha para dashboards que precisam de SSR e Server Actions para queries pesadas.
+Para dashboards B2B complexos, React com bibliotecas como TanStack Table, Recharts ou Tremor tende a oferecer o melhor equilíbrio entre produtividade e flexibilidade. Next.js 15 no App Router também é uma excelente escolha para dashboards que precisam de SSR e Server Actions para queries pesadas.
 
 **Preciso de um data engineer antes do dashboard?**
 Se seus dados já estão estruturados em um banco relacional ou em uma ferramenta como BigQuery, não necessariamente. O time de desenvolvimento pode criar as queries e otimizar a performance. Se os dados estão espalhados em planilhas, APIs desorganizadas e sistemas legados, um trabalho prévio de modelagem de dados pode reduzir o custo do dashboard em 30% a 50%.
@@ -151,6 +179,12 @@ Para a maioria dos casos B2B, não. Dashboards são ferramentas de consulta que 
 **Como medir se o dashboard está sendo usado?**
 Métricas simples: frequência de login, tempo médio de sessão, taxa de retenção semanal e quais visualizações são mais acessadas. Se usuários estão exportando dados para Excel constantemente, é sinal de que o dashboard não está entregando o que precisam.
 
+**Shadcn/ui vale a pena para dashboards B2B?**
+Sim. Shadcn/ui se tornou o padrão de facto para projetos Next.js em 2025 e 2026 porque combina flexibilidade (você copia o código, não instala como dependência) com consistência visual. Para dashboards, a combinação de Shadcn/ui com Tremor (biblioteca de componentes de dados) acelera o desenvolvimento sem sacrificar customização.
+
+**Quando devo usar Power BI em vez de um dashboard customizado?**
+Se suas necessidades são relatórios padronizados, dados já estruturados em fontes compatíveis (Excel, SQL Server, SharePoint) e o público é interno sem necessidade de UX customizada, Power BI ou Looker Studio são mais baratos e rápidos. Um dashboard customizado faz sentido quando você precisa de integrações complexas, fluxos de ação embutidos, white-label ou experiência mobile dedicada. Leia nossa comparação completa: [dashboard personalizado vs Power BI](/blog/dashboard-personalizado-vs-power-bi-empresa).
+
 ## Conclusão
 
 Design de dashboard B2B é uma disciplina técnica e estratégica ao mesmo tempo. As decisões aqui discutidas não têm resposta certa universal — têm resposta certa para um contexto específico.
@@ -158,3 +192,5 @@ Design de dashboard B2B é uma disciplina técnica e estratégica ao mesmo tempo
 O que diferencia dashboards que viram referência dentro das empresas daqueles que são abandonados não é o framework usado, a biblioteca de gráficos escolhida ou o número de widgets disponíveis. É a qualidade das decisões de design tomadas antes de escrever a primeira linha de código.
 
 Na SystemForge, esse processo começa na fase de brief: entendemos quem vai usar o dashboard, com que frequência, para tomar que tipo de decisão. Só depois projetamos a arquitetura de informação e a hierarquia visual. Se você está construindo ou reformulando um dashboard B2B, esse é o tipo de processo que evita retrabalho caro.
+
+*Atualizado em maio de 2026*

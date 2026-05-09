@@ -46,6 +46,8 @@ O modelo mental do REST é elegante: recursos são substantivos, verbos HTTP rep
 
 O problema clássico do REST é o "N+1 de endpoints": para renderizar uma tela de pedido, você faz `GET /order/123`, depois `GET /user/456`, depois `GET /product/789` para cada item. Isso resulta em múltiplos round-trips de rede e código de orquestração no frontend que deveria ser responsabilidade do backend.
 
+Se você está construindo uma API pública ou integrando com sistemas legados, nosso guia sobre [quando usar um API gateway](/blog/api-gateway-quando-vale-a-pena) pode ajudar a decidir se uma camada intermediária faz sentido no seu caso.
+
 ## GraphQL: Quando o Cliente Precisa Controlar os Dados
 
 GraphQL surgiu no Facebook em 2012 para resolver exatamente esse problema: times de mobile que precisavam de dados muito específicos, em formatos muito diferentes, sem sobrecarregar uma API monolítica.
@@ -94,10 +96,10 @@ Em uma única requisição, você busca o pedido, os itens, os produtos e o clie
 
 tRPC é a abordagem mais nova e a mais específica de contexto. Funciona exclusivamente em projetos TypeScript onde frontend e backend compartilham o mesmo repositório (monorepo) ou são servidos pela mesma base de código, como Next.js.
 
-A proposta é radical: eliminar completamente a camada de serialização/deserialização e contratos de API. Você chama funções do servidor como se fossem funções locais, com type-safety completo.
+A proposta é radical: eliminar completamente a camada de serialização/deserialização e contratos de API. Você chama funções do servidor como se fossem funções locais, com type-safety completa.
 
 ```typescript
-// No servidor (pages/api/trpc/[trpc].ts ou app/api/trpc/[trpc]/route.ts)
+// No servidor (app/api/trpc/[trpc]/route.ts — Next.js 15 App Router)
 export const appRouter = router({
   getOrder: publicProcedure
     .input(z.object({ id: z.string() }))
@@ -115,7 +117,7 @@ Se você mudar o retorno da procedure no servidor, o TypeScript vai gritar em to
 
 **Onde tRPC é imbatível:**
 
-- Next.js full-stack (App Router ou Pages Router)
+- Next.js 15 full-stack (App Router ou Pages Router)
 - Startups e produtos onde velocidade de iteração é crítica
 - Times pequenos que querem DX máxima sem overhead de configuração
 - Projetos internos onde você controla 100% dos consumidores da API
@@ -125,6 +127,22 @@ Se você mudar o retorno da procedure no servidor, o TypeScript vai gritar em to
 - Funciona apenas com TypeScript — Python, Go, iOS nativo ficam de fora
 - Não é uma API pública — não dá para compartilhar com parceiros externos
 - Vendor lock-in leve: migrar para REST/GraphQL depois requer reescrita
+
+Se você está montando a stack de um projeto Next.js novo, nosso artigo sobre [desenvolvimento web moderno com Next.js](/blog/desenvolvimento-web-moderno-nextjs-2026) detalha como tRPC se encaixa no ecossistema atual.
+
+## Server Components e a Nova Era do Data Fetching
+
+Desde o Next.js 13 e consolidado no Next.js 15, Server Components mudaram como pensamos sobre comunicação cliente-servidor. Em vez de expor uma API e consumi-la no frontend, você pode buscar dados diretamente no servidor durante a renderização — sem precisar de REST, GraphQL ou tRPC para muitos casos.
+
+Isso não elimina a necessidade de APIs, mas muda onde elas vivem:
+
+- **Server Components**: buscam dados diretamente no banco ou em serviços internos. Zero HTTP requests do cliente. Ideal para dados que não mudam frequentemente ou que precisam de SEO.
+- **Server Actions**: permitem mutações diretas do servidor sem expor endpoints explícitos. Type-safe por padrão no Next.js 15 com TypeScript.
+- **Client Components**: quando precisar de interatividade no browser, aí sim uma API (REST, GraphQL ou tRPC) entra em cena.
+
+A implicação prática é que muitos projetos Next.js 15 hoje usam uma mistura: Server Components para a maioria das telas, tRPC ou Server Actions para mutações, e REST ou GraphQL apenas para integrações externas ou apps mobile.
+
+Para projetos que precisam de autenticação robusta entre essas camadas, vale a pena entender as diferenças entre [JWT, OAuth2 e session-based auth](/blog/autenticacao-apis-jwt-oauth2-session).
 
 ## Matriz de Decisão por Tipo de Projeto
 
@@ -143,6 +161,33 @@ Se você mudar o retorno da procedure no servidor, o TypeScript vai gritar em to
 
 A decisão raramente é binária. Muitas arquiteturas maduras usam REST para APIs públicas, tRPC para comunicação interna entre serviços TypeScript e GraphQL para o BFF (Backend for Frontend) consumido pelo app mobile.
 
+## API-first com IA: REST e GraphQL em 2026
+
+A explosão de integrações com IA generativa em 2025 e 2026 trouxe uma nova camada de complexidade para decisões de API. Modelos de linguagem, agents autônomos e assistentes de código consomem APIs de formas que humanos não consomem: eles precisam de schemas bem documentados, endpoints previsíveis e respostas estruturadas.
+
+REST se beneficia disso porque OpenAPI (Swagger) é o padrão de facto para documentação machine-readable. Ferramentas como LangChain e CrewAI consomem especificações OpenAPI para gerar chamadas de API automaticamente. Se você está construindo um produto que será consumido por agents de IA, REST com OpenAPI 3.1 é a aposta mais segura.
+
+GraphQL também funciona bem com IA, mas exige que o modelo entenda o schema antes de gerar queries. Isso é viável, mas adiciona uma camada de complexidade que REST não tem.
+
+tRPC, por outro lado, é invisível para IA externa. É uma ferramenta de produtividade interna, não uma interface para consumo externo. Se seu produto precisa ser "plugável" em ecossistemas de IA, tRPC sozinho não é suficiente — você vai precisar de uma camada REST ou GraphQL por cima.
+
+## FAQ
+
+**Posso misturar REST, GraphQL e tRPC no mesmo projeto?**
+Sim, e muitas vezes é a decisão correta. REST para APIs públicas e integrações externas, GraphQL para apps mobile com necessidades de dados complexas, e tRPC para comunicação interna em monorepo TypeScript. O custo é a complexidade operacional de manter três protocolos.
+
+**tRPC funciona fora do Next.js?**
+Sim, tRPC funciona com qualquer framework TypeScript: Express, Fastify, Remix, Nuxt. Mas a DX máxima é realmente no ecossistema Next.js + React Query (TanStack Query), onde a integração é praticamente zero-config.
+
+**GraphQL ainda vale a pena em 2026?**
+Para projetos que se encaixam nos casos de uso ideais — múltiplos clientes, dados altamente relacionais, times grandes — sim. Para projetos simples ou times pequenos, o overhead de setup e manutenção pode não compensar. A hype passou, mas a tecnologia continua sólida onde faz sentido.
+
+**Server Actions substituem tRPC?**
+Para mutações simples em projetos Next.js 15, Server Actions cobrem boa parte do que tRPC faz. Mas tRPC ainda é superior para queries complexas, subscriptions em tempo real, e projetos onde o backend precisa ser independente do framework de frontend.
+
+**Como documentar uma API REST para consumo externo?**
+Use OpenAPI 3.1 com Swagger UI ou Redoc. Mantenha a especificação versionada junto com o código. Ferramentas como Zod podem gerar schemas OpenAPI automaticamente a partir das validações do backend, eliminando duplicação.
+
 ## Conclusão
 
 Não existe protocolo universalmente superior — existe protocolo certo para o contexto certo.
@@ -151,6 +196,8 @@ Escolha **REST** quando você precisa de uma API consumível por qualquer client
 
 Escolha **GraphQL** quando você tem múltiplos clientes com necessidades de dados divergentes, um time dedicado para o schema e dados altamente relacionais. O investimento em aprendizado se paga em flexibilidade.
 
-Escolha **tRPC** quando você está construindo um produto Next.js full-stack com TypeScript e quer a melhor experiência de desenvolvimento possível. A type-safety end-to-end elimina uma classe inteira de bugs.
+Escolha **tRPC** quando você está construindo um produto Next.js 15 full-stack com TypeScript e quer a melhor experiência de desenvolvimento possível. A type-safety end-to-end elimina uma classe inteira de bugs.
 
 No SystemForge, cada projeto começa com uma decisão arquitetural documentada — protocolo de API, estratégia de autenticação, política de versionamento. O resultado é um sistema que o próximo desenvolvedor consegue entender e evoluir sem decifrar código legado. Se você está iniciando uma API ou migrando uma existente, podemos ajudar a estruturar essa decisão com base no seu contexto específico.
+
+*Atualizado em maio de 2026*

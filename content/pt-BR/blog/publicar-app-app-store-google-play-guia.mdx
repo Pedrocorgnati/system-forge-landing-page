@@ -36,13 +36,13 @@ Antes de tudo, você precisa de contas ativas nas duas plataformas. Os modelos s
 
 **Google Play Console**
 - Custo: USD 25 (taxa única, não anual)
-- Desde 2024, contas novas precisam completar um período de teste fechado com pelo menos 12 testadores por 14 dias contínuos antes de poder publicar para o público geral. Esse número mudou de 20 para 12 em meados de 2024
+- Desde 2024, contas novas precisam completar um período de teste fechado com pelo menos 20 testadores por 14 dias contínuos antes de poder publicar para o público geral. Essa regra foi reafirmada em 2025 e continua vigente em 2026.
 - Aceita submissão via interface web, sem necessidade de hardware específico
 
 | Plataforma | Custo | Tempo para ativar conta | Requisito especial |
 |---|---|---|---|
 | App Store (Apple) | USD 99/ano | 24–48h (PF) / até 30 dias (PJ com DUNS) | Xcode ou Transporter |
-| Google Play | USD 25 (único) | 24–48h | 12 testadores por 14 dias (contas novas) |
+| Google Play | USD 25 (único) | 24–48h | 20 testadores por 14 dias (contas novas) |
 
 Uma decisão importante: publicar como pessoa física ou jurídica? Para produtos comerciais, sempre prefira a conta organizacional. O nome da empresa aparece na loja, não o nome pessoal do desenvolvedor, o que transmite mais credibilidade.
 
@@ -99,17 +99,47 @@ As primeiras três linhas aparecem antes do "ver mais" — use esse espaço para
 **Palavras-chave (App Store)**
 A App Store tem um campo específico de keywords (100 caracteres) que não aparece para o usuário mas influencia o ranking. Use palavras que não estejam no título ou subtítulo. Não repita termos.
 
+Se você quer entender melhor como otimizar a descoberta do seu app, nosso artigo sobre [deep links e app indexing para SEO mobile](/blog/deep-links-app-indexing-seo-mobile) complementa o ASO com estratégias de busca fora das lojas.
+
+## Alternativas de Distribuição fora das Lojas Oficiais
+
+Publicar na App Store e Google Play não é a única forma de distribuir um app. Dependendo do seu público e modelo de negócio, alternativas podem fazer sentido — ou serem necessárias.
+
+**Progressive Web App (PWA).** Se o seu produto não precisa de recursos nativos como câmera avançada, sensores ou notificações push complexas, um PWA pode eliminar completamente a burocracia das lojas. O usuário acessa via browser e "instala" na tela inicial. Custo de desenvolvimento é menor, atualizações são instantâneas e não há taxa de loja. A limitação é a descoberta: sem ASO, você depende de SEO e marketing direto.
+
+**Enterprise / MDM (Mobile Device Management).** Para apps internos de empresas, distribuição via MDM é padrão. O app não passa pelo review da loja e é instalado diretamente nos dispositivos corporativos. Requer infraestrutura de gestão de dispositivos, mas dá controle total.
+
+**TestFlight (iOS) e Internal Testing (Android).** Antes da publicação pública, você pode distribuir para beta testers via TestFlight (até 10.000 testers externos) ou Google Play Internal Testing. É uma forma de validar o app com usuários reais antes de enfrentar o review oficial.
+
+**Alternative App Stores (Android).** No Android, lojas alternativas como Samsung Galaxy Store, Amazon Appstore e outras regionais podem ampliar o alcance, especialmente em mercados onde o Google Play não é dominante. O custo é a fragmentação de atualizações e métricas.
+
+A escolha da distribuição deve ser feita antes do desenvolvimento, não depois. Um app projetado para loja oficial tem arquitetura diferente de um PWA ou de um app enterprise. Mudar de estratégia no meio do caminho é caro.
+
 ## O Que Mudou em 2025 e 2026
 
 As lojas de apps evoluem constantemente. Dois pontos que atualizamos com frequência para clientes:
 
-**App Store e Notarization (iOS 17+)**
-A Apple reforçou o uso de Notarization para apps distribuídos fora da App Store (Enterprise e TestFlight externo). Se seu app usa distribuição enterprise, o processo de notarização agora é obrigatório e inclui verificação automática de malware. Para apps na loja pública, isso não muda o processo, mas reforça a importância de manter o código limpo e sem frameworks não declarados.
+**App Store e Notarization (iOS 18+)**
+A Apple reforçou o uso de Notarization para apps distribuídos fora da App Store (Enterprise e TestFlight externo). Se seu app usa distribuição enterprise, o processo de notarização agora é obrigatório e inclui verificação automática de malware. Para apps na loja pública, isso não muda o processo, mas reforça a importância de manter o código limpo e sem frameworks não declarados. Com o iOS 18, a Apple também introduziu novas restrições para apps que usam APIs sensíveis, exigindo justificativa detalhada no App Store Connect.
 
 **Google Play: novas políticas de dados e IA**
-Em 2025, o Google Play passou a exigir declaração explícita de uso de modelos de IA generativa dentro do app. Se seu produto usa recursos de IA — como geração de texto, imagem ou recomendação automática — é necessário declarar isso no formulário de dados do app e garantir que o conteúdo gerado esteja em conformidade com as políticas de segurança. Apps que não declaram uso de IA estão sujeitos a suspensão.
+Em 2025, o Google Play passou a exigir declaração explícita de uso de modelos de IA generativa dentro do app. Se seu produto usa recursos de IA — como geração de texto, imagem ou recomendação automática — é necessário declarar isso no formulário de dados do app e garantir que o conteúdo gerado esteja em conformidade com as políticas de segurança. Apps que não declaram uso de IA estão sujeitos a suspensão. Em 2026, essa regra foi expandida para cobrir também IA preditiva e sistemas de recomendação baseados em machine learning.
 
-Também vale lembrar: se você está construindo um app que vai operar no Brasil e precisa integrar com sistemas fiscais ou [automação empresarial](/blog/ia-aplicada-nichos), a arquitetura do app precisa considerar essas integrações desde o início — não como um patch depois do lançamento.
+Também vale lembrar: se você está construindo um app que vai operar no Brasil e precisa integrar com sistemas fiscais ou [automação empresarial](/blog/ia-aplicada-nichos-empresariais), a arquitetura do app precisa considerar essas integrações desde o início — não como um patch depois do lançamento.
+
+## Monetização: Modelos que Funcionam em 2026
+
+Escolher como monetizar o app é tão importante quanto construí-lo. Os modelos evoluíram nos últimos anos e algumas estratégias se destacaram no mercado brasileiro.
+
+**Freemium com IAP.** O modelo mais comum para apps B2C: uso básico gratuito, funcionalidades premium via In-App Purchase. Funciona bem quando o valor do premium é claro e mensurável — por exemplo, remover anúncios, desbloquear funcionalidades ou aumentar limites. No Brasil, onde a sensibilidade a preços é alta, o freemium bem calibrado costuma ter melhor conversão que apps pagos upfront.
+
+**Assinatura.** Modelo padrão para apps de produtividade, saúde e educação. A vantagem é a receita recorrente previsível. A desvantagem é a barreira de entrada: usuários brasileiros tendem a hesitar mais em assinaturas mensais do que em compras únicas. A solução é oferecer teste gratuito de 7 a 14 dias e plano anual com desconto significativo (30% a 50%).
+
+**White-label / B2B.** Em vez de vender para o consumidor final, licencie o app para empresas que querem uma solução pronta com a própria marca. Esse modelo tem ticket médio mais alto (R$ 5 mil a R$ 50 mil por licença), menos competição e churn mais baixo. O custo é a personalização: cada cliente vai querer adaptações.
+
+**Marketplace.** O app conecta oferta e demanda e cobra uma taxa por transação. Funciona bem quando há network effects — quanto mais usuários, mais valor para todos. O desafio é o problema do ovo e da galinha: sem oferta não há demanda, sem demanda não há oferta.
+
+Se você está construindo um app para um nicho específico, nosso artigo sobre [apps mobile por nicho](/blog/app-mobile-por-nicho) mostra como validar o modelo de monetização antes de investir em desenvolvimento completo.
 
 ## FAQ
 
@@ -128,8 +158,16 @@ Não é obrigatório, mas é fortemente recomendado. A Apple e o Google conferem
 **Quanto custa manter um app publicado?**
 Além da taxa anual da Apple (USD 99), considere custos de servidor, push notification, atualizações de compatibilidade com novas versões do iOS/Android e manutenção de dependências. Um app parado por mais de 6 meses geralmente precisa de trabalho de atualização antes de uma nova release.
 
+**React Native ainda é uma boa escolha em 2026?**
+Sim. React Native continua sendo uma das melhores escolhas para apps cross-platform, especialmente com o New Architecture (Fabric e TurboModules) estabilizado. Para projetos que precisam de performance nativa ou UI altamente customizada, Flutter e desenvolvimento nativo (Swift/Kotlin) são alternativas válidas. A escolha depende do time e das necessidades do produto.
+
+**Como escolher entre PWA e app nativo?**
+Se o seu produto precisa de notificações push confiáveis, acesso offline robusto, recursos de câmera/avaliação nativa ou presença nas lojas para credibilidade, vá de app nativo. Se o objetivo é validar uma ideia rapidamente com custo baixo e o público usa principalmente via web, um PWA pode ser suficiente — e muito mais barato.
+
 ## Conclusão com CTA da SystemForge
 
 Publicar um app com sucesso não é só sobre o código — é sobre entender as regras de cada plataforma, preparar os metadados corretamente e lançar com uma estratégia de visibilidade desde o dia um. Um único erro no processo de submissão pode atrasar o lançamento em semanas.
 
 Na SystemForge, tratamos a publicação como parte do desenvolvimento, não como uma etapa posterior. Desde a configuração das contas até o ASO inicial e o plano de rollout, cada detalhe é documentado e executado com o mesmo rigor do código em si. Se você está construindo um app e quer garantir que o lançamento aconteça no prazo e sem surpresas, fale com a gente.
+
+*Atualizado em maio de 2026*

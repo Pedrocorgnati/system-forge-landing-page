@@ -51,7 +51,7 @@ Comunicação ruim é a causa número um de projetos que fracassam apesar do tim
 
 ## Contrato: Propriedade do Código e Cláusulas Críticas
 
-O contrato é onde as conversas amigáveis se tornam compromissos legais. Leia com atenção e, se necessário, consulte um advogado especializado antes de assinar.
+O contrato é onde as conversas amigáveis se tornam compromissos legais. Leia com atenção e, se necessário, consulte um advogado especializado antes de assinar. Para entender o mínimo que um contrato de desenvolvimento deve conter, consulte nosso guia sobre [o que precisa ter em um contrato de software](/blog/contrato-desenvolvimento-software-o-que-precisa-ter).
 
 **Quem é o dono do código produzido?** Esta é a cláusula mais importante. O código deve pertencer ao cliente — não à software house. Contratos que mantêm a propriedade intelectual com a empresa fornecedora criam dependência permanente. Se um dia você quiser mudar de fornecedor, vai precisar pagar novamente pelo que já foi desenvolvido.
 
@@ -63,7 +63,7 @@ O contrato é onde as conversas amigáveis se tornam compromissos legais. Leia c
 
 ## Red Flags: 7 Sinais de que Algo Vai Dar Errado
 
-Com base em padrões comuns de projetos que dão errado, fique atento a estes sinais:
+Com base em padrões comuns de projetos que dão errado, fique atento a estes sinais. Se quiser uma lista mais completa dos erros mais frequentes, leia nosso artigo sobre [erros ao contratar uma empresa de software no Brasil](/blog/erros-contratar-empresa-software-brasil).
 
 1. **Proposta enviada no mesmo dia da reunião inicial.** Projetos sérios levam tempo para ser estimados corretamente. Velocidade aqui é sinal de que o escopo foi ignorado.
 
@@ -94,8 +94,46 @@ Use este checklist ao avaliar propostas de software houses:
 - [ ] Code review formal no processo de desenvolvimento
 - [ ] Documentação técnica incluída no escopo
 
+## Avaliação Técnica: O Que Pedir Antes de Assinar
+
+Antes de fechar contrato, peça entregáveis técnicos que vão revelar a maturidade do time. Uma software house organizada vai ter esses materiais prontos ou vai produzi-los sem drama.
+
+**Arquitetura de referência.** Peça um diagrama simplificado de como o sistema vai ser estruturado: camadas de frontend, backend, banco de dados e integrações externas. Não precisa ser um C4 completo, mas precisa mostrar que alguém pensou em escalabilidade, segurança e manutenibilidade antes de começar a codar.
+
+**Stack tecnológica justificada.** A escolha de linguagem, framework e infraestrutura deve ter uma razão de ser além de "é o que a gente sempre usa". Pergunte por que escolheram Node.js em vez de Python, ou PostgreSQL em vez de MongoDB. Respostas do tipo "porque o time domina" são válidas — desde que o time realmente domine.
+
+**Plano de testes.** Um projeto sem testes automatizados é um projeto com débito técnico embutido. Pergunte sobre cobertura de testes unitários, testes de integração e processo de QA. Se a resposta for "testamos na mão antes de entregar", desconfie.
+
+**Documentação como entregável.** Código sem documentação é patrimônio intangível que só existe na cabeça de quem escreveu. Insista que a documentação técnica — arquitetura, APIs, ambiente — faça parte do escopo contratado, não seja um adicional.
+
+## Cultura de Documentação: O Diferencial Invisível
+
+A maioria dos gestores nunca pensa em documentação durante o processo de contratação. Erro grave. Documentação é o que permite que você mude de fornecedor sem perder anos de conhecimento acumulado.
+
+Em 2026, com o avanço de ferramentas de IA generativa aplicadas à engenharia de software, a documentação ganhou uma nova dimensão. Software houses que usam IA para manter documentação atualizada — gerando diagramas a partir do código, resumindo mudanças em changelogs automáticos, criando guias de onboarding a partir de commits — entreguem um valor tangível que vai além do código.
+
+Na hora de avaliar, pergunte: "Como vocês documentam decisões arquiteturais?" Se a resposta for um silêncio constrangedor ou "a gente conversa", você está olhando para um time que vai deixar um legado de dívida técnica. Documentação não é burocracia: é respeito pelo cliente e pelo desenvolvedor que vai trabalhar no projeto daqui a dois anos.
+
+Se quiser entender como documentação bem feita muda o jogo, leia nosso artigo sobre [documentação de software na prática](/blog/documentacao-de-software-pratica-que-separa-amadores).
+
+## FAQ
+
+**Quanto custa contratar uma software house no Brasil?**
+Depende do escopo e da senioridade do time. Projetos sob medida costumam partir de R$ 15 mil para MVPs simples e podem chegar a R$ 150 mil ou mais para sistemas enterprise com múltiplas integrações. Para entender como precificar o seu projeto, leia nosso guia sobre [como escrever um briefing técnico](/blog/como-escrever-briefing-tecnico-nao-desenvolvedores).
+
+**Software house ou time interno: qual é melhor?**
+Para projetos pontuais, validação de MVP ou quando a velocidade de entrega é crítica, software house é mais eficiente. Para produtos que vão viver por anos com evolução constante, um time interno costuma ser mais barato no longo prazo. Muitas empresas híbridas — começam com software house e transferem para time interno gradualmente.
+
+**Como garantir que vou receber o código fonte?**
+O contrato deve ser explícito sobre propriedade intelectual e entrega do código. Além disso, insista em repositório Git na conta da sua empresa desde o primeiro commit. Isso garante que você tenha acesso ao código em tempo real, não só na entrega final.
+
+**O que fazer se o projeto atrasar?**
+Contratos bem feitos têm cláusulas de milestone com datas e penalidades por atraso. Mas o mais importante é ter visibilidade: relatórios semanais de progresso, métricas de velocidade do time (velocity, se usar Scrum) e transparência sobre impedimentos. Atraso surpresa é muito pior do que atraso comunicado com antecedência.
+
 ## Conclusão
 
-Contratar uma software house envolve muito mais do que avaliar portfólio e comparar preços. O processo de trabalho, a estrutura de comunicação, as cláusulas contratuais sobre propriedade do código e os sinais de alerta no processo comercial são igualmente importantes.
+Contratar uma software house envolve muito mais do que avaliar portfólio e comparar preços. O processo de trabalho, a estrutura de comunicação, as cláusulas contratuais sobre propriedade do código, a cultura de documentação e os sinais de alerta no processo comercial são igualmente importantes.
 
 A SystemForge foi construída com base em documentação e processos transparentes. Trabalhamos com repositórios do cliente desde o primeiro commit, metodologia ágil com cerimônias documentadas e contratos que garantem 100% da propriedade intelectual para o contratante. Se quiser entender como isso funciona na prática, fale com nosso time.
+
+*Atualizado em maio de 2026*
