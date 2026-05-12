@@ -1,0 +1,146 @@
+---
+title: "Urgent SaaS Platform: From Concept to Working MVP in Weeks"
+slug: "urgent-saas-platform-mvp-weeks-cost"
+date: "2026-05-11"
+locale: "en"
+description: "SaaS MVP in 6–12 weeks: $40k–$150k. Core feature + auth + billing with Next.js + Supabase + Stripe. What's achievable and what's a trap."
+excerpt: "SaaS MVP in 6–12 weeks: $40,000–$150,000. Core feature + auth + billing with Next.js + Supabase + Stripe. What's achievable and what's a trap."
+tags: ["urgent SaaS MVP", "SaaS platform development", "Next.js SaaS", "SaaS development cost 2026", "rapid SaaS build"]
+coverImage: "/images/blog/urgent-saas-platform-mvp-weeks-cost.png"
+author: "Pedro Corgnati"
+relatedService: "web-development"
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: "pt-BR"
+    slug: "plataforma-saas-urgente"
+  - locale: "it-IT"
+    slug: "piattaforma-saas-urgente-mvp-settimane"
+  - locale: "es-ES"
+    slug: "plataforma-saas-urgente-mvp-semanas"
+seo_score: 8
+conversion_score: 8
+authority_score: 8
+uniqueness_score: 8
+---
+
+# Urgent SaaS Platform: From Concept to Working MVP in Weeks
+
+An urgent SaaS isn't fragile SaaS — it's **focused SaaS**. Core feature + authentication with roles + recurring billing: that's what you get in 6–12 weeks for $40,000–$150,000. Companies that try to build a "complete SaaS platform" in 8 weeks ship nothing useful, or ship something that collapses under the first 50 users. The constraint that makes urgent SaaS possible is the same constraint that makes good software in general: ruthless scope control.
+
+I'm Pedro Corgnati, founder of SystemForge. I've shipped SaaS MVPs under tight timelines — a B2B analytics platform in 8 weeks, a contractor scheduling SaaS in 10 weeks, a client portal SaaS in 6 weeks. This guide is what I tell every founder who comes to me with a deadline.
+
+If you're still deciding whether to build or buy: read [SaaS vs. custom software — how to decide](https://systemforgesoftware.com/blog/saas-vs-custom-software-how-to-decide) first. For production architecture post-MVP: [SaaS architecture and billing compliance](https://systemforgesoftware.com/blog/saas-architecture-billing-compliance-2026) covers what you build in Phase 2. If you're adding AI to your SaaS: see [Vercel AI SDK production cost](https://systemforgesoftware.com/blog/vercel-ai-sdk-cost-nextjs-production-2026) before committing to a model.
+
+## The 3-Component MVP That Actually Works
+
+### Component 1: The core feature
+
+The single thing your customers pay for. In a project management SaaS: create project → assign tasks → mark complete. In an analytics SaaS: connect data source → run report → export. In a scheduling SaaS: create slot → customer books → confirmation sent.
+
+Be brutal about scope. If it's not the reason customers pay, it's Phase 2. The most common mistake in urgent SaaS builds is treating "nice to have" features as core features. A three-feature MVP shipped in 8 weeks beats a ten-feature MVP never shipped.
+
+Test your scope definition: can you describe the core feature in one sentence? If you need more than a sentence, it's not scoped down enough.
+
+### Component 2: Authentication with multi-tenant architecture
+
+Every SaaS has at least two roles: admin and user. Multi-tenant architecture — where each customer sees only their own data — must be designed from day one. Retrofitting it is expensive and often requires rewriting the entire data model.
+
+In practice, multi-tenancy means:
+- Every database query scoped to a `tenant_id` (organization or account)
+- Row-level security at the database layer (Supabase handles this with PostgreSQL RLS)
+- Invitation flows so admins can add team members
+- Role-based permissions (what can a viewer vs. editor vs. admin do?)
+
+Supabase makes this significantly faster than building auth from scratch: JWT-based sessions, OAuth providers, email magic links, and RLS policies are available out of the box.
+
+### Component 3: Recurring billing
+
+Stripe Billing handles subscriptions, free trials, proration, invoicing, dunning (automatic retry for failed payments), and revenue recovery. Integrating it from the start — not as an afterthought — takes 1–2 weeks and saves 6–8 weeks of painful retrofit later.
+
+The billing structure defines your product tiers. Before a line of code is written, decide:
+- How many plans? (Free/Pro/Business or usage-based?)
+- What changes per tier? (seats, features, API calls?)
+- Free trial duration?
+- Annual vs. monthly pricing?
+
+These decisions affect your database schema. Changing them mid-build is costly.
+
+## Cost Ranges (USD, 2026)
+
+| Scope | Timeline | Cost |
+|-------|----------|------|
+| Core + auth + billing (MVP) | 6–8 weeks | $40,000–$75,000 |
+| + Secondary features (2–3) | 8–12 weeks | $60,000–$120,000 |
+| + Mobile app (React Native) | 12–16 weeks | $90,000–$180,000 |
+
+Monthly costs after launch:
+- Vercel Pro hosting: $20/month
+- Supabase Pro: $25/month
+- Stripe fees: 2.9% + $0.30 per transaction
+- Maintenance/support: $1,500–$4,000/month
+
+## Red Flags in an Urgent SaaS Scope
+
+**Red flag: "Complete the full platform" in 8 weeks**
+A full SaaS platform with feature parity to established competitors is a 6–18 month project. If you're hearing "we can build everything" in 6 weeks, you're about to get a very expensive skeleton.
+
+**Red flag: No discovery phase**
+Any developer who starts writing code without a 1–2 week discovery phase (requirements, data model, architecture decisions, wireframes) is heading for scope creep. Discovery is what separates an 8-week project from an 8-month one.
+
+**Red flag: Fixed price with open scope**
+"We'll build your SaaS for $50,000" with no defined feature list ends in a half-built product and a difficult conversation about "additional work."
+
+**Red flag: No mention of multi-tenancy from day one**
+If the developer isn't asking about how accounts, organizations, and users relate in your product before writing any code, the architecture will need to be revisited at significant cost.
+
+## Stack for Speed
+
+Next.js 15 + Supabase (auth + DB + realtime) + Stripe + Vercel is the fastest reliable stack for SaaS MVPs in 2026. This combination eliminates DevOps overhead for the first 12–18 months of growth and provides:
+
+- **Next.js App Router:** server components reduce client-side bundle, API routes co-located with pages
+- **Supabase:** PostgreSQL with row-level security, realtime subscriptions, storage, and auth — no backend service to provision separately
+- **Stripe:** subscriptions, customer portal, webhook handling — production-ready billing in 1–2 weeks
+- **Vercel:** zero-config deployment, preview deployments per PR, edge functions globally
+
+This stack isn't right for every project — high-volume data processing or specific compliance requirements may require different choices — but for a focused SaaS MVP under a time constraint, it's the fastest reliable path I've found.
+
+## The Discovery Sprint: Non-Negotiable
+
+A paid discovery sprint (1 week, $2,000–$5,000) should precede any SaaS build. It produces:
+- Data model design (entities, relationships, tenancy structure)
+- User flow diagrams for the core feature
+- API contract (what routes exist, what they accept and return)
+- Technical risks identified and mitigated
+- A realistic timeline with milestone breakdown
+
+If the developer you're talking to won't do a paid discovery sprint, walk away. You're paying for certainty before committing to a 8–12 week engagement.
+
+## How to Validate Before Building
+
+Before spending $40,000+, validate that customers will pay for your core feature:
+
+1. **Landing page with a waitlist or pre-sale form** — measure sign-up conversion
+2. **Fake door test** — put a "Buy now" button, collect emails, tell them "coming soon"
+3. **Wizard of Oz test** — manually deliver the SaaS service, then build the automation after validating demand
+4. **5 customer interviews** — ask about their current process, not about your product
+
+The worst outcome in urgent SaaS is spending $80,000 to build quickly something that nobody wants. Validate the core value proposition first, then build fast.
+
+## FAQ
+
+**Can I charge customers from week 1 of development?**
+Yes — Stripe Billing can be integrated before the product is complete. Some teams charge for early access while still building. The benefit: revenue to fund development and customer feedback before launch.
+
+**What's the minimum scope to validate market demand?**
+One feature that solves one problem, for one persona. Don't try to serve two different customer segments in an MVP. Segment confusion kills SaaS MVPs faster than any technical problem.
+
+**Should I build mobile from day one?**
+No, unless mobile is the core channel (e.g., a field technician app). Build web first, validate the product, then add mobile in Phase 2. Adding React Native to a web SaaS adds 30–50% to cost and timeline.
+
+**What happens after MVP launch?**
+Plan for a 2–3 month stabilization period. Real users will find edge cases that weren't in the spec. Budget $1,500–$4,000/month for post-launch support, bug fixes, and small feature additions based on early customer feedback.
+
+---
+
+Need a SaaS MVP on a tight timeline? [Contact us](https://systemforgesoftware.com/contact) — we'll scope what's achievable in your timeframe and at what cost, with an honest assessment of risk.

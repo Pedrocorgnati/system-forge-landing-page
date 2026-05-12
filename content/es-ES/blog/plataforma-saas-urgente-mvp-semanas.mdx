@@ -1,0 +1,143 @@
+---
+title: "Plataforma SaaS Urgente: Del Concepto al MVP Funcional en Semanas"
+slug: "plataforma-saas-urgente-mvp-semanas"
+date: "2026-05-11"
+locale: "es-ES"
+description: "MVP SaaS en 6–12 semanas: €36.000–€140.000. Función core + auth + facturación con Next.js + Supabase + Stripe. Qué es alcanzable y qué es una trampa."
+excerpt: "MVP SaaS en 6–12 semanas: €36.000–€140.000. Función core + auth + facturación con Next.js + Supabase + Stripe. Qué es alcanzable y qué es una trampa."
+tags: ["plataforma SaaS urgente", "MVP SaaS España", "desarrollo SaaS Next.js", "coste SaaS 2026", "startup SaaS rápido"]
+coverImage: "/images/blog/plataforma-saas-urgente-mvp-semanas.png"
+author: "Pedro Corgnati"
+relatedService: "desarrollo-web"
+published: true
+exclusive: false
+hreflang_pair:
+  - locale: "pt-BR"
+    slug: "plataforma-saas-urgente"
+  - locale: "en"
+    slug: "urgent-saas-platform-mvp-weeks-cost"
+  - locale: "it-IT"
+    slug: "piattaforma-saas-urgente-mvp-settimane"
+seo_score: 8
+conversion_score: 8
+authority_score: 8
+uniqueness_score: 8
+---
+
+# Plataforma SaaS Urgente: Del Concepto al MVP Funcional en Semanas
+
+Un SaaS urgente no es un SaaS frágil — es un **SaaS focalizado**. Función core + autenticación con roles + facturación recurrente: eso es lo que obtienes en 6–12 semanas por €36.000–€140.000. Las empresas que intentan construir una "plataforma SaaS completa" en 8 semanas no entregan nada útil, o entregan algo que colapsa con los primeros 50 usuarios. La restricción que hace posible el SaaS urgente es la misma que hace buen software en general: control riguroso del alcance.
+
+Soy Pedro Corgnati, fundador de SystemForge. He entregado MVPs SaaS con plazos ajustados — una plataforma de analytics B2B en 8 semanas, un SaaS de scheduling para autónomos en 10 semanas. Esta guía es lo que le digo a cada fundador que llega con una fecha límite.
+
+Si todavía estás decidiendo si construir o comprar: lee primero [cómo construir una plataforma SaaS desde cero](https://systemforge.es/blog/construir-plataforma-saas-desde-cero-2026). Para la infraestructura post-MVP: la [hoja de ruta para un MVP SaaS en 30 días](https://systemforge.es/blog/mvp-saas-en-30-dias-hoja-de-ruta) cubre las siguientes fases. Si añades IA al SaaS: revisa antes el [coste del Vercel AI SDK en producción con Next.js](https://systemforge.es/blog/vercel-ai-sdk-costo-nextjs-produccion-2026).
+
+## Los 3 Componentes del MVP que Funciona
+
+### Componente 1: La función core
+
+Lo único por lo que tus clientes pagan. En un SaaS de gestión de proyectos: crea proyecto → asigna tareas → marca completado. En un SaaS de analytics: conecta fuente de datos → ejecuta informe → exporta. En un SaaS de reservas: crea hueco → cliente reserva → confirmación enviada.
+
+Sé brutal con el alcance. Si no es la razón por la que los clientes pagan, es Fase 2. El error más común en builds urgentes es tratar las funcionalidades "nice to have" como funcionalidades core. Un MVP con tres funcionalidades entregado en 8 semanas supera a un MVP con diez funcionalidades nunca entregado.
+
+Comprueba tu definición de alcance: ¿puedes describir la función core en una frase? Si necesitas más de una frase, no está suficientemente reducida.
+
+### Componente 2: Autenticación con arquitectura multi-tenant
+
+Todo SaaS tiene al menos dos roles: admin y usuario. La arquitectura multi-tenant — donde cada cliente solo ve sus propios datos — debe diseñarse desde el día uno. Añadirla después es costoso y a menudo requiere reescribir todo el modelo de datos.
+
+En la práctica, el multi-tenancy significa:
+- Cada consulta a la base de datos con scope en `tenant_id` (organización o cuenta)
+- Row-level security a nivel de base de datos (Supabase lo gestiona con PostgreSQL RLS)
+- Flujos de invitación para que los admins añadan miembros del equipo
+- Permisos basados en roles (¿qué puede hacer un visualizador vs. un editor vs. un admin?)
+
+Supabase hace esto significativamente más rápido que construir la auth desde cero: sesiones JWT, OAuth providers, magic links de email y políticas RLS disponibles out of the box.
+
+### Componente 3: Facturación recurrente
+
+Stripe Billing gestiona suscripciones, pruebas gratuitas, prorrateo, facturación, dunning (reintentos automáticos por pagos fallidos) y recuperación de ingresos. Integrarlo desde el inicio — no como añadido — requiere 1–2 semanas y ahorra 6–8 semanas de costoso retrofit posterior.
+
+La estructura de facturación define tus planes de producto. Antes de escribir una línea de código, decide:
+- ¿Cuántos planes? (Free/Pro/Business o basado en uso?)
+- ¿Qué cambia por plan? (usuarios, funcionalidades, llamadas API?)
+- ¿Duración de la prueba gratuita?
+- ¿Precios anuales vs. mensuales?
+
+Estas decisiones impactan el esquema de la base de datos. Cambiarlas a mitad del build es costoso.
+
+## Costes (EUR, 2026)
+
+| Alcance | Plazo | Coste |
+|---------|-------|-------|
+| Core + auth + billing (MVP) | 6–8 sem. | €36.000–€68.000 |
+| + Funcionalidades secundarias (2–3) | 8–12 sem. | €55.000–€110.000 |
+| + App móvil (React Native) | 12–16 sem. | €82.000–€165.000 |
+
+Costes mensuales tras el lanzamiento:
+- Vercel Pro: €18/mes
+- Supabase Pro: €23/mes
+- Comisiones Stripe: 1,5–2,9% + €0,25 por transacción (varía SEPA/tarjeta)
+- Mantenimiento: €1.400–€3.800/mes
+
+## Señales de Alerta en un Alcance SaaS Urgente
+
+**Señal 1: "Plataforma completa" en 8 semanas**
+Una plataforma SaaS completa con paridad de funcionalidades con incumbentes es un proyecto de 6–18 meses. Si escuchas "construimos todo" en 6 semanas, estás a punto de recibir un esqueleto muy caro.
+
+**Señal 2: Sin fase de discovery**
+Cualquier desarrollador que empiece a escribir código sin un discovery de 1–2 semanas va hacia un scope creep. El discovery es lo que separa un proyecto de 8 semanas de uno de 8 meses.
+
+**Señal 3: Sin mención del multi-tenancy desde el día uno**
+Si el desarrollador no está preguntando cómo se relacionan cuentas, organizaciones y usuarios en tu producto antes de escribir código, la arquitectura necesitará revisión a coste significativo.
+
+## Stack para la Velocidad
+
+Next.js 15 + Supabase (auth + DB + realtime) + Stripe + Vercel es la combinación más rápida y fiable para MVPs SaaS en 2026. Elimina la complejidad de DevOps durante los primeros 12–18 meses de crecimiento.
+
+Este stack no es correcto para cada proyecto — volúmenes altos de datos o requisitos específicos de compliance (GDPR data residency europea) pueden requerir elecciones distintas — pero para un MVP SaaS focalizado bajo una fecha límite, es el camino fiable más rápido que he encontrado.
+
+## El Sprint de Discovery: No Negociable
+
+Un sprint de discovery pagado (1 semana, €1.500–€4.500) debe preceder cualquier build SaaS. Produce:
+- Diseño del modelo de datos (entidades, relaciones, estructura de tenancy)
+- Diagramas de flujo de usuario para la función core
+- Contrato API (qué rutas existen, qué aceptan y devuelven)
+- Riesgos técnicos identificados y mitigados
+- Timeline realista con desglose de hitos
+
+Si el desarrollador con quien hablas no hace un sprint de discovery pagado, cambia de desarrollador. Estás pagando por certeza antes de comprometerte en un proyecto de 8–12 semanas.
+
+## RGPD y Conformidad para SaaS Europeos
+
+Si tu SaaS recopila datos de usuarios europeos, el RGPD impacta la arquitectura:
+- **Residencia de datos:** los datos de usuarios UE deben alojarse en UE (Vercel tiene regiones EU; Supabase tiene eu-west)
+- **Derecho al olvido:** el sistema debe soportar eliminación de cuenta con cascada de datos
+- **Consentimiento explícito:** banner de cookies, política de privacidad, registro del consentimiento
+- **Minimización de datos:** recopilar solo los datos necesarios para la funcionalidad
+
+Construir esto desde el inicio es mucho más barato que añadirlo después de una notificación de la AEPD.
+
+## Cómo Validar Antes de Construir
+
+Antes de gastar €36.000+, valida que los clientes pagarán por tu función core:
+1. **Landing page con lista de espera o pre-venta** — mide la conversión de registro
+2. **Prueba de puerta falsa** — pon un botón "Comprar ahora", recoge emails, diles "próximamente"
+3. **5 entrevistas con clientes** — pregunta sobre su proceso actual, no sobre tu producto
+
+El peor resultado en SaaS urgente es gastar €80.000 para construir rápido algo que nadie quiere.
+
+## FAQ
+
+**¿Puedo cobrar a clientes desde la semana 1 del desarrollo?**
+Sí — Stripe Billing puede integrarse antes de que el producto esté completo. Algunos equipos cobran por acceso anticipado mientras aún construyen. La ventaja: ingresos para financiar el desarrollo y feedback de clientes antes del lanzamiento.
+
+**¿Debería construir mobile desde el día uno?**
+No, a menos que el móvil sea el canal core (ej. una app para técnicos de campo). Construye web primero, valida el producto, luego añade mobile en Fase 2. Añadir React Native a un SaaS web añade el 30–50% a costes y plazo.
+
+**¿Qué pasa después del lanzamiento del MVP?**
+Planifica un período de estabilización de 2–3 meses. Los usuarios reales encontrarán casos límite que no estaban en la spec. Presupuesta €1.400–€3.800/mes para soporte post-lanzamiento, corrección de bugs y pequeñas adiciones de funcionalidades.
+
+---
+
+¿Necesitas un MVP SaaS con plazo ajustado? [Contáctanos](https://systemforge.es/contacto) — definimos qué es alcanzable en tu tiempo y a qué coste, con una evaluación honesta de los riesgos.
