@@ -11,6 +11,12 @@ name: Quad Market Build
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.agents/**'
+      - '.claude/**'
+      - 'CHANGELOG*'
   pull_request:
     branches: [main]
   workflow_dispatch:
@@ -60,6 +66,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
 
       - name: Cache node_modules + velite
         uses: actions/cache@v4
@@ -71,6 +78,16 @@ jobs:
           key: deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-${{ hashFiles('package-lock.json') }}
           restore-keys: |
             deps-${{ runner.os }}-node${{ env.NODE_VERSION }}-
+
+      - name: Cache npm + .next
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx', '**/*.mdx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
 
       - name: Install dependencies
         if: steps.cache-deps.outputs.cache-hit != 'true'
