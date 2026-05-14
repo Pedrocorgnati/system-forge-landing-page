@@ -19,7 +19,7 @@ import path from 'path'
 // Config
 // ---------------------------------------------------------------------------
 
-const ROOT = process.cwd()
+const ROOT = path.resolve(__dirname, '..')
 const STOCKPILE_DIR = path.join(ROOT, '.claude', 'blog', 'data', 'stockpile')
 const TELEMETRY_DIR = path.join(ROOT, '.claude', 'blog', 'data', 'telemetry')
 
