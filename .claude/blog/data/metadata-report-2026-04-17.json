@@ -1,0 +1,27 @@
+{
+  "generated_at": "2026-04-17",
+  "mode": "parity-daily",
+  "total_articles_processed": 15,
+  "metadata_per_article": {
+    "common_schemas": ["Article", "FAQPage", "BreadcrumbList"],
+    "open_graph": {"og:type": "article", "og:locale_alternate": "auto-from-hreflang_pair"},
+    "twitter_card": {"card": "summary_large_image"},
+    "geo_optimization": {
+      "answer_in_first_100_words": true,
+      "clear_h2_structure": true,
+      "current_timestamps": true,
+      "faq_schema_always": true
+    }
+  },
+  "metadata_validation": {
+    "title_max_chars": 120,
+    "description_max_chars": 160,
+    "all_within_limits": true,
+    "tags_count_per_article_min": 5,
+    "tags_count_per_article_max": 10
+  },
+  "hreflang_alternates_per_article": {
+    "rule": "todos os artigos parity referenciam o hub pt-BR via hreflang_pair, e ao publicar geram <link rel=alternate hreflang> bidirecional"
+  },
+  "compliance": "config.publish_rules + config.geo_optimization atendidos"
+}
