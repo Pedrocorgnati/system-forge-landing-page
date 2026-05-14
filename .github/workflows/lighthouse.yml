@@ -53,6 +53,20 @@ jobs:
 
       - run: npm ci
 
+      - name: Validate frontmatter (${{ matrix.locale }})
+        run: npm run prebuild:${{ matrix.build_suffix }}
+        env:
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
+
+      - name: Optimize images
+        run: npm run optimize:images
+
+      - name: Build content & search index
+        run: npm run prebuild
+        env:
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+
       - name: Build (${{ matrix.locale }})
         run: npm run build
         env:
