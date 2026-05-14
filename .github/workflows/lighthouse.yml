@@ -1,45 +1,69 @@
 name: Lighthouse CI
 
-# Aguarda o workflow "Triple Market Build" completar (padrão do projeto)
-# Idêntico ao deploy.yml e smoke-test.yml
 on:
-  workflow_run:
-    workflows: ["Triple Market Build"]
-    types:
-      - completed
+  schedule:
+    - cron: '0 3 * * 0'   # domingo 03h UTC
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
 
 jobs:
   lighthouse-ci:
-    # Só roda se o build passou
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
         include:
           - locale: pt-BR
-            artifact: build-pt-BR
             build_suffix: br
+            site_url: https://forjadesistemas.com.br
+            contact_email: contato@forjadesistemas.com.br
             port: 3001
           - locale: it-IT
-            artifact: build-it-IT
             build_suffix: it
+            site_url: https://systemforge.it
+            contact_email: contatto@systemforge.it
             port: 3002
           - locale: en
-            artifact: build-en
             build_suffix: en
+            site_url: https://systemforgesoftware.com
+            contact_email: contact@systemforgesoftware.com
             port: 3003
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download build artifact (${{ matrix.locale }})
-        uses: actions/download-artifact@v4
         with:
-          name: ${{ matrix.artifact }}
-          # Artifact do workflow de build que disparou este
-          run-id: ${{ github.event.workflow_run.id }}
-          path: out/
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Cache npm + .next
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ${{ github.workspace }}/.next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-${{ hashFiles('**/*.[jt]s', '**/*.[jt]sx', '**/*.mdx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json') }}-
+
+      - run: npm ci
+
+      - name: Build (${{ matrix.locale }})
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_LOCALE: ${{ matrix.locale }}
+          NEXT_PUBLIC_SITE_URL: ${{ matrix.site_url }}
+          OUT_DIR: out
+          NEXT_PUBLIC_CONTACT_EMAIL: ${{ matrix.contact_email }}
+          NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
+          NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
+          NEXT_PUBLIC_BUDGET_ENGINE_URL: ${{ secrets.NEXT_PUBLIC_BUDGET_ENGINE_URL }}
 
       - name: Install serve
         run: npm install -g serve
@@ -63,14 +87,12 @@ jobs:
         env:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
-      # Gate explícito — exit 1 se Lighthouse falhar
-      # (complementa gate automático via assertions "error" no lighthouserc.json)
       - name: Performance gate check (${{ matrix.locale }})
         if: always()
         run: |
           if [ "${{ steps.lighthouse.outcome }}" = "failure" ]; then
-            echo "❌ Lighthouse CI FAILED for locale: ${{ matrix.locale }}"
+            echo "Lighthouse CI FAILED for locale: ${{ matrix.locale }}"
             echo "Performance < 90 OR SEO < 95. Deploy blocked."
             exit 1
           fi
-          echo "✅ Performance gate PASSED for locale: ${{ matrix.locale }}"
+          echo "Performance gate PASSED for locale: ${{ matrix.locale }}"
