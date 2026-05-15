@@ -1,1790 +1,2777 @@
 {
   "locale": "pt-BR",
-  "total_clusters_avaliados": 220,
-  "novos": 180,
-  "ja_cobertos": 37,
-  "expandir": 0,
-  "fundir": 3,
+  "generated_at": "2026-05-14",
+  "total_clusters_avaliados": 172,
+  "novos": 91,
+  "ja_cobertos": 18,
+  "expandir": 63,
+  "fundir": 0,
   "ja_gerados": 0,
   "ja_no_estoque": 0,
+  "taxa_aproveitamento_pct": 52.9,
+  "stockpile_warning": "Stockpile desabilitado (stockpile.enabled=false) — Passo 1.5 registrado como aviso; nenhum pacote inventariado.",
+  "inventario_existente_total": 374,
+  "inventario_reviewed_total": 210,
   "clusters": [
     {
-      "cluster_id": "e-commerce-urgencia",
+      "cluster_id": "erp-personalizado-transacional-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-transacional-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "automacao-de-processos-transacional-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-transacional-fundo",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-transacional-fundo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-transacional-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-transacional-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-3",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "desenvolvimento-de-api-transacional-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "consultoria-tecnica-em-ti-comercial-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-transacional-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-transacional-fundo",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-transacional-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-transacional-fundo",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "consultoria-tecnica-em-ti-transacional-fundo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-transacional-fundo",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-transacional-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-transacional-fundo",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)",
+      "existing_slug": "guia-completo-loja-virtual",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-transacional-fundo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-4",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-5",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "transacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-comercial-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "sistema-web-interno-transacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "transacional",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-comercial-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)",
+      "existing_slug": "guia-completo-loja-virtual",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "erp-personalizado-comercial-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "automacao-de-processos-comercial-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-comercial-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-comercial-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "sistema-web-interno-comercial-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-comercial-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-comercial-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-comercial-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "erp-personalizado-urgencia-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-comercial-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-comercial-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-comercial-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "desenvolvimento-de-api-comercial-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-comercial-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-comercial-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "comercial",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-geo-local-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Slug identico ao artigo publicado: loja-virtual-urgente",
+      "details": "artigo geo-local existente cobre intencao: crm-personalizado-cidades-brasil",
+      "existing_slug": "crm-personalizado-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-urgencia",
+      "cluster_id": "erp-personalizado-geo-local-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "erp-personalizado-geo-local-fundo-2",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-geo-local-fundo",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-geo-local-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-geo-local-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "automacao-de-processos-geo-local-fundo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Slug identico ao artigo publicado: crm-urgente",
+      "details": "artigo geo-local existente cobre intencao: automacao-de-processos-cidades-brasil",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "automacao-processos-urgencia",
+      "cluster_id": "automacao-de-processos-geo-local-fundo-2",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'automacao urgente' coberta pelo artigo existente: automacao-de-processos-urgente",
+      "details": "artigo geo-local existente cobre intencao: automacao-de-processos-cidades-brasil",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "software-sob-medida-urgencia",
+      "cluster_id": "chatbot-com-ia-geo-local-fundo",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-geo-local-fundo-2",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-geo-local-fundo",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-geo-local-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-geo-local-fundo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'software sob medida urgente' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "artigo geo-local existente cobre intencao: manutencao-de-sistema-cidades-brasil",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "manutencao-sistema-urgencia",
+      "cluster_id": "sistema-web-interno-geo-local-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'manutencao sistema urgente' coberta pelo artigo existente: manutencao-de-sistema-urgente",
+      "details": "artigo geo-local existente cobre intencao: sistema-web-cidades-brasil",
+      "existing_slug": "sistema-web-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "erp-simples-urgencia",
+      "cluster_id": "sistema-web-interno-geo-local-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'erp urgente' coberta pelo artigo existente: erp-simples-urgente",
+      "details": "artigo geo-local existente cobre intencao: sistema-web-cidades-brasil",
+      "existing_slug": "sistema-web-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "site-institucional-geo-local-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "site-institucional-geo-local-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-comercial",
+      "cluster_id": "software-sob-medida-geo-local-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'preco de software sob medida' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "artigo geo-local existente cobre intencao: software-sob-medida-cidades-brasil",
+      "existing_slug": "software-sob-medida-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "software-sob-medida-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-comercial",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-comercial-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-transacional",
+      "cluster_id": "software-sob-medida-geo-local-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'contratar site' coberta pelo artigo existente: quanto-custa-site-para-clinica-medica-2026",
+      "details": "artigo geo-local existente cobre intencao: software-sob-medida-cidades-brasil",
+      "existing_slug": "software-sob-medida-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-transacional",
+      "cluster_id": "crm-personalizado-urgencia-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'contratar aplicativo' coberta pelo artigo existente: aplicativo-por-nicho",
+      "details": "artigo urgente existente: crm-personalizado-urgente",
+      "existing_slug": "crm-personalizado-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "saas-transacional-2",
+      "cluster_id": "saas-app-web-urgencia-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "sistema-web-interno-transacional-2",
+      "cluster_id": "aplicativo-mobile-urgencia-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-transacional-2",
+      "cluster_id": "automacao-de-processos-urgencia-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'contratar automacao' coberta pelo artigo existente: automacao-empresarial-urgente",
+      "details": "artigo urgente existente: automacao-de-processos-urgente",
+      "existing_slug": "automacao-de-processos-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "integracao-sistemas-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-transacional-2",
+      "cluster_id": "chatbot-com-ia-urgencia-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'contratar chatbot' coberta pelo artigo existente: chatbot-por-nicho",
+      "details": "artigo urgente existente: chatbot-com-ia-urgente",
+      "existing_slug": "chatbot-com-ia-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "software-sob-medida-transacional-2",
+      "cluster_id": "consultoria-tecnica-em-ti-urgencia-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-urgencia-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-urgencia-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-urgencia-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-urgencia-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'contratar software sob medida' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "artigo urgente existente: loja-virtual-urgente",
+      "existing_slug": "loja-virtual-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "manutencao-sistema-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-transacional-2",
-      "classification": "FUNDIR",
-      "action": "merge",
-      "details": "Intencao similar em reviewed: agente-ia-whatsapp-business-api-personalizado-preco-2026",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-transacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-urgencia",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-urgencia",
-      "classification": "FUNDIR",
-      "action": "merge",
-      "details": "Intencao similar em reviewed: sistema-web-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-urgencia",
+      "cluster_id": "manutencao-de-sistema-urgencia-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Slug identico ao artigo publicado: sistema-web-urgente",
+      "details": "artigo urgente existente: refatoracao-de-sistema-urgente",
+      "existing_slug": "refatoracao-de-sistema-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-urgencia",
+      "cluster_id": "refatoracao-de-sistema-urgencia-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'dashboard urgente' coberta pelo artigo existente: painel-de-indicadores-urgente",
+      "details": "artigo urgente existente: refatoracao-de-sistema-urgente",
+      "existing_slug": "refatoracao-de-sistema-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "automacao-processos-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-urgencia",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-transacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-informacional-4",
+      "cluster_id": "sistema-web-interno-urgencia-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'software sob medida em 7 dias' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "artigo urgente existente: sistema-web-urgente",
+      "existing_slug": "sistema-web-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-nicho",
+      "cluster_id": "site-institucional-urgencia-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-urgencia-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "urgencia",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-dor-financeira-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "api-backend-nicho",
+      "cluster_id": "site-institucional-dor-financeira-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-dor-financeira-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-dor-financeira-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "erp-personalizado-dor-financeira-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "automacao-de-processos-dor-financeira-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-dor-financeira-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-dor-financeira-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "consultoria-tecnica-em-ti-dor-financeira-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-dor-financeira-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-dor-financeira-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-dor-financeira-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-dor-financeira-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-dor-financeira-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-dor-financeira-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "sistema-web-interno-dor-financeira-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-geo-local-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "geo-local",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'api urgente' coberta pelo artigo existente: backend-urgente",
+      "details": "artigo geo-local existente cobre intencao: loja-virtual-cidades-brasil",
+      "existing_slug": "loja-virtual-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "e-commerce-informacional-4",
+      "cluster_id": "site-institucional-substituicao-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "saas-informacional-4",
+      "cluster_id": "crm-personalizado-comparativa-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "sistema-web-interno-informacional-4",
+      "cluster_id": "erp-personalizado-comparativa-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-informacional-4",
+      "cluster_id": "software-sob-medida-nicho-fundo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "nicho",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-nicho-fundo-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "fundo",
+      "intent_type": "nicho",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-comparativa-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "erp-simples-informacional-4",
+      "cluster_id": "sistema-web-interno-comparativa-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "dashboard-bi-informacional-4",
+      "cluster_id": "automacao-de-processos-dor-operacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "automacao-processos-informacional-4",
+      "cluster_id": "manutencao-de-sistema-substituicao-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "integracao-sistemas-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-tecnologia",
+      "cluster_id": "site-institucional-nicho-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "nicho",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'saas urgente' coberta pelo artigo existente: plataforma-saas-urgente",
+      "details": "artigo nicho existente: site-institucional-por-nicho",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "chatbot-ia-tecnologia",
+      "cluster_id": "erp-personalizado-dor-operacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-comparativa-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-dor-operacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-comparativa-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-comparativa-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-comparativa-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-dor-operacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-dor-operacional-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-dor-operacional-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-dor-operacional-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-dor-operacional-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-dor-operacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-dor-operacional-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-dor-operacional-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "sistema-web-interno-dor-operacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-dor-operacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "software-sob-medida-dor-operacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "crm-personalizado-substituicao-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "erp-personalizado-substituicao-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "saas-app-web-substituicao-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "aplicativo-mobile-substituicao-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "automacao-de-processos-substituicao-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "chatbot-com-ia-substituicao-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "dashboard-bi-substituicao-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "integracao-de-sistemas-substituicao-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "landing-page-substituicao-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "loja-virtual-substituicao-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "sistema-web-interno-substituicao-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
+      "classification": "NOVO",
+      "action": "gerar",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
+      "stockpile_equivalence_id": null,
+      "stockpile_promotion_state": null
+    },
+    {
+      "cluster_id": "site-institucional-nicho-meio-2",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "nicho",
       "classification": "JA_COBERTO",
       "action": "skip",
-      "details": "Keyword principal 'chatbot urgente' coberta pelo artigo existente: chatbot-com-ia-urgente",
+      "details": "artigo nicho existente: site-institucional-por-nicho",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "refatoracao-legado-tecnologia",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'refatoracao urgente' coberta pelo artigo existente: refatoracao-de-sistema-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-tecnologia",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-nicho",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'loja virtual para escola' coberta pelo artigo existente: loja-virtual-por-nicho",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-nicho",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'manutencao sistema para escola' coberta pelo artigo existente: sistema-gestao-escola-infantil-creche-2026",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-nicho",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'sistema web para escola' coberta pelo artigo existente: sistema-web-por-nicho",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-nicho",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-comparativa",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-comparativa",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-comparativa",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-comparativa",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-comparativa",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-informacional-6",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-local",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'software sob medida em Recife' coberta pelo artigo existente: sistema-personalizado-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-local",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-tecnologia",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-tecnologia-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "api-backend-tecnologia-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-informacional-3",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'site clínica' coberta pelo artigo existente: quanto-custa-site-por-nicho",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e landing page' coberta pelo artigo existente: landing-page-que-converte-elementos-essenciais",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "landing-page-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e loja virtual' coberta pelo artigo existente: guia-completo-loja-virtual",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "e-commerce-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "app-mobile-informacional-7",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "saas-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "sistema-web-interno-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e crm' coberta pelo artigo existente: crm-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "crm-personalizado-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-informacional",
-      "classification": "FUNDIR",
-      "action": "merge",
-      "details": "Intencao similar em reviewed: erp-por-segmento",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "erp-simples-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "dashboard-bi-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "automacao-processos-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "integracao-sistemas-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "chatbot-ia-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e software sob medida' coberta pelo artigo existente: sistema-personalizado-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-informacional-2",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'software sob medida escola' coberta pelo artigo existente: sistema-personalizado-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e manutencao sistema' coberta pelo artigo existente: manutencao-de-sistema-urgente",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "manutencao-sistema-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "refatoracao-legado-informacional",
+      "cluster_id": "software-sob-medida-substituicao-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "refatoracao-legado-informacional-2",
+      "cluster_id": "saas-app-web-comparativa-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "refatoracao-legado-informacional-3",
+      "cluster_id": "automacao-de-processos-comparativa-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "marketplace-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e marketplace' coberta pelo artigo existente: marketplace-b2b-vs-b2c-diferencas",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "marketplace-informacional-3",
+      "cluster_id": "chatbot-com-ia-comparativa-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "saas-informacional-parte1",
+      "cluster_id": "consultoria-tecnica-em-ti-comparativa-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "saas-informacional-parte2",
+      "cluster_id": "integracao-de-sistemas-comparativa-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-informacional-parte1",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'software sob medida startup' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-tecnologia",
+      "cluster_id": "landing-page-comparativa-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "app-mobile-tecnologia",
+      "cluster_id": "manutencao-de-sistema-comparativa-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "api-backend-tecnologia-parte1",
+      "cluster_id": "refatoracao-de-sistema-comparativa-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "api-backend-tecnologia-parte2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "crm-personalizado-informacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)",
+      "existing_slug": "guia-completo-crm-personalizado",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-informacional-4",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "erp-personalizado-informacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "automacao-de-processos-informacional-meio",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "e-commerce-informacional-5",
+      "cluster_id": "sistema-web-interno-informacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "app-mobile-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "manutencao-de-sistema-informacional-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "app-mobile-informacional-6",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "crm-personalizado-informacional-topo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)",
+      "existing_slug": "guia-completo-crm-personalizado",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "saas-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "erp-personalizado-informacional-topo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "sistema-web-interno-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "automacao-de-processos-informacional-topo",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "automacao-de-processos-informacional-topo-2",
+      "pillar": "Automacao e Processos Empresariais",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "crm-personalizado-informacional-3",
+      "cluster_id": "consultoria-tecnica-em-ti-informacional-topo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "erp-simples-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "dashboard-bi-informacional-topo",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "erp-simples-informacional-5",
+      "cluster_id": "desenvolvimento-de-api-informacional-topo",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "dashboard-bi-informacional-3",
+      "cluster_id": "saas-app-web-informacional-meio",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "dashboard-bi-informacional-5",
+      "cluster_id": "aplicativo-mobile-informacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "automacao-processos-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "chatbot-com-ia-informacional-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "integracao-sistemas-informacional-3",
+      "cluster_id": "consultoria-tecnica-em-ti-informacional-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "chatbot-ia-informacional-2",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'chatbot clínica' coberta pelo artigo existente: chatbot-por-nicho",
+      "cluster_id": "dashboard-bi-informacional-meio",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "chatbot-ia-informacional-5",
+      "cluster_id": "integracao-de-sistemas-informacional-meio",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "software-sob-medida-informacional-3",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'software sob medida farmácia' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "cluster_id": "landing-page-informacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "manutencao-sistema-informacional-3",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "loja-virtual-informacional-meio",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)",
+      "existing_slug": "guia-completo-loja-virtual",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "manutencao-sistema-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "refatoracao-de-sistema-informacional-meio",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "refatoracao-legado-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "site-institucional-informacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "marketplace-informacional-2",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "software-sob-medida-informacional-meio",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "meio",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "marketplace-informacional-5",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "chatbot-com-ia-informacional-topo",
+      "pillar": "IA Aplicada a Negocios",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)",
+      "existing_slug": "chatbot-com-ia-urgente",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-informacional-parte1",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "software-sob-medida-informacional-topo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-informacional-parte2",
+      "cluster_id": "saas-app-web-informacional-topo",
+      "pillar": "Gestao de Produto e MVP",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "landing-page-tecnologia",
+      "cluster_id": "aplicativo-mobile-informacional-topo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "software-sob-medida-informacional-parte2",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'roi de software sob medida' coberta pelo artigo existente: sistema-personalizado-urgente",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-informacional-8",
+      "cluster_id": "integracao-de-sistemas-informacional-topo",
+      "pillar": "Tecnologia e Stack",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
       "classification": "NOVO",
       "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
-    },
-    {
-      "cluster_id": "site-institucional-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e site' coberta pelo artigo existente: site-aparecer-google-seo-stack-ideal",
+      "details": "intencao nao coberta — artigo novo necessario",
+      "existing_slug": null,
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "app-mobile-informacional",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "landing-page-informacional-topo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "site-institucional-informacional-7",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "loja-virtual-informacional-topo",
+      "pillar": "E-commerce e Vendas Online",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)",
+      "existing_slug": "guia-completo-loja-virtual",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "api-backend-informacional",
-      "classification": "JA_COBERTO",
-      "action": "skip",
-      "details": "Keyword principal 'o que e api' coberta pelo artigo existente: api-para-empresas-integracao-erp-ecommerce",
+      "cluster_id": "refatoracao-de-sistema-informacional-topo",
+      "pillar": "Como Contratar e Avaliar",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
     {
-      "cluster_id": "app-mobile-informacional-8",
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Intencao nao coberta por nenhum artigo existente, gerado ou no estoque",
+      "cluster_id": "site-institucional-informacional-topo",
+      "pillar": "Tipos de Projeto e Produto",
+      "funnel_stage": "topo",
+      "intent_type": "informacional",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)",
+      "existing_slug": "site-institucional-por-nicho",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     }
   ],
-  "expansions": [],
-  "merges": [
+  "expansions": [
     {
-      "cluster_id": "api-backend-transacional-2",
-      "merge_target_slug": "agente-ia-whatsapp-business-api-personalizado-preco-2026",
-      "justification": "Intencao similar em reviewed: agente-ia-whatsapp-business-api-personalizado-preco-2026"
+      "cluster_id": "erp-personalizado-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster erp-personalizado-transacional-fundo",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
     },
     {
-      "cluster_id": "app-mobile-urgencia",
-      "merge_target_slug": "sistema-web-urgente",
-      "justification": "Intencao similar em reviewed: sistema-web-urgente"
+      "cluster_id": "automacao-de-processos-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster automacao-de-processos-transacional-fundo",
+        "H2: Casos de uso para automacao de processos"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)"
     },
     {
-      "cluster_id": "erp-simples-informacional",
-      "merge_target_slug": "erp-por-segmento",
-      "justification": "Intencao similar em reviewed: erp-por-segmento"
+      "cluster_id": "refatoracao-de-sistema-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster refatoracao-de-sistema-transacional-fundo",
+        "H2: Casos de uso para refatoracao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster site-institucional-transacional-fundo",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-transacional-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster site-institucional-transacional-fundo-2",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster software-sob-medida-transacional-fundo",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-3",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster software-sob-medida-transacional-fundo-3",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "crm-personalizado-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster crm-personalizado-transacional-fundo",
+        "H2: Casos de uso para crm personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster chatbot-com-ia-transacional-fundo",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "dashboard-bi-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster dashboard-bi-transacional-fundo",
+        "H2: Casos de uso para dashboard bi"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster landing-page-transacional-fundo",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "loja-virtual-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-loja-virtual",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster loja-virtual-transacional-fundo",
+        "H2: Casos de uso para loja virtual"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)"
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-transacional-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster manutencao-de-sistema-transacional-fundo",
+        "H2: Casos de uso para manutencao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster software-sob-medida-transacional-fundo-2",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-4",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster software-sob-medida-transacional-fundo-4",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-transacional-fundo-5",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Transacional — contexto do cluster software-sob-medida-transacional-fundo-5",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "loja-virtual-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-loja-virtual",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster loja-virtual-comercial-meio",
+        "H2: Casos de uso para loja virtual"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster erp-personalizado-comercial-meio",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "automacao-de-processos-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster automacao-de-processos-comercial-meio",
+        "H2: Casos de uso para automacao de processos"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster chatbot-com-ia-comercial-meio",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster site-institucional-comercial-meio",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster landing-page-comercial-meio",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster software-sob-medida-comercial-meio",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-urgencia-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Urgencia — contexto do cluster erp-personalizado-urgencia-meio",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "crm-personalizado-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster crm-personalizado-comercial-meio",
+        "H2: Casos de uso para crm personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "dashboard-bi-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster dashboard-bi-comercial-meio",
+        "H2: Casos de uso para dashboard bi"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)"
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster manutencao-de-sistema-comercial-meio",
+        "H2: Casos de uso para manutencao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-comercial-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Comercial — contexto do cluster refatoracao-de-sistema-comercial-meio",
+        "H2: Casos de uso para refatoracao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-geo-local-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster erp-personalizado-geo-local-fundo",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-geo-local-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster erp-personalizado-geo-local-fundo-2",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-geo-local-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster chatbot-com-ia-geo-local-fundo",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-geo-local-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster chatbot-com-ia-geo-local-fundo-2",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-geo-local-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster landing-page-geo-local-fundo",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-geo-local-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster site-institucional-geo-local-fundo",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-geo-local-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Geo Local — contexto do cluster site-institucional-geo-local-fundo-2",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "dashboard-bi-urgencia-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "sections_to_add": [
+        "H2: Urgencia — contexto do cluster dashboard-bi-urgencia-meio",
+        "H2: Casos de uso para dashboard bi"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-urgencia-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Urgencia — contexto do cluster landing-page-urgencia-meio",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-urgencia-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Urgencia — contexto do cluster site-institucional-urgencia-meio",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-urgencia-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Urgencia — contexto do cluster software-sob-medida-urgencia-meio",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-nicho-fundo",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Nicho — contexto do cluster software-sob-medida-nicho-fundo",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-nicho-fundo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Nicho — contexto do cluster software-sob-medida-nicho-fundo-2",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "crm-personalizado-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster crm-personalizado-informacional-meio",
+        "H2: Casos de uso para crm personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster erp-personalizado-informacional-meio",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "automacao-de-processos-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster automacao-de-processos-informacional-meio",
+        "H2: Casos de uso para automacao de processos"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "manutencao-de-sistema-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "manutencao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster manutencao-de-sistema-informacional-meio",
+        "H2: Casos de uso para manutencao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: manutencao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "crm-personalizado-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-crm-personalizado",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster crm-personalizado-informacional-topo",
+        "H2: Casos de uso para crm personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-crm-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "erp-personalizado-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "tiny-erp-vs-erp-personalizado",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster erp-personalizado-informacional-topo",
+        "H2: Casos de uso para erp personalizado"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: tiny-erp-vs-erp-personalizado (overlap=100%)"
+    },
+    {
+      "cluster_id": "automacao-de-processos-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster automacao-de-processos-informacional-topo",
+        "H2: Casos de uso para automacao de processos"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "automacao-de-processos-informacional-topo-2",
+      "action": "EXPANDIR",
+      "existing_slug": "automacao-de-processos-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster automacao-de-processos-informacional-topo-2",
+        "H2: Casos de uso para automacao de processos"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: automacao-de-processos-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "dashboard-bi-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster dashboard-bi-informacional-topo",
+        "H2: Casos de uso para dashboard bi"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster chatbot-com-ia-informacional-meio",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "dashboard-bi-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "power-bi-vs-dashboard-customizado-nextjs-pme",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster dashboard-bi-informacional-meio",
+        "H2: Casos de uso para dashboard bi"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: power-bi-vs-dashboard-customizado-nextjs-pme (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster landing-page-informacional-meio",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "loja-virtual-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-loja-virtual",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster loja-virtual-informacional-meio",
+        "H2: Casos de uso para loja virtual"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)"
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster refatoracao-de-sistema-informacional-meio",
+        "H2: Casos de uso para refatoracao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster site-institucional-informacional-meio",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-informacional-meio",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster software-sob-medida-informacional-meio",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "chatbot-com-ia-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "chatbot-com-ia-urgente",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster chatbot-com-ia-informacional-topo",
+        "H2: Casos de uso para chatbot com ia"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: chatbot-com-ia-urgente (overlap=100%)"
+    },
+    {
+      "cluster_id": "software-sob-medida-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "quanto-custa-software-sob-medida-brasil-2026",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster software-sob-medida-informacional-topo",
+        "H2: Casos de uso para software sob medida"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: quanto-custa-software-sob-medida-brasil-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "landing-page-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "landing-page-conversao-cro-otimizacao-2026",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster landing-page-informacional-topo",
+        "H2: Casos de uso para landing page"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: landing-page-conversao-cro-otimizacao-2026 (overlap=100%)"
+    },
+    {
+      "cluster_id": "loja-virtual-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "guia-completo-loja-virtual",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster loja-virtual-informacional-topo",
+        "H2: Casos de uso para loja virtual"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: guia-completo-loja-virtual (overlap=100%)"
+    },
+    {
+      "cluster_id": "refatoracao-de-sistema-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "refatoracao-de-sistema-cidades-brasil",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster refatoracao-de-sistema-informacional-topo",
+        "H2: Casos de uso para refatoracao de sistema"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: refatoracao-de-sistema-cidades-brasil (overlap=100%)"
+    },
+    {
+      "cluster_id": "site-institucional-informacional-topo",
+      "action": "EXPANDIR",
+      "existing_slug": "site-institucional-por-nicho",
+      "sections_to_add": [
+        "H2: Informacional — contexto do cluster site-institucional-informacional-topo",
+        "H2: Casos de uso para site institucional"
+      ],
+      "keywords_to_incorporate": [],
+      "justification": "artigo existente cobre parcialmente: site-institucional-por-nicho (overlap=100%)"
     }
-  ]
+  ],
+  "merges": []
 }

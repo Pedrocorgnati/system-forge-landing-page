@@ -6,250 +6,205 @@
 - Idioma: Português Brasileiro
 
 ## Resumo por Onda
-| Onda | Clusters | Score Medio | Foco |
-|------|----------|-------------|------|
-| 1 | 33 | 84.7 | Comercial/urgencia |
-| 2 | 55 | 78.9 | Nichos/dores |
-| 3 | 80 | 54.5 | Autoridade |
-| 4 | 44 | 43.0 | Cobertura |
-| 5 | 8 | 35.1 | Programatico |
+| Onda | Nome | Clusters | Score Medio | Range | Foco | Volume Alvo | Prazo |
+|------|------|----------|-------------|-------|------|-------------|-------|
+| 1 | Ataque Imediato | 41 | 84.3 | 91.0-76.5 | Comercial/urgencia | 30-50 | Mes 1 |
+| 2 | Expansao Comercial | 58 | 70.4 | 74.5-61.5 | Nichos/dores | 50-80 | Mes 2-3 |
+| 3 | Autoridade | 41 | 57.4 | 59.5-56.5 | Guias/pilares/tecnologia | 80-120 | Mes 4-6 |
+| 4 | Cobertura Total | 32 | 35.9 | 41.0-32.0 | Informacionais/educacionais | 100-200 | Mes 7-12 |
 
 ## Onda 1 — Ataque Imediato
-| # | Cluster | Score | Tipo | CTA |
-|---|---------|-------|------|-----|
-| 1 | loja virtual urgente | 88 | urgencia | Fale com um especialista no WhatsApp |
-| 2 | crm urgente | 88 | urgencia | Fale com um especialista no WhatsApp |
-| 3 | automacao urgente | 88 | urgencia | Fale com um especialista no WhatsApp |
-| 4 | software sob medida urgente | 88 | urgencia | Fale com um especialista no WhatsApp |
-| 5 | manutencao sistema urgente | 88 | urgencia | Fale com um especialista no WhatsApp |
-| 6 | erp urgente | 87 | urgencia | Fale com um especialista no WhatsApp |
-| 7 | preco de site | 84 | comercial | Fale com um especialista no WhatsApp |
-| 8 | site Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 9 | preco de landing page | 84 | comercial | Fale com um especialista no WhatsApp |
-| 10 | landing page Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 11 | preco de loja virtual | 84 | comercial | Fale com um especialista no WhatsApp |
-| 12 | loja virtual Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 13 | preco de aplicacao | 84 | comercial | Fale com um especialista no WhatsApp |
-| 14 | aplicativo Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 15 | preco de saas | 84 | comercial | Fale com um especialista no WhatsApp |
-| 16 | saas Goiânia preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 17 | preco de sistema web | 84 | comercial | Fale com um especialista no WhatsApp |
-| 18 | sistema web Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 19 | preco de crm | 84 | comercial | Fale com um especialista no WhatsApp |
-| 20 | crm Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 21 | preco de erp | 84 | comercial | Fale com um especialista no WhatsApp |
-| 22 | erp Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 23 | preco de dashboard | 84 | comercial | Fale com um especialista no WhatsApp |
-| 24 | dashboard Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 25 | preco de automacao | 84 | comercial | Fale com um especialista no WhatsApp |
-| 26 | automacao Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 27 | preco de integracao sistemas | 84 | comercial | Fale com um especialista no WhatsApp |
-| 28 | integracao sistemas Goiânia preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 29 | preco de chatbot | 84 | comercial | Fale com um especialista no WhatsApp |
-| 30 | chatbot Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 31 | preco de software sob medida | 84 | comercial | Fale com um especialista no WhatsApp |
-| 32 | software sob medida Maringá preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 33 | preco de manutencao sistema | 84 | comercial | Fale com um especialista no WhatsApp |
+**Foco:** Comercial/urgencia | **Volume alvo:** 30-50 artigos | **Prazo:** Mes 1
+
+| # | Cluster | Keyword Principal | Score | Intent | Funil | CTA | Conversao |
+|---|---------|------------------|-------|--------|-------|-----|-----------|
+| 1 | ERP personalizado | contratar desenvolvimento de ERP para minha empresa | 91.0 | transacional | fundo | whatsapp | alto |
+| 2 | aplicativo mobile | contratar empresa para desenvolver aplicativo | 91.0 | transacional | fundo | whatsapp | alto |
+| 3 | automação de processos | contratar empresa para automatizar processos | 91.0 | transacional | fundo | whatsapp | alto |
+| 4 | integração de sistemas | contratar integração entre sistemas da empresa | 91.0 | transacional | fundo | whatsapp | alto |
+| 5 | refatoração de sistema | contratar empresa para refatorar sistema antigo | 91.0 | transacional | fundo | whatsapp | alto |
+| 6 | site institucional | contratar empresa para criar site institucional | 91.0 | transacional | fundo | whatsapp | alto |
+| 7 | site institucional | quanto custa criar site para empresa | 91.0 | transacional | fundo | whatsapp | alto |
+| 8 | software sob medida | contratar empresa para desenvolver software sob medida | 91.0 | transacional | fundo | whatsapp | alto |
+| 9 | software sob medida | contratar sistema de agendamento para dentista | 91.0 | transacional | fundo | whatsapp | alto |
+| 10 | desenvolvimento de API | contratar desenvolvimento de API para minha empresa | 88.0 | transacional | meio | whatsapp | alto |
+| 11 | consultoria técnica em TI | quanto custa consultoria de tecnologia para empresa | 87.5 | comercial | meio | whatsapp | medio-alto |
+| 12 | CRM personalizado | contratar desenvolvimento de CRM personalizado | 86.0 | transacional | fundo | whatsapp | alto |
+| 13 | SaaS / app web | contratar equipe para desenvolver meu SaaS | 86.0 | transacional | fundo | whatsapp | alto |
+| 14 | aplicativo mobile | quem faz criar aplicativo | 86.0 | transacional | fundo | whatsapp | alto |
+| 15 | chatbot com IA | contratar desenvolvimento de chatbot com IA | 86.0 | transacional | fundo | whatsapp | alto |
+| 16 | consultoria técnica em TI | contratar consultoria técnica de software | 86.0 | transacional | fundo | whatsapp | alto |
+| 17 | dashboard / BI | contratar desenvolvimento de dashboard de KPIs | 86.0 | transacional | fundo | whatsapp | alto |
+| 18 | landing page | contratar criação de landing page para campanha | 86.0 | transacional | fundo | whatsapp | alto |
+| 19 | loja virtual | contratar desenvolvedor para criar loja virtual | 86.0 | transacional | fundo | whatsapp | alto |
+| 20 | manutenção de sistema | contratar manutenção de sistema web | 86.0 | transacional | fundo | whatsapp | alto |
+| 21 | software sob medida | software house Brasil profissional | 86.0 | transacional | fundo | whatsapp | alto |
+| 22 | software sob medida | contratar software para escritório contábil | 86.0 | transacional | fundo | whatsapp | alto |
+| 23 | software sob medida | contratar sistema de pdv para loja de roupas | 86.0 | transacional | fundo | whatsapp | alto |
+| 24 | aplicativo mobile | quanto custa criar um aplicativo em 2026 | 84.5 | comercial | meio | whatsapp | medio-alto |
+| 25 | sistema web interno | contratar desenvolvimento de sistema interno | 83.0 | transacional | meio | whatsapp | alto |
+| 26 | loja virtual | quanto custa criar uma loja virtual em 2026 | 82.5 | comercial | meio | whatsapp | medio-alto |
+| 27 | ERP personalizado | quanto custa um ERP simples para empresa pequena | 81.5 | comercial | meio | whatsapp | medio-alto |
+| 28 | automação de processos | quanto custa automatizar processos da empresa | 81.5 | comercial | meio | whatsapp | medio-alto |
+| 29 | chatbot com IA | quanto custa criar um chatbot com IA para empresa | 81.5 | comercial | meio | whatsapp | medio-alto |
+| 30 | integração de sistemas | quanto custa integrar sistemas da empresa | 81.5 | comercial | meio | whatsapp | medio-alto |
+| 31 | sistema web interno | quanto custa um sistema web interno para empresa | 81.5 | comercial | meio | whatsapp | medio-alto |
+| 32 | site institucional | quanto custa criar um site institucional em 2026 | 80.5 | comercial | meio | whatsapp | medio-alto |
+| 33 | landing page | quanto custa fazer uma landing page profissional | 78.5 | comercial | meio | whatsapp | medio-alto |
+| 34 | software sob medida | quanto custa desenvolver software sob medida em 2026 | 78.5 | comercial | meio | whatsapp | medio-alto |
+| 35 | ERP personalizado | ERP simples urgente para empresa em crescimento | 77.0 | urgencia | meio | whatsapp | alto |
+| 36 | CRM personalizado | quanto custa desenvolver um CRM personalizado | 76.5 | comercial | meio | whatsapp | medio-alto |
+| 37 | SaaS / app web | quanto custa desenvolver um SaaS em 2026 | 76.5 | comercial | meio | whatsapp | medio-alto |
+| 38 | dashboard / BI | quanto custa criar um dashboard personalizado | 76.5 | comercial | meio | whatsapp | medio-alto |
+| 39 | desenvolvimento de API | quanto custa desenvolver uma API REST | 76.5 | comercial | meio | whatsapp | medio-alto |
+| 40 | manutenção de sistema | quanto custa manutenção mensal de sistema web | 76.5 | comercial | meio | whatsapp | medio-alto |
+| 41 | refatoração de sistema | quanto custa refatorar sistema legado | 76.5 | comercial | meio | whatsapp | medio-alto |
 
 ## Onda 2 — Expansao Comercial
-| # | Cluster | Score | Tipo | CTA |
-|---|---------|-------|------|-----|
-| 1 | manutencao sistema Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 2 | preco de refatoracao | 84 | comercial | Fale com um especialista no WhatsApp |
-| 3 | refatoracao Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 4 | preco de api | 84 | comercial | Fale com um especialista no WhatsApp |
-| 5 | api Manaus preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 6 | preco de marketplace | 84 | comercial | Fale com um especialista no WhatsApp |
-| 7 | marketplace Recife preco | 84 | comercial | Fale com um especialista no WhatsApp |
-| 8 | contratar cite | 82 | transacional | Fale com um especialista no WhatsApp |
-| 9 | contratar aplicacao | 82 | transacional | Fale com um especialista no WhatsApp |
-| 10 | contratar site | 80 | transacional | Fale com um especialista no WhatsApp |
-| 11 | contratar landing page | 80 | transacional | Fale com um especialista no WhatsApp |
-| 12 | contratar loja virtual | 80 | transacional | Fale com um especialista no WhatsApp |
-| 13 | contratar aplicativo | 80 | transacional | Fale com um especialista no WhatsApp |
-| 14 | contratar saas | 80 | transacional | Fale com um especialista no WhatsApp |
-| 15 | contratar sistema web | 80 | transacional | Fale com um especialista no WhatsApp |
-| 16 | contratar crm | 80 | transacional | Fale com um especialista no WhatsApp |
-| 17 | contratar erp | 80 | transacional | Fale com um especialista no WhatsApp |
-| 18 | contratar dashboard | 80 | transacional | Fale com um especialista no WhatsApp |
-| 19 | contratar automacao | 80 | transacional | Fale com um especialista no WhatsApp |
-| 20 | contratar integracao sistemas | 80 | transacional | Fale com um especialista no WhatsApp |
-| 21 | contratar chatbot | 80 | transacional | Fale com um especialista no WhatsApp |
-| 22 | contratar software sob medida | 80 | transacional | Fale com um especialista no WhatsApp |
-| 23 | contratar manutencao sistema | 80 | transacional | Fale com um especialista no WhatsApp |
-| 24 | contratar refatoracao | 80 | transacional | Fale com um especialista no WhatsApp |
-| 25 | contratar api | 80 | transacional | Fale com um especialista no WhatsApp |
-| 26 | contratar marketplace | 80 | transacional | Fale com um especialista no WhatsApp |
-| 27 | site urgente | 79 | urgencia | Fale com um especialista no WhatsApp |
-| 28 | aplicacao urgente | 79 | urgencia | Fale com um especialista no WhatsApp |
-| 29 | quem faz landing page em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 30 | quem faz loja virtual em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 31 | quem faz saas em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 32 | quem faz sistema web em Goiânia | 78 | transacional | Fale com um especialista no WhatsApp |
-| 33 | sistema web urgente | 78 | urgencia | Fale com um especialista no WhatsApp |
-| 34 | quem faz crm em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 35 | quem faz erp em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 36 | quem faz dashboard em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 37 | dashboard urgente | 78 | urgencia | Fale com um especialista no WhatsApp |
-| 38 | quem faz automacao em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 39 | quem faz integracao sistemas em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 40 | integracao sistemas urgente | 78 | urgencia | Fale com um especialista no WhatsApp |
-| 41 | quem faz chatbot em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 42 | quem faz software sob medida em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 43 | quem faz manutencao sistema em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 44 | quem faz refatoracao em Manaus | 78 | transacional | Fale com um especialista no WhatsApp |
-| 45 | quem faz api em Salvador | 78 | transacional | Fale com um especialista no WhatsApp |
-| 46 | quem faz marketplace em Recife | 78 | transacional | Fale com um especialista no WhatsApp |
-| 47 | site em 7 dias | 77 | informacional | Fale com um especialista no WhatsApp |
-| 48 | aplicacao em 7 dias | 77 | informacional | Fale com um especialista no WhatsApp |
-| 49 | chatbot em 7 dias | 77 | informacional | Fale com um especialista no WhatsApp |
-| 50 | software sob medida em 7 dias | 77 | informacional | Fale com um especialista no WhatsApp |
-| 51 | landing page urgente | 74 | nicho | Fale com um especialista no WhatsApp |
-| 52 | api urgente | 74 | nicho | Fale com um especialista no WhatsApp |
-| 53 | loja virtual clínica | 70 | informacional | Fale com um especialista no WhatsApp |
-| 54 | saas clínica | 70 | informacional | Fale com um especialista no WhatsApp |
-| 55 | sistema web farmácia | 70 | informacional | Fale com um especialista no WhatsApp |
+**Foco:** Nichos/dores | **Volume alvo:** 50-80 artigos | **Prazo:** Mes 2-3
+
+| # | Cluster | Keyword Principal | Score | Intent | Funil | CTA | Conversao |
+|---|---------|------------------|-------|--------|-------|-----|-----------|
+| 1 | CRM personalizado | CRM personalizado em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 2 | ERP personalizado | ERP personalizado em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 3 | ERP personalizado | ERP personalizado em Recife | 74.5 | geo-local | fundo | orcamento | medio |
+| 4 | SaaS / app web | desenvolvimento de SaaS em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 5 | aplicativo mobile | desenvolvimento de app em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 6 | aplicativo mobile | desenvolvimento de app em Fortaleza | 74.5 | geo-local | fundo | orcamento | medio |
+| 7 | automação de processos | automação de processos em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 8 | automação de processos | automação de processos em Recife | 74.5 | geo-local | fundo | orcamento | medio |
+| 9 | chatbot com IA | chatbot com IA em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 10 | chatbot com IA | chatbot com IA em Recife | 74.5 | geo-local | fundo | orcamento | medio |
+| 11 | integração de sistemas | integração de sistemas em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 12 | landing page | landing page em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 13 | manutenção de sistema | manutenção de sistema em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 14 | sistema web interno | desenvolvimento de sistema em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 15 | sistema web interno | desenvolvimento de sistema em Recife | 74.5 | geo-local | fundo | orcamento | medio |
+| 16 | site institucional | criação de site em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 17 | site institucional | criação de site em Campinas | 74.5 | geo-local | fundo | orcamento | medio |
+| 18 | software sob medida | software house em São Paulo | 74.5 | geo-local | fundo | orcamento | medio |
+| 19 | software sob medida | software house em Fortaleza | 74.5 | geo-local | fundo | orcamento | medio |
+| 20 | CRM personalizado | CRM personalizado rápido para equipe comercial | 72.0 | urgencia | meio | whatsapp | alto |
+| 21 | SaaS / app web | MVP de SaaS rápido para validar ideia | 72.0 | urgencia | meio | whatsapp | alto |
+| 22 | aplicativo mobile | preciso de um app pronto em 30 dias | 72.0 | urgencia | meio | whatsapp | alto |
+| 23 | automação de processos | automação urgente de processos manuais | 72.0 | urgencia | meio | whatsapp | alto |
+| 24 | chatbot com IA | chatbot urgente para atendimento Black Friday | 72.0 | urgencia | meio | whatsapp | alto |
+| 25 | consultoria técnica em TI | programador freelancer urgente | 72.0 | urgencia | meio | whatsapp | alto |
+| 26 | dashboard / BI | dashboard de indicadores urgente | 72.0 | urgencia | meio | whatsapp | alto |
+| 27 | integração de sistemas | integração urgente entre sistema e marketplace | 72.0 | urgencia | meio | whatsapp | alto |
+| 28 | landing page | landing page urgente para lançamento de produto | 72.0 | urgencia | meio | whatsapp | alto |
+| 29 | loja virtual | preciso de loja virtual funcionando rápido | 72.0 | urgencia | meio | whatsapp | alto |
+| 30 | manutenção de sistema | meu sistema caiu preciso de suporte urgente | 72.0 | urgencia | meio | whatsapp | alto |
+| 31 | refatoração de sistema | sistema legado travando operação preciso resolver rápid... | 72.0 | urgencia | meio | whatsapp | alto |
+| 32 | sistema web interno | sistema web interno urgente para operação | 72.0 | urgencia | meio | whatsapp | alto |
+| 33 | site institucional | preciso de um site institucional urgente | 72.0 | urgencia | meio | whatsapp | alto |
+| 34 | software sob medida | software sob medida com entrega rápida | 72.0 | urgencia | meio | whatsapp | alto |
+| 35 | aplicativo mobile | como criar app gastando menos de 50 mil | 69.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 36 | site institucional | como ter um site profissional gastando pouco | 69.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 37 | software sob medida | sistema sob medida barato e bom | 69.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 38 | CRM personalizado | CRM para empresa barato e bom | 68.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 39 | ERP personalizado | ERP para PME barato e bom | 68.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 40 | automação de processos | automatizar empresa barato e bom | 68.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 41 | SaaS / app web | desenvolver SaaS barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 42 | chatbot com IA | chatbot WhatsApp barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 43 | consultoria técnica em TI | programador freelancer barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 44 | dashboard / BI | dashboard de indicadores barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 45 | integração de sistemas | integrar sistemas barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 46 | landing page | landing page barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 47 | loja virtual | loja virtual barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 48 | manutenção de sistema | manutenção de site barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 49 | refatoração de sistema | refatorar sistema barato e bom | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 50 | sistema web interno | da pra fazer sistema de gestão barato | 67.0 | dor-financeira | meio | diagnostico | medio-alto |
+| 51 | loja virtual | criar loja virtual em São Paulo | 66.5 | geo-local | meio | orcamento | medio |
+| 52 | site institucional | trocar site Wix por site profissional sob medida | 65.0 | substituicao | fundo | consultivo | baixo |
+| 53 | CRM personalizado | Salesforce ou CRM sob medida para empresa pequena | 63.5 | comparativa | meio | diagnostico | medio |
+| 54 | ERP personalizado | ERP pronto ou ERP sob medida para PME | 63.5 | comparativa | meio | diagnostico | medio |
+| 55 | software sob medida | sistema de agendamento para dentista | 63.0 | nicho | fundo | orcamento | medio |
+| 56 | software sob medida | app de agendamento para salão de beleza | 63.0 | nicho | fundo | orcamento | medio |
+| 57 | dashboard / BI | Power BI ou dashboard sob medida para empresa | 61.5 | comparativa | meio | diagnostico | medio |
+| 58 | sistema web interno | sistema pronto ou sistema sob medida para empresa | 61.5 | comparativa | meio | diagnostico | medio |
 
 ## Onda 3 — Autoridade
-| # | Cluster | Score | Tipo | CTA |
-|---|---------|-------|------|-----|
-| 1 | crm farmácia | 70 | informacional | Fale com um especialista no WhatsApp |
-| 2 | erp academia | 70 | informacional | Fale com um especialista no WhatsApp |
-| 3 | dashboard farmácia | 70 | informacional | Fale com um especialista no WhatsApp |
-| 4 | automacao clínica | 70 | informacional | Fale com um especialista no WhatsApp |
-| 5 | integracao sistemas escola | 70 | informacional | Fale com um especialista no WhatsApp |
-| 6 | manutencao sistema coworking | 70 | informacional | Fale com um especialista no WhatsApp |
-| 7 | refatoracao dentista | 70 | informacional | Fale com um especialista no WhatsApp |
-| 8 | marketplace clínica | 70 | informacional | Fale com um especialista no WhatsApp |
-| 9 | saas urgente | 62 | tecnologia | Fale com um especialista no WhatsApp |
-| 10 | chatbot urgente | 62 | tecnologia | Fale com um especialista no WhatsApp |
-| 11 | refatoracao urgente | 62 | tecnologia | Fale com um especialista no WhatsApp |
-| 12 | marketplace urgente | 62 | tecnologia | Fale com um especialista no WhatsApp |
-| 13 | loja virtual para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 14 | saas para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 15 | crm para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 16 | automacao para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 17 | chatbot para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 18 | software sob medida para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 19 | manutencao sistema para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 20 | refatoracao para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 21 | marketplace para escola | 61 | nicho | Solicite um diagnóstico gratuito |
-| 22 | site para escola | 60 | nicho | Solicite um diagnóstico gratuito |
-| 23 | aplicativo para escola | 60 | nicho | Solicite um diagnóstico gratuito |
-| 24 | sistema web para escola | 60 | nicho | Solicite um diagnóstico gratuito |
-| 25 | erp para dentista | 60 | nicho | Solicite um diagnóstico gratuito |
-| 26 | dashboard para escola | 60 | nicho | Solicite um diagnóstico gratuito |
-| 27 | integracao sistemas para escola | 60 | nicho | Solicite um diagnóstico gratuito |
-| 28 | landing page pronto ou sob medida | 58 | comparativa | Solicite um diagnóstico gratuito |
-| 29 | sistema web pronto ou sob medida | 58 | comparativa | Solicite um diagnóstico gratuito |
-| 30 | dashboard pronto ou sob medida | 58 | comparativa | Solicite um diagnóstico gratuito |
-| 31 | integracao sistemas pronto ou sob medida | 58 | comparativa | Solicite um diagnóstico gratuito |
-| 32 | api pronto ou sob medida | 58 | comparativa | Solicite um diagnóstico gratuito |
-| 33 | site lento demais | 56 | informacional | Solicite um diagnóstico gratuito |
-| 34 | site em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 35 | landing page em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 36 | loja virtual em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 37 | aplicativo em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 38 | saas em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 39 | sistema web em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 40 | crm em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 41 | erp em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 42 | dashboard em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 43 | automacao em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 44 | integracao sistemas em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 45 | chatbot em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 46 | software sob medida em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 47 | manutencao sistema em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 48 | refatoracao em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 49 | api em Manaus | 52 | local | Solicite um diagnóstico gratuito |
-| 50 | marketplace em Recife | 52 | local | Solicite um diagnóstico gratuito |
-| 51 | api advocacia | 48 | tecnologia | Se quiser ajuda real com isso... |
-| 52 | api clínica | 48 | tecnologia | Se quiser ajuda real com isso... |
-| 53 | api escola | 48 | tecnologia | Se quiser ajuda real com isso... |
-| 54 | site startup | 47 | informacional | Se quiser ajuda real com isso... |
-| 55 | site clínica | 47 | informacional | Se quiser ajuda real com isso... |
-| 56 | o que e landing page | 47 | informacional | Se quiser ajuda real com isso... |
-| 57 | landing page startup | 47 | informacional | Se quiser ajuda real com isso... |
-| 58 | landing page academia | 47 | informacional | Se quiser ajuda real com isso... |
-| 59 | o que e loja virtual | 47 | informacional | Se quiser ajuda real com isso... |
-| 60 | loja virtual escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 61 | loja virtual advocacia | 47 | informacional | Se quiser ajuda real com isso... |
-| 62 | aplicativo farmácia | 47 | informacional | Se quiser ajuda real com isso... |
-| 63 | aplicativo escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 64 | roi de aplicacao | 47 | informacional | Se quiser ajuda real com isso... |
-| 65 | saas escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 66 | saas pet shop | 47 | informacional | Se quiser ajuda real com isso... |
-| 67 | sistema web escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 68 | sistema web advocacia | 47 | informacional | Se quiser ajuda real com isso... |
-| 69 | sistema web startup | 47 | informacional | Se quiser ajuda real com isso... |
-| 70 | o que e crm | 47 | informacional | Se quiser ajuda real com isso... |
-| 71 | roi de crm | 47 | informacional | Se quiser ajuda real com isso... |
-| 72 | o que e erp | 47 | informacional | Se quiser ajuda real com isso... |
-| 73 | erp farmácia | 47 | informacional | Se quiser ajuda real com isso... |
-| 74 | dashboard escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 75 | dashboard dentista | 47 | informacional | Se quiser ajuda real com isso... |
-| 76 | o que e automacao | 47 | informacional | Se quiser ajuda real com isso... |
-| 77 | automacao academia | 47 | informacional | Se quiser ajuda real com isso... |
-| 78 | automacao escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 79 | o que e integracao sistemas | 47 | informacional | Se quiser ajuda real com isso... |
-| 80 | integracao sistemas academia | 47 | informacional | Se quiser ajuda real com isso... |
+**Foco:** Guias/pilares/tecnologia | **Volume alvo:** 80-120 artigos | **Prazo:** Mes 4-6
+
+| # | Cluster | Keyword Principal | Score | Intent | Funil | CTA | Conversao |
+|---|---------|------------------|-------|--------|-------|-----|-----------|
+| 1 | automação de processos | minha equipe gasta horas copiando dados entre sistemas | 59.5 | dor-operacional | meio | diagnostico | medio |
+| 2 | manutenção de sistema | empresa confiável para assumir suporte de sistema aband... | 59.0 | substituicao | meio | consultivo | baixo |
+| 3 | site institucional | sistema para dentista | 59.0 | nicho | meio | orcamento | medio |
+| 4 | ERP personalizado | minha empresa cresceu e planilha não dá mais conta | 58.5 | dor-operacional | meio | diagnostico | medio |
+| 5 | aplicativo mobile | app nativo ou React Native qual é melhor | 58.5 | comparativa | meio | diagnostico | medio |
+| 6 | aplicativo mobile | app da empresa trava nos dispositivos mais usados | 58.5 | dor-operacional | meio | diagnostico | medio |
+| 7 | loja virtual | Shopify ou loja virtual própria qual compensa mais | 58.5 | comparativa | meio | diagnostico | medio |
+| 8 | site institucional | site institucional no Wix ou feito sob medida | 58.5 | comparativa | meio | diagnostico | medio |
+| 9 | software sob medida | software sob medida ou software pronto qual compensa | 58.5 | comparativa | meio | diagnostico | medio |
+| 10 | CRM personalizado | equipe comercial perde leads por falta de CRM | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 11 | SaaS / app web | meu SaaS não escala e perde clientes | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 12 | chatbot com IA | equipe não dá conta de responder todos no WhatsApp | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 13 | dashboard / BI | demoro horas montando relatório manualmente | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 14 | integração de sistemas | funcionário digita mesma informação em 3 sistemas | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 15 | landing page | minha landing page não converte o que fazer | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 16 | loja virtual | minha loja virtual trava quando tem muitos acessos | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 17 | manutenção de sistema | meu sistema vive dando erro e ninguém resolve | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 18 | sistema web interno | minha equipe perde tempo com planilhas e retrabalho | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 19 | site institucional | meu site antigo não aparece no Google como resolver | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 20 | software sob medida | nenhum software pronto resolve meu problema | 57.5 | dor-operacional | meio | diagnostico | medio |
+| 21 | CRM personalizado | sair do Pipedrive para CRM sob medida | 57.0 | substituicao | meio | consultivo | baixo |
+| 22 | ERP personalizado | trocar Bling por ERP sob medida | 57.0 | substituicao | meio | consultivo | baixo |
+| 23 | SaaS / app web | trocar planilha por sistema SaaS próprio | 57.0 | substituicao | meio | consultivo | baixo |
+| 24 | aplicativo mobile | trocar app feito no Bubble por app nativo | 57.0 | substituicao | meio | consultivo | baixo |
+| 25 | automação de processos | trocar macros do Excel por sistema automatizado | 57.0 | substituicao | meio | consultivo | baixo |
+| 26 | chatbot com IA | sair do ManyChat para chatbot próprio com GPT | 57.0 | substituicao | meio | consultivo | baixo |
+| 27 | dashboard / BI | sair do Excel para dashboard interativo | 57.0 | substituicao | meio | consultivo | baixo |
+| 28 | integração de sistemas | trocar integração via planilha por API automática | 57.0 | substituicao | meio | consultivo | baixo |
+| 29 | landing page | sair do Leadpages para landing page própria | 57.0 | substituicao | meio | consultivo | baixo |
+| 30 | loja virtual | sair do Shopify por causa das taxas | 57.0 | substituicao | meio | consultivo | baixo |
+| 31 | sistema web interno | substituir planilha Excel por sistema web | 57.0 | substituicao | meio | consultivo | baixo |
+| 32 | site institucional | sistema para oficina mecânica | 57.0 | nicho | meio | orcamento | medio |
+| 33 | software sob medida | trocar software genérico por sistema feito pra mim | 57.0 | substituicao | meio | consultivo | baixo |
+| 34 | SaaS / app web | criar SaaS próprio ou usar plataforma pronta | 56.5 | comparativa | meio | diagnostico | medio |
+| 35 | automação de processos | Zapier ou automação sob medida qual compensa | 56.5 | comparativa | meio | diagnostico | medio |
+| 36 | chatbot com IA | chatbot pronto ou chatbot sob medida com IA | 56.5 | comparativa | meio | diagnostico | medio |
+| 37 | consultoria técnica em TI | melhor programador freelancer do Brasil | 56.5 | comparativa | meio | diagnostico | medio |
+| 38 | integração de sistemas | melhor integrar sistemas do Brasil | 56.5 | comparativa | meio | diagnostico | medio |
+| 39 | landing page | landing page pronta vs landing page sob medida | 56.5 | comparativa | meio | diagnostico | medio |
+| 40 | manutenção de sistema | melhor manutenção de site do Brasil | 56.5 | comparativa | meio | diagnostico | medio |
+| 41 | refatoração de sistema | refatorar sistema ou fazer do zero | 56.5 | comparativa | meio | diagnostico | medio |
 
 ## Onda 4 — Cobertura Total
-| # | Cluster | Score | Tipo | CTA |
-|---|---------|-------|------|-----|
-| 1 | roi de integracao sistemas | 47 | informacional | Solicite um diagnóstico gratuito |
-| 2 | chatbot escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 3 | chatbot startup | 47 | informacional | Se quiser ajuda real com isso... |
-| 4 | o que e software sob medida | 47 | informacional | Se quiser ajuda real com isso... |
-| 5 | software sob medida escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 6 | o que e manutencao sistema | 47 | informacional | Se quiser ajuda real com isso... |
-| 7 | manutencao sistema clínica | 47 | informacional | Se quiser ajuda real com isso... |
-| 8 | o que e refatoracao | 47 | informacional | Se quiser ajuda real com isso... |
-| 9 | refatoracao coworking | 47 | informacional | Se quiser ajuda real com isso... |
-| 10 | refatoracao escola | 47 | informacional | Se quiser ajuda real com isso... |
-| 11 | o que e marketplace | 47 | informacional | Se quiser ajuda real com isso... |
-| 12 | marketplace farmácia | 47 | informacional | Se quiser ajuda real com isso... |
-| 13 | roi de saas | 46 | informacional | Se quiser ajuda real com isso... |
-| 14 | saas em Brasília | 46 | informacional | Se quiser ajuda real com isso... |
-| 15 | software sob medida startup | 46 | informacional | Solicite um diagnóstico gratuito |
-| 16 | site restaurante | 42 | tecnologia | Se quiser ajuda real com isso... |
-| 17 | aplicativo restaurante | 42 | tecnologia | Se quiser ajuda real com isso... |
-| 18 | api academia | 42 | tecnologia | Se quiser ajuda real com isso... |
-| 19 | roi de api | 42 | tecnologia | Se quiser ajuda real com isso... |
-| 20 | site escola | 41 | informacional | Se quiser ajuda real com isso... |
-| 21 | landing page escola | 41 | informacional | Se quiser ajuda real com isso... |
-| 22 | roi de loja virtual | 41 | informacional | Se quiser ajuda real com isso... |
-| 23 | aplicativo clínica | 41 | informacional | Se quiser ajuda real com isso... |
-| 24 | aplicativo startup | 41 | informacional | Solicite um diagnóstico gratuito |
-| 25 | saas startup | 41 | informacional | Se quiser ajuda real com isso... |
-| 26 | roi de sistema web | 41 | informacional | Se quiser ajuda real com isso... |
-| 27 | crm startup | 41 | informacional | Se quiser ajuda real com isso... |
-| 28 | crm clínica | 41 | informacional | Se quiser ajuda real com isso... |
-| 29 | erp dentista | 41 | informacional | Se quiser ajuda real com isso... |
-| 30 | roi de erp | 41 | informacional | Se quiser ajuda real com isso... |
-| 31 | dashboard startup | 41 | informacional | Se quiser ajuda real com isso... |
-| 32 | roi de dashboard | 41 | informacional | Se quiser ajuda real com isso... |
-| 33 | roi de automacao | 41 | informacional | Se quiser ajuda real com isso... |
-| 34 | integracao sistemas clínica | 41 | informacional | Se quiser ajuda real com isso... |
-| 35 | chatbot clínica | 41 | informacional | Se quiser ajuda real com isso... |
-| 36 | roi de chatbot | 41 | informacional | Se quiser ajuda real com isso... |
-| 37 | software sob medida farmácia | 41 | informacional | Se quiser ajuda real com isso... |
-| 38 | manutencao sistema escola | 41 | informacional | Se quiser ajuda real com isso... |
-| 39 | roi de manutencao sistema | 41 | informacional | Se quiser ajuda real com isso... |
-| 40 | roi de refatoracao | 41 | informacional | Se quiser ajuda real com isso... |
-| 41 | marketplace startup | 41 | informacional | Se quiser ajuda real com isso... |
-| 42 | roi de marketplace | 41 | informacional | Se quiser ajuda real com isso... |
-| 43 | landing page imobiliária | 40 | informacional | Se quiser ajuda real com isso... |
-| 44 | roi de landing page | 40 | informacional | Se quiser ajuda real com isso... |
+**Foco:** Informacionais/educacionais | **Volume alvo:** 100-200 artigos | **Prazo:** Mes 7-12
 
-## Onda 5 — Programatico/Local
-| # | Cluster | Score | Tipo | CTA |
-|---|---------|-------|------|-----|
-| 1 | landing page restaurante | 40 | tecnologia | Se quiser ajuda real com isso... |
-| 2 | roi de software sob medida | 40 | informacional | Se quiser ajuda real com isso... |
-| 3 | site imobiliária | 39 | informacional | Solicite um diagnóstico gratuito |
-| 4 | o que e site | 34 | informacional | Se quiser ajuda real com isso... |
-| 5 | o que e aplicacao | 34 | informacional | Se quiser ajuda real com isso... |
-| 6 | roi de site | 32 | informacional | Se quiser ajuda real com isso... |
-| 7 | o que e api | 32 | informacional | Se quiser ajuda real com isso... |
-| 8 | modernizar aplicacao antigo | 30 | informacional | Solicite um diagnóstico gratuito |
+| # | Cluster | Keyword Principal | Score | Intent | Funil | CTA | Conversao |
+|---|---------|------------------|-------|--------|-------|-----|-----------|
+| 1 | CRM personalizado | quanto tempo leva CRM para empresa | 41.0 | informacional | meio | suave | baixo |
+| 2 | ERP personalizado | quanto tempo leva ERP para PME | 41.0 | informacional | meio | suave | baixo |
+| 3 | automação de processos | quanto tempo leva automatizar empresa | 41.0 | informacional | meio | suave | baixo |
+| 4 | sistema web interno | o que é um sistema web interno para empresas | 41.0 | informacional | meio | suave | baixo |
+| 5 | manutenção de sistema | como escolher manutenção de site | 38.0 | informacional | meio | suave | baixo |
+| 6 | CRM personalizado | o que é CRM e para que serve na empresa | 37.0 | informacional | topo | suave | baixo |
+| 7 | ERP personalizado | o que é um ERP e como ele ajuda minha empresa | 37.0 | informacional | topo | suave | baixo |
+| 8 | automação de processos | o que é automação de processos empresariais | 37.0 | informacional | topo | suave | baixo |
+| 9 | automação de processos | como aplicar inteligência artificial na empresa pequena | 37.0 | informacional | topo | suave | baixo |
+| 10 | consultoria técnica em TI | o que faz um consultor de TI para empresa | 37.0 | informacional | topo | suave | baixo |
+| 11 | dashboard / BI | o que é um dashboard de gestão empresarial | 37.0 | informacional | topo | suave | baixo |
+| 12 | desenvolvimento de API | o que é uma API e para que serve na empresa | 37.0 | informacional | topo | suave | baixo |
+| 13 | SaaS / app web | quanto tempo leva desenvolver SaaS | 36.0 | informacional | meio | suave | baixo |
+| 14 | aplicativo mobile | quanto tempo leva fazer um app | 36.0 | informacional | meio | suave | baixo |
+| 15 | chatbot com IA | quanto tempo leva chatbot WhatsApp | 36.0 | informacional | meio | suave | baixo |
+| 16 | consultoria técnica em TI | quanto tempo leva programador freelancer | 36.0 | informacional | meio | suave | baixo |
+| 17 | dashboard / BI | quanto tempo leva dashboard de indicadores | 36.0 | informacional | meio | suave | baixo |
+| 18 | integração de sistemas | quanto tempo leva integrar sistemas | 36.0 | informacional | meio | suave | baixo |
+| 19 | landing page | quanto tempo leva landing page | 36.0 | informacional | meio | suave | baixo |
+| 20 | loja virtual | quanto tempo leva loja virtual | 36.0 | informacional | meio | suave | baixo |
+| 21 | refatoração de sistema | quanto tempo leva refatorar sistema | 36.0 | informacional | meio | suave | baixo |
+| 22 | site institucional | quanto tempo leva site profissional | 36.0 | informacional | meio | suave | baixo |
+| 23 | software sob medida | quanto tempo leva sistema sob medida | 36.0 | informacional | meio | suave | baixo |
+| 24 | chatbot com IA | o que é um chatbot com inteligência artificial | 34.0 | informacional | topo | suave | baixo |
+| 25 | software sob medida | o que é software sob medida e quando vale a pena | 34.0 | informacional | topo | suave | baixo |
+| 26 | SaaS / app web | o que é um SaaS e como funciona | 32.0 | informacional | topo | suave | baixo |
+| 27 | aplicativo mobile | como criar um aplicativo do zero | 32.0 | informacional | topo | suave | baixo |
+| 28 | integração de sistemas | o que é integração de sistemas e para que serve | 32.0 | informacional | topo | suave | baixo |
+| 29 | landing page | o que é uma landing page e como funciona | 32.0 | informacional | topo | suave | baixo |
+| 30 | loja virtual | como funciona uma loja virtual própria | 32.0 | informacional | topo | suave | baixo |
+| 31 | refatoração de sistema | o que é refatoração de sistema legado | 32.0 | informacional | topo | suave | baixo |
+| 32 | site institucional | o que é um site institucional e para que serve | 32.0 | informacional | topo | suave | baixo |
