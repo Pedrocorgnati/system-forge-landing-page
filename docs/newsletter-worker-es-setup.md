@@ -2,9 +2,12 @@
 
 Estado atual (2026-05-19): worker ES nao deployado.
 
-- `workers/worker-es/wrangler.toml` contem placeholders:
-  `PENDING_CREATE_KV_NAMESPACE_ES`, `PENDING_CREATE_KV_NAMESPACE_ES_PREVIEW`,
-  `PENDING_GENERATE_NEW_PEPPER_FOR_ES_DO_NOT_REUSE_IT_PEPPER`.
+- `workers/worker-es/wrangler.toml`: placeholders restantes
+  `PENDING_CREATE_KV_NAMESPACE_ES` e `PENDING_CREATE_KV_NAMESPACE_ES_PREVIEW`
+  (KV IDs sao gerados pelo Cloudflare ao criar o namespace).
+- `AUDIT_PEPPER` ja gerado (`62e485e8***a68d`, unico — nao reusa BR/IT/EN);
+  commit `<sha>` no historico. Mantenha esse valor; rotacao futura invalida
+  hashes de auditoria existentes.
 - Probe `curl -sI https://newsletter-es.corgnati-pedro.workers.dev/health`
   retorna `text/plain 404` (hostname inexistente — Cloudflare default).
 - Repo Secrets `NEWSLETTER_WORKER_URL_ES` e
@@ -29,12 +32,10 @@ Estado atual (2026-05-19): worker ES nao deployado.
    - Se nao existir, criar com `npx wrangler d1 create newsletter-audit`
      e substituir o `database_id`.
 
-3. **Pepper** (segredo de hash, unico por locale):
-   ```bash
-   openssl rand -base64 48
-   ```
-   Cole o valor no `AUDIT_PEPPER` do `wrangler.toml` (substituindo o
-   placeholder). **Nao reutilize** o pepper IT/BR/EN.
+3. **Pepper** — ja configurado (`62e485e8***a68d` em
+   `workers/worker-es/wrangler.toml:20`). Para rotacionar, gerar novo
+   via `openssl rand -hex 32` e substituir — porem isso invalida hashes
+   de auditoria ja gravados (ok se worker ainda nao deployou).
 
 4. **Resend audience** (lista email):
    - Painel Resend -> Audiences -> Create -> `newsletter-es`.
