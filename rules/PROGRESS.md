@@ -237,7 +237,7 @@ Quad Market Deploy success  workflow_run       44m42s  (run 26113968516)
 ### 9.4. Probe HTTP nos 4 domínios
 Todos respondem 200 com `last-modified` de hoje (vide §5). ✅
 
-### 9.5. Gaps detectados — status pos pair-codex (2026-05-19 18:55 UTC)
+### 9.5. Gaps detectados — status pos pair-codex (2026-05-19 19:30 UTC)
 
 | Gap | Severidade | Status | Resolução |
 |---|---|---|---|
@@ -286,9 +286,10 @@ Sessão `mcp__codex__codex` (gpt-5.2, sandbox read-only) confirmou:
 3. **Pedro (opcional):** setar `NEXT_PUBLIC_WHATSAPP_NUMBER_ES` quando
    houver linha ES dedicada — UI volta a renderizar WhatsApp em ES sem
    refactor extra.
-4. **Tech-debt residual** (P3, sem impacto operacional):
-   - Reconciliar emails EN/IT hardcoded com matrix do CI.
-   - Atualizar log "10 × 3 locales" stale em `scripts/check-content-parity.ts`.
+4. **Tech-debt P3 — resolvido** (commits `f3b56bc`, `7e18b4e`):
+   - `config/sites/{en,it}.ts:20` agora respeitam `process.env.NEXT_PUBLIC_CONTACT_EMAIL` com fallback hardcoded (mesmo pattern de BR/ES). CI continua injetando per-locale via `build.yml` matrix.
+   - Prosa stale "3 locales" / "Triple Market" reescrita em 10 arquivos (BUILD.md, ROBOTS-I18N-AUDIT.md, src/types/hreflang.types.ts, scripts/check-content-parity.ts, scripts/validate-hreflang-pages.ts, docs/{search-console-setup,ci-cd-secrets,hreflang-rules,INTEGRATION-AUDIT}.md, .github/workflows/deploy.yml). Lógica já cobria 4 locales; apenas comentários estavam desatualizados.
+   - Não tocado (deliberado): `rules/{multi-domain,commit-multilanguage,auto-publishable-blog}.md` (documentam o gap como histórico de backlog); `scripts/smoke-stockpile-generate.ts:183` (literal de cenário downgrade test).
 
 ---
 
