@@ -6,7 +6,7 @@ Estado atual (2026-05-19): worker ES nao deployado.
   `PENDING_CREATE_KV_NAMESPACE_ES` e `PENDING_CREATE_KV_NAMESPACE_ES_PREVIEW`
   (KV IDs sao gerados pelo Cloudflare ao criar o namespace).
 - `AUDIT_PEPPER` ja gerado (`62e485e8***a68d`, unico — nao reusa BR/IT/EN);
-  commit `<sha>` no historico. Mantenha esse valor; rotacao futura invalida
+  commit `ccd2022` no historico. Mantenha esse valor; rotacao futura invalida
   hashes de auditoria existentes.
 - Probe `curl -sI https://newsletter-es.corgnati-pedro.workers.dev/health`
   retorna `text/plain 404` (hostname inexistente — Cloudflare default).
