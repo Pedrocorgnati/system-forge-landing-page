@@ -204,4 +204,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Build veio de workflow_dispatch - disparando Quad Market Deploy"
-          gh workflow run deploy.yml --ref main --repo ${{ github.repository }}
+          gh workflow run deploy.yml \
+            --ref main \
+            --repo ${{ github.repository }} \
+            -f build_run_id=${{ github.run_id }}

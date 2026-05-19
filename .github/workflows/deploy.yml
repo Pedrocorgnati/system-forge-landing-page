@@ -19,6 +19,10 @@ on:
         description: 'Mercado para deploy manual (all, br, it, en, es)'
         required: false
         default: 'all'
+      build_run_id:
+        description: 'Build run_id (passado por build.yml quando promote bot dispara o Deploy)'
+        required: false
+        default: ''
 
 # Cancela runs anteriores para o mesmo branch
 concurrency:
@@ -52,7 +56,7 @@ jobs:
           name: build-pt-BR
           path: out/
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.build_run_id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -162,7 +166,7 @@ jobs:
           name: build-it-IT
           path: out/
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.build_run_id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -270,7 +274,7 @@ jobs:
           name: build-en
           path: out/
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.build_run_id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -378,7 +382,7 @@ jobs:
           name: build-es-ES
           path: out/
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id || inputs.build_run_id }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
