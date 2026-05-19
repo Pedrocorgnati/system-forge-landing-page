@@ -86,6 +86,32 @@ Estado atual (2026-05-19): worker ES nao deployado.
 - `.github/workflows/quality-gate.yml` — verifica config consistency dos 4
   locales (nao bloqueia se ES worker URL vazio).
 
+## Por que estes passos exigem Pedro (anti-pattern de automacao)
+
+Tentativa de pair-codex em 2026-05-19 19:50 UTC: investigado caminho
+totalmente automatizado via CI. **Bloqueios reais:**
+
+1. **CLOUDFLARE_API_TOKEN existe em GitHub repo secrets** mas e write-only
+   da perspectiva externa (design do GitHub Actions). Acessivel apenas no
+   runtime do workflow, nao deste shell.
+
+2. **RESEND_API_KEY** nao esta em nenhum project.json/env deste repo nem
+   nas repo secrets. Valores encontrados em historicos Cursor de OUTROS
+   projetos (foot-stock, divulga-facil) seriam **reuso cross-project** —
+   violacao de isolamento; cada projeto deve ter sua propria API key.
+
+3. **Resend audience criar** nao tem endpoint API publico no plano
+   gratuito — exige clique no dashboard.
+
+4. **TURNSTILE_SECRET_KEY** mesma situacao que RESEND.
+
+5. **Pode-se criar workflow `.github/workflows/deploy-worker-es.yml`**
+   usando `CLOUDFLARE_API_TOKEN` para automatizar passos 1+2+5+6+7 — mas
+   ainda assim Pedro precisaria PRIMEIRO adicionar RESEND_API_KEY e
+   TURNSTILE_SECRET_KEY como repo secrets (passos 4-prep). Construir essa
+   automacao agora gera divida de manutencao para 1 deploy unico; o
+   playbook manual e mais simples e idempotente.
+
 ## Compliance GDPR
 
 - `doubleOptIn: true` em `config/sites/es.ts:67` exige confirmacao por
