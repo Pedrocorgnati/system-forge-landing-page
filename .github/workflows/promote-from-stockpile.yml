@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: promote-from-stockpile
@@ -39,3 +40,16 @@ jobs:
           git config user.email "actions@github.com"
           git config user.name "promote-from-stockpile bot"
           git push origin main || echo "no commit (no-op)"
+
+      - name: Dispatch Quad Market Build (apenas se houve promote commit)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Pushes do GITHUB_TOKEN nao disparam outros workflows por design.
+          # Dispatch explicito via workflow_dispatch quando ha commit do bot.
+          if git log -1 --format=%s | grep -q "^content(multilanguage): promote daily batch"; then
+            echo "Promote commit detectado - disparando Quad Market Build"
+            gh workflow run build.yml --ref main
+          else
+            echo "Sem promote commit - skip dispatch"
+          fi
