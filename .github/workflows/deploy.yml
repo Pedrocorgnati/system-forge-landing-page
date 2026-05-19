@@ -24,10 +24,13 @@ on:
         required: false
         default: ''
 
-# Cancela runs anteriores para o mesmo branch
+# Serializa deploys para o mesmo branch (enfileira, nao cancela).
+# Cancel-in-progress=true causava SFTP em estado parcial quando um novo push
+# chegava no meio do upload paralelo (5 sessoes por locale). Enfileirar
+# garante que cada quad-deploy termine antes do proximo comecar.
 concurrency:
   group: deploy-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   # ===========================================================================
