@@ -81,7 +81,7 @@
 
   # Content Security Policy — locale: IT
   # GDPR: GTM ausente — carregado somente após consentimento explícito (module-11 CMP)
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self'; connect-src 'self' https://api.resend.com https://it-worker.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self'; connect-src 'self' https://api.resend.com https://newsletter-it.corgnati-pedro.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
   # HSTS — 1 ano, includeSubDomains
   # Nota: preload requer registro em hstspreload.org — ativar após validação

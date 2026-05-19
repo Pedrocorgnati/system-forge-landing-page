@@ -1,6 +1,6 @@
 # ================================================================
 # SystemForge Landing Page — .htaccess
-# Locale: BR
+# Locale: ES
 # Gerado por: scripts/generate-htaccess.ts
 # NÃO editar manualmente — editar o script e regenerar
 # ================================================================
@@ -79,8 +79,9 @@
   # Restringe APIs sensíveis do browser
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
 
-  # Content Security Policy — locale: BR
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self'; connect-src 'self' https://api.resend.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
+  # Content Security Policy — locale: ES
+  # GDPR: GTM ausente — carregado somente após consentimento explícito (module-11 CMP)
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self'; connect-src 'self' https://api.resend.com https://newsletter-es.corgnati-pedro.workers.dev; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"
 
   # HSTS — 1 ano, includeSubDomains
   # Nota: preload requer registro em hstspreload.org — ativar após validação
