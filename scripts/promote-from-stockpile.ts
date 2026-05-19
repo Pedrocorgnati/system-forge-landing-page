@@ -186,7 +186,7 @@ function main(): void {
     git(`add -- ${pathspecs}`)
     const msg = `content(multilanguage): promote daily batch (${summary})`
     git(`commit -m ${JSON.stringify(msg)}`)
-    git(`pull --rebase ${GIT_REMOTE} ${GIT_BRANCH}`)
+    git(`pull --rebase --autostash ${GIT_REMOTE} ${GIT_BRANCH}`)
     git(`push ${GIT_REMOTE} HEAD:${GIT_BRANCH}`)
 
     console.log(`[promote] OK: ${writes.length} arquivos | ${summary}`)
