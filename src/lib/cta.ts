@@ -12,11 +12,18 @@ export function isAllowedCTAHref(href: string): boolean {
 }
 
 export function buildWhatsAppUrl(phone: string, message?: string): string {
-  const base = `https://wa.me/${phone.replace(/\D/g, '')}`
+  const clean = phone.replace(/\D/g, '')
+  if (!clean) return ''
+  const base = `https://wa.me/${clean}`
   if (message) {
     return `${base}?text=${encodeURIComponent(message)}`
   }
   return base
+}
+
+/** True quando o locale tem linha WhatsApp configurada (env var ou fallback). */
+export function hasWhatsApp(phone: string): boolean {
+  return phone.replace(/\D/g, '').length > 0
 }
 
 /**
@@ -48,19 +55,23 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
 
   const ctaList: CTAConfig[] = [
     {
+      action: ConversionAction.BUDGET_ENGINE,
+      label: m.cta.budget,
+      href: config.budgetEngine,
+      // Sem linha WhatsApp, budget assume slot 'primary' visualmente.
+      variant: config.whatsapp ? 'ghost' : 'primary',
+    },
+  ]
+
+  if (config.whatsapp) {
+    ctaList.unshift({
       action: ConversionAction.WHATSAPP,
       label: m.cta.whatsapp,
       href: buildWhatsAppUrl(config.whatsapp, waMessage),
       variant: 'primary',
       icon: '💬',
-    },
-    {
-      action: ConversionAction.BUDGET_ENGINE,
-      label: m.cta.budget,
-      href: config.budgetEngine,
-      variant: 'ghost',
-    },
-  ]
+    })
+  }
 
   // Only include Calendly CTA if a URL is configured
   if (config.calendly) {

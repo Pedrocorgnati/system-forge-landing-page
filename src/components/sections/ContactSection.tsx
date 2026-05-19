@@ -15,23 +15,29 @@ const ct = messages.contact
 /** Derive the section id from config.routes.contact (e.g. "/#contato" -> "contato") */
 const sectionId = config.routes.contact.replace(/^\/?#?/, '')
 
+// Canal WhatsApp e renderizado apenas quando o locale tem linha configurada
+// (config.whatsapp != ''). Locales sem linha (e.g., ES) caem para budget + form.
+const whatsappChannel = config.whatsapp
+  ? [{
+      icon: MessageCircle,
+      label: 'WhatsApp',
+      description: ct.whatsappDesc,
+      cta: ct.whatsappCta,
+      href: buildWhatsAppUrl(config.whatsapp, ct.whatsappMessage),
+      external: true,
+      highlight: true,
+      accent: {
+        bg: 'bg-emerald-500/15',
+        text: 'text-emerald-400',
+        border: 'hover:border-emerald-500/40',
+        glow: 'bg-emerald-500/[0.07]',
+        shadow: 'hover:shadow-[0_8px_30px_rgba(34,197,94,0.15)]',
+      },
+    }]
+  : []
+
 const channels = [
-  {
-    icon: MessageCircle,
-    label: 'WhatsApp',
-    description: ct.whatsappDesc,
-    cta: ct.whatsappCta,
-    href: buildWhatsAppUrl(config.whatsapp, ct.whatsappMessage),
-    external: true,
-    highlight: true,
-    accent: {
-      bg: 'bg-emerald-500/15',
-      text: 'text-emerald-400',
-      border: 'hover:border-emerald-500/40',
-      glow: 'bg-emerald-500/[0.07]',
-      shadow: 'hover:shadow-[0_8px_30px_rgba(34,197,94,0.15)]',
-    },
-  },
+  ...whatsappChannel,
   {
     icon: Calculator,
     label: ct.budgetLabel,
@@ -39,7 +45,7 @@ const channels = [
     cta: ct.budgetCta,
     href: SITE.budgetEngine,
     external: true,
-    highlight: false,
+    highlight: !config.whatsapp, // promove budget a highlight quando WA ausente
     accent: {
       bg: 'bg-amber-500/15',
       text: 'text-amber-400',
@@ -111,6 +117,9 @@ export function ContactSection() {
               href={SITE.budgetEngine}
               target="_blank"
               rel="noopener noreferrer"
+              data-track-event="schedule_click"
+              data-track-prop-source="contact_hero"
+              data-track-prop-channel="budget_engine"
               className="contact-stagger-3 mt-2 inline-flex items-center gap-2 w-fit px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-blue-400 text-white font-semibold text-lg shadow-[0_4px_14px_rgba(59,130,246,0.3)] hover:shadow-[0_6px_20px_rgba(59,130,246,0.45)] hover:-translate-y-0.5 transition-all duration-200"
             >
               {ct.budgetHeroCta}
@@ -122,6 +131,8 @@ export function ContactSection() {
           <div data-testid="contact-channels" className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {channels.map((channel, index) => {
               const Icon = channel.icon
+              const isWhatsapp = channel.label === 'WhatsApp'
+              const trackEvent = isWhatsapp ? 'whatsapp_click' : 'schedule_click'
               return (
                 <a
                   key={channel.label}
@@ -129,6 +140,9 @@ export function ContactSection() {
                   href={channel.href}
                   target={channel.external ? '_blank' : undefined}
                   rel={channel.external ? 'noopener noreferrer' : undefined}
+                  data-track-event={trackEvent}
+                  data-track-prop-source="contact_channels"
+                  data-track-prop-channel={channel.label.toLowerCase()}
                   className={[
                     `contact-stagger-${index + 4}`,
                     'contact-card-shine group flex flex-col gap-5 p-7 rounded-2xl',

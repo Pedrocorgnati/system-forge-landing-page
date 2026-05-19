@@ -2,16 +2,21 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { CTAButton } from '@/components/ui/CTAButton'
-import { buildWhatsAppCTA } from '@/lib/cta'
+import { buildBudgetCTA, buildWhatsAppCTA } from '@/lib/cta'
 import { loadMessages } from '@config/content'
 import { ROUTES } from '@/lib/constants/routes'
+import { getSiteConfig } from '@config'
 
 const messages = loadMessages()
+const config = getSiteConfig()
 
 const benefits = messages.sections.advisorTeaser.benefits as string[]
 
 export function StrategicAdvisorTeaser() {
-  const whatsappCTA = buildWhatsAppCTA(messages.sections.advisorTeaser.talkToTeam, 'advisor-teaser')
+  // Locales sem linha WhatsApp configurada caem para budget CTA no teaser.
+  const teaserCTA = config.whatsapp
+    ? buildWhatsAppCTA(messages.sections.advisorTeaser.talkToTeam, 'advisor-teaser')
+    : buildBudgetCTA(messages.sections.advisorTeaser.talkToTeam, 'advisor-teaser')
 
   return (
     <section
@@ -59,7 +64,7 @@ export function StrategicAdvisorTeaser() {
                 {messages.sections.advisorTeaser.comingSoonDescription}
               </p>
             </div>
-            <CTAButton config={whatsappCTA} variant="primary" size="md" />
+            <CTAButton config={teaserCTA} variant="primary" size="md" />
           </div>
 
           {/* Back to home */}

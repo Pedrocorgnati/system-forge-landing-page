@@ -1,8 +1,9 @@
 import { CTAButton } from '@/components/ui/CTAButton'
-import { buildWhatsAppCTA } from '@/lib/cta'
+import { buildBudgetCTA, buildWhatsAppCTA } from '@/lib/cta'
 import { ServiceCategory } from '@/lib/types'
 import { ROUTES } from '@/lib/constants'
 import { loadMessages } from '@config/content'
+import { getSiteConfig } from '@config'
 
 /**
  * SidebarCTA — banner lateral sticky (desktop) ou inline (mobile).
@@ -25,8 +26,12 @@ export function SidebarCTA({ relatedService }: SidebarCTAProps) {
     ? (serviceNamesMap[relatedService] ?? serviceNamesMap['default'])
     : serviceNamesMap['default']) ?? ''
 
-  const whatsappLabel = m.cta.whatsapp
-  const whatsappCTA = buildWhatsAppCTA(whatsappLabel, `sidebar-cta-${relatedService ?? 'default'}`)
+  // Locales sem linha WhatsApp (e.g., ES) caem para budget CTA.
+  const config = getSiteConfig()
+  const ctaContext = `sidebar-cta-${relatedService ?? 'default'}`
+  const ctaConfig = config.whatsapp
+    ? buildWhatsAppCTA(m.cta.whatsapp, ctaContext)
+    : buildBudgetCTA(m.cta.budget, ctaContext)
 
   const sidebarTitle = blogCTA.sidebarNeed.replace('{name}', serviceName)
 
@@ -40,7 +45,7 @@ export function SidebarCTA({ relatedService }: SidebarCTAProps) {
         {sidebarTitle}
       </p>
 
-      <CTAButton config={whatsappCTA} size="sm" variant="primary" fullWidth />
+      <CTAButton config={ctaConfig} size="sm" variant="primary" fullWidth />
 
       {relatedService && (
         <a

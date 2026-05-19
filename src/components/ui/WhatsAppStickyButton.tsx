@@ -34,6 +34,9 @@ export function WhatsAppStickyButton() {
     return () => observer.disconnect()
   }, [])
 
+  // Locale sem linha WhatsApp configurada (e.g., ES sem env var) -> nao renderiza CTA.
+  if (!config.whatsapp) return null
+
   const href = buildWhatsAppUrl(config.whatsapp, config.locale)
   const ariaLabel = m.sections.whatsappSticky?.ariaLabel ?? 'WhatsApp'
 
