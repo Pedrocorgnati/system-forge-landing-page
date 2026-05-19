@@ -122,6 +122,12 @@ jobs:
           NEXT_PUBLIC_GA4_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_GA4_MEASUREMENT_ID }}
           NEXT_PUBLIC_WHATSAPP_NUMBER: ${{ secrets.NEXT_PUBLIC_WHATSAPP_NUMBER }}
           NEXT_PUBLIC_BUDGET_ENGINE_URL: ${{ secrets.NEXT_PUBLIC_BUDGET_ENGINE_URL }}
+          # Newsletter worker URLs: NEXT_PUBLIC_* precisa estar presente no passo
+          # de build para ser embutido no bundle client. Sem isto config.newsletter
+          # .workerUrl resolve para '' e o formulario nao submete em nenhum locale.
+          NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR }}
+          NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT }}
+          NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4

@@ -32,7 +32,7 @@ export const itConfig: SiteConfig = {
   },
   navigation: [
     { label: 'Home', href: '/' },
-    { label: 'Servizi', href: '/servizi' },
+    { label: 'Servizi', href: '/servicos' },
     { label: 'Portfolio', href: '/portfolio' },
     { label: 'Blog', href: '/blog' },
     { label: 'Contatto', href: '/#contatto' },
@@ -44,19 +44,22 @@ export const itConfig: SiteConfig = {
     titleTemplate: '%s | SystemForge',
     ogImage: '/og/og-it.png',
   },
+  // Slugs fisicos pt-BR: o app/ so gera rotas PT. Slugs localizados
+  // (/servizi, /blog/categorie) pendem da feature i18n-triple-market;
+  // ate la, apontar para as rotas reais evita 404 na navegacao.
   routes: {
     home: '/',
-    services: '/servizi',
-    service: (slug: string) => `/servizi/${slug}`,
+    services: '/servicos',
+    service: (slug: string) => `/servicos/${slug}`,
     portfolio: '/portfolio',
     portfolioProject: (slug: string) => `/portfolio/${slug}`,
     blog: '/blog',
     blogPost: (slug: string) => `/blog/${slug}`,
     blogPage: (n: number) => `/blog/page/${n}`,
-    blogCategory: (cat: string) => `/blog/categorie/${cat}`,
+    blogCategory: (cat: string) => `/blog/categoria/${cat}`,
     blogTag: (tag: string) => `/blog/tag/${encodeURIComponent(tag)}`,
     privacy: '/privacy',
-    newsletterConfirmed: '/newsletter/confermato',
+    newsletterConfirmed: '/newsletter/confirmado',
     advisor: '/consulente',
     contact: '/#contatto',
   },
