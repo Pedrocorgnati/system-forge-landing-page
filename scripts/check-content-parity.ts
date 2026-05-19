@@ -36,7 +36,7 @@ function recordError(msg: string): void {
 
 // ─── Verificar existência dos 30 arquivos ────────────────────────────────────
 
-console.log('\n━━━ Verificando existência dos arquivos (10 × 3 locales) ━━━')
+console.log('\n━━━ Verificando existência dos arquivos (10 × 4 locales) ━━━')
 
 for (const locale of LOCALES) {
   for (const file of CONTENT_FILES) {
@@ -92,7 +92,7 @@ for (const { locale, items } of portfolioByLocale.slice(1)) {
 }
 
 if (errors === filesMissing) {
-  console.log(`✅ Portfolio IDs: paridade OK (${basePortfolioIds.length} projetos × 3 locales)`)
+  console.log(`✅ Portfolio IDs: paridade OK (${basePortfolioIds.length} projetos × 4 locales)`)
 }
 
 // ─── Serviços: paridade de IDs ───────────────────────────────────────────────
@@ -126,7 +126,7 @@ for (const { locale, items } of servicesByLocale.slice(1)) {
 }
 
 if (errors === filesMissing) {
-  console.log(`✅ Services IDs: paridade OK (${baseServiceIds.length} categorias × 3 locales)`)
+  console.log(`✅ Services IDs: paridade OK (${baseServiceIds.length} categorias × 4 locales)`)
 }
 
 // ─── Testimonials: count ──────────────────────────────────────────────────────

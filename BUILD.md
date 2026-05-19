@@ -1,6 +1,6 @@
 # Build Guide — System Forge Landing Page (Multi-Locale)
 
-Este projeto suporta **3 locales**: 🇧🇷 `pt-BR`, 🇮🇹 `it-IT`, 🇺🇸 `en`
+Este projeto suporta **4 locales**: 🇧🇷 `pt-BR`, 🇮🇹 `it-IT`, 🇺🇸 `en`, 🇪🇸 `es-ES`
 
 ## ⚠️ IMPORTANTE: Uso Obrigatório
 
@@ -10,11 +10,12 @@ Este projeto **NÃO suporta** o comando genérico `npm run build`. Use **sempre*
 npm run build:br   # Português Brasileiro (https://forjadesistemas.com.br)
 npm run build:it   # Italiano (https://systemforge.it)
 npm run build:en   # English (https://systemforgesoftware.com)
+npm run build:es   # Español (https://systemforge.es)
 ```
 
 ## Por que isso?
 
-O script de prebuild (`prebuild` em `package.json`) executa `generate:search-index`, que exige a variável de ambiente `NEXT_PUBLIC_LOCALE` definida. Os comandos específicos (`build:br`, `build:it`, `build:en`) definem isso automaticamente. O comando genérico `npm run build` não define, causando falha.
+O script de prebuild (`prebuild` em `package.json`) executa `generate:search-index`, que exige a variável de ambiente `NEXT_PUBLIC_LOCALE` definida. Os comandos específicos (`build:br`, `build:it`, `build:en`, `build:es`) definem isso automaticamente. O comando genérico `npm run build` não define, causando falha.
 
 ## Desenvolvimento Local
 
@@ -29,8 +30,8 @@ NEXT_PUBLIC_LOCALE=pt-BR npm run build
 ## Produção (Build Multi-Locale)
 
 ```bash
-# Build para todos os 3 locales (gera dist-br/, dist-it/, dist-en/)
-npm run build:br && npm run build:it && npm run build:en
+# Build para todos os 4 locales (gera dist-br/, dist-it/, dist-en/, dist-es/)
+npm run build:br && npm run build:it && npm run build:en && npm run build:es
 
 # Ou executar o smoke test completo (valida SEO + hreflang)
 npm run smoke:seo

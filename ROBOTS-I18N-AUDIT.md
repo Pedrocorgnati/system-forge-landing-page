@@ -100,7 +100,7 @@ const siteUrl = config.url.endsWith('/')
 **Status:** ✅ COMPLIANT
 - All sensitive paths blocked
 - Newsletter confirmation pages excluded (no indexing needed)
-- Covers all 3 locales for confirmation pages
+- Covers all 4 locales for confirmation pages
 
 ---
 

@@ -105,7 +105,7 @@ systemforgesoftware.com/services → aponta para forjadesistemas.com.br/servicos
 
 ## Como Adicionar uma Nova Rota
 
-1. **Adicionar ao `ROUTE_SLUGS`** em `src/lib/locale-slugs.ts` com slugs nativos para os 3 locales
+1. **Adicionar ao `ROUTE_SLUGS`** em `src/lib/locale-slugs.ts` com slugs nativos para os 4 locales
 2. **Criar a página** em `src/app/{slug}/page.tsx` (a tag hreflang é gerada automaticamente pelo `layout.tsx`)
 3. **Validar:** executar `npx tsx scripts/validate-hreflang-pages.ts` após o build
 4. **Para páginas sem cross-domain hreflang** (ex: privacidade): não adicionar ao `ROUTE_SLUGS` ou tratar como caso especial no layout
@@ -133,8 +133,8 @@ As tags hreflang são injetadas pelo `layout.tsx`:
 ## Validação Automatizada
 
 ```bash
-# Após o build completo dos 3 locales:
-npm run build:br && npm run build:it && npm run build:en
+# Após o build completo dos 4 locales:
+npm run build:br && npm run build:it && npm run build:en && npm run build:es
 npx tsx scripts/validate-hreflang-pages.ts
 
 # Relatório gerado em:
@@ -142,7 +142,7 @@ npx tsx scripts/validate-hreflang-pages.ts
 ```
 
 O script `validate-hreflang-pages.ts` valida:
-- Presença de alternates para os 3 locales em cada página
+- Presença de alternates para os 4 locales em cada página
 - Uso de slugs nativos (não slug de outro locale)
 - x-default apontando para systemforgesoftware.com
 - Reciprocidade bidirecional

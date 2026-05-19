@@ -1,4 +1,4 @@
-# CI/CD Secrets — Triple Market Deploy
+# CI/CD Secrets — Quad Market Deploy
 
 > ⚠️ **SEGURANÇA: Nunca commite valores reais neste arquivo.**
 > Use o painel do Hostinger para obter as credenciais SFTP de cada domínio.

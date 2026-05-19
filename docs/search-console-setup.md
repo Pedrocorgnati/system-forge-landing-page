@@ -1,7 +1,7 @@
-# Google Search Console — Triple Market Setup
+# Google Search Console — Quad Market Setup
 
 > Documento de referência para configuração do Google Search Console e GA4
-> para os 3 domínios do sistema i18n-triple-market.
+> para os 4 domínios do sistema i18n-quad-market.
 >
 > INT-012, INT-073 — module-9-seo-sitemaps TASK-4
 
@@ -11,7 +11,7 @@
 
 - Acesso ao Google Search Console em `search.google.com/search-console`
 - Acesso ao Google Analytics em `analytics.google.com`
-- DNS ativo e HTTPS configurado nos 3 domínios
+- DNS ativo e HTTPS configurado nos 4 domínios
 - Sitemaps gerados e acessíveis em cada domínio (após deploy)
 
 ---

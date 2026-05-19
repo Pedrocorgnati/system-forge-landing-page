@@ -38,8 +38,8 @@ export interface ArticleHreflang {
    * Mapa de locale → slug localizado.
    * Apenas os locales presentes neste mapa recebem hreflang tags.
    *
-   * @example // Artigo universal (3 locales)
-   * { 'pt-BR': 'sobre-nos', 'it-IT': 'chi-siamo', 'en': 'about-us' }
+   * @example // Artigo universal (4 locales)
+   * { 'pt-BR': 'sobre-nos', 'it-IT': 'chi-siamo', 'en': 'about-us', 'es-ES': 'sobre-nosotros' }
    *
    * @example // Artigo exclusivo (apenas BR)
    * { 'pt-BR': 'carnaval-2025' }

@@ -8,13 +8,13 @@
 
 | Gate | Status | Script | Detalhes |
 |------|--------|--------|----------|
-| Paridade de Conteúdo (TASK-1) | ⏳ PENDENTE | `npx tsx scripts/check-content-parity.ts` | 30 arquivos × 3 locales |
+| Paridade de Conteúdo (TASK-1) | ⏳ PENDENTE | `npx tsx scripts/check-content-parity.ts` | 40 arquivos × 4 locales |
 | Build Isolation (TASK-2) | ⏳ PENDENTE | `npx tsx scripts/check-build-isolation.ts` | Requer: npm run build:br/it/en |
 | Hreflang Reciprocidade (TASK-3) | ⏳ PENDENTE | `npx tsx scripts/validate-hreflang-final.ts` | Gera: docs/HREFLANG-AUDIT.md |
 | Broken Links (TASK-4) | ⏳ PENDENTE | `npx tsx scripts/check-broken-links.ts --internal-only` | Gera: docs/BROKEN-LINKS-AUDIT.md |
 | Smoke Tests (TASK-5) | ⏳ PENDENTE | `bash scripts/smoke-test-full.sh` | Requer: domínios live (pós-deploy) |
 | ECU Audit (TASK-6) | ⏳ PENDENTE | `bash scripts/audit-ecu.sh` | Zero Órfãos + Axe-core |
-| TS/ESLint Gate (TASK-7) | ⏳ PENDENTE | CI: `.github/workflows/quality-gate.yml` | 3 ambientes × tsc + ESLint |
+| TS/ESLint Gate (TASK-7) | ⏳ PENDENTE | CI: `.github/workflows/quality-gate.yml` | 4 ambientes × tsc + ESLint |
 
 ---
 
@@ -25,9 +25,9 @@
 
 ## Como Executar
 
-### Pré-requisito: rodar os 3 builds localmente
+### Pré-requisito: rodar os 4 builds localmente
 ```bash
-npm run build:br && npm run build:it && npm run build:en
+npm run build:br && npm run build:it && npm run build:en && npm run build:es
 ```
 
 ### Sequência de validação (pré-deploy)
@@ -58,10 +58,10 @@ bash scripts/smoke-test-workers.sh  # requer WORKER_BR/IT/EN env vars
 
 ### CI: Quality Gate (PRs e push para main)
 O workflow `.github/workflows/quality-gate.yml` executa automaticamente:
-- TypeScript check (3 locales)
+- TypeScript check (4 locales)
 - ESLint --max-warnings 0
 - Content parity
-- Frontmatter validation (3 locales)
+- Frontmatter validation (4 locales)
 
 ---
 
@@ -69,11 +69,11 @@ O workflow `.github/workflows/quality-gate.yml` executa automaticamente:
 
 | Arquivo | Descrição |
 |---------|-----------|
-| `scripts/check-content-parity.ts` | TASK-1: 30 arquivos × 3 locales |
+| `scripts/check-content-parity.ts` | TASK-1: 40 arquivos × 4 locales |
 | `scripts/check-build-isolation.ts` | TASK-2: zero cross-contamination |
 | `scripts/validate-hreflang-final.ts` | TASK-3: hreflang reciprocity → docs/HREFLANG-AUDIT.md |
 | `scripts/check-broken-links.ts` | TASK-4: broken links → docs/BROKEN-LINKS-AUDIT.md |
-| `scripts/smoke-test-full.sh` | TASK-5: smoke tests 3 domínios |
+| `scripts/smoke-test-full.sh` | TASK-5: smoke tests 4 domínios |
 | `scripts/smoke-test-features.sh` | TASK-5: funcionalidades (blog/contact/services) |
 | `scripts/smoke-test-workers.sh` | TASK-5: Cloudflare Workers newsletter |
 | `scripts/audit-ecu.sh` | TASK-6: ECU + Axe-core |

@@ -3,10 +3,10 @@
  * Valida reciprocidade hreflang em todas as páginas do HTML estático gerado.
  *
  * Para cada rota em ROUTE_SLUGS:
- *   1. Lê o HTML de out-br/{slug}, out-it/{slug}, out-en/{slug}
+ *   1. Lê o HTML de out-br/{slug}, out-it/{slug}, out-en/{slug}, out-es/{slug}
  *   2. Extrai todas as tags <link rel="alternate" hreflang="..."> do <head>
- *   3. Verifica que cada página contém alternates para os 3 locales + x-default→EN
- *   4. Verifica reciprocidade: BR→IT/EN, IT→BR/EN, EN→BR/IT
+ *   3. Verifica que cada página contém alternates para os 4 locales + x-default→EN
+ *   4. Verifica reciprocidade entre BR, IT, EN, ES
  *   5. Verifica que slugs nativos são usados (não o mesmo slug para todos)
  *
  * Usage:
