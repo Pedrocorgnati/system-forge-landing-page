@@ -44,6 +44,7 @@ const STOCKPILE_DIR = path.resolve(REPO_ROOT, process.env.STOCKPILE_DIR ?? '.cla
 const CONTENT_DIR = path.resolve(REPO_ROOT, process.env.CONTENT_DIR ?? 'content')
 const GIT_REMOTE = process.env.GIT_REMOTE ?? 'origin'
 const GIT_BRANCH = process.env.GIT_BRANCH ?? 'main'
+const DRY_RUN = process.env.DRY_RUN === '1'
 
 function git(args: string): string {
   return execSync(`git ${args}`, { cwd: REPO_ROOT, encoding: 'utf8' })
@@ -99,9 +100,21 @@ function main(): void {
         if (!fs.existsSync(reviewed)) continue
         const raw = fs.readFileSync(reviewed, 'utf8')
         const parsed = matter(raw)
+        // Compat shim: stockpile gerador emite `description` mas PostFrontmatterSchema
+        // (e velite.config.ts) exigem `excerpt`. Mapear sem truncar — falhar
+        // validacao se >300 e melhor que cortar mid-sentence.
+        let injectedExcerpt = false
+        if (!parsed.data.excerpt && typeof parsed.data.description === 'string') {
+          parsed.data.excerpt = parsed.data.description
+          injectedExcerpt = true
+        }
         const schemaResult = PostFrontmatterSchema.safeParse(parsed.data)
         if (!schemaResult.success) {
-          console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: schema invalido (${schemaResult.error.issues[0]?.message ?? 'unknown'})`)
+          const issues = schemaResult.error.issues
+            .slice(0, 5)
+            .map((i) => `${i.path?.join('.') || '?'} -> ${i.message}`)
+            .join('; ')
+          console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: ${issues}`)
           continue
         }
         const slug = String(parsed.data.slug)
@@ -110,8 +123,24 @@ function main(): void {
           console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: slug-collision em ${target}`)
           continue
         }
-        fs.mkdirSync(path.dirname(target), { recursive: true })
-        fs.writeFileSync(target, raw, 'utf8')
+        // Splice `excerpt:` no raw apos `description:` (evita matter.stringify
+        // que reformatra todo o YAML e gera diffs barulhentos).
+        let finalRaw = raw
+        if (injectedExcerpt) {
+          const yamlValue = JSON.stringify(String(parsed.data.excerpt))
+          const spliced = raw.replace(/^(description:[^\n]*\n)/m, `$1excerpt: ${yamlValue}\n`)
+          if (spliced === raw) {
+            console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: nao encontrou linha 'description:' no frontmatter para inserir excerpt`)
+            continue
+          }
+          finalRaw = spliced
+        }
+        if (DRY_RUN) {
+          console.log(`[promote][dry-run] would write ${path.relative(REPO_ROOT, target)} (excerpt_injected=${injectedExcerpt}, bytes=${finalRaw.length})`)
+        } else {
+          fs.mkdirSync(path.dirname(target), { recursive: true })
+          fs.writeFileSync(target, finalRaw, { encoding: 'utf8', flag: 'wx' })
+        }
         writes.push({ pkgDir: dir, locale, slug, target })
         promotedIds.add(pkg.equivalence_id)
         counts[locale] = counts[locale]! + 1
@@ -124,19 +153,37 @@ function main(): void {
     }
 
     const now = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z')
+    const touchedPkgPaths = new Set<string>()
     for (const { pkgDir } of writes) {
       const pkgPath = path.join(pkgDir, 'package.json')
+      if (touchedPkgPaths.has(pkgPath)) continue
+      touchedPkgPaths.add(pkgPath)
       const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as StockpilePackage
       if (pkg.promotion_state === 'promoted') continue
+      if (DRY_RUN) {
+        console.log(`[promote][dry-run] would mark ${pkg.equivalence_id} as promoted`)
+        continue
+      }
       pkg.promotion_state = 'promoted'
       pkg.lifecycle.promoted_at = now
       fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8')
     }
 
+    const summary = LOCALES.map((l) => `${l}=${counts[l] ?? 0}`).join(' ')
+    if (DRY_RUN) {
+      console.log(`[promote][dry-run] OK: ${writes.length} arquivos | ${summary}`)
+      return
+    }
+
     git('config user.name "github-actions[bot]"')
     git('config user.email "41898282+github-actions[bot]@users.noreply.github.com"')
-    git('add -A')
-    const summary = LOCALES.map((l) => `${l}=${counts[l] ?? 0}`).join(' ')
+    const pathspecs = [
+      ...writes.map((w) => path.relative(REPO_ROOT, w.target)),
+      ...Array.from(touchedPkgPaths).map((p) => path.relative(REPO_ROOT, p)),
+    ]
+      .map((p) => JSON.stringify(p))
+      .join(' ')
+    git(`add -- ${pathspecs}`)
     const msg = `content(multilanguage): promote daily batch (${summary})`
     git(`commit -m ${JSON.stringify(msg)}`)
     git(`pull --rebase ${GIT_REMOTE} ${GIT_BRANCH}`)
