@@ -377,6 +377,54 @@ INERTE** (comentários explícitos no `velite.config.ts`), caso o blog um dia
 aceite conteúdo de terceiros. Até lá, não são dead code acidental — são código
 morto **documentado e deliberado**.
 
+### 7.3. `relatedService` — normalização em vez de enum estrito
+
+`relatedService` (frontmatter opcional, alimenta o CTA contextual do artigo —
+`CTAContextual` → `ROUTES.SERVICE(relatedService)` → `/servicos/[slug]`) **deve**
+resolver para um dos 13 valores canônicos de `ServiceCategory`. Mas o pipeline de
+conteúdo (routine `blog-daily`) escreve esse campo livremente nos 4 locales, sem
+validar. O resultado real: **~48 valores distintos**, a maioria não-canônica —
+variantes pt/it/en/es de "custom systems", "web development", "business
+automation", "system maintenance", "AI agents".
+
+Falha estrutural que isso causou: o schema do Velite era
+`relatedService: s.enum(serviceCategoryValues)`. Em modo não-estrito (o default
+histórico), um post com `relatedService` fora do enum **falhava a validação de
+schema inteira** e era **silenciosamente dropado** — em pt-BR, **210 de 379
+posts** (55%) nunca chegavam ao `.velite`, viravam 404 em produção com build
+verde. Ao ligar `strict: true` (§7.1) o mesmo enum passaria a **abortar o build**
+— CI vermelho permanente até centenas de artigos serem reescritos.
+
+Correção (camada de normalização, não enum estrito):
+
+- **`src/lib/blog/normalize-service.ts`** — módulo sem dependência de framework
+  (importável pelo Velite via caminho relativo e por app/scripts). Exporta
+  `normalizeRelatedService(raw): ServiceCategory | undefined`: canoniza a forma
+  textual (trim, lowercase, espaços/underscores → hífen), aceita valor já
+  canônico, mapeia **sinônimos verdadeiros** via alias, e devolve `undefined`
+  para clusters ambíguos.
+- **`velite.config.ts`** — schema cru passa a `relatedService: s.string()`
+  (aceita qualquer valor → nem aborta nem dropa); o `.transform()` chama
+  `normalizeRelatedService()`. O tipo gerado vira `ServiceCategory | undefined`,
+  casando com `Article.relatedService?: ServiceCategory`.
+- **`post-schema.ts`** — campo adicionado como `z.string().optional()`
+  (leniente; a normalização é downstream).
+- **`validate-frontmatter.ts`** — emite **WARNING não-bloqueante** listando os
+  valores não-canônicos e suas contagens, para dar visibilidade ao drift do
+  pipeline sem travar o CI.
+
+Decisão deliberada sobre os aliases: **só sinônimos verdadeiros** são mapeados
+(variantes de mobile → `aplicativo-mobile`, de "automação IA"/"agentes IA" →
+`automacao-com-ia`, de "consultoria técnica" → `consultoria`, `erp-pmi` →
+`erp`). Clusters ambíguos ("sistemas-personalizados", "desenvolvimento-web",
+"automação-empresarial", manutenção) caem em `undefined` de propósito: chutar um
+`/servicos/[slug]` errado em centenas de artigos é pior que omitir o link
+contextual — `undefined` degrada para o CTA padrão, que é totalmente funcional.
+
+Prevenção na origem (tech-debt P3): a routine `blog-daily` deveria emitir slugs
+canônicos de `ServiceCategory` direto, localizando apenas os rótulos de exibição.
+Enquanto não o fizer, a camada de normalização absorve o drift sem regressão.
+
 ## 8. Modos manuais permitidos
 
 - `gh workflow run promote-from-stockpile.yml --ref main` — força ciclo fora do
@@ -417,6 +465,10 @@ morto **documentado e deliberado**.
 - **[P3] Dois diretórios de pacote órfãos** (`reviewed.md` sem `package.json`)
   em `.claude/blog/data/stockpile/packages/`. O `loadPackages()` agora os
   reporta via warn; decidir entre completar o `package.json` ou apagar os dirs.
+- **[P3] `relatedService` não-canônico na origem**: a routine `blog-daily`
+  escreve ~48 variantes do campo nos 4 locales. A camada de normalização (§7.3)
+  absorve o drift, mas o fix de raiz é a routine emitir slugs canônicos de
+  `ServiceCategory`. `validate-frontmatter` já reporta o drift via warning.
 
 ### Resolvido nesta auditoria (2026-05-19)
 
@@ -449,6 +501,11 @@ morto **documentado e deliberado**.
 - ~~[P1] Sem guard de compilação MDX no promote~~ — `mdxBodyCompiles()` via
   `scripts/check-mdx.mjs` (§3.4). Post que quebraria o build strict não é
   promovido.
+- ~~[P0] `relatedService` enum dropava 210/379 posts pt-BR (55%) silenciosamente~~
+  — schema cru vira `s.string()` + normalização no `.transform()` via
+  `normalizeRelatedService()` (§7.3). Sob `strict: true` o enum teria abortado o
+  build; a camada de normalização faz todos os 379 posts publicarem com o tipo
+  ainda casando `Article.relatedService?: ServiceCategory`.
 
 ## 11. Apêndice operacional (comandos `gh` para triagem)
 
@@ -505,3 +562,12 @@ Ver `commit-multilanguage.md` para semântica de mensagem/autor e
   com MDX que não compila já estavam em `content/`; [P1]: `<FAQSchema>` órfão no
   runtime e ausência de guard de compilação no promote. Todos corrigidos. Novas
   seções §3.4 (guard MDX) e §7.2 (rehype-sanitize inerte).
+- **2026-05-19 (continuação 2)** — Achado [P0] durante a validação do fix
+  anterior: `relatedService` era `s.enum(...)` e o campo é escrito sem validação
+  pelo pipeline de conteúdo — 210/379 posts pt-BR (55%) tinham valor não-canônico
+  e eram **silenciosamente dropados** do build (404 em produção, build verde). O
+  `strict: true` recém-adicionado teria convertido isso em CI vermelho
+  permanente. Corrigido com camada de normalização
+  (`src/lib/blog/normalize-service.ts`): schema cru `s.string()` + normalização
+  no `.transform()`. Nova seção §7.3. Os 4 locales: velite strict build + `tsc`
+  verdes.

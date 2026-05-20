@@ -84,6 +84,13 @@ export const PostFrontmatterSchema = z
     hreflang_pair: z.array(hreflangPairSchema).default([]),
     coverImage: z.string().optional(),
     author: z.string().default('Pedro Corgnati'),
+    // relatedService: string crua e LENIENTE de propósito. O pipeline de
+    // conteúdo escreve variantes não-canônicas nos 4 locales; a normalização
+    // para ServiceCategory acontece no .transform() do velite via
+    // normalizeRelatedService() (src/lib/blog/normalize-service.ts). Validar
+    // como enum aqui faria validate-frontmatter.ts (hard-fail) rejeitar
+    // centenas de artigos legados. Drift é reportado como WARNING não-bloqueante.
+    relatedService: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     // exclusive + hreflang_pair são mutuamente exclusivos

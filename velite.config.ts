@@ -3,7 +3,7 @@ import rehypeSanitize from 'rehype-sanitize'
 import remarkGfm from 'remark-gfm'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { ServiceCategory } from './src/lib/types'
+import { normalizeRelatedService } from './src/lib/blog/normalize-service'
 
 // Build-time cover fallback (espelha src/lib/blog/cover-fallback.ts).
 // Mantido inline porque velite roda fora do bundler do Next; importar via
@@ -115,26 +115,6 @@ const sanitizeSchema = {
 }
 
 // ---------------------------------------------------------------------------
-// ServiceCategory enum values (INT-095: CTAs contextualizados)
-// ---------------------------------------------------------------------------
-
-const serviceCategoryValues = [
-  ServiceCategory.SAAS,
-  ServiceCategory.MOBILE,
-  ServiceCategory.MARKETPLACE,
-  ServiceCategory.AI,
-  ServiceCategory.BOTS,
-  ServiceCategory.LANDING,
-  ServiceCategory.ECOMMERCE,
-  ServiceCategory.DASHBOARD,
-  ServiceCategory.API,
-  ServiceCategory.DESKTOP,
-  ServiceCategory.GESTAO,
-  ServiceCategory.ERP,
-  ServiceCategory.CONSULTORIA,
-] as const
-
-// ---------------------------------------------------------------------------
 // hreflang pair sub-schema (inline — mirrors PostFrontmatterSchema)
 // ---------------------------------------------------------------------------
 
@@ -181,7 +161,14 @@ const posts = defineCollection({
       coverImage: s.string().default('/images/blog/default-cover.png'),
       // Autor: default para o autor principal
       author: s.string().default('Pedro Corgnati'),
-      // Serviço relacionado: CTAs contextualizados (INT-095) — opcional
+      // Serviço relacionado: CTAs contextualizados (INT-095) — opcional.
+      // RAW = s.string() (aceita qualquer valor) de propósito: o pipeline de
+      // conteúdo escreve ~48 variantes não-canônicas nos 4 locales. Um
+      // s.enum() aqui — com defineConfig({ strict: true }) — ABORTARIA o build;
+      // sem strict, DESCARTARIA silenciosamente o post (404 em produção). O
+      // .transform() abaixo normaliza para ServiceCategory canônico via
+      // normalizeRelatedService(); valores ambíguos viram undefined (CTA
+      // padrão). Ver src/lib/blog/normalize-service.ts.
       relatedService: s.string().optional(),
       // Conteúdo MDX compilado com rehype-sanitize
       // copyLinkedFiles:false — blog images live in public/static, not as relative MDX assets
@@ -203,6 +190,10 @@ const posts = defineCollection({
         permalink: `/blog/${data.slug}`,
         // description: backward compat with existing blog components that use article.description
         description: data.excerpt,
+        // Normaliza relatedService cru -> ServiceCategory canônico | undefined.
+        // Sobrescreve o valor string de ...rest para o tipo gerado casar com
+        // Article.relatedService?: ServiceCategory (ArticlePage.tsx).
+        relatedService: normalizeRelatedService(data.relatedService),
       }
     }),
   // BLOCO INERTE: `mdx` nao e uma chave valida de defineCollection — velite a

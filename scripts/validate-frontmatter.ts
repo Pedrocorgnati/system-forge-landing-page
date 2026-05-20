@@ -11,6 +11,10 @@ import fs from 'fs'
 import path from 'path'
 import matter from 'gray-matter'
 import { PostFrontmatterSchema } from '../src/lib/blog/post-schema'
+import {
+  isCanonicalService,
+  normalizeRelatedService,
+} from '../src/lib/blog/normalize-service'
 
 const locale = process.env.NEXT_PUBLIC_LOCALE || 'pt-BR'
 const blogDir = path.join(process.cwd(), 'content', locale, 'blog')
@@ -30,6 +34,11 @@ if (files.length === 0) {
 let hasErrors = false
 const errorsByFile = new Map<string, string[]>()
 
+// Drift NÃO-BLOQUEANTE: relatedService cru fora do enum canônico. Reportado como
+// WARNING (não falha o build) — a normalização real roda no .transform() do
+// velite. Surface a divergência do pipeline de conteúdo sem travar o CI.
+const serviceDrift = new Map<string, { count: number; mappedTo: string }>()
+
 for (const file of files) {
   const filePath = path.join(blogDir, file)
   let data: Record<string, unknown>
@@ -41,6 +50,18 @@ for (const file of files) {
     errorsByFile.set(file, [`  - [parse] Erro ao parsear frontmatter: ${(err as Error).message}`])
     hasErrors = true
     continue
+  }
+
+  // Coleta drift de relatedService (não-bloqueante — ver serviceDrift acima).
+  const rawService = data.relatedService
+  if (typeof rawService === 'string' && rawService.trim() && !isCanonicalService(rawService)) {
+    const mapped = normalizeRelatedService(rawService)
+    const entry = serviceDrift.get(rawService) ?? {
+      count: 0,
+      mappedTo: mapped ?? 'undefined (CTA padrão)',
+    }
+    entry.count++
+    serviceDrift.set(rawService, entry)
   }
 
   const result = PostFrontmatterSchema.safeParse(data)
@@ -66,3 +87,19 @@ if (hasErrors) {
 }
 
 console.log(`\n✅ Todos os ${files.length} artigos ${locale} válidos`)
+
+// WARNING não-bloqueante: drift de relatedService no pipeline de conteúdo.
+if (serviceDrift.size > 0) {
+  const total = [...serviceDrift.values()].reduce((sum, e) => sum + e.count, 0)
+  console.warn(
+    `\n⚠️  relatedService não-canônico em ${total} artigo(s) ${locale} ` +
+      `(${serviceDrift.size} valor(es) distinto(s)) — normalizado no build, não bloqueia:`,
+  )
+  const sorted = [...serviceDrift.entries()].sort((a, b) => b[1].count - a[1].count)
+  for (const [value, { count, mappedTo }] of sorted) {
+    console.warn(`   - "${value}" ×${count} → ${mappedTo}`)
+  }
+  console.warn(
+    '   Corrija na origem: a routine deve emitir slugs canônicos de ServiceCategory.',
+  )
+}
