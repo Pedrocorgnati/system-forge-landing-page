@@ -37,7 +37,11 @@ jobs:
     name: Deploy BR (forjadesistemas.com.br)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
+    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
+    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
+    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
+    timeout-minutes: 150
 
     steps:
       - name: Checkout (scripts only)
@@ -147,7 +151,11 @@ jobs:
     name: Deploy IT (systemforge.it)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
+    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
+    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
+    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
+    timeout-minutes: 150
 
     steps:
       - name: Checkout (scripts only)
@@ -255,7 +263,11 @@ jobs:
     name: Deploy EN (systemforgesoftware.com)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
+    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
+    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
+    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
+    timeout-minutes: 150
 
     steps:
       - name: Checkout (scripts only)
@@ -363,7 +375,11 @@ jobs:
     name: Deploy ES (systemforge.es)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
+    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
+    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
+    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
+    timeout-minutes: 150
 
     steps:
       - name: Checkout (scripts only)

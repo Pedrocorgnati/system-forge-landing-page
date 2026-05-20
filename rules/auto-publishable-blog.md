@@ -290,13 +290,24 @@ Segredos por mercado: `SFTP_{BR,IT,EN,ES}_{HOST,USER,PASS,PORT,PUBLIC_HTML}`,
 `CLOUDFLARE_ZONE_ID[_{IT,EN,ES}]`, `CLOUDFLARE_API_TOKEN` (compartilhado),
 `NEWSLETTER_WORKER_URL_{BR,IT,EN,ES}`. Documentação em `docs/ci-cd-secrets.md`.
 
-**Risco residual (P2)**: o upload SFTP de cada job é em 5 sessões paralelas via
-`sshpass`, **não atômico**. Se um job atingir o timeout de 60 min ou cair a
-rede no meio do upload, o servidor pode ficar com estado parcial (alguns
-arquivos novos, outros velhos). O `cancel-in-progress: false` já elimina o
-cenário mais comum (cancelamento por novo push); o hardening ideal restante é
-deploy em diretório versionado + symlink swap atômico
-(`releases/{sha}/` + symlink `current → releases/{sha}`). Ver §10.
+**Timeout de cada job: 150 min.** O upload SFTP **re-envia todos os ~30k arquivos
+do export estático a cada deploy** — não há skip incremental. Com o timeout
+antigo de 60 min, o locale pt-BR (o maior — ~36k arquivos depois que a correção
+do `relatedService` restaurou 210 posts antes dropados) **estourava o timeout
+mid-upload** e o job era cancelado, deixando release parcial. EN também caía por
+variância de rede. 150 min dá folga de ~2x sobre o tempo real (~67 min para BR).
+
+**Risco residual (P1)**: o upload SFTP de cada job é em 5 sessões paralelas via
+`sshpass`, **não atômico** e **sem incremental**. Se um job atingir o timeout ou
+cair a rede no meio do upload, o servidor fica com estado parcial (alguns
+arquivos novos, outros velhos). O `cancel-in-progress: false` elimina o
+cenário de cancelamento por novo push, e o timeout de 150 min dá folga — mas o
+mecanismo continua frágil porque re-sobe tudo toda vez. Hardening recomendado
+(tech-debt §10): trocar o par `mkdir`-batch + `put`-loop por **`lftp mirror -R
+--parallel=N`** (uma conexão, pipelined, cria diretórios implicitamente,
+elimina a fase de `mkdir` de ~7 min) — **sem `--delete`** para não arriscar
+remoções. Hardening ideal de atomicidade: deploy em diretório versionado +
+symlink swap (`releases/{sha}/` + symlink `current`). Ver §10.
 
 ## 6. Invariantes inegociáveis
 
