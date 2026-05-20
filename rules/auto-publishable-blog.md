@@ -464,10 +464,30 @@ Enquanto não o fizer, a camada de normalização absorve o drift sem regressão
 
 ## 10. Tech-debt aberto (severizado)
 
-- **[P2] Deploy SFTP não-atômico**: upload em 5 sessões paralelas; timeout/queda
-  de rede mid-upload deixa release parcial. `cancel-in-progress: false` já
-  cobriu o cenário de cancelamento por novo push. Hardening restante: release
-  versionada em diretório + symlink swap atômico.
+- **[P1] Deploy SFTP não-atômico e não-incremental**: upload em 5 sessões
+  paralelas que **re-envia todos os ~30k+ arquivos do export a cada deploy**
+  (sem skip incremental). Timeout/queda de rede mid-upload deixa release
+  parcial. `cancel-in-progress: false` cobriu o cancelamento por novo push e o
+  `timeout-minutes: 150` (§5) dá folga — mas o mecanismo continua frágil.
+  Hardening recomendado: trocar `mkdir`-batch + `put`-loop por `lftp mirror -R
+  --parallel=N` (uma conexão, pipelined, sem fase de `mkdir`), **sem
+  `--delete`**. Hardening ideal de atomicidade: release versionada em diretório
+  + symlink swap. Ver §5.
+- **[P1] `published: false` é não-funcional (flag morta)**: o schema Velite tem
+  `published: s.boolean().default(true)` documentado como "false = draft (não
+  indexado)", mas **nenhum elo de renderização honra o campo** —
+  `blog/[slug]/page.tsx generateStaticParams`, a listagem `blog/page.tsx`, a
+  paginação, os feeds e as páginas de tag/categoria iteram os artigos sem
+  filtro. Consequência: 5 posts pt-BR com `published: false` (pacotes de
+  stockpile com `promoted_at: null` — a promoção commitou o `.mdx` mas não
+  virou a flag) estão **vivos em produção** (HTTP 200, na listagem, no
+  sitemap). Decisão pendente do humano: (a) virar os 5 para `published: true`
+  no conteúdo (se forem conteúdo pronto — seo_score 80 / conversion_score 76
+  sugerem que sim) e corrigir a promoção para virar a flag; OU (b) implementar
+  o comportamento de draft (excluir de `generateStaticParams` + listagem +
+  feeds + sitemap) e decidir 410/noindex para os 5 que já estavam vivos.
+  Enquanto não decidido, o sitemap lista os 5 (deve refletir o que está
+  crawlável — ver `src/lib/blog-articles.ts`).
 - **[P3] Internal broken links** (~13.4k, i18n routing incompleto). Tech-debt
   em `PENDING-ACTIONS.md`. Não bloqueia publicação (`continue-on-error` no
   `Check broken links`).
@@ -481,7 +501,7 @@ Enquanto não o fizer, a camada de normalização absorve o drift sem regressão
   absorve o drift, mas o fix de raiz é a routine emitir slugs canônicos de
   `ServiceCategory`. `validate-frontmatter` já reporta o drift via warning.
 
-### Resolvido nesta auditoria (2026-05-19)
+### Resolvido nesta auditoria (2026-05-19 / 05-20)
 
 - ~~[P0] `.run-lock.json` tracked sem `.gitignore`~~ — gitignored
   (`.gitignore:74-75`), não versionado.
@@ -517,6 +537,18 @@ Enquanto não o fizer, a camada de normalização absorve o drift sem regressão
   `normalizeRelatedService()` (§7.3). Sob `strict: true` o enum teria abortado o
   build; a camada de normalização faz todos os 379 posts publicarem com o tipo
   ainda casando `Article.relatedService?: ServiceCategory`.
+- ~~[P0] Sitemap omitia 100% dos posts de blog~~ — `sitemap.xml` de cada
+  domínio listava só 21 URLs (8 institucionais + 13 serviços); **nenhum** dos
+  ~1221 posts (4 mercados). Causa: `src/lib/blog-articles.ts >
+  getArticlesForLocale()` era um `@STUB` que `return []`, embora o
+  `src/app/sitemap.ts` já iterasse o resultado corretamente. Wired ao Velite
+  (`import { blog } from '@/.velite'`): monta `localeSlugMap` com o locale ativo
+  + `hreflang_pair`, herda `exclusive`. Sitemap passa a listar todos os posts
+  vivos com hreflang alternates por artigo universal.
+- ~~[P1] Deploy: `timeout-minutes: 60` cancelava BR/EN mid-upload~~ — bump para
+  150 min nos 4 jobs (§5). O deploy do dia BR/EN havia sido cancelado pelo
+  timeout deixando release parcial; re-deploy limpo confirmado (4 domínios com
+  contagem de posts batendo a fonte: pt-BR 379, it-IT 282, en 281, es-ES 279).
 
 ## 11. Apêndice operacional (comandos `gh` para triagem)
 
@@ -582,3 +614,12 @@ Ver `commit-multilanguage.md` para semântica de mensagem/autor e
   (`src/lib/blog/normalize-service.ts`): schema cru `s.string()` + normalização
   no `.transform()`. Nova seção §7.3. Os 4 locales: velite strict build + `tsc`
   verdes.
+- **2026-05-20** — Fase de verificação do deploy. (1) Achado [P1] de deploy:
+  `timeout-minutes: 60` cancelava os jobs BR/EN mid-upload SFTP — re-deploy
+  limpo após bump para 150 min; contagem de posts ao vivo confere com a fonte
+  nos 4 domínios (1221 total). (2) Achado [P0] de SEO: o `sitemap.xml` não
+  listava nenhum post de blog porque `getArticlesForLocale()` era um `@STUB`
+  retornando `[]` — wired ao Velite. (3) Achado [P1]: a flag `published` é
+  não-funcional (nenhum elo de render a honra); 5 posts pt-BR `published:false`
+  estão vivos. Documentado em §10 como decisão pendente do humano — não alterado
+  unilateralmente para não esconder conteúdo aparentemente pronto.

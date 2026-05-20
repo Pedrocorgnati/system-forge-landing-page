@@ -5,47 +5,60 @@
  * INT-020 — Integração Velite → hreflang por artigo.
  * module-9-seo-sitemaps TASK-1/ST008
  *
- * @STUB: Integração Velite pendente (module-6 completado).
- * Substituir implementação quando allVeliteArticles estiver disponível.
- * Convenção de frontmatter esperada:
- *   locale: 'pt-BR' | 'it-IT' | 'en'
- *   exclusive: boolean
- *   hreflang_pair: Array<{ locale: SupportedLocale; slug: string }>
+ * Consome a collection `blog` do Velite (locale-scoped em build time via
+ * pattern `${locale}/blog/**`). Cada artigo carrega:
+ *   locale: SupportedLocale          — sempre == locale do build ativo
+ *   exclusive: boolean               — true = existe só neste locale (sem hreflang)
+ *   hreflang_pair: Array<{ locale, slug }> — equivalentes universais nos outros locales
  */
+import { blog as allVeliteArticles } from '@/.velite'
 import type { SupportedLocale } from '@config/types'
 import type { ArticleHreflang } from '@/types/hreflang.types'
 
 /**
  * Retorna ArticleHreflang[] para o locale ativo.
  *
- * @STUB — Retorna array vazio até integração Velite estar configurada.
- * Substituir pelo corpo comentado abaixo quando module-6 estiver concluído.
+ * Wired ao Velite (substitui o @STUB que retornava []). Antes desta correção o
+ * `src/app/sitemap.ts` recebia array vazio e o sitemap.xml de produção não
+ * listava NENHUM post de blog — ~1221 artigos invisíveis para crawlers.
+ * Ver rules/auto-publishable-blog.md §10.
  *
- * @param _activeLocale Locale do build atual
+ * NÃO filtra por `published`: o sitemap deve refletir o que está de fato
+ * publicado/crawlável. `generateStaticParams` em blog/[slug] gera página para
+ * todos os artigos, então todos têm URL viva. Se `published` passar a ser
+ * honrado no render, este helper deve ganhar o mesmo filtro (ver Fault B,
+ * rules/auto-publishable-blog.md §10).
+ *
+ * @param activeLocale Locale do build atual
  */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function getArticlesForLocale(_activeLocale: SupportedLocale): ArticleHreflang[] {
-  // @STUB: Substituir por integração Velite (module-6)
-  // Exemplo de implementação com Velite:
-  //
-  // import { blog as allVeliteArticles } from '@/.velite'
-  //
-  // const articles: ArticleHreflang[] = []
-  // for (const article of allVeliteArticles) {
-  //   const articleLocale = article.locale as SupportedLocale | undefined
-  //   if (articleLocale !== _activeLocale) continue
-  //   const exclusive = article.exclusive as boolean | undefined
-  //   const hreflangPair = article.hreflang_pair as
-  //     Array<{ locale: SupportedLocale; slug: string }> | undefined
-  //   if (exclusive) {
-  //     articles.push({ slug: article.slug, localeSlugMap: { [_activeLocale]: article.slug }, exclusive: true })
-  //     continue
-  //   }
-  //   const localeSlugMap: Partial<Record<SupportedLocale, string>> = { [_activeLocale]: article.slug }
-  //   if (hreflangPair) for (const pair of hreflangPair) localeSlugMap[pair.locale] = pair.slug
-  //   articles.push({ slug: article.slug, localeSlugMap, exclusive: false })
-  // }
-  // return articles
+export function getArticlesForLocale(activeLocale: SupportedLocale): ArticleHreflang[] {
+  const articles: ArticleHreflang[] = []
 
-  return []
+  for (const article of allVeliteArticles) {
+    // Velite já é locale-scoped em build time; guarda defensiva contra um doc
+    // cruzado eventual (frontmatter `locale` divergente da pasta).
+    if ((article.locale as SupportedLocale) !== activeLocale) continue
+
+    if (article.exclusive) {
+      // Artigo exclusivo: presente só neste locale — sem hreflang alternates.
+      articles.push({
+        slug: article.slug,
+        localeSlugMap: { [activeLocale]: article.slug },
+        exclusive: true,
+      })
+      continue
+    }
+
+    // Artigo universal: o locale ativo + os pares declarados em hreflang_pair.
+    const localeSlugMap: Partial<Record<SupportedLocale, string>> = {
+      [activeLocale]: article.slug,
+    }
+    for (const pair of article.hreflang_pair ?? []) {
+      localeSlugMap[pair.locale as SupportedLocale] = pair.slug
+    }
+
+    articles.push({ slug: article.slug, localeSlugMap, exclusive: false })
+  }
+
+  return articles
 }
