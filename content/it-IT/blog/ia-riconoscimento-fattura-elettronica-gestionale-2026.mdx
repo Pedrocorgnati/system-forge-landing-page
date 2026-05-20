@@ -57,7 +57,7 @@ L'IA serve quando devi fare quattro cose che il parser non sa fare:
 
 Il dibattito "OCR classico contro LLM" e mal posto. Per la fattura elettronica italiana il pipeline corretto e ibrido.
 
-**Livello 1 - Parser XML deterministico.** Schema validato contro la versione SdI corrente (1.6.1 al momento della scrittura). Gestisce il 90% del lavoro per campi standard. Stack: qualsiasi linguaggio con libreria XML decente. Tempo: <50ms per fattura.
+**Livello 1 - Parser XML deterministico.** Schema validato contro la versione SdI corrente (1.6.1 al momento della scrittura). Gestisce il 90% del lavoro per campi standard. Stack: qualsiasi linguaggio con libreria XML decente. Tempo: &lt;50ms per fattura.
 
 **Livello 2 - LLM con embedding per classificazione.** Per ogni linea della fattura, embedding della descrizione + embedding del piano dei conti aziendale + similarita coseno + LLM che valida la proposta migliore. Stack tipico: pgvector su Postgres oppure Pinecone, con OpenAI text-embedding-3-large o Cohere embed-multilingual-v3. Costo: €0,001-0,003 per linea. Latenza: 200-500ms.
 

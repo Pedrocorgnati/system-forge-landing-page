@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write
 
 concurrency:
   group: promote-from-stockpile
@@ -33,23 +34,68 @@ jobs:
       - name: Promote (max-per-locale 3)
         env:
           MAX_PER_LOCALE: '3'
+        # O script (scripts/promote-from-stockpile.ts, passo 7) faz commit +
+        # pull --rebase --autostash + push origin main internamente. Se o push
+        # falhar, o script sai != 0, este step falha e o job aborta antes do
+        # dispatch abaixo. NAO ha step de push redundante: o push do script e a
+        # unica fonte da verdade (removido o antigo step `Push` que mascarava
+        # falhas com `|| echo "no commit (no-op)"` e usava identidade divergente).
         run: npx tsx scripts/promote-from-stockpile.ts
-
-      - name: Push (se houve commit)
-        run: |
-          git config user.email "actions@github.com"
-          git config user.name "promote-from-stockpile bot"
-          git push origin main || echo "no commit (no-op)"
 
       - name: Dispatch Quad Market Build (apenas se houve promote commit)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Pushes do GITHUB_TOKEN nao disparam outros workflows por design.
-          # Dispatch explicito via workflow_dispatch quando ha commit do bot.
+          # Pushes feitos com GITHUB_TOKEN nao disparam outros workflows por
+          # design (anti-loop do GitHub Actions); dispatch explicito necessario.
+          # Este step so roda se o step Promote teve sucesso => o push do script
+          # aterrou em origin/main => o promote commit esta no remoto. Por isso
+          # o `git log -1` da working tree e fiel ao que foi publicado.
           if git log -1 --format=%s | grep -q "^content(multilanguage): promote daily batch"; then
             echo "Promote commit detectado - disparando Quad Market Build"
             gh workflow run build.yml --ref main
           else
             echo "Sem promote commit - skip dispatch"
           fi
+
+      - name: Abrir issue em caso de falha
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const today = new Date().toISOString().slice(0, 10);
+            const body = [
+              'O workflow `promote-from-stockpile` falhou.',
+              '',
+              `- Run: ${runUrl}`,
+              `- Trigger: ${context.eventName}`,
+              `- Commit: ${context.sha}`,
+              `- Data: ${today}`,
+              '',
+              'Triagem: ver `rules/auto-publishable-blog.md` secao 9 (tripwires).',
+            ].join('\n');
+            const existing = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'promote-failure',
+            });
+            if (existing.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing.data[0].number,
+                body,
+              });
+              core.info(`Comentario adicionado na issue #${existing.data[0].number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: `[promote-from-stockpile] falha em ${today}`,
+                body,
+                labels: ['promote-failure'],
+              });
+              core.info(`Issue #${created.data.number} aberta`);
+            }

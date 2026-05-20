@@ -8,8 +8,9 @@
  *   1. acquire run lock TTL 30min
  *   2. ler packages/{uuid}/package.json
  *   3. filtrar promotion_state==available && fresh && !invalidated
- *   4. agrupar por locale, sort por equivalence_id (FIFO), pick top MAX_PER_LOCALE
+ *   4. agrupar por locale, sort FIFO por lifecycle.created_at, pick top MAX_PER_LOCALE
  *   5. copiar reviewed.md -> content/{locale}/blog/{slug}.mdx; validar PostFrontmatterSchema
+ *      + compilar o corpo MDX (guard contra post que quebraria o build do velite)
  *   6. marcar promotion_state=promoted + promoted_at=now (uma vez por pacote)
  *   7. git config + add + commit + pull --rebase + push origin main
  *   8. release lock (try/finally, sempre)
@@ -25,7 +26,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { execSync } from 'child_process'
+import { execSync, execFileSync } from 'child_process'
 import { randomUUID } from 'crypto'
 import { fileURLToPath } from 'url'
 import matter from 'gray-matter'
@@ -50,6 +51,49 @@ function git(args: string): string {
   return execSync(`git ${args}`, { cwd: REPO_ROOT, encoding: 'utf8' })
 }
 
+/**
+ * Compila o corpo MDX (sem frontmatter) para detectar erros que so apareceriam
+ * no build do velite — ex.: `<` seguido de digito lido como tag JSX, ou `{...}`
+ * cru lido como expressao acorn. Com o velite em strict mode um post quebrado
+ * ABORTA o build inteiro; este guard impede que ele seja sequer promovido e
+ * commitado em main (Zero Silencio: drift detectado antes do push).
+ *
+ * A compilacao real roda em `scripts/check-mdx.mjs` via node PURO como
+ * subprocesso. Motivo: `@mdx-js/mdx` puxa `estree-walker` (ESM-only, sem
+ * condicao `require` em `exports`), que o resolver do tsx 4.x — runtime deste
+ * script no CI — nao consegue resolver (ERR_PACKAGE_PATH_NOT_EXPORTED). Isolar
+ * a cadeia de import num processo `node` separado contorna isso.
+ */
+function mdxBodyCompiles(body: string): { ok: true } | { ok: false; error: string } {
+  const checker = path.join(REPO_ROOT, 'scripts', 'check-mdx.mjs')
+  try {
+    execFileSync(process.execPath, [checker], {
+      cwd: REPO_ROOT,
+      input: body,
+      encoding: 'utf8',
+      stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    return { ok: true }
+  } catch (e) {
+    const err = e as { status?: number | null; code?: string; stderr?: string | Buffer; message?: string }
+    const stderr = err.stderr ? err.stderr.toString().trim() : ''
+    // exit 3 = check-mdx.mjs compilou e o MDX genuinamente nao passa. Skipavel.
+    if (err.status === 3) {
+      return { ok: false, error: stderr.split('\n')[0] || 'MDX nao compila' }
+    }
+    // Qualquer outro exit (helper ausente, `@mdx-js/mdx` nao instalado, node
+    // ausente, erro de sintaxe no proprio checker) e falha de INFRAESTRUTURA,
+    // nao um post quebrado. Tratar como skip transformaria o run num promote
+    // no-op silencioso que para a publicacao inteira sem ninguem ver. Lancar
+    // aborta o run, falha o step do CI e dispara o auto-issue (Zero Silencio).
+    throw new Error(
+      `guard de compilacao MDX inoperante (exit=${err.status ?? err.code ?? '?'}): ` +
+        `${stderr || err.message || 'erro desconhecido'}. ` +
+        `Confirme que scripts/check-mdx.mjs existe e que '@mdx-js/mdx' esta instalado (npm ci).`
+    )
+  }
+}
+
 function loadPackages(): Array<{ pkg: StockpilePackage; dir: string }> {
   const root = path.join(STOCKPILE_DIR, 'packages')
   if (!fs.existsSync(root)) return []
@@ -59,7 +103,12 @@ function loadPackages(): Array<{ pkg: StockpilePackage; dir: string }> {
     .map((d) => {
       const dir = path.join(root, d.name)
       const pkgPath = path.join(dir, 'package.json')
-      if (!fs.existsSync(pkgPath)) return null
+      if (!fs.existsSync(pkgPath)) {
+        // Zero Silencio: dir de pacote sem package.json e orfao (geracao
+        // abortada). Skipar em silencio escondia pacotes nao-promoveis.
+        console.warn(`[promote] skip ${d.name}: diretorio sem package.json (orfao)`)
+        return null
+      }
       try {
         const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8')) as StockpilePackage
         return { pkg, dir }
@@ -86,7 +135,17 @@ function main(): void {
       if (checkInvalidation(pkg.equivalence_id, STOCKPILE_DIR).blocked) return false
       return true
     })
-    eligible.sort((a, b) => a.pkg.equivalence_id.localeCompare(b.pkg.equivalence_id))
+    // FIFO real: pacote mais antigo primeiro por lifecycle.created_at (ISO 8601,
+    // ordenavel lexicograficamente). equivalence_id e o desempate deterministico
+    // quando dois pacotes compartilham o mesmo created_at. Antes a ordenacao era
+    // so por equivalence_id (UUID) — deterministica, porem nao temporal: um UUID
+    // alto podia inanir indefinidamente se o stockpile vivesse cheio.
+    eligible.sort((a, b) => {
+      const ca = a.pkg.lifecycle.created_at
+      const cb = b.pkg.lifecycle.created_at
+      if (ca !== cb) return ca < cb ? -1 : 1
+      return a.pkg.equivalence_id.localeCompare(b.pkg.equivalence_id)
+    })
 
     const promotedIds = new Set<string>()
     const writes: Array<{ pkgDir: string; locale: SupportedLocale; slug: string; target: string }> = []
@@ -115,6 +174,11 @@ function main(): void {
             .map((i) => `${i.path?.join('.') || '?'} -> ${i.message}`)
             .join('; ')
           console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: ${issues}`)
+          continue
+        }
+        const mdxCheck = mdxBodyCompiles(parsed.content)
+        if (!mdxCheck.ok) {
+          console.warn(`[promote] skip ${pkg.equivalence_id}/${locale}: MDX nao compila — ${mdxCheck.error}`)
           continue
         }
         const slug = String(parsed.data.slug)

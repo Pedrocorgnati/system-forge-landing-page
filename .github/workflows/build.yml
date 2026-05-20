@@ -4,8 +4,8 @@
 #
 # Fluxo:
 #   push para main → este workflow → artifacts build-{locale}
-#   → deploy.yml (via workflow_run) → 3 deploys SFTP paralelos
-#   → smoke-test.yml (via workflow_run) → 3 smoke tests paralelos
+#   → deploy.yml (via workflow_run) → 4 deploys SFTP paralelos (BR/IT/EN/ES)
+#   → job in-line post-deploy-smoke (em deploy.yml) → smoke tests dos 4 domínios
 name: Quad Market Build
 
 on:

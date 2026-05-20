@@ -61,7 +61,12 @@ function resolveCoverImage(cover: string, slug: string): string {
  * Build isolation por locale: cada build lê apenas o subdiretório do locale ativo.
  * NEXT_PUBLIC_LOCALE determina qual pasta de conteúdo é usada.
  *
- * THREAT-MODEL T-001: XSS via MDX — mitigado via rehype-sanitize com allowlist.
+ * THREAT-MODEL T-001: XSS via MDX — o conteúdo do blog é gerado por um pipeline
+ *   automatizado confiável (routine Claude), não por submissão pública. NOTA: o
+ *   bloco `sanitizeSchema` + `mdx:` da collection abaixo está INERTE (velite não
+ *   lê `mdx` em defineCollection — ver comentário no bloco). Sanitização real
+ *   exigiria mover a config para `s.mdx({...})` E removeria `<script>` JSON-LD e
+ *   componentes `<FAQSchema>`/`<Callout>` — decisão de arquitetura pendente.
  * INT-045: Isolamento por build locale.
  * INT-077: Frontmatter padronizado com hreflang_pair.
  */
@@ -90,6 +95,9 @@ const WORDS_PER_MINUTE = 200
 
 // ---------------------------------------------------------------------------
 // rehype-sanitize allowlist (THREAT-MODEL T-001)
+// ATENCAO: este schema esta INERTE — so e referenciado pelo bloco `mdx:` da
+// collection abaixo, que o velite NAO le. Mantido como referencia da allowlist
+// pretendida caso a sanitizacao seja wireada via `s.mdx({...})` no futuro.
 // ---------------------------------------------------------------------------
 
 const sanitizeSchema = {
@@ -142,20 +150,27 @@ const hreflangPairSchema = s.object({
 const posts = defineCollection({
   name: 'Post',
   pattern: `${locale}/blog/**/*.mdx`,
+  // LOCKSTEP: as regras de campo abaixo espelham PostFrontmatterSchema em
+  // src/lib/blog/post-schema.ts (fonte da verdade — auto-publishable-blog.md §7.1).
+  // Velite usa `s` (não o `z` canônico) e não pode importar o módulo Zod direto,
+  // então os limites min/max são duplicados à mão. Mudar um lado exige mudar o
+  // outro. Com `defineConfig({ strict: true })` (fim do arquivo) um doc que viola
+  // este schema ABORTA o build — manter paridade com o canônico evita divergência
+  // com o hard-fail de scripts/validate-frontmatter.ts, que corre antes no CI.
   schema: s
     .object({
-      // Title: ≤120 chars (SEO, INT-054)
-      title: s.string().max(120),
+      // Title: 1–120 chars (SEO, INT-054)
+      title: s.string().min(1).max(120),
       // Date: ISO 8601 (INT-045)
       date: s.isodate(),
       // Slug: kebab-case, unique within collection
       slug: s.slug('posts'),
       // Locale: must match the build locale (validated at build time)
       locale: s.enum(SUPPORTED_LOCALES as unknown as [string, ...string[]]),
-      // Excerpt: ≤300 chars (meta description + listing pages)
-      excerpt: s.string().max(300),
-      // Tags: 1–10 tags (INT-046)
-      tags: s.array(s.string()).min(1).max(10),
+      // Excerpt: 50–300 chars (meta description + listing pages)
+      excerpt: s.string().min(50).max(300),
+      // Tags: 1–10 tags, cada uma não-vazia (INT-046)
+      tags: s.array(s.string().min(1)).min(1).max(10),
       // Published: false = draft (não indexado)
       published: s.boolean().default(true),
       // Exclusive: true = artigo existe apenas neste locale
@@ -167,7 +182,7 @@ const posts = defineCollection({
       // Autor: default para o autor principal
       author: s.string().default('Pedro Corgnati'),
       // Serviço relacionado: CTAs contextualizados (INT-095) — opcional
-      relatedService: s.enum(serviceCategoryValues).optional(),
+      relatedService: s.string().optional(),
       // Conteúdo MDX compilado com rehype-sanitize
       // copyLinkedFiles:false — blog images live in public/static, not as relative MDX assets
       content: s.mdx({ copyLinkedFiles: false }),
@@ -190,12 +205,14 @@ const posts = defineCollection({
         description: data.excerpt,
       }
     }),
+  // BLOCO INERTE: `mdx` nao e uma chave valida de defineCollection — velite a
+  // ignora silenciosamente. As opcoes de MDX que valem sao (a) as passadas para
+  // `s.mdx({...})` no campo `content` acima e (b) `defineConfig({ mdx })` global.
+  // Consequencia: rehype-sanitize NAO roda e remark-gfm vem do default do velite
+  // (por isso as tabelas funcionam). Ver THREAT-MODEL T-001 no topo do arquivo.
   mdx: {
-    // Disable file copying: blog images live in public/static, not as relative MDX assets.
-    // Prevents EISDIR when MDX contains site-root links like [text](/).
     copyLinkedFiles: false,
     rehypePlugins: [
-      // XSS prevention: remove <script>, on* attrs, javascript: hrefs
       [rehypeSanitize, sanitizeSchema],
     ],
     remarkPlugins: [remarkGfm],
@@ -208,6 +225,12 @@ const posts = defineCollection({
 
 export default defineConfig({
   root: 'content',
+  // strict: um MDX que falha a compilacao ou a validacao de schema ABORTA o
+  // build (exit != 0) em vez de ser descartado com um warning. Sem isto, um post
+  // quebrado some silenciosamente do .velite e vira 404 em producao com o build
+  // verde — exatamente a falha que esta auditoria corrigiu. Ver
+  // rules/auto-publishable-blog.md.
+  strict: true,
   output: {
     data: '.velite',
     assets: 'public/static',

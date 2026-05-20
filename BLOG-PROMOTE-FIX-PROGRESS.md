@@ -60,13 +60,13 @@ Hreflang reciprocidade está intacta — o que quebrou foi a **publicação auto
 
 ### Etapa 3 — Commit + push
 
-- [ ] Pre-flight: confirmar `git status` limpo exceto pelo patch + PROGRESS
-- [ ] Controversial check: o commit dispara cadeia que muta produção em 4 domínios?
-- [ ] Hardening: review independente via codex MCP
-- [ ] `git add scripts/promote-from-stockpile.ts BLOG-PROMOTE-FIX-PROGRESS.md`
-- [ ] `git commit` com mensagem `fix(blog-promote): map description -> excerpt to unblock auto-publish quad-market`
-- [ ] `git push origin main`
-- [ ] Marcar concluído
+- [x] Pre-flight: working tree tem changes não-relacionadas da Fase 2 mas commit é seletivo (só 2 files)
+- [x] Controversial check: o commit toca `scripts/promote-from-stockpile.ts` — não está em `paths-ignore` do `build.yml`, portanto vai disparar `Quad Market Build` no push. Build esperado para passar (não muda content/MDX, apenas script TS standalone). Não dispara `promote-from-stockpile` (workflow é `schedule + workflow_dispatch`, NÃO push-triggered)
+- [x] Hardening: codex MCP review confirmou — push é seguro, promote-from-stockpile precisa ser triggado manualmente via `gh workflow run`
+- [x] `git add scripts/promote-from-stockpile.ts BLOG-PROMOTE-FIX-PROGRESS.md`
+- [x] `git commit -m "fix(blog-promote): map description -> excerpt to unblock auto-publish"` → SHA `a6254da`
+- [x] `git push origin main` → `353b664..a6254da  main -> main` OK
+- [x] Marcar concluído
 
 ### Etapa 4 — Verificação online: mecanismo de publicação automática implantado
 
