@@ -58,6 +58,122 @@ jobs:
             echo "Sem promote commit - skip dispatch"
           fi
 
+      # ── T010: alerta de no-op recorrente ────────────────────────────────── #
+      # D4 (limiar): 3 DIAS CORRIDOS sem promote commit. O cron roda diariamente
+      # (0 13 * * *), logo 3 dias = ~3 ciclos silenciosos. Semantica DELIBERADA
+      # de janela temporal (nao contador de runs): imune a `workflow_dispatch`
+      # extra inflando o contador e a cron skipado deflacionando — ver D4 no
+      # DECISION-LOG.md. Stateless: derivado do historico git (fetch-depth: 0 no
+      # checkout acima), sem state file.
+      # D5 (mecanismo): GitHub issue com label `promote-noop`, reusando o padrao
+      # da issue de falha abaixo. Distincao: `promote-failure` = o workflow
+      # QUEBROU; `promote-noop` = o workflow passou VERDE mas nao publicou nada
+      # ha N dias. Roda so em run verde (if: success()) — falha ja e coberta
+      # pela issue `promote-failure`. Auto-resolve: fecha a issue quando um
+      # promote volta a acontecer.
+      # LIMITACAO CONHECIDA (watchdog): se este workflow nao rodar (cron
+      # auto-desabilitado apos 60d de inatividade do repo, ou schedule atrasado),
+      # nenhum alerta e emitido. Mitigado na pratica: o repo recebe commits
+      # diarios da routine blog-daily, entao nao fica 60d inativo. Watchdog
+      # externo de "workflow nao rodou" e follow-up registrado (ver T015).
+      - name: Detectar no-op recorrente
+        if: success()
+        uses: actions/github-script@v7
+        env:
+          NOOP_THRESHOLD_DAYS: '3'
+        with:
+          script: |
+            const { spawnSync } = require('child_process');
+            const fs = require('fs');
+            const days = parseInt(process.env.NOOP_THRESHOLD_DAYS, 10);
+            const grep = '^content(multilanguage): promote daily batch';
+            const owner = context.repo.owner, repo = context.repo.repo;
+            // git sem shell (spawnSync) — `(` `)` no --grep sao literais para git,
+            // sem acoplamento de quoting/escaping de /bin/sh.
+            const git = (args) => {
+              const r = spawnSync('git', args, { encoding: 'utf8' });
+              if (r.status !== 0) throw new Error(`git ${args.join(' ')}: ${r.stderr}`);
+              return r.stdout;
+            };
+
+            // Arming: se NUNCA houve promote commit, o pipeline esta em bootstrap
+            // (estoque ainda nao promovido) — nao e no-op, e ausencia esperada.
+            const lastDate = git(['log', '-1', `--grep=${grep}`, '--format=%cs']).trim();
+            if (!lastDate) {
+              core.info('[noop-check] bootstrap (nenhum promote commit no historico) - monitor nao armado');
+              return;
+            }
+
+            // Conta promote commits na janela do limiar (N dias corridos).
+            const recentN = git(['log', `--since=${days} days ago`, `--grep=${grep}`, '--format=%H'])
+              .split('\n').filter(Boolean).length;
+
+            const open = await github.rest.issues.listForRepo({
+              owner, repo, state: 'open', labels: 'promote-noop',
+            });
+
+            if (recentN > 0) {
+              core.info(`[noop-check] ${recentN} promote commit(s) em ${days}d - pipeline saudavel`);
+              if (open.data.length > 0) {
+                const n = open.data[0].number;
+                await github.rest.issues.createComment({
+                  owner, repo, issue_number: n,
+                  body: `Promote bem-sucedido (ultimo: ${lastDate}). No-op recorrente resolvido - fechado automaticamente.`,
+                });
+                await github.rest.issues.update({ owner, repo, issue_number: n, state: 'closed' });
+                core.info(`[noop-check] issue #${n} fechada (no-op resolvido)`);
+              }
+              return;
+            }
+
+            core.warning(`[noop-check] 0 promote commits em ${days}d (ultimo: ${lastDate}) - no-op recorrente`);
+            // T011 (quando implementado) popula `discard_reasons` no metrics JSON
+            // (schema blog-metrics/v1 — ver T009 no PROGRESS.md). Hook degradavel.
+            let reasons = '(metrics/ ainda nao emitido - ver T009/T011)';
+            try {
+              const dir = '.claude/blog/data/stockpile/metrics';
+              const files = fs.readdirSync(dir)
+                .filter((f) => f.startsWith('promote-') && f.endsWith('.json')).sort();
+              if (files.length > 0) {
+                const j = JSON.parse(fs.readFileSync(`${dir}/${files[files.length - 1]}`, 'utf8'));
+                reasons = JSON.stringify(j.discard_reasons || {});
+              }
+            } catch (e) { /* metrics ausente - mantem placeholder */ }
+
+            const runUrl = `${context.serverUrl}/${owner}/${repo}/actions/runs/${context.runId}`;
+            const body = [
+              `O pipeline de promote esta VERDE mas nao publica artigo ha ${days} dias (no-op recorrente).`,
+              '',
+              `- Limiar (D4): ${days} promotes consecutivos sem publicacao`,
+              `- Ultimo promote com publicacao: ${lastDate}`,
+              `- Run: ${runUrl}`,
+              `- Motivos agregados de descarte (T011): ${reasons}`,
+              '',
+              'Triagem: ver `rules/auto-publishable-blog.md` secao 9 e o runbook de incidente (T015).',
+            ].join('\n');
+
+            // Garante o label promote-noop (idempotente — 422 se ja existe).
+            try {
+              await github.rest.issues.createLabel({
+                owner, repo, name: 'promote-noop', color: 'FBCA04',
+                description: 'Promote verde mas sem publicacao ha N dias',
+              });
+            } catch (e) { /* label ja existe */ }
+
+            if (open.data.length > 0) {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number: open.data[0].number, body,
+              });
+              core.info(`[noop-check] comentario adicionado na issue #${open.data[0].number}`);
+            } else {
+              const created = await github.rest.issues.create({
+                owner, repo,
+                title: '[promote-from-stockpile] no-op recorrente',
+                body, labels: ['promote-noop'],
+              });
+              core.info(`[noop-check] issue #${created.data.number} aberta`);
+            }
+
       - name: Abrir issue em caso de falha
         if: failure()
         uses: actions/github-script@v7

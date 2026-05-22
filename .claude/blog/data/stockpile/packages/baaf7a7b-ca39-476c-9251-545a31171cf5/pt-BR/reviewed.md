@@ -10,7 +10,7 @@ relatedService: "desenvolvimento-web"
 canonical: "https://forjadesistemas.com.br/blog/landing-page-nichadacidade"
 exclusive: true
 hreflang_pair: []
-draft: true
+draft: false
 brief: "landing-page-nichadacidade"
 equivalence_id: "baaf7a7b-ca39-476c-9251-545a31171cf5"
 word_count: 2400

@@ -73,3 +73,8 @@ DEPLOYMENT.md
 # Stockpile lock files (estado efêmero local; nunca versionar)
 .claude/blog/data/stockpile/.run-lock.json
 .claude/blog/data/stockpile/packages/*/.lock.json
+
+# Stockpile métricas blog-metrics/v1 (snapshot por run; efêmero — T011)
+# O histórico durável é o git log dos commits de promote; este JSON é o
+# snapshot rico consumido pelo step de no-op dentro do mesmo job de CI.
+.claude/blog/data/stockpile/metrics/
