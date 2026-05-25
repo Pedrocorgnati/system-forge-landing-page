@@ -18,6 +18,7 @@
  *   0.4 — /privacy
  */
 import type { MetadataRoute } from 'next'
+import { blog as allVeliteArticles } from '@/.velite'
 import { getSiteConfig } from '@config'
 import { ROUTE_SLUGS } from '@/lib/locale-slugs'
 import { buildLanguagesForRoute, buildLanguagesForArticle } from '@/lib/seo/build-alternates'
@@ -134,16 +135,25 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   const articles = getArticlesForLocale(activeLocale)
 
+  // V-01: mapa slug → data real de publicação (evita lastmod fraudulento).
+  // allVeliteArticles já é locale-scoped pelo build (NEXT_PUBLIC_LOCALE).
+  const articleDateMap = new Map<string, string>(
+    allVeliteArticles.map(a => [a.slug, a.date])
+  )
+
   for (const article of articles) {
     const articleSlug = article.localeSlugMap[activeLocale]
     if (!articleSlug) continue
+
+    // V-01: usa data real do artigo; fallback para `now` apenas se ausente.
+    const articleLastMod = articleDateMap.get(article.slug) ?? now
 
     if (!article.exclusive) {
       // Artigo universal: com hreflang alternates
       const languages = buildLanguagesForArticle(article)
       entries.push({
         url: `${base}${routes.blog}/${articleSlug}`,
-        lastModified: now,
+        lastModified: articleLastMod,
         changeFrequency: 'monthly',
         priority: 0.7,
         ...(languages ? { alternates: { languages } } : {}),
@@ -152,7 +162,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
       // Artigo exclusivo: sem hreflang
       entries.push({
         url: `${base}${routes.blog}/${articleSlug}`,
-        lastModified: now,
+        lastModified: articleLastMod,
         changeFrequency: 'monthly',
         priority: 0.5,
       })

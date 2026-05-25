@@ -37,13 +37,15 @@ jobs:
     name: Deploy BR (forjadesistemas.com.br)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
-    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
-    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
-    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
-    timeout-minutes: 150
+    # V-02: lftp mirror --ignore-time sincroniza apenas arquivos com tamanho
+    # diferente do remoto — evita reupload massivo de ~36k arquivos para 4 posts
+    # novos. Timeout reduzido de 150→90 min; ajustar se locale crescer muito.
+    timeout-minutes: 90
 
     steps:
+      - name: Capture deploy start timestamp
+        run: echo "DEPLOY_START_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -88,42 +90,24 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_BR_HOST }}
           SFTP_USER: ${{ secrets.SFTP_BR_USER }}
-          SSHPASS: ${{ secrets.SFTP_BR_PASS }}
+          LFTP_PASSWORD: ${{ secrets.SFTP_BR_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_BR_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_BR_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y sshpass > /dev/null 2>&1
-          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          TARGET="$SFTP_USER@$SFTP_HOST"
-          # Step 1: create all remote directories (single connection, fast)
-          BATCH_DIRS=$(mktemp)
-          find out -type d | sort | while IFS= read -r dir; do
-            echo "-mkdir ${dir/#out/$SFTP_PATH}"
-          done >> "$BATCH_DIRS"
-          echo "quit" >> "$BATCH_DIRS"
-          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
-          # Step 2: upload files in 5 parallel sftp sessions (~5x faster)
-          mapfile -t ALL_FILES < <(find out -type f | sort)
-          TOTAL=${#ALL_FILES[@]}
-          PARALLEL=5
-          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
-          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
-          PIDS=()
-          for i in $(seq 0 $((PARALLEL - 1))); do
-            BATCH=$(mktemp)
-            START=$((i * CHUNK))
-            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
-              echo "put $file ${file/#out/$SFTP_PATH}"
-            done >> "$BATCH"
-            echo "quit" >> "$BATCH"
-            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
-            PIDS+=($!)
-          done
-          FAILED=0
-          for pid in "${PIDS[@]}"; do
-            wait "$pid" || FAILED=1
-          done
-          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          LOCAL_COUNT=$(find out -type f | wc -l)
+          echo "Arquivos no output local: $LOCAL_COUNT"
+          # V-02: mirror --ignore-time compara por tamanho; pula arquivos com
+          # tamanho idêntico ao remoto (evita reupload de conteúdo inalterado).
+          # Cria diretórios remotos ausentes automaticamente.
+          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+            "set sftp:auto-confirm yes; \
+             set net:max-retries 3; \
+             set net:reconnect-interval-base 5; \
+             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
+                    --log=/dev/stderr out/ ${SFTP_PATH}; \
+             quit"
+          echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (BR)
         if: success()
@@ -139,10 +123,15 @@ jobs:
       - name: Deploy summary (BR)
         if: success()
         run: |
-          echo "## Deploy BR concluído" >> $GITHUB_STEP_SUMMARY
-          echo "- **Domínio:** forjadesistemas.com.br" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          DEPLOY_END_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          echo "## Deploy BR concluído" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| dominio | forjadesistemas.com.br |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| commit | ${{ github.sha }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_start_ts | $DEPLOY_START_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_end_ts | $DEPLOY_END_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| files_in_output | ${DEPLOY_FILE_COUNT:-n/a} |" >> "$GITHUB_STEP_SUMMARY"
 
   # ===========================================================================
   # DEPLOY: Itália (it-IT) → systemforge.it
@@ -151,13 +140,13 @@ jobs:
     name: Deploy IT (systemforge.it)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
-    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
-    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
-    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
-    timeout-minutes: 150
+    # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
+    timeout-minutes: 90
 
     steps:
+      - name: Capture deploy start timestamp
+        run: echo "DEPLOY_START_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -202,40 +191,21 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_IT_HOST }}
           SFTP_USER: ${{ secrets.SFTP_IT_USER }}
-          SSHPASS: ${{ secrets.SFTP_IT_PASS }}
+          LFTP_PASSWORD: ${{ secrets.SFTP_IT_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_IT_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_IT_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y sshpass > /dev/null 2>&1
-          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          TARGET="$SFTP_USER@$SFTP_HOST"
-          BATCH_DIRS=$(mktemp)
-          find out -type d | sort | while IFS= read -r dir; do
-            echo "-mkdir ${dir/#out/$SFTP_PATH}"
-          done >> "$BATCH_DIRS"
-          echo "quit" >> "$BATCH_DIRS"
-          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
-          mapfile -t ALL_FILES < <(find out -type f | sort)
-          TOTAL=${#ALL_FILES[@]}
-          PARALLEL=5
-          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
-          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
-          PIDS=()
-          for i in $(seq 0 $((PARALLEL - 1))); do
-            BATCH=$(mktemp)
-            START=$((i * CHUNK))
-            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
-              echo "put $file ${file/#out/$SFTP_PATH}"
-            done >> "$BATCH"
-            echo "quit" >> "$BATCH"
-            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
-            PIDS+=($!)
-          done
-          FAILED=0
-          for pid in "${PIDS[@]}"; do
-            wait "$pid" || FAILED=1
-          done
-          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          LOCAL_COUNT=$(find out -type f | wc -l)
+          echo "Arquivos no output local: $LOCAL_COUNT"
+          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+            "set sftp:auto-confirm yes; \
+             set net:max-retries 3; \
+             set net:reconnect-interval-base 5; \
+             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
+                    --log=/dev/stderr out/ ${SFTP_PATH}; \
+             quit"
+          echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (IT)
         if: success()
@@ -251,10 +221,15 @@ jobs:
       - name: Deploy summary (IT)
         if: success()
         run: |
-          echo "## Deploy IT concluído" >> $GITHUB_STEP_SUMMARY
-          echo "- **Domínio:** systemforge.it" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          DEPLOY_END_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          echo "## Deploy IT concluído" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| dominio | systemforge.it |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| commit | ${{ github.sha }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_start_ts | $DEPLOY_START_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_end_ts | $DEPLOY_END_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| files_in_output | ${DEPLOY_FILE_COUNT:-n/a} |" >> "$GITHUB_STEP_SUMMARY"
 
   # ===========================================================================
   # DEPLOY: Inglês (en) → systemforgesoftware.com
@@ -263,13 +238,13 @@ jobs:
     name: Deploy EN (systemforgesoftware.com)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
-    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
-    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
-    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
-    timeout-minutes: 150
+    # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
+    timeout-minutes: 90
 
     steps:
+      - name: Capture deploy start timestamp
+        run: echo "DEPLOY_START_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -314,40 +289,21 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_EN_HOST }}
           SFTP_USER: ${{ secrets.SFTP_EN_USER }}
-          SSHPASS: ${{ secrets.SFTP_EN_PASS }}
+          LFTP_PASSWORD: ${{ secrets.SFTP_EN_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_EN_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_EN_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y sshpass > /dev/null 2>&1
-          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          TARGET="$SFTP_USER@$SFTP_HOST"
-          BATCH_DIRS=$(mktemp)
-          find out -type d | sort | while IFS= read -r dir; do
-            echo "-mkdir ${dir/#out/$SFTP_PATH}"
-          done >> "$BATCH_DIRS"
-          echo "quit" >> "$BATCH_DIRS"
-          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
-          mapfile -t ALL_FILES < <(find out -type f | sort)
-          TOTAL=${#ALL_FILES[@]}
-          PARALLEL=5
-          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
-          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
-          PIDS=()
-          for i in $(seq 0 $((PARALLEL - 1))); do
-            BATCH=$(mktemp)
-            START=$((i * CHUNK))
-            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
-              echo "put $file ${file/#out/$SFTP_PATH}"
-            done >> "$BATCH"
-            echo "quit" >> "$BATCH"
-            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
-            PIDS+=($!)
-          done
-          FAILED=0
-          for pid in "${PIDS[@]}"; do
-            wait "$pid" || FAILED=1
-          done
-          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          LOCAL_COUNT=$(find out -type f | wc -l)
+          echo "Arquivos no output local: $LOCAL_COUNT"
+          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+            "set sftp:auto-confirm yes; \
+             set net:max-retries 3; \
+             set net:reconnect-interval-base 5; \
+             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
+                    --log=/dev/stderr out/ ${SFTP_PATH}; \
+             quit"
+          echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (EN)
         if: success()
@@ -363,10 +319,15 @@ jobs:
       - name: Deploy summary (EN)
         if: success()
         run: |
-          echo "## Deploy EN concluído" >> $GITHUB_STEP_SUMMARY
-          echo "- **Domínio:** systemforgesoftware.com" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          DEPLOY_END_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          echo "## Deploy EN concluído" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| dominio | systemforgesoftware.com |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| commit | ${{ github.sha }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_start_ts | $DEPLOY_START_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_end_ts | $DEPLOY_END_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| files_in_output | ${DEPLOY_FILE_COUNT:-n/a} |" >> "$GITHUB_STEP_SUMMARY"
 
   # ===========================================================================
   # DEPLOY: Espanha (es-ES) → systemforge.es
@@ -375,13 +336,13 @@ jobs:
     name: Deploy ES (systemforge.es)
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
-    # 150 min: o upload SFTP re-envia TODOS os arquivos do export estático a
-    # cada deploy (~36k arquivos para pt-BR, sem skip incremental). No timeout
-    # antigo de 60 min, BR (maior locale) e EN estouravam mid-upload, deixando
-    # release parcial. Ver rules/auto-publishable-blog.md §5 (tech-debt lftp).
-    timeout-minutes: 150
+    # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
+    timeout-minutes: 90
 
     steps:
+      - name: Capture deploy start timestamp
+        run: echo "DEPLOY_START_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_ENV"
+
       - name: Checkout (scripts only)
         uses: actions/checkout@v4
         with:
@@ -426,40 +387,21 @@ jobs:
         env:
           SFTP_HOST: ${{ secrets.SFTP_ES_HOST }}
           SFTP_USER: ${{ secrets.SFTP_ES_USER }}
-          SSHPASS: ${{ secrets.SFTP_ES_PASS }}
+          LFTP_PASSWORD: ${{ secrets.SFTP_ES_PASS }}
           SFTP_PORT: ${{ secrets.SFTP_ES_PORT }}
           SFTP_PATH: ${{ secrets.SFTP_ES_PUBLIC_HTML }}
         run: |
-          sudo apt-get install -y sshpass > /dev/null 2>&1
-          SFTP_OPTS="-P $SFTP_PORT -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          TARGET="$SFTP_USER@$SFTP_HOST"
-          BATCH_DIRS=$(mktemp)
-          find out -type d | sort | while IFS= read -r dir; do
-            echo "-mkdir ${dir/#out/$SFTP_PATH}"
-          done >> "$BATCH_DIRS"
-          echo "quit" >> "$BATCH_DIRS"
-          sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH_DIRS"
-          mapfile -t ALL_FILES < <(find out -type f | sort)
-          TOTAL=${#ALL_FILES[@]}
-          PARALLEL=5
-          CHUNK=$(( (TOTAL + PARALLEL - 1) / PARALLEL ))
-          echo "Uploading $TOTAL files in $PARALLEL parallel batches of ~$CHUNK files"
-          PIDS=()
-          for i in $(seq 0 $((PARALLEL - 1))); do
-            BATCH=$(mktemp)
-            START=$((i * CHUNK))
-            for file in "${ALL_FILES[@]:$START:$CHUNK}"; do
-              echo "put $file ${file/#out/$SFTP_PATH}"
-            done >> "$BATCH"
-            echo "quit" >> "$BATCH"
-            sshpass -e sftp $SFTP_OPTS "$TARGET" < "$BATCH" &
-            PIDS+=($!)
-          done
-          FAILED=0
-          for pid in "${PIDS[@]}"; do
-            wait "$pid" || FAILED=1
-          done
-          [ "$FAILED" -eq 0 ] || { echo "One or more upload batches failed"; exit 1; }
+          sudo apt-get install -y lftp > /dev/null 2>&1
+          LOCAL_COUNT=$(find out -type f | wc -l)
+          echo "Arquivos no output local: $LOCAL_COUNT"
+          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+            "set sftp:auto-confirm yes; \
+             set net:max-retries 3; \
+             set net:reconnect-interval-base 5; \
+             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
+                    --log=/dev/stderr out/ ${SFTP_PATH}; \
+             quit"
+          echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (ES)
         if: success()
@@ -475,10 +417,15 @@ jobs:
       - name: Deploy summary (ES)
         if: success()
         run: |
-          echo "## Deploy ES concluído" >> $GITHUB_STEP_SUMMARY
-          echo "- **Domínio:** systemforge.es" >> $GITHUB_STEP_SUMMARY
-          echo "- **Commit:** ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Timestamp:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          DEPLOY_END_TS=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+          echo "## Deploy ES concluído" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Campo | Valor |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| dominio | systemforge.es |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| commit | ${{ github.sha }} |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_start_ts | $DEPLOY_START_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| deploy_end_ts | $DEPLOY_END_TS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| files_in_output | ${DEPLOY_FILE_COUNT:-n/a} |" >> "$GITHUB_STEP_SUMMARY"
 
   # ===========================================================================
   # POST-DEPLOY: Smoke Tests (4 domínios)
