@@ -1,0 +1,159 @@
+---
+title: "Sitio web en Wix o desarrollo a medida para tu empresa: comparativa honesta"
+slug: "sitio-wix-vs-sitio-a-medida-empresa"
+description: "Sitio institucional en Wix o hecho a medida: comparamos coste total, SEO, rendimiento y dependencia del proveedor para que tu empresa elija con criterio."
+excerpt: "Antes de suscribirte a una plataforma lista para usar, descubre lo que estás cediendo — y cuándo un sitio a medida se rentabiliza antes de lo que crees."
+date: "2026-05-21"
+dateModified: "2026-05-21"
+locale: "es-ES"
+author: "Pedro Corgnati"
+tags: ["sitio institucional", "desarrollo web", "Wix vs a medida", "presencia digital"]
+relatedService: "desarrollo-web"
+canonical: "https://systemforge.es/blog/sitio-wix-vs-sitio-a-medida-empresa"
+published: false
+seo_score: 85
+conversion_score: 81
+hreflang_pair:
+  - { locale: "pt-BR", slug: "site-wix-vs-site-sob-medida-empresa" }
+  - { locale: "it-IT", slug: "sito-wix-vs-sito-su-misura-azienda" }
+  - { locale: "en", slug: "wix-website-vs-custom-built-site-business" }
+  - { locale: "es-ES", slug: "sitio-wix-vs-sitio-a-medida-empresa" }
+stockpile_origin:
+  equivalence_id: "be84c3f9-d90e-edcc-a1d2-1105d15d7907"
+  package_version: 1
+  generated_at: "2026-05-21T03:00:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Sitio web en Wix o desarrollo a medida para tu empresa: comparativa honesta
+
+*Por Pedro Corgnati, Fundador de SystemForge*
+
+Cuando una empresa decide crear o renovar su sitio web, casi siempre se encuentra ante la misma encrucijada: usar una plataforma lista para usar como Wix, Squarespace o Webflow, o invertir en un desarrollo personalizado. La respuesta no es universal. Depende del momento de la empresa, de sus objetivos y del presupuesto disponible.
+
+En este artículo ofrezco una comparativa honesta entre las dos opciones, basada en proyectos reales con empresas españolas e internacionales. Sin ideología de plataforma, sin tecnicismos innecesarios — solo los criterios que de verdad importan para quien tiene que tomar esta decisión.
+
+---
+
+## Qué son las plataformas listas para usar y para quién están diseñadas
+
+Wix, Squarespace y similares nacieron para resolver un problema concreto: permitir que cualquier persona, sin conocimientos técnicos, tenga un sitio web profesional en pocas horas. Para un autónomo, un negocio local o alguien que está probando una idea, tienen sentido.
+
+Su modelo de negocio se basa en la suscripción mensual. En España, los planes de uso profesional más habituales oscilan entre 15 € y 45 € al mes, con funcionalidades adicionales en los niveles superiores. Parece económico — hasta que calculas el total a lo largo del tiempo.
+
+Una empresa que use un plan intermedio durante cinco años gastará entre 900 € y 2.700 €, sin poseer nada propio al final. Es como pagar un alquiler indefinido por un espacio digital que nunca será tuyo.
+
+---
+
+## Qué significa tener un sitio desarrollado a medida
+
+Un sitio a medida se construye específicamente para el contexto, la marca y los objetivos de tu empresa. El código es tuyo. El servidor lo contratas tú. El diseño es único. Sin limitaciones de plantilla, sin funcionalidades bloqueadas por el plan contratado.
+
+La inversión inicial es mayor — para un sitio institucional de complejidad media en España, los precios suelen oscilar entre 5.000 € y 25.000 €, dependiendo de la complejidad y el número de páginas. Pero el coste recurrente cae drásticamente: un hosting de calidad cuesta entre 20 € y 100 € al mes, y el mantenimiento puede gestionarse de forma puntual o mediante un contrato de soporte.
+
+---
+
+## Comparativa directa: los ocho criterios que más importan
+
+| Criterio | Plataforma lista (Wix/Squarespace) | Sitio a medida |
+|---|---|---|
+| Coste inicial | € 0 – 2.000 | € 5.000 – 25.000+ |
+| Coste mensual recurrente | € 15 – 45 | € 20 – 100 (solo hosting) |
+| Propiedad del código | No — se alquila | Sí — es tuyo |
+| SEO técnico avanzado | Limitado | Control total |
+| Velocidad de carga | Media (dependiente de la plataforma) | Alta (optimizable) |
+| Escalabilidad | Limitada al plan/plataforma | Ilimitada |
+| Dependencia del proveedor | Alta | Ninguna |
+| Personalización de funcionalidades | Baja o media | Total |
+
+### Coste total a lo largo del tiempo
+
+El argumento más habitual a favor de las plataformas listas es el bajo coste inicial. Es cierto, pero incompleto. Analicemos el TCO (Coste Total de Propiedad) a 5 años:
+
+- Plataforma lista: 0 € de inicio + 25 €/mes = 1.500 € en 5 años, sin activo al final
+- Sitio a medida: 10.000 € de inicio + 60 €/mes (hosting) = 13.600 € en 5 años, con un activo valorado en 10.000 €+ que puede migrarse, cederse o evolucionarse
+
+El punto de equilibrio financiero suele alcanzarse entre los 24 y 36 meses. Las empresas con horizonte temporal superior a dos años casi siempre salen ganando con el desarrollo personalizado.
+
+### SEO: donde las plataformas listas pierden más terreno
+
+Este es, en mi experiencia, el criterio más infravalorado. Plataformas como Wix han mejorado mucho el SEO básico en los últimos años — se pueden definir title tags, meta descriptions y URLs amigables. Pero el SEO técnico avanzado sigue siendo su punto débil.
+
+Los Core Web Vitals — las métricas de experiencia de usuario que Google utiliza como factor de posicionamiento — se ven directamente afectados por el código que genera la plataforma. Los sitios Wix cargan JavaScript innecesario, tienen HTML menos limpio y dependen de servidores compartidos. En pruebas comparativas, los sitios institucionales a medida suelen obtener entre 15 y 30 puntos más en PageSpeed Insights.
+
+Para empresas que dependen del tráfico orgánico, esto se traduce en posiciones más altas en Google y más visitantes cualificados, sin incrementar el presupuesto publicitario.
+
+### Velocidad de carga y conversión
+
+La velocidad de carga afecta tanto al SEO como a la conversión. Estimaciones del sector indican que cada segundo adicional de carga puede reducir la tasa de conversión entre un 7 % y un 12 %. Con un sitio a medida controlas el servidor, el CDN, la compresión de imágenes y la carga de scripts. Con una plataforma lista, estás sujeto a las decisiones de infraestructura de la empresa que la gestiona.
+
+### Dependencia del proveedor: el riesgo que nadie menciona
+
+Cuando construyes tu sitio en Wix, el contenido queda dentro de su ecosistema. Si la plataforma sube precios, elimina un plan o cierra, tienes que empezar desde cero. Con un sitio a medida, puedes cambiar de proveedor de hosting, de agencia o de tecnología en cualquier momento. El código es tuyo, el dominio es tuyo, el contenido es tuyo.
+
+---
+
+## Cuándo una plataforma lista es la opción correcta
+
+Ser honesto significa reconocer las situaciones en las que Wix o similares son la elección adecuada:
+
+- Negocio en fase inicial que valida una idea con presupuesto muy limitado
+- Autónomo o microempresa que necesita presencia digital básica con rapidez
+- Evento temporal o landing page de campaña con fecha de caducidad
+- Empresa sin recursos técnicos internos y sin planes de crecimiento digital a corto plazo
+
+Si te encuentras en esta situación, usa una plataforma lista — pero planifica ya la migración para cuando el negocio crezca.
+
+---
+
+## Cuándo el sitio a medida es el camino correcto
+
+- Empresa consolidada con planes de crecimiento a medio plazo
+- Negocio que depende del SEO orgánico como canal de adquisición
+- Empresa que necesitará integrar el sitio con otros sistemas (CRM, ERP, automatización de marketing)
+- Negocio en el que la experiencia de usuario y la identidad visual son factores diferenciadores
+- Empresa que ya gasta más de 30 €/mes en plataforma y no ve evolución
+
+---
+
+## El marco de decisión en cuatro preguntas
+
+Antes de firmar un plan o contratar a un desarrollador, responde a estas preguntas:
+
+1. **¿Cuánto tiempo planeas estar en el mercado?** Si la respuesta es "indefinidamente", el coste del desarrollo a medida se amortiza.
+2. **¿El SEO orgánico forma parte de tu estrategia de adquisición?** Si es así, las plataformas listas limitarán tu potencial.
+3. **¿Necesitarás integrar el sitio con otros sistemas?** Las integraciones en plataformas listas suelen ser caras, limitadas o inexistentes.
+4. **¿Puedes asumir el coste inicial ahora?** Si no, usa una plataforma lista ahora — pero programa la migración para dentro de 12 meses.
+
+---
+
+## Preguntas frecuentes
+
+**¿Puede posicionarse bien en Google un sitio de Wix?**
+Sí, para palabras clave con poca competencia. Pero para términos más competitivos, el SEO técnico de un sitio a medida tiene una ventaja estructural que las plataformas listas difícilmente pueden igualar.
+
+**¿Cuánto tiempo tarda en desarrollarse un sitio institucional a medida?**
+Los proyectos bien definidos suelen completarse en 3 a 8 semanas. Los plazos varían según la complejidad del diseño, el número de páginas y las integraciones requeridas.
+
+**¿Puedo migrar mi sitio de Wix a uno propio?**
+Sí, pero no es automático. Los textos e imágenes pueden migrarse, pero el diseño hay que reconstruirlo. Planificar la migración con antelación minimiza el impacto en el SEO actual.
+
+**¿Las plataformas listas cumplen con el RGPD?**
+Las principales plataformas ofrecen herramientas para gestionar el consentimiento, pero la responsabilidad final del tratamiento de datos recae en la empresa. Con un sitio a medida tienes más control sobre dónde se almacenan los datos y cómo se gestionan las cookies — aspecto crítico bajo el RGPD.
+
+**¿Es cara la manutención de un sitio a medida?**
+Depende de la tecnología utilizada. Los sitios modernos en Next.js o WordPress bien estructurado tienen costes de mantenimiento accesibles — entre 150 € y 600 € al mes para soporte y actualizaciones, dependiendo del alcance.
+
+**¿Qué pasa si la agencia que desarrolló mi sitio cierra?**
+Como el código es tuyo, puedes trasladar la gestión a otra agencia. Esta es una de las principales ventajas del desarrollo a medida: independencia del proveedor.
+
+---
+
+## Conclusión: la decisión correcta depende de tu momento
+
+No existe una respuesta universal. Existe la respuesta adecuada para la fase en que se encuentra tu empresa. Si estás comenzando y el presupuesto es ajustado, una plataforma lista cumple su función. Si la empresa ya tiene tracción, depende de la presencia digital y tiene crecimiento por delante, invertir en un sitio a medida compensa — y lo hace antes de lo que esperas.
+
+En SystemForge trabajamos con empresas que han llegado al límite de las plataformas listas y necesitan algo a la altura de su operación. Si quieres entender cuál es el camino más inteligente para tu caso concreto, la conversación es gratuita.
+
+[Escríbenos por WhatsApp](https://wa.me/5517981539795) y agendamos una llamada sin compromiso. En 30 minutos tendrás una visión clara de lo que tiene sentido para tu empresa.
