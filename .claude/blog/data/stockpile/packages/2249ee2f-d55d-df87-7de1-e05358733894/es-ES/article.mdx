@@ -1,0 +1,143 @@
+---
+title: "Sistema de la Empresa Caído: Guía de Acción Inmediata para Managers"
+slug: "sistema-empresa-caido-soporte-tecnico-urgente"
+description: "¿El sistema de tu empresa ha caído? Guía de acción inmediata: a quién llamar, qué hacer en los primeros 60 minutos y cómo evitar que vuelva a ocurrir."
+excerpt: "Sistema empresarial caído: plan paso a paso para los primeros 60 minutos, recuperar la operación y construir resiliencia ante futuras interrupciones."
+date: "2026-05-21"
+dateModified: "2026-05-21"
+locale: "es-ES"
+author: "Pedro Corgnati"
+tags: ["soporte-tecnico", "sistema-caido", "mantenimiento-sistemas", "emergencia-ti"]
+relatedService: "mantenimiento-sistemas"
+canonical: "https://systemforge.es/blog/sistema-empresa-caido-soporte-tecnico-urgente"
+published: false
+seo_score: 82
+conversion_score: 79
+hreflang_pair:
+  - { locale: "pt-BR", slug: "sistema-caiu-suporte-tecnico-urgente" }
+  - { locale: "it-IT", slug: "sistema-aziendale-giu-supporto-tecnico-urgente" }
+  - { locale: "en", slug: "company-system-down-urgent-technical-support" }
+  - { locale: "es-ES", slug: "sistema-empresa-caido-soporte-tecnico-urgente" }
+stockpile_origin:
+  equivalence_id: "2249ee2f-d55d-df87-7de1-e05358733894"
+  package_version: 1
+  generated_at: "2026-05-21T03:20:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Sistema de la Empresa Caído: Guía de Acción Inmediata para Managers
+
+*Por Pedro Corgnati, Fundador de SystemForge*
+
+**Cuando el sistema de una empresa cae, la secuencia de acciones en los primeros 60 minutos determina si el problema dura horas o días. La primera prioridad no es arreglar el sistema — es aislar el alcance del problema, activar el soporte adecuado y comunicar al equipo para evitar acciones paralelas que empeoran la situación.** Las empresas que se recuperan rápidamente son las que tienen este protocolo definido antes de que ocurra la crisis.
+
+Una caída del sistema en horario laboral es una de las situaciones más estresantes para cualquier gestor. Las pérdidas se acumulan cada minuto: pedidos sin procesar, equipo bloqueado, clientes sin atención. La diferencia entre una caída de 2 horas y una de 2 días generalmente no está en la complejidad del problema — está en la velocidad y calidad de la respuesta.
+
+Esta guía es un plan de acción práctico para actuar correctamente en este momento de crisis.
+
+---
+
+## Los primeros 10 minutos: qué hacer ahora mismo
+
+En los primeros 10 minutos tras identificar la caída, ejecuta en este orden:
+
+**1. Confirma si es una caída total o parcial**
+Pregunta a 2-3 personas en departamentos distintos si tienen el mismo problema. Un único usuario con el problema puede ser su equipo. Tres usuarios en departamentos distintos con el mismo síntoma indica una caída del sistema.
+
+**2. Documenta la hora exacta de la caída**
+Anota (o pide a alguien que anote) la hora en que empezó el problema y los primeros síntomas reportados. Esto acelera enormemente el diagnóstico técnico.
+
+**3. Activa el soporte técnico responsable**
+Si tienes un contrato de soporte activo, llama ahora. No mandes un email. Llama. Si no tienes contrato de soporte, este es el momento de buscar uno de emergencia.
+
+**4. Comunica al equipo con un mensaje directo**
+Manda un mensaje a todos: "El sistema está caído. No intentéis reiniciar nada, no hagáis cambios. Esperáis comunicación." Evita que las personas tomen acciones aleatorias que dificultan el diagnóstico.
+
+**5. Activa el modo manual temporal**
+Para operaciones críticas que no pueden parar (facturación, pagos), activa el proceso manual de contingencia. Si no existe uno, documenta hoy qué harías de forma manual — eso se convierte en tu plan B.
+
+---
+
+## Qué puede haber causado la caída
+
+Entender la categoría del problema ayuda a definir a quién llamar y el plazo realista de recuperación:
+
+| Tipo de problema | Síntomas comunes | Tiempo medio de resolución |
+|---|---|---|
+| Servidor/hosting caído | Todos los usuarios sin acceso, sin error específico | 1-4 horas (depende del proveedor) |
+| Base de datos corrompida | Errores de conexión, datos incompletos al acceder | 2-8 horas |
+| Actualización que rompió el sistema | El problema empezó justo después de una actualización | 1-3 horas (rollback) |
+| Ataque informático | Comportamiento extraño, lentitud extrema, archivos desaparecidos | 4-24 horas |
+| Problema de red local | Solo los que están en la oficina tienen el problema | 1-2 horas |
+| Error en integración de terceros | Un módulo específico dejó de funcionar, el resto sí funciona | 2-6 horas |
+
+Comparte esta tabla con quien gestione el soporte para agilizar el diagnóstico.
+
+---
+
+## Cómo encontrar soporte técnico de emergencia en España
+
+Si no tienes un contrato de soporte activo, debes actuar con rapidez:
+
+**Opción 1: La empresa que desarrolló el sistema**
+Si el sistema es a medida, el primer intento debe ser siempre quien lo desarrolló. Conocen el código y pueden identificar el problema en minutos. Si no responden o ya no existen, pasa a la opción 2.
+
+**Opción 2: Empresa de soporte especializada en emergencias**
+Existen empresas que trabajan específicamente con intervenciones TI de emergencia. Cobran más que el soporte estándar (espera pagar entre € 80 y € 350 por hora en emergencia), pero resuelven rápido.
+
+**Opción 3: Tu proveedor de hosting**
+Si el problema está en la infraestructura, tu proveedor tiene obligación contractual de resolverlo. Abre un ticket urgente. Si no se resuelve en 2 horas, escala al responsable de cuenta o al soporte de nivel 2.
+
+---
+
+## Post-recuperación: cómo evitar que vuelva a ocurrir
+
+Cuando el sistema vuelva a funcionar, tienes una ventana de motivación para resolver el problema estructural. Aprovéchala.
+
+**Exige un informe completo del incidente:**
+- Causa raíz identificada
+- Qué se hizo para resolverlo
+- Qué se puede hacer para prevenir
+- Si existe riesgo de recurrencia
+
+**Evalúa tu contrato de soporte:**
+Las empresas sin contrato de soporte activo son las que más sufren las caídas. Un buen contrato incluye:
+- SLA definido (tiempo máximo de respuesta y resolución)
+- Monitorización proactiva (te avisan antes de notar el problema)
+- Backup regular y verificado
+- Ventana de mantenimiento preventivo mensual
+
+El coste de un contrato de soporte mensual (generalmente € 200-1.200/mes para sistemas medianos) es una fracción del coste de 4 horas de caída en horario laboral.
+
+---
+
+## Preguntas frecuentes
+
+### ¿Qué hacer si el soporte técnico tarda más de 2 horas en aparecer?
+
+Escala al responsable o director de la empresa de soporte. Si no tienes contrato, busca una segunda empresa en paralelo. En emergencias, tener dos equipos mirando el problema es mejor que esperar pasivamente.
+
+### ¿Cuánto cuesta una hora de soporte técnico de emergencia en España?
+
+El soporte de emergencia en España varía entre € 80 y € 350 por hora según la complejidad del sistema y la experiencia del profesional. Compara con el coste de la empresa parada: un equipo de 15 personas bloqueado 4 horas a € 20/hora de coste medio = € 1.200 de pérdida directa, sin contar clientes perdidos.
+
+### ¿El software en la nube es más fiable que los sistemas locales?
+
+Para la mayoría de las pymes españolas, sí. Las plataformas cloud como AWS, Azure o soluciones SaaS ofrecen un uptime garantizado del 99,9%+ y failover automático que los servidores físicos locales raramente igualan.
+
+### ¿Cómo sé si el sistema está en riesgo antes de que caiga?
+
+Señales de alerta a monitorizar: ralentización progresiva en las últimas semanas, errores esporádicos que "se resuelven solos", logs de errores en crecimiento, backup no testado hace más de 30 días, sistema sin actualizaciones de seguridad hace más de 6 meses.
+
+### ¿Quién es legalmente responsable por las pérdidas causadas por la caída?
+
+Depende del contrato con la empresa de software o el proveedor de hosting. La mayoría de los contratos definen SLAs y penalizaciones por incumplimiento. Si tu contrato no tiene SLA, negocia uno en la próxima renovación.
+
+---
+
+## ¿Necesitas soporte ahora?
+
+Si el sistema de tu empresa está caído o quieres contratar soporte preventivo antes de que ocurra la crisis, **[contáctanos por WhatsApp](https://wa.me/5517981539795)**. Respondemos en 30 minutos en horario laboral para emergencias y realizamos un diagnóstico inicial gratuito.
+
+Trabajamos con mantenimiento de sistemas web, APIs, bases de datos e integraciones — con SLA definido e informe de cada intervención.

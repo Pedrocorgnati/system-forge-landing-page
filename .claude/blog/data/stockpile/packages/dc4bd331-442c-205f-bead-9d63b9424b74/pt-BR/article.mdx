@@ -1,0 +1,154 @@
+---
+title: "Site Profissional para Escritório de Advocacia: O Que Deve Ter e Quanto Custa"
+slug: "site-escritorio-advocacia-profissional"
+description: "Saiba o que um site profissional para escritório de advocacia deve ter, quanto custa e por que o Código de Ética da OAB define o que pode ou não pode estar no site."
+excerpt: "Um site profissional para escritório de advocacia atrai clientes qualificados, respeita as normas da OAB e custa entre R$ 4.500 e R$ 22.000 dependendo das funcionalidades."
+date: "2026-05-21"
+dateModified: "2026-05-21"
+locale: "pt-BR"
+author: "Pedro Corgnati"
+tags: ["site escritório advocacia", "site advogado profissional", "site jurídico OAB", "desenvolvimento web advocacia", "marketing jurídico"]
+relatedService: "desenvolvimento-web"
+canonical: "https://forjadesistemas.com.br/blog/site-escritorio-advocacia-profissional"
+published: false
+seo_score: 86
+conversion_score: 81
+hreflang_pair:
+  - { locale: "pt-BR", slug: "site-escritorio-advocacia-profissional" }
+  - { locale: "it-IT", slug: "sito-studio-legale-professionale" }
+  - { locale: "en", slug: "professional-law-firm-website-features-costs" }
+  - { locale: "es-ES", slug: "web-profesional-despacho-abogados" }
+stockpile_origin:
+  equivalence_id: "dc4bd331-442c-205f-bead-9d63b9424b74"
+  package_version: 1
+  generated_at: "2026-05-21T11:30:00Z"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Site Profissional para Escritório de Advocacia: O Que Deve Ter e Quanto Custa
+
+*Por Pedro Corgnati, Fundador da Forja de Sistemas*
+
+**Um site profissional para escritório de advocacia custa entre R$ 4.500 e R$ 22.000 no Brasil, dependendo do número de áreas de atuação, integração com sistema de agendamento, blog jurídico e adequação às normas do Código de Ética e Disciplina da OAB.** Templates genéricos de plataformas como Wix ou Squarespace custam menos, mas ignoram as restrições do Provimento 205/2021 da OAB — o que pode gerar processo disciplinar.
+
+Neste guia, detalho o que um site jurídico eficaz precisa ter, o que o Código de Ética permite e proíbe em publicidade de advogados, os custos reais e como escolher o parceiro certo para o desenvolvimento.
+
+---
+
+## O que um site para escritório de advocacia deve ter
+
+**Um site jurídico profissional precisa, no mínimo, de: apresentação do escritório e dos sócios, descrição das áreas de atuação, formulário de contato discreto, blog com artigos de autoridade, e adequação às normas da OAB.**
+
+### Página inicial com posicionamento claro
+A página inicial comunica, em 5 segundos, quem é o escritório, em que áreas atua e por que o visitante deve entrar em contato. Dados do escritório (endereço, telefone, número da OAB) devem estar visíveis — é obrigação ética e também fator de confiança para conversão.
+
+### Apresentação dos advogados
+Perfil completo de cada advogado com foto profissional, número de inscrição na OAB, formação acadêmica, especializações, experiência relevante e áreas de atuação. Isso demonstra credencial real e aumenta a confiança do visitante antes do primeiro contato.
+
+### Áreas de atuação com conteúdo substantivo
+Cada área (Direito do Trabalho, Direito de Família, Direito do Consumidor, etc.) deve ter uma página própria com descrição clara dos serviços, casos típicos atendidos e, quando possível, informações educativas sobre o tema. Isso posiciona o escritório como autoridade e melhora o SEO para buscas específicas.
+
+### Blog jurídico com artigos de autoridade
+O blog é o motor de aquisição orgânica de um site jurídico. Artigos que respondem perguntas reais de clientes em potencial ("posso demitir funcionário sem justa causa durante período de experiência?") geram tráfego qualificado sem custo por clique. Artigos bem escritos também demonstram expertise e aumentam a confiança do visitante.
+
+---
+
+## O que a OAB permite e proíbe no site do advogado
+
+**O Provimento 205/2021 do Conselho Federal da OAB regula a publicidade de advogados. Desconhecer essas regras pode gerar processo disciplinar e sanções que vão de advertência à suspensão.**
+
+O que é **permitido**:
+- Nome do escritório, endereço, telefone, e-mail e número de inscrição na OAB
+- Áreas de atuação e especializações
+- Currículos dos advogados
+- Artigos e publicações jurídicas
+- Informações sobre honorários, desde que sem tabela de preços explícita
+- Redes sociais com conteúdo informativo e educativo
+
+O que é **proibido**:
+- Captação direta de clientela com linguagem mercantil ("ligue agora e ganhe desconto")
+- Promessa de resultado ("garantimos que você vai ganhar")
+- Comparação com outros escritórios ou advogados
+- Divulgação de fotos de clientes, parceiros ou situações que causem impacto emocional
+- Publicidade "ostensiva" em Google Ads com textos que promovam serviços de forma agressiva
+
+Um site bem desenvolvido por profissional que conhece as normas da OAB já nasce dentro dos limites éticos — sem necessidade de retrabalho posterior.
+
+---
+
+## Quanto custa um site para escritório de advocacia? Tabela comparativa
+
+| Tipo de site | Custo | Prazo | Adequação OAB | Customização |
+|---|---|---|---|---|
+| Template Wix/Squarespace | R$ 0–R$ 1.200 | 1–3 dias | Parcial (você ajusta) | Baixa |
+| Freelancer básico | R$ 1.500–R$ 4.000 | 2–4 semanas | Depende do profissional | Média |
+| Agência/dev básico | R$ 4.500–R$ 8.000 | 3–6 semanas | Boa | Alta |
+| Site profissional completo | R$ 9.000–R$ 16.000 | 5–10 semanas | Completa | Alta |
+| Site premium com CRM e blog | R$ 18.000–R$ 22.000 | 8–14 semanas | Completa | Total |
+
+O custo de manutenção mensal (hospedagem, atualizações de segurança, suporte) varia entre R$ 150 e R$ 500/mês dependendo da infraestrutura.
+
+---
+
+## Funcionalidades que fazem diferença no site jurídico
+
+### Formulário de contato estratégico
+O formulário não deve ser genérico ("envie sua mensagem"). Deve guiar o visitante com campos específicos: área do problema, urgência percebida, como ficou sabendo do escritório. Isso ajuda o advogado a qualificar o contato antes da primeira ligação e filtra consultas que não têm fit com as áreas de atuação.
+
+### Agendamento online
+Integração com Google Calendar ou sistema de agendamento (Calendly, Cal.com) permite ao cliente marcar uma consulta inicial sem precisar ligar. Isso aumenta a taxa de conversão de visitantes em consultas, especialmente com clientes da geração millennial e Z.
+
+### Chat jurídico com triagem automática
+Um chat no site (WhatsApp Business ou chat próprio) com triagem inicial por palavras-chave permite responder perguntas simples fora do horário comercial e qualificar o caso antes de transferir para o advogado. Não substitui o atendimento humano, mas reduz o tempo de resposta percebido.
+
+### SEO local para buscas como "advogado trabalhista em [cidade]"
+Advogados que atendem presencialmente dependem de buscas locais. O site precisa estar otimizado para buscas por cidade e área de atuação, com integração ao Google Meu Negócio e schema markup específico para escritórios de advocacia.
+
+---
+
+## Erros comuns em sites de escritórios de advocacia
+
+**Erro 1: Fotos genéricas de banco de imagens.** Fotos de mão apertando em cima de mesa ou balança da justiça genérica prejudicam a credibilidade. Fotos reais do escritório e dos advogados aumentam conversão.
+
+**Erro 2: Textos em linguagem jurídica rebuscada.** O visitante do site é um cliente em potencial, não um par acadêmico. Textos claros e acessíveis convertem mais.
+
+**Erro 3: Site sem responsividade mobile.** Mais de 65% das buscas por serviços jurídicos no Brasil são feitas por celular. Um site que não funciona bem no mobile perde mais da metade dos visitantes.
+
+**Erro 4: Nenhum artigo ou conteúdo novo nos últimos 2 anos.** O Google penaliza sites sem atualização. Um blog com artigos mensais mantém o site relevante nas buscas.
+
+**Erro 5: Formulário de contato que não funciona.** Parece básico, mas é surpreendentemente comum: formulários que não enviam, não têm confirmação e não notificam o advogado.
+
+---
+
+## Perguntas frequentes
+
+### Preciso de um site separado para cada área de atuação?
+
+Não necessariamente. Um site bem estruturado pode ter páginas dedicadas para cada área de atuação, todas dentro do mesmo domínio. Sites separados por área fazem sentido apenas para escritórios muito especializados que querem posicionamento de marca distinto por nicho.
+
+### Um site jurídico pode aparecer no Google Ads?
+
+Pode, mas com restrições. O Provimento 205/2021 permite anúncios em buscadores desde que o texto não seja mercantil ou prometa resultados. Textos como "Consulta gratuita" ou "Especialistas em direito trabalhista" são aceitáveis; "Ganhe sua causa" ou "Desconto na primeira consulta" não são.
+
+### Qual é o prazo realista para um site novo aparecer no Google?
+
+Para buscas orgânicas (SEO), o prazo médio para um site novo começar a receber tráfego relevante é de 3 a 6 meses, dependendo da concorrência na área e cidade. Durante esse período, Google Ads ou redes sociais podem complementar a aquisição.
+
+### Site com blog precisa de domínio próprio?
+
+Sim. Sempre. Blogs hospedados em subdomínios de plataformas gratuitas (advogado.wixsite.com) não constroem autoridade de domínio para o escritório. O investimento em um domínio próprio (R$ 50–R$ 80/ano) e hospedagem profissional (R$ 150–R$ 400/mês) é obrigatório para qualquer estratégia de SEO séria.
+
+### Um site precisa de política de privacidade (LGPD)?
+
+Sim. Todo site que coleta dados pessoais — incluindo nome e e-mail via formulário de contato — deve ter política de privacidade e aviso de cookies conforme a LGPD (Lei 13.709/2018). Isso é obrigação legal, não apenas boa prática.
+
+---
+
+## Próximo passo: diagnóstico gratuito para o site do seu escritório
+
+Se o site do seu escritório não está trazendo clientes qualificados ou você ainda não tem um site profissional, o melhor passo é uma avaliação sem compromisso.
+
+Na Forja de Sistemas, analisamos o cenário atual, discutimos as prioridades e entregamos uma proposta com escopo definido e custo transparente — já adequada às normas da OAB.
+
+[Falar com a Forja de Sistemas pelo WhatsApp](https://wa.me/5517981539795)
