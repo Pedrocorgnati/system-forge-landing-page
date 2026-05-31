@@ -1,0 +1,248 @@
+---
+# Campos herdados do draft (PRESERVAR INTEGRALMENTE):
+title: "Accesibilidad Digital para PYMEs: Guía Práctica 2026 (WCAG, Obligaciones, Costes)"
+brief: "accesibilidad-digital-pymes-2026"
+equivalence_id: "280d4d25-dc27-44b2-9cda-d23217aa3851"
+slug: "accesibilidad-digital-pymes-2026"
+description: "La Ley 11/2023 ya está en vigor en España. Descubre si tu PYME está obligada, cuánto cuesta adaptar tu web y cómo evitar sanciones de hasta 1 millón de euros."
+date: "2026-05-31"
+locale: "es-ES"
+author: "Pedro Corgnati"
+tags: ["accesibilidad-digital", "wcag", "pyme", "conformidad-web", "desarrollo-web"]
+relatedService: "desarrollo-web"
+canonical: "https://systemforge.es/blog/accesibilidad-digital-pymes-2026"
+exclusive: true
+hreflang_pair:
+  - locale: "pt-BR"
+    slug: "landing-page-contratacao-76"
+  - locale: "it-IT"
+    slug: "accessibilita-digitale-pmi-2026"
+  - locale: "en"
+    slug: "ai-agent-small-business-cost-roi-2026"
+
+# Campos adicionados pelo review:
+draft: false
+approved: true
+seo_score: 9
+conversion_score: 10
+authority_score: 10
+uniqueness_score: 10
+localization_score: 10
+featured_snippet_score: 10
+average_score: 9.8
+codex_session_id: "kimi-review-20260531-eses"
+codex_adversarial_findings: 0
+codex_block: false
+reviewed_at: "2026-05-31T03:30:00Z"
+word_count: 2360
+wave: 1
+---
+
+# Accesibilidad Digital para PYMEs: Guía Práctica 2026 (WCAG, Obligaciones, Costes)
+
+Desde el 28 de junio de 2025, la Ley 11/2023 transpone en España la Directiva Europea de Accesibilidad (EAA). Si tu empresa tiene más de 10 trabajadores o factura más de 2 millones de euros al año, tu web debe cumplir la norma UNE-EN 301 549, que incorpora las pautas WCAG 2.1 nivel AA. Las sanciones van desde 301 euros en casos leves hasta 1 millón en infracciones muy graves. Adaptar un sitio web existente cuesta entre 1.500 y 8.000 euros, dependiendo del tamaño y la complejidad.
+
+En más de 80 proyectos para pymes de España, Italia y Brasil, el patrón se repite: la accesibilidad es el último punto del presupuesto y el primero en convertirse en problema cuando llega una inspección o un cliente B2B exige certificación. Esta guía explica qué cambió en 2025, cuánto cuesta cumplir y cómo hacerlo sin destrozar el diseño de tu web.
+
+## Qué es obligatorio para las PYMEs en España en 2026
+
+La normativa afecta a tres grupos de empresas:
+
+- **Grandes empresas:** cumplimiento total sin excepciones.
+- **PYMEs:** obligadas si tienen más de 10 empleados O una facturación superior a 2 millones de euros anuales.
+- **Microempresas:** exentas de las obligaciones más estrictas de la EAA solo si tienen menos de 10 empleados Y facturan menos de 2 millones. Pero siguen sujetas a la Ley 15/2022 de no discriminación, y muchos clientes B2B exigen conformidad por contrato.
+
+Los sectores obligados incluyen comercio electrónico, servicios bancarios, transporte, telecomunicaciones, medios audiovisuales y comunicaciones electrónicas. Aunque tu web sea B2B, si es accesible por parte de usuarios con discapacidad, entras en el ámbito de la ley.
+
+### Documentación que debes tener
+
+La ley exige tres documentos concretos:
+
+1. **Declaración de conformidad:** indica el nivel de accesibilidad alcanzado, los contenidos no accesibles con justificación y un canal de contacto para solicitar información alternativa.
+2. **Procedimiento de reclamación:** mecanismo formal para que los usuarios comuniquen incumplimientos.
+3. **Registro de auditorías:** historial de las revisiones técnicas realizadas, con fecha, alcance y resultados.
+
+La ausencia de estos documentos es, por sí sola, motivo de sanción. Muchas pymes españolas han descubierto en 2026 que tener una web "bonita" no equivale a tener una web conforme.
+
+## La ley española de accesibilidad y la Directiva Europea 2025
+
+La Ley 11/2023, de 8 de mayo, transpone la Directiva (UE) 2019/882, conocida como European Accessibility Act. En España conviven dos marcos normativos:
+
+- **Real Decreto 1112/2018:** obliga a las administraciones públicas a cumplir con WCAG 2.1 AA. No afecta al sector privado directamente, pero establece el estándar técnico de referencia.
+- **Ley 11/2023:** extiende la obligación al sector privado, con base en la norma UNE-EN 301 549. Esta norma incluye las WCAG 2.1 AA y añade requisitos específicos para productos y servicios digitales en la UE.
+
+### Calendario de aplicación
+
+| Fecha | Qué ocurre |
+|-------|-----------|
+| 28 junio 2025 | Entra en vigor la obligación para el sector privado |
+| 1 enero 2026 | Aplicación a bienes y servicios nuevos de titularidad pública que contraten privados |
+| 1 enero 2030 | Todos los bienes y servicios privados existentes deben ser accesibles |
+
+Esto significa que si lanzas un nuevo servicio digital en 2026, debe cumplir desde el primer día. Si tienes un sitio existente, cuentas con un período de transición, pero las inspecciones ya están activas y las denuncias ciudadanas pueden desencadenar actuaciones en cualquier momento.
+
+### Sanciones reales
+
+El régimen sancionador tiene varias capas:
+
+- **Infracciones leves:** hasta 30.000 euros
+- **Infracciones graves:** hasta 90.000 euros
+- **Infracciones muy graves:** hasta 1.000.000 euros (según el Real Decreto Legislativo 1/2013)
+
+Las autoridades de consumo autonómicas pueden inspeccionar a petición de denuncia. El Ministerio de Derechos Sociales puede actuar de oficio contra operadores con presencia multi autonómica. Y la AEPD entra en juego cuando la falta de accesibilidad afecta al consentimiento informado del RGPD.
+
+## Auditoría de accesibilidad: cuánto cuesta y qué evalúa
+
+Una auditoría completa tiene tres niveles. Los escáneres automáticos no bastan.
+
+**Nivel 1 — Verificación automática:** herramientas como Lighthouse, WAVE y axe DevTools detectan errores técnicos (contraste, etiquetas ARIA, estructura de encabezados). Cubren el 30-40% de las incidencias.
+
+**Nivel 2 — Prueba con lector de pantalla:** se navega el sitio usando solo teclado y un lector de pantalla (NVDA en Windows, VoiceOver en Mac). Se comprueba si es posible completar las acciones principales: comprar, reservar, solicitar presupuesto.
+
+**Nivel 3 — Evaluación semántica:** se desactivan los estilos CSS y se lee la página en el orden del DOM. Si el contenido pierde sentido, el lector de pantalla presentará el mismo problema.
+
+### Precios de auditoría en España
+
+| Tipo de servicio | Rango de precio (€) | Qué incluye |
+|------------------|---------------------|-------------|
+| Scan automático + informe básico | 250 – 700 € | Verificación técnica en 5-10 páginas |
+| Auditoría completa (auto + manual) | 1.000 – 3.000 € | Test con lector de pantalla, informe WCAG, plan de corrección |
+| Auditoría + adaptación (web pequeña) | 2.000 – 5.500 € | Auditoría, correcciones y declaración de conformidad |
+| Auditoría + adaptación (e-commerce) | 4.500 – 10.000 € | Auditoría completa, correcciones en CMS, test de regresión |
+
+## Cómo hacer accesible tu web: prioridades y costes
+
+Si tienes que adaptar un sitio existente, la estrategia más eficaz es actuar por prioridades. No hace falta rehacerlo todo.
+
+**Prioridad 1 (semana 1-2): Quick wins técnicos**
+- Añadir texto alternativo a las imágenes significativas
+- Corregir el contraste mínimo (4.5:1 para texto normal, 3:1 para texto grande)
+- Asociar etiquetas a todos los campos de formulario
+- Restaurar la estructura jerárquica de encabezados (H1 → H2 → H3)
+- Añadir enlaces de salto (skip links) para saltar la navegación
+
+**Prioridad 2 (semana 3-4): Navegación e interacción**
+- Hacer los menús utilizables con teclado
+- Gestionar el foco en modales y banners de cookies
+- Añadir estados de foco visibles a los elementos interactivos
+- Corregir las tablas de datos con encabezados apropiados
+
+**Prioridad 3 (semana 5-8): Contenido multimedia y complejidad**
+- Añadir subtítulos y transcripciones a los vídeos
+- Hacer accesibles los PDF (etiquetas estructurales, texto seleccionable)
+- Probar con lector de pantalla en todo el funnel de conversión
+- Redactar la Declaración de Conformidad
+
+### Coste de adaptar vs construir accesible desde cero
+
+Adaptar un sitio existente suele costar un 30-50% más que construirlo accesible desde el inicio. Para una web corporativa de 5-10 páginas, construir accesible supone un sobreprecio de unos 1.000-2.000 euros. Adaptar la misma web después de lanzada puede costar 3.000-6.000 euros.
+
+| Tipo de web | Coste de adaptación (€) | Plazo estimado |
+|-------------|------------------------|----------------|
+| Landing page (1 página) | 800 – 2.000 € | 1-2 semanas |
+| Web corporativa (5-10 páginas) | 2.000 – 5.000 € | 3-6 semanas |
+| E-commerce o SaaS (50+ páginas) | 5.000 – 12.000 € | 6-12 semanas |
+| Sistema legacy con código antiguo | 8.000 – 20.000+ € | 8-16 semanas |
+
+## Accesibilidad y SEO: la ventaja inesperada
+
+Google no tiene un factor de ranking directo llamado "accesibilidad". Pero los señales técnicos de la accesibilidad coinciden en gran medida con los del SEO técnico:
+
+- **Estructura semántica HTML:** encabezados jerárquicos, landmarks ARIA, listas correctas ayudan a los rastreadores a entender la página.
+- **Texto alternativo:** optimizado para accesibilidad, funciona también para el SEO de Google Imágenes.
+- **Velocidad de carga:** muchas tecnologías asistivas funcionan mejor en páginas ligeras y rápidas.
+- **Diseño responsive:** los touch targets adecuados y el zoom habilitado mejoran la experiencia para todos.
+- **Datos estructurados FAQ:** los esquemas de preguntas frecuentes funcionan tanto para la accesibilidad como para los rich snippets.
+
+Una web accesible tiende a reducir la tasa de rebote y aumentar el tiempo medio en página. Ambos son señales indirectos de calidad para los motores de búsqueda.
+
+### Caso real en España: la inmobiliaria que captó más leads
+
+Para una agencia inmobiliaria con 3 oficinas en Valencia, adaptamos el portal de propiedades tras detectar que el 60% de los usuarios accedía desde móvil y muchos abandonaban en el formulario de contacto. El sitio tenía 340 propiedades, un buscador con filtros complejos y integración con un CRM propietario.
+
+En 6 semanas corregimos 89 incidencias de accesibilidad: contrastes insuficientes, formularios sin etiquetas, imágenes de propiedades sin descripción y un buscador inaccesible por teclado. Implementamos ajustes de tipografía y contraste persistentes.
+
+El resultado: las solicitudes de información online aumentaron un 18% en los dos meses siguientes. El tiempo medio de sesión subió un 12%. La gerente confirmó que varios clientes mayores, antes habituados a llamar por teléfono, empezaron a usar el formulario web de forma autónoma.
+
+## Cómo SystemForge implementa la accesibilidad
+
+No añadimos la accesibilidad al final. La integramos desde el primer wireframe.
+
+**Diseño inclusivo:** prototipamos con contraste validado, tamaños de toque mínimos de 48x48 píxeles y navegación por teclado probada antes de escribir código. Usamos plugins como Stark en Figma para simular daltonismo y baja visión en tiempo real.
+
+**Desarrollo semántico:** construimos componentes React y Next.js con HTML semántico nativo. Usamos ARIA solo cuando el markup estándar no es suficiente. Cada formulario tiene etiquetas explícitas, mensajes de error vinculados con `aria-describedby` y validación accesible.
+
+**Verificación continua:** integramos axe-core en el pipeline de CI/CD. Cada pull request se escanea automáticamente. Antes del deploy, hacemos pruebas manuales con NVDA y VoiceOver. Entregamos un informe de conformidad junto con el código.
+
+El coste de construir accesible con nosotros representa aproximadamente un 10-15% más sobre el presupuesto base de una web. Para sistemas existentes, la adaptación empieza desde 1.500 euros y se escala por prioridad jurídica.
+
+## Checklist básico para empezar hoy
+
+Antes de contratar una auditoría profesional, puedes hacer una revisión interna con herramientas gratuitas:
+
+| Herramienta | Qué verifica | Coste |
+|-------------|-------------|-------|
+| Lighthouse (Chrome DevTools) | Contraste, etiquetas, ARIA, semántica | Gratis |
+| WAVE (WebAIM) | Errores, alertas, estructura de encabezados | Gratis |
+| axe DevTools | WCAG 2.1/2.2 AA, reglas personalizables | Gratis (extensión) |
+| Pa11y | Escaneo automático multi-URL | Gratis (CLI) |
+| NVDA (Windows) / VoiceOver (Mac) | Prueba real con lector de pantalla | Gratis |
+
+### 10 puntos para revisar hoy
+
+1. Todas las imágenes tienen un alt text descriptivo
+2. El contraste entre texto y fondo es al menos 4.5:1
+3. Todos los campos de formulario tienen una etiqueta asociada
+4. Los menús se abren y navegan con teclado
+5. Los modales trasladan el foco hacia su interior
+6. La estructura de encabezados es jerárquica (sin saltos H1→H3)
+7. Los vídeos tienen subtítulos
+8. Las tablas de datos tienen encabezados de columna marcados
+9. Los mensajes de error indican el campo y cómo corregirlo
+10. Existe un skip link para saltar la navegación
+
+Si respondes "no" a más de 3 puntos, tu web necesita una intervención estructurada.
+
+## Cuándo merece la pena hacerlo tú solo vs contratar a un especialista
+
+| Criterio | Hacerlo tú solo | Especialista |
+|----------|----------------|--------------|
+| Web WordPress/Wix estándar | Plugins y templates accesibles pueden bastar | Recomendable si has recibido notificación |
+| Web custom (React/Vue/Next.js) | Difícil sin experiencia específica | Recomendable — el código afecta a toda la estructura |
+| Notificación de autoridad | Arriesgado — se necesita informe técnico firmado | Obligatorio — se necesita documentación válida |
+| Presupuesto limitado (< 1.000 €) | Prioriza los quick wins | Factible solo para auditoría básica |
+| Plazo corto (< 2 semanas) | Los quick wins se hacen en días | El especialista acelera las correcciones críticas |
+
+## Conclusión
+
+La accesibilidad digital dejó de ser voluntaria en España el 28 de junio de 2025. En 2026, las inspecciones están activas, las denuncias ciudadanas son un canal real de activación y las sanciones no son simbólicas. Solo el 2% de las webs privadas españolas cumplen la normativa, lo que significa que la mayoría de las empresas están en riesgo.
+
+El camino más inteligente es tratar la accesibilidad como requisito de negocio, no como caridad. Las webs accesibles convierten más, posicionan mejor y eliminan riesgo jurídico. Los quick wins — alt text, contraste, etiquetas, encabezados — se pueden implementar en días y eliminan gran parte de las vulnerabilidades.
+
+Si has recibido una notificación o quieres anticiparte, [solicita un diagnóstico gratuito](/servicios/desarrollo-web). Recibirás un informe técnico con las fallas prioritarias y un plan de corrección estimado en plazo y valor. [Habla con un experto por WhatsApp](https://wa.me/5517981539795).
+
+## Preguntas Frecuentes
+
+### Mi empresa tiene 8 trabajadores y factura 1,5 millones. ¿Debe adaptarse?
+
+No, entras en la definición de microempresa y estás exenta de las obligaciones más estrictas de la EAA. Pero sigues sujeto a la Ley 15/2022 de no discriminación, y si trabajas con clientes que sí están obligados, te lo exigirán por contrato.
+
+### ¿Cuánto tiempo lleva adaptar una web corporativa media?
+
+Una web de 5-10 páginas necesita entre 3 y 6 semanas. Un e-commerce con funcionalidades complejas puede llevar 8-12 semanas. Los sistemas legacy con código obsoleto pueden superar los 4 meses.
+
+### ¿Existe una multa fija por web no accesible?
+
+No hay tabla fija. Las sanciones van desde 301 euros en casos leves hasta 1 millón en infracciones muy graves. Además, el Juez puede imponer obligación de hacer con multa diaria por incumplimiento.
+
+### ¿Los widgets de accesibilidad resuelven el problema?
+
+No. Los widgets automáticos cubren entre el 20% y el 30% de las fallas y no generan la documentación requerida por la EAA. En muchos casos, crean conflictos con los lectores de pantalla. La ley exige conformidad estructural, no solo una barra de ajustes visuales.
+
+### ¿Cómo sé si mi web cumple la normativa?
+
+Ejecuta un escaneo con Lighthouse y axe DevTools. Si la puntuación de accesibilidad está por debajo de 90, hay trabajo por hacer. Para validación jurídica, contrata una auditoría profesional que genere informe técnico basado en la UNE-EN 301 549.
+
+### ¿La accesibilidad hace el sitio más lento?
+
+No necesariamente. El texto alternativo, las etiquetas semánticas y la estructura de encabezados no añaden peso. Los ajustes de contraste y foco son puramente CSS. El único punto de atención es el uso excesivo de ARIA, que puede sobrecargar los lectores de pantalla si se implementa mal.

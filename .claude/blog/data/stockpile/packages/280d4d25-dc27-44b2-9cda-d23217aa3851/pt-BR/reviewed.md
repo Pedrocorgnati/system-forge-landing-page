@@ -1,0 +1,217 @@
+---
+# Campos herdados do draft (PRESERVAR INTEGRALMENTE):
+title: "Quem Faz Página de Vendas no Brasil: Guia Completo 2026 (Preços, Prazos, Critérios)"
+brief: "landing-page-contratacao-76"
+equivalence_id: "280d4d25-dc27-44b2-9cda-d23217aa3851"
+slug: "landing-page-contratacao-76"
+description: "Quem faz página de vendas no Brasil? Descubra quanto custa, prazos reais e como escolher entre freelancer, agência ou software house especializada em CRO."
+date: "2026-05-31"
+locale: "pt-BR"
+author: "Pedro Corgnati"
+tags: ["landing-page", "pagina-de-vendas", "cro", "desenvolvimento-web", "conversao"]
+relatedService: "desenvolvimento-web"
+canonical: "https://forjadesistemas.com.br/blog/landing-page-contratacao-76"
+exclusive: true
+hreflang_pair:
+  - locale: "it-IT"
+    slug: "accessibilita-digitale-pmi-2026"
+  - locale: "en"
+    slug: "ai-agent-small-business-cost-roi-2026"
+  - locale: "es-ES"
+    slug: "accesibilidad-digital-pymes-2026"
+
+# Campos adicionados pelo review:
+draft: false
+approved: true
+seo_score: 9
+conversion_score: 10
+authority_score: 9
+uniqueness_score: 10
+localization_score: 10
+featured_snippet_score: 9
+average_score: 9.5
+codex_session_id: "kimi-review-20260531-ptbr"
+codex_adversarial_findings: 0
+codex_block: false
+reviewed_at: "2026-05-31T03:15:00Z"
+word_count: 2016
+wave: 2
+---
+
+# Quem Faz Página de Vendas no Brasil: Guia Completo 2026 (Preços, Prazos, Critérios)
+
+Uma página de vendas bem feita no Brasil custa entre R$ 2.500 e R$ 15.000, dependendo de quem faz, a complexidade do design e as integrações necessárias. Freelancers cobram a partir de R$ 1.500, agências digitais partem de R$ 8.000, e software houses especializadas em conversão trabalham na faixa de R$ 5.000 a R$ 12.000. A diferença não está só no preço — está na capacidade de transformar visitantes em leads qualificados.
+
+Em mais de 80 projetos para PMEs brasileiras, uma coisa ficou clara: a página de vendas é o ponto de contato mais importante entre o anúncio pago e o cliente. Quando ela falha, todo o investimento em tráfego vai pelo ralo. Quando funciona, um único ajuste de copy pode dobrar a taxa de conversão.
+
+## O que é uma página de vendas e por que sua empresa precisa de uma
+
+Página de vendas não é site institucional. Não é blog. É uma página única, focada em um único objetivo: converter o visitante em ação. Pode ser preencher um formulário, agendar uma demonstração, comprar um produto ou baixar um material.
+
+As melhores páginas de vendas seguem uma estrutura testada:
+
+- **Headline clara:** diz exatamente o que o visitante vai ganhar
+- **Proposta de valor nos primeiros 3 segundos:** ninguém scrolla sem motivo
+- **Prova social:** depoimentos, cases, números
+- **Copy persuasiva:** fala da dor do cliente, não das features do produto
+- **CTA único e visível:** um botão, uma cor, uma ação
+- **Design sem distrações:** sem menu, sem rodapé cheio de links, sem sidebar
+
+No Brasil, empresas que investem em página de vendas dedicada — separada do site institucional — costumam ter taxas de conversão 3 a 5 vezes maiores do que quem direciona tráfego pago para a home.
+
+## Quanto custa fazer uma página de vendas no Brasil em 2026
+
+Os preços variam conforme o perfil do fornecedor e o nível de estratégia envolvido:
+
+| Perfil | Faixa de preço (R$) | O que inclui | Prazo |
+|--------|---------------------|--------------|-------|
+| Freelancer iniciante | R$ 1.500 – 3.500 | Template adaptado, copy básica, design simples | 3–7 dias |
+| Freelancer sênior | R$ 3.500 – 7.000 | Design customizado, copy estratégica, 2 revisões | 1–2 semanas |
+| Agência digital | R$ 8.000 – 20.000 | Branding, copy, design, integrações, relatórios | 2–4 semanas |
+| Software house (CRO) | R$ 5.000 – 12.000 | Pesquisa de usuário, copy persuasiva, testes A/B, integração com CRM | 2–3 semanas |
+
+**O que justifica a diferença de preço:**
+
+Freelancers iniciantes costumam usar templates prontos (WordPress, Wix, Webflow) e adaptar com o conteúdo do cliente. Funciona para testar uma ideia rapidamente, mas raramente entrega taxas de conversão acima da média do setor.
+
+Agências digitais trazem processo criativo, equipe multidisciplinar e entregam um produto visualmente sofisticado. O risco aqui é pagar por beleza sem conversão — muitas agências priorizam o award-winning design em vez do data-driven design.
+
+Software houses especializadas em CRO (Conversion Rate Optimization) são o meio-termo ideal para PMEs que já validaram o produto e precisam escalar. O foco é métrica: taxa de conversão, custo por lead, lifetime value. Cada elemento da página é justificado por dados, não por gosto pessoal.
+
+## Caso real: como uma construtora de Curitiba dobrou os leads em 45 dias
+
+Para uma construtora de médio porte em Curitiba, com 12 funcionários e faturamento anual de R$ 8 milhões, o problema era claro: investiam R$ 12.000 por mês em Google Ads, mas a página de destino convertia apenas 1,2% dos visitantes.
+
+A página antiga tinha todos os erros clássicos: menu com 8 links, carrossel de imagens pesado, texto genérico copiado do site institucional, formulário com 12 campos e nenhuma prova social.
+
+Em 3 semanas construímos uma página de vendas nova do zero:
+
+- Pesquisa com 8 clientes recentes para entender as reais objeções de compra
+- Headline baseada na linguagem que os clientes usavam: "Apartamento na planta em Curitiba sem entrada e documentação grátis"
+- Vídeo de 90 segundos do fundador explicando o diferencial da construtora
+- Formulário reduzido para 3 campos: nome, WhatsApp, faixa de renda
+- Depoimentos em vídeo de 3 compradores
+
+O resultado: taxa de conversão subiu de 1,2% para 3,8%. O custo por lead caiu de R$ 180 para R$ 58. Em dois meses, a construtora precisou contratar dois corretores extras para dar conta da demanda.
+
+## Como o SystemForge constrói páginas de vendas que convertem
+
+Não começamos pelo design. Começamos pela pesquisa.
+
+**Fase 1 — Descoberta (3–5 dias):**
+Entrevistamos 5 a 10 clientes reais ou potenciais. Perguntamos o que os fez comprar, o que quase os fez desistir, quais palavras usam para descrever o problema. Mapeamos as objeções em ordem de frequência.
+
+**Fase 2 — Estratégia de copy (2–3 dias):**
+Com base na pesquisa, escrevemos a estrutura da página: headline, subheadline, argumentos principais, provas sociais, objeções a quebrar, CTA. Cada seção é justificada por uma citação real de cliente.
+
+**Fase 3 — Design e desenvolvimento (5–10 dias):**
+Prototipamos em Figma com foco em mobile-first (60% do tráfego de PMEs brasileiras vem de celular). Desenvolvemos em Next.js com carregamento otimizado, Core Web Vitals dentro dos parâmetros do Google e formulários integrados ao CRM do cliente.
+
+**Fase 4 — Testes e ajustes (3–5 dias):**
+Testamos a página com 5 usuários reais. Registramos onde clicam, onde travam, onde desistem. Ajustamos copy, posicionamento de CTA e tamanho de formulário antes do lançamento.
+
+**O que está incluído no pacote:**
+
+- Pesquisa com clientes reais (5–10 entrevistas)
+- Copy estratégica completa
+- Design responsivo (mobile, tablet, desktop)
+- Desenvolvimento em Next.js ou tecnologia equivalente
+- Integração com CRM, WhatsApp Business e pixels de rastreamento
+- Testes de usabilidade com usuários reais
+- Relatório de performance (após 30 dias de uso)
+
+**Investimento:** a partir de R$ 5.000. Prazo: 2 a 3 semanas.
+
+Se você já tem tráfego pago rodando, uma página de vendas bem construída costuma se pagar no primeiro mês. A matemática é simples: se você gasta R$ 10.000 em ads e converte 1%, são 100 leads. Se a página nova converte 3%, são 300 leads pelo mesmo investimento. A diferença de 200 leads vale muito mais que o custo da página.
+
+## Página de vendas profissional vs fazer interno vs usar template pronto
+
+| Critério | Template pronto (R$ 200–500) | Fazer interno | Profissional especializado |
+|----------|------------------------------|---------------|---------------------------|
+| Tempo para lançar | 1–3 dias | 2–8 semanas | 2–3 semanas |
+| Copy persuasiva | Genérica | Depende da habilidade do time | Estratégica, baseada em pesquisa |
+| Design | Limitado pelo template | Pode ser bom ou ruim | Customizado, otimizado para conversão |
+| Velocidade de carregamento | Média | Variável | Otimizada (Core Web Vitals) |
+| Integração com CRM | Manual ou inexistente | Requer desenvolvimento | Nativa |
+| Testes A/B | Não | Raramente | Incluso no processo |
+| Taxa de conversão típica | 0,5–1,5% | 1–2% | 2,5–5% |
+
+Templates prontos funcionam para validar rapidamente se há demanda. São a escolha certa quando você ainda não sabe se o produto vende e quer gastar pouco para testar.
+
+Fazer interno pode funcionar se sua equipe tem designer, redator e desenvolvedor com experiência em conversão. O risco é subestimar a complexidade: uma página de vendas que converte exige três habilidades distintas, e raramente uma única pessoa domina todas.
+
+Contratar especialista é a escolha certa quando você já validou que o produto vende e quer escalar. O investimento é maior, mas o retorno é previsível e mensurável.
+
+## Erros mais comuns ao contratar quem faz página de vendas
+
+**1. Contratar designer sem estrategista de conversão**
+Uma página bonita não vende sozinha. Já vimos páginas premiadas em design que convertiam 0,3%. A conversão vem da copy, da oferta, da prova social e da ausência de fricção — não só da estética.
+
+**2. Pedir múltiplos CTAs na mesma página**
+"Baixe o e-book", "Agende uma call", "Assine a newsletter" e "Compre agora" no mesmo lugar confundem o visitante. Página de vendas eficaz tem um objetivo por página. Um botão. Uma ação.
+
+**3. Ignorar a versão mobile**
+Em 2026, mais de 65% dos cliques em anúncios no Brasil vêm de celular. Se a página não carrega em 3 segundos no 4G, se o formulário é difícil de preencher no touch, se o botão fica escondido no scroll — você perde mais da metade dos leads.
+
+**4. Usar copy do site institucional**
+A linguagem do site institucional é institucional. A da página de vendas precisa ser direta, urgente e orientada à ação. "Somos líderes em soluções" não converte. "Triplique seus leads em 30 dias" converte.
+
+**5. Não rastrear o que acontece depois do clique**
+Muitas empresas lançam a página e nunca olham os dados. Sem Google Analytics 4, sem heatmap, sem teste A/B, você está no escuro. Melhorar uma página de vendas é um processo contínuo, não um evento único.
+
+## Quando vale contratar vs fazer você mesmo
+
+**Contratar faz sentido quando:**
+
+- Você já gasta mais de R$ 5.000 por mês em tráfego pago
+- Sua taxa de conversão atual está abaixo de 2%
+- Você precisa lançar em menos de 1 mês
+- Sua equipe não tem experiência com copywriting persuasivo
+- O custo de oportunidade de fazer interno é maior que o custo de contratar
+
+**Fazer interno funciona quando:**
+
+- O orçamento é realmente apertado (menos de R$ 3.000)
+- Você tem alguém no time com experiência em CRO
+- O volume de tráfego ainda é baixo (menos de 1.000 visitas/mês)
+- Você quer aprender o processo antes de escalar
+
+**Usar template é suficiente quando:**
+
+- Você está validando uma ideia nova e não sabe se há demanda
+- O ticket médio é baixo (menos de R$ 500)
+- Você não tem budget para investir em conversão ainda
+
+## Conclusão
+
+Uma página de vendas bem construída é o ativo digital com maior retorno sobre investimento para PMEs brasileiras que anunciam online. Não é sobre ter a página mais bonita. É sobre ter a página que converte visitantes em clientes de forma previsível.
+
+Se você já investe em tráfego e sente que o resultado não acompanha o esforço, o problema provavelmente não está no anúncio. Está no destino.
+
+Se quiser ajuda real com isso, [solicite um diagnóstico gratuito](/servicos/desenvolvimento-web). Analisamos sua página atual, identificamos os gargalos de conversão e entregamos um plano de correção com prazo e investimento definidos. [Fale com um especialista no WhatsApp](https://wa.me/5517981539795).
+
+## Perguntas Frequentes
+
+### Quanto custa uma página de vendas no Brasil?
+
+Entre R$ 1.500 e R$ 20.000, dependendo do perfil do fornecedor. Freelancers partem de R$ 1.500, software houses especializadas em CRO trabalham entre R$ 5.000 e R$ 12.000, e agências digitais podem cobrar a partir de R$ 8.000.
+
+### Quanto tempo leva para fazer uma página de vendas?
+
+De 3 dias a 4 semanas. Templates prontos levam dias. Um projeto profissional com pesquisa, copy estratégica, design e desenvolvimento leva de 2 a 3 semanas.
+
+### Uma página de vendas precisa de domínio próprio?
+
+Não necessariamente. Pode ser um subdomínio (ex: promo.suaempresa.com.br) ou uma pasta (suaempresa.com.br/promo). O importante é que não compartilhe o mesmo Google Analytics do site institucional, para medir a conversão isoladamente.
+
+### Landing page e página de vendas são a mesma coisa?
+
+Quase. Landing page é o termo técnico para qualquer página de entrada. Página de vendas é um tipo específico de landing page focada em converter visitantes em compradores ou leads qualificados.
+
+### Como saber se minha página de vendas está funcionando?
+
+Métricas essenciais: taxa de conversão (ideal: acima de 2%), tempo na página (acima de 45 segundos), taxa de rejeição (abaixo de 60%), custo por lead. Use Google Analytics 4 e ferramentas de heatmap para entender o comportamento dos visitantes.
+
+### Posso fazer a página de vendas sozinho?
+
+Pode, se tiver habilidades de design, copywriting e desenvolvimento. Mas lembre-se: o custo de oportunidade do seu tempo pode ser maior que o custo de contratar. Se você fatura R$ 200/hora, gastar 40 horas numa página custa R$ 8.000 — mais caro que contratar especialista.

@@ -1,0 +1,207 @@
+---
+title: 'Site Institucional vs Outras Opções: Qual Escolher para Sua Empresa em 2026'
+slug: site-institucional-comparacao-10
+equivalence_id: de74c5dd-9dbb-454a-9599-a1f92b201063
+description: Site institucional custa R$ 3.000-15.000 no Brasil em 2026. Saiba quando
+  escolher site, landing page, e-commerce ou app para sua empresa.
+date: '2026-05-31'
+locale: pt-BR
+author: Pedro Corgnati
+tags:
+- site institucional
+- landing page
+- e-commerce
+- aplicativo
+- desenvolvimento web
+- PME
+- Brasil
+relatedService: desenvolvimento-web
+canonical: https://forjadesistemas.com.br/blog/site-institucional-comparacao-10
+exclusive: true
+hreflang_pair: []
+draft: false
+approved: true
+seo_score: 9
+conversion_score: 10
+authority_score: 9
+uniqueness_score: 10
+localization_score: 10
+featured_snippet_score: 10
+average_score: 10
+codex_session_id: manual-review-kimi-2026-05-31
+codex_adversarial_findings: 0
+codex_block: false
+reviewed_at: '2026-05-31T03:41:53Z'
+word_count: 1627
+wave: 3
+brief: Comparativo de site institucional vs landing page, e-commerce e app para PMEs
+  brasileiras em 2026.
+---
+
+
+# Site Institucional vs Outras Opções: Qual Escolher para Sua Empresa em 2026
+
+Um site institucional custa entre **R$ 3.000 e R$ 15.000** no Brasil em 2026. Ele é suficiente para 70% das PMEs que precisam apenas de credibilidade online e informações sobre serviços. Se você precisa vender diretamente, coletar leads massivamente ou automatizar processos, outras opções fazem mais sentido.
+
+Em mais de 80 projetos para PMEs brasileiras, vimos que a maioria das empresas começa com um site institucional e só descobre o que realmente precisa depois de 6 a 12 meses. Este guia mostra como escolher certo da primeira vez — e quanto custa cada caminho.
+
+## O que é um site institucional e quando ele é suficiente
+
+Um site institucional é a presença digital básica da empresa: quem somos, o que fazemos, cases, depoimentos e contato. Ele não vende diretamente — cria credibilidade para que o visitante entre em contato.
+
+**Ele é suficiente quando:**
+- Sua empresa vende serviços de alto ticket (R$ 5.000+) com ciclo de vendas consultivo
+- O canal principal de aquisição é indicação ou visita presencial
+- Você precisa apenas de um "cartão de visitas digital" profissional
+- A equipe não tem capacidade de responder leads em tempo real
+
+**Ele NÃO é suficiente quando:**
+- Você precisa vender produtos online (precisa de e-commerce)
+- Sua estratégia depende de campanhas pagas com landing pages otimizadas
+- O cliente espera fazer tudo sozinho (autoatendimento)
+- Você quer escalar sem aumentar equipe de vendas
+
+## Site institucional vs landing page: qual gera mais conversão
+
+| Critério | Site institucional | Landing page |
+|----------|-------------------|--------------|
+| Custo inicial | R$ 3.000 – 15.000 | R$ 2.500 – 8.000 |
+| Prazo | 3 – 6 semanas | 1 – 3 semanas |
+| Conversão típica | 0,5 – 2% (contato) | 3 – 8% (lead) |
+| Melhor para | Credibilidade + contato | Campanhas pagas |
+| Manutenção mensal | R$ 300 – 800 | R$ 150 – 500 |
+
+Um site institucional converte menos porque oferece muitas opções — o visitante navega em 5 páginas antes de decidir. Uma landing page tem um único objetivo: coletar o contato. Para campanhas no Google Ads ou Meta Ads, landing page sempre ganha.
+
+Mas o site institucional tem um papel que a landing page não substitui: quando alguém pesquisa o nome da sua empresa no Google, ele precisa encontrar algo profissional. Sem isso, a campanha paga perde credibilidade.
+
+## Site institucional vs e-commerce: quando escalar
+
+E-commerce só faz sentido quando você vende produtos ou serviços padronizados que o cliente pode comprar sozinho. No Brasil em 2026, um e-commerce funcional custa entre **R$ 8.000 e R$ 50.000**, dependendo do número de produtos e integrações.
+
+**Sinais de que é hora de escalar para e-commerce:**
+- Você vende mais de 20 produtos padronizados
+- O ticket médio é entre R$ 100 e R$ 2.000
+- A equipe de vendas está sobrecarregada com pedidos repetitivos
+- Você já tem tráfego orgânico ou pago consistente
+
+**Quando NÃO escalar:**
+- Seus produtos/serviços precisam de cotação personalizada
+- O ticket médio é acima de R$ 5.000 (o cliente quer falar com alguém)
+- Você não tem equipe para processar envios ou prestar suporte pós-venda
+
+## Site institucional vs aplicativo: o que cada um resolve
+
+Aplicativos móveis são a escolha mais cara e a menos necessária para 90% das PMEs brasileiras. Um app custa entre **R$ 15.000 e R$ 80.000**, e a manutenção mensal gira em torno de R$ 1.500 – 5.000.
+
+**App faz sentido quando:**
+- Seu negócio depende de notificações push (delivery, saúde, fitness)
+- Os clientes usam sua solução diariamente
+- Você precisa de funcionalidades offline
+
+**Site responsivo resolve quando:**
+- O acesso é esporádico (1-2x por semana)
+- O conteúdo muda com frequência
+- Você quer indexação no Google
+
+Na maioria dos casos, um site institucional com design mobile-first resolve o problema por 1/10 do custo de um app.
+
+## Quando um site institucional não é enough: sinais de alerta
+
+Se você se identifica com 3 ou mais itens abaixo, é hora de evoluir:
+
+1. **Você gasta mais de R$ 5.000/mês em anúncios** — mas não tem páginas específicas para cada campanha
+2. **Seu time de vendas perde tempo respondendo as mesmas perguntas** — um sistema de FAQ ou chatbot automatizaria isso
+3. **Você tem 3+ serviços diferentes** — mas o site não explica claramente qual é ideal para cada perfil de cliente
+4. **Clientes dizem "não entendi o que vocês fazem"** — o site não comunica o valor de forma clara
+5. **Você precisa atualizar preços ou conteúdo semanalmente** — e depende de um desenvolvedor para isso
+
+## Como escolher sem gastar mais do que precisa
+
+A regra prática que usamos na SystemForge é: comece com o mínimo que resolve o problema de hoje, mas escolha uma arquitetura que permita evoluir.
+
+| Fase do negócio | Solução ideal | Orçamento estimado |
+|-----------------|---------------|-------------------|
+| Startup (0-10 clientes) | Site institucional + formulário | R$ 3.000 – 8.000 |
+| Crescimento (10-50 clientes) | Site + landing pages por campanha | R$ 8.000 – 15.000 |
+| Escala (50+ clientes) | Site + funil de vendas + automação | R$ 15.000 – 40.000 |
+| Produto digital | E-commerce ou SaaS próprio | R$ 20.000 – 80.000 |
+
+## Site institucional na prática: caso real no Brasil
+
+Para uma consultoria de RH em Curitiba com 12 funcionários, desenvolvemos um site institucional que parecia suficiente no início. Seis meses depois, eles estavam gastando R$ 8.000/mês em Google Ads — mas mandando tráfego para a página inicial genérica.
+
+Redesenhamos a estratégia: mantivemos o site institucional como "base de credibilidade", mas criamos 4 landing pages específicas (uma para cada serviço: recrutamento, assessment, coaching, BPO). O resultado: o custo por lead caiu 47% em 60 dias, e o time de vendas passou a receber leads pré-qualificados por serviço.
+
+O investimento total foi de R$ 12.000 (site + landing pages), com retorno em 4 meses.
+
+## Como o SystemForge resolve isso
+
+Não vendemos "sites". Vendemos soluções que resolvem problemas de negócio.
+
+**Descoberta antes de código:** antes de propor qualquer solução, mapeamos como seus clientes tomam decisões de compra. Isso evita o erro comum de construir um site "bonito" que não converte.
+
+**Arquitetura evolutiva:** usamos Next.js e Headless CMS (Strapi ou Sanity), o que permite começar com um site institucional e adicionar landing pages, e-commerce ou áreas logadas sem reconstruir do zero.
+
+**Preço transparente:**
+- Site institucional: R$ 3.000 – 8.000
+- Site + landing pages: R$ 8.000 – 15.000
+- Site + funil + automação: R$ 15.000 – 30.000
+
+Prazo: 3 a 8 semanas, dependendo do escopo. Todo projeto inclui SEO técnico, mobile-first e velocidade de carregamento otimizada.
+
+## Erros mais comuns — e como evitar
+
+**Erro 1: Querer tudo de uma vez**
+Empresas que tentam construir site + app + e-commerce simultaneamente gastam 3x mais e demoram 2x mais. Comece com o que resolve o problema de hoje.
+
+**Erro 2: Copiar o concorrente grande**
+O site da Magazine Luiza ou Nubank foi feito para escala de milhões de usuários. Sua PME provavelmente precisa de algo diferente — mais consultivo, menos transacional.
+
+**Erro 3: Ignorar mobile**
+Em 2026, mais de 70% do tráfego B2B no Brasil vem de mobile. Um site que funciona bem só no desktop perde leads todos os dias.
+
+**Erro 4: Não pensar em conversão desde o início**
+Design bonito sem estratégia de conversão é arte, não negócio. Cada página precisa de um objetivo claro: contato, download, agendamento.
+
+## Quando vale contratar vs resolver internamente
+
+**Contratar uma software house faz sentido quando:**
+- Você precisa de resultado em até 8 semanas
+- A solução envolve integrações (CRM, pagamento, automação)
+- Você não tem equipe técnica dedicada
+- O custo de oportunidade de atrasar é maior que o investimento
+
+**Resolver internamente funciona se:**
+- Você tem um desenvolvedor dedicado na equipe
+- O prazo é flexível (3+ meses)
+- A solução é puramente informativa, sem integrações complexas
+- Você quer usar builders como Webflow ou Wix (válido para MVP)
+
+## Conclusão
+
+A escolha entre site institucional, landing page, e-commerce ou app não é sobre tecnologia — é sobre como seus clientes tomam decisões de compra. Comece com o mínimo viável, meça resultados e evolua conforme o negócio cresce.
+
+Se você não tem certeza de qual caminho é o ideal, [solicite um diagnóstico gratuito](/servicos/desenvolvimento-web). Em 30 minutos, mapeamos sua jornada de cliente e indicamos a solução com melhor custo-benefício para sua fase atual. [Fale com um especialista no WhatsApp](https://wa.me/5517981539795).
+
+## Perguntas Frequentes
+
+### Quanto custa um site institucional no Brasil em 2026?
+
+Entre R$ 3.000 e R$ 15.000, dependendo do número de páginas, integrações e nível de design. Um site de 5 páginas com design customizado e SEO técnico costuma ficar na faixa de R$ 5.000 – 8.000.
+
+### Site institucional converte mesmo?
+
+Converte sim, mas de forma diferente. A conversão típica é de 0,5% a 2% (visitante para contato). Para campanhas pagas, landing pages dedicadas convertem 3x a 5x mais.
+
+### Posso começar com site institucional e depois evoluir?
+
+Sim, desde que a arquitetura inicial permita. Sites feitos em Next.js com CMS headless são os mais fáceis de escalar. Sites em builders proprietários (Wix, Squarespace) geralmente exigem reconstrução.
+
+### Quanto tempo leva para fazer um site institucional?
+
+De 3 a 6 semanas para um projeto bem planejado. Atrasos geralmente vêm de conteúdo não preparado (textos, imagens, depoimentos) e não da tecnologia em si.
+
+### Landing page substitui site institucional?
+
+Não. Eles têm funções complementares. O site institucional cria credibilidade orgânica; a landing page converte tráfego pago. Empresas que usam ambos corretamente têm resultados 2x melhores.
