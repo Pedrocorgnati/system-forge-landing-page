@@ -5,10 +5,10 @@
 
 Landing page multi-mercado do **SystemForge / Forja de Sistemas** — um site Next.js estático (export) com 4 builds independentes por locale, cada um deployado em um domínio diferente via GitHub Actions + SFTP para Hostinger. Cloudflare fica na frente como CDN/proxy.
 
-- Repositório GitHub: `Pedromurta/system-forge-landing-page`
+- Repositório GitHub: `Pedrocorgnati/system-forge-landing-page`
 - Workspace local: `output/workspace/system-forge-landing-page/`
 - Credenciais SSH Hostinger: `output/workspace/my-fckng-landing-page/.env.deploy`
-- GitHub CLI já autenticado localmente (`gh auth status` → Pedromurta)
+- GitHub CLI já autenticado localmente (`gh auth status` → Pedrocorgnati)
 - Cloudflare Account ID: armazenado em `${{ secrets.CLOUDFLARE_ACCOUNT_ID }}` (não commitado)
 - Cloudflare API Token: armazenado em `${{ secrets.CLOUDFLARE_API_TOKEN }}` (não commitado)
   - Permissões: Workers Scripts Edit, D1 Edit, Workers KV Edit, Zone Edit, DNS Edit, Cache Purge, Turnstile Edit
@@ -191,7 +191,7 @@ curl -s -X POST "https://api.cloudflare.com/client/v4/zones" \
 ```
 Pegar o Zone ID retornado, adicionar ao GitHub:
 ```bash
-gh secret set CLOUDFLARE_ZONE_ID_EN --body "ZONE_ID_AQUI" --repo Pedromurta/system-forge-landing-page
+gh secret set CLOUDFLARE_ZONE_ID_EN --body "ZONE_ID_AQUI" --repo Pedrocorgnati/system-forge-landing-page
 ```
 Depois configurar os nameservers retornados no Dynadot para `systemforgesoftware.com`.
 
@@ -236,7 +236,7 @@ curl -s -X POST "https://api.resend.com/domains/$RESEND_DOMAIN_ID/verify" \
 ### PASSO 4 — Disparar o primeiro deploy
 ```bash
 cd output/workspace/system-forge-landing-page
-gh workflow run deploy.yml --repo Pedromurta/system-forge-landing-page
+gh workflow run deploy.yml --repo Pedrocorgnati/system-forge-landing-page
 ```
 Ou fazer um push para `main`.
 
@@ -251,7 +251,7 @@ cd workers/worker-br && echo "SECRET_KEY_BR" | CLOUDFLARE_API_TOKEN="${CLOUDFLAR
 
 ### PASSO 6 — Configurar GA4 (opcional)
 1. Criar propriedade em analytics.google.com para cada domínio (ou uma propriedade multi-stream)
-2. `gh secret set NEXT_PUBLIC_GA4_MEASUREMENT_ID --body "G-XXXXXXXXXX" --repo Pedromurta/system-forge-landing-page`
+2. `gh secret set NEXT_PUBLIC_GA4_MEASUREMENT_ID --body "G-XXXXXXXXXX" --repo Pedrocorgnati/system-forge-landing-page`
 
 ## Observações importantes
 - O deploy usa `FTP-Deploy-Action` com `protocol: ftps` na porta 21 (não SSH)
