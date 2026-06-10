@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["automation ROI", "return on investment", "process automation", "business management"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/roi-of-process-automation-how-to-calculate-it"
 published: false
 seo_score: 86

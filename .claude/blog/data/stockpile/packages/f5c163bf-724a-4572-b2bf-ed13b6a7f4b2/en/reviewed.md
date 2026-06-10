@@ -1,4 +1,5 @@
 ---
+
 draft: true
 locale: "en"
 brief: "ai-agent-small-business-cost-roi-2026"
@@ -9,7 +10,7 @@ wave: 1
 priority_score: 80
 title: "AI Agent for Small Business: Real Cost and ROI in 2026"
 slug: "ai-agent-small-business-cost-roi-2026"
-description: "Complete guide to AI agent costs and ROI for small businesses in 2026. Real prices, implementation timelines, and how to avoid overpaying for scope you do not need."
+description: "Complete guide to AI agent costs and ROI for small businesses in 2026. Real prices, implementation timelines, and how to avoid overpaying for scope you do."
 date: "2026-05-30"
 author: "Pedro Corgnati"
 tags: ["ai-agent", "business-automation", "SMB", "ROI", "cost-analysis"]
@@ -32,6 +33,8 @@ reviewed_at: "2026-05-30T17:00:49-03:00"
 ---
 
 # AI Agent for Small Business: Real Cost and ROI in 2026
+
+*By Pedro Corgnati, Founder of SystemForge*
 
 A custom AI agent for a small business in the United States costs between **$5,000 and $25,000** to build, plus **$300 to $800 per month** in ongoing operations. Most SMBs break even in about **10 months** when the agent automates high-volume tasks like customer support, scheduling, or lead qualification. In this guide, I will break down exactly what drives those numbers, when the investment makes sense, and how to avoid overpaying for scope you do not need.
 

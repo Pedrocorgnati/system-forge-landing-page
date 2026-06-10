@@ -1,14 +1,15 @@
 ---
+
 title: "Logistics Tracking System for Transport Companies: Features and Costs"
 slug: "logistics-tracking-system-transport-company-features-costs"
-description: "Discover the essential features of a logistics and tracking system for transport companies, real cost ranges, and when custom TMS development beats off-the-shelf software."
+description: "Discover the essential features of a logistics and tracking system for transport companies, real cost ranges, and when custom TMS development beats."
 excerpt: "A custom TMS with real-time GPS tracking, fleet control, and freight document management costs between $22,000 and $80,000 — see what's included and when it pays off."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["logistics tracking system", "TMS transport company", "fleet tracking software", "freight management system", "custom TMS"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/logistics-tracking-system-transport-company-features-costs"
 published: false
 seo_score: 86

@@ -1,14 +1,15 @@
 ---
+
 title: "How to Use Artificial Intelligence in Your Business: Complete Guide for SMBs 2026"
 slug: "how-to-use-artificial-intelligence-in-your-business"
-description: "Complete practical guide on how to use AI in your business: where to start, which tools to use, real costs, and documented ROI cases for small and mid-size businesses in 2026."
+description: "Complete practical guide on how to use AI in your business: where to start, which tools to use, real costs, and documented ROI cases for small and mid-size."
 excerpt: "Discover how to use AI in your business with concrete steps, without a large technical team or enterprise-level budget. Real cases and documented ROI."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["artificial-intelligence-business", "ai-smb", "how-to-use-ai", "digital-transformation", "business-automation"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/how-to-use-artificial-intelligence-in-your-business"
 published: false
 seo_score: 89

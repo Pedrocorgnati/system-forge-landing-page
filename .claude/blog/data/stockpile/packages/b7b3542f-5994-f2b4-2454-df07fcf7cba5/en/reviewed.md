@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["clinic-website", "dental-website", "medical-website", "web-development", "healthcare-digital", "online-booking"]
-relatedService: "desenvolvimento-web"
+relatedService: web-development
 canonical: "https://systemforgesoftware.com/blog/professional-website-dental-medical-clinic-what-to-include"
 published: false
 seo_score: 87

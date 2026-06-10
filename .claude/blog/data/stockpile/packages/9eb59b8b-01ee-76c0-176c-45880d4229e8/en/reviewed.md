@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["mvp", "digital product", "development cost", "saas", "startup"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/how-much-does-it-cost-to-launch-a-digital-product-mvp"
 published: false
 seo_score: 86

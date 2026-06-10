@@ -1,0 +1,206 @@
+---
+title: "Cómo dejar Excel y tener un sistema propio en tu empresa española: guía paso a paso (2026)"
+excerpt: "Cuándo Excel se queda corto, cuánto cuesta migrar (no-code, low-code o a medida) y los 7 pasos para cambiar en 90 días sin parar la operación."
+description: "Cuándo Excel se queda corto, cuánto cuesta migrar (no-code, low-code o a medida) y los 7 pasos para cambiar en 90 días sin parar la operación."
+slug: como-dejar-excel-sistema-gestion-empresa-espana
+locale: es-ES
+date: "2026-06-08"
+dateModified: "2026-06-08"
+canonical: "https://systemforge.es/blog/como-dejar-excel-sistema-gestion-empresa-espana"
+published: false
+tags: ["dejar Excel", "sistema de gestión", "PYME España"]
+relatedService: "sistemas-personalizados"
+stockpile_origin:
+  equivalence_id: f1dde043-d3c7-461d-aad9-0f7500661c47
+  package_version: 1
+  generated_at: "2026-06-08"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Cómo dejar Excel y tener un sistema propio en tu empresa española: guía paso a paso (2026)
+
+Dejar Excel y migrar a un sistema propio es la decisión correcta cuando se cumplen señales objetivas: más de tres personas editan la misma hoja a la vez, ya habéis perdido datos por un error de fórmula, o el onboarding de un empleado nuevo supera las dos semanas. El coste oscila entre 0 € y 140.000 € según la ruta: no-code hasta 800 €/mes, low-code entre 3.000 € y 18.000 € de setup, y software a medida entre 18.000 € y 140.000 €. La PYME española media recupera la inversión en 9 a 22 meses por horas ahorradas y errores evitados.
+
+En los proyectos a medida que hemos construido para PYMEs españolas de 8 a 80 empleados, el patrón se repite: nadie decide "abandonar Excel" un lunes. Lo que ocurre es que la hoja crece hasta convertirse en el sistema operativo real de la empresa, con fórmulas que solo entiende una persona y un caos de versiones por WhatsApp. Esta guía te da el criterio, los números y los 7 pasos para hacer el cambio sin frenar el negocio.
+
+## Cuándo Excel deja de ser suficiente: 5 señales objetivas
+
+Excel no es el enemigo. Sigue siendo excelente para análisis puntuales, prototipos y cálculos de un solo usuario. El problema empieza cuando lo usas como sistema de gestión multiusuario. Estas son las cinco señales que, en la práctica, marcan el punto de no retorno:
+
+1. **Más de tres personas tocan la misma hoja en paralelo.** Aparecen versiones "_final_v2_buena.xlsx" y nadie sabe cuál manda.
+2. **Has perdido datos o tenido un error caro por una fórmula.** Un rango mal copiado que facturó de menos durante un trimestre.
+3. **El onboarding de un empleado nuevo supera las dos semanas** solo para entender "cómo funcionan las hojas".
+4. **El cumplimiento normativo se vuelve manual.** RGPD, factura electrónica o trazabilidad para la AEAT que dependen de copiar y pegar.
+5. **El crecimiento está bloqueado por procesos opacos.** No puedes delegar porque el proceso vive en la cabeza de una persona.
+
+Dato económico de referencia: una PYME de 10 empleados pierde de media entre **8.200 € y 12.000 € al año** solo en tiempo dedicado a tareas en hojas que podrían automatizarse. Ese número, por sí solo, ya justifica empezar a mirar alternativas.
+
+## El verdadero coste de seguir con Excel (cálculo honesto)
+
+"Excel es gratis" es la frase más cara que se dice en una PYME. El coste no está en la licencia, está en lo que no ves en la cuenta de resultados.
+
+**Horas perdidas.** Un equipo de 10 personas dedica entre 11 y 16 horas semanales a tareas en hojas que son automatizables: copiar entre pestañas, cuadrar cifras, reconciliar fuentes. Con el salario medio bruto en España en torno a **14,52 €/hora** (INE 2025), 12 horas a la semana suponen unos **9.060 € al año** por equipo.
+
+**Errores de fórmula.** Los estudios de auditoría sobre hojas complejas detectan errores presentes en la gran mayoría de los casos. Un rango arrastrado mal, una celda fuera de la suma, y el error se propaga sin que nadie lo vea hasta que llega a una factura o a un informe.
+
+**Retrabajo por duplicidad.** Cuando el mismo dato vive en cuatro hojas, cada actualización exige tocar las cuatro. Lo que no se actualiza, miente.
+
+**Coste regulatorio.** Si la AEAT pide trazabilidad o llega una inspección de protección de datos, reconstruir el histórico desde hojas dispersas cuesta días y abre riesgo de sanción.
+
+Sumando los cuatro, el "Excel gratis" de una PYME de 10 personas cuesta fácilmente entre **10.000 € y 18.000 € al año**. Esa es la cifra contra la que comparar cualquier alternativa.
+
+> ¿Quieres saber tu número exacto? [Solicita un diagnóstico gratuito](https://systemforge.es/servicios/sistemas-personalizados) y calculamos juntos cuántas horas y euros pierde hoy tu operación en hojas.
+
+## Las 3 rutas reales para dejar Excel (no-code, low-code y a medida)
+
+No existe una única solución. Existen tres familias, y la honestidad está en reconocer que cada una encaja con un perfil distinto, no en empujar la que vende el autor.
+
+**No-code (Airtable, Notion, Smartsheet, Coda).** Bases de datos visuales que montas sin programar. Ideales para procesos simples y equipos de menos de 15 personas. Pones en marcha en días, no en meses. El límite aparece cuando la lógica de negocio se complica o cuando necesitas integraciones profundas.
+
+**Low-code (Bubble, Glide, Retool, Make + Zapier).** Permiten construir aplicaciones reales con lógica personalizada apoyándote en componentes visuales. Encajan en procesos medios y equipos medios. Más potencia que el no-code, sin el coste completo de un desarrollo desde cero. La contrapartida: dependes de la plataforma y sus precios.
+
+**Software a medida (desarrollo personalizado).** Un sistema construido exactamente para tu proceso, que es tuyo y escala sin límites de plataforma. Es la ruta para procesos críticos, diferenciadores o que son tu ventaja competitiva. Cuesta más y tarda más, pero el activo queda en tu balance, no en la suscripción de un tercero.
+
+La pregunta correcta no es "¿cuál es mejor?", sino "¿cuál encaja con mi caso?". Airtable gestiona datos de empresas Fortune 500; eso no lo hace adecuado para tu ERP crítico. Y un desarrollo a medida es excesivo para automatizar tres formularios.
+
+## Cuál ruta te conviene según tamaño y proceso
+
+La decisión se simplifica con dos ejes: tamaño del equipo y complejidad del proceso.
+
+| Perfil | Equipo | Complejidad | Ruta recomendada |
+|---|---|---|---|
+| Simple + pequeño | <15 | Baja | No-code (Airtable, Notion) |
+| Complejo + pequeño | <15 | Alta | Low-code (Retool, Bubble) |
+| Simple + grande | >15 | Baja | No-code o SaaS vertical |
+| Complejo + grande | >15 | Alta | A medida o ERP |
+
+A esto añade tres filtros de realidad: presupuesto disponible, si tienes (o no) equipo de IT interno, y la capacidad real de cambio de tu organización. Una empresa sin nadie que mantenga la herramienta no debería elegir low-code complejo aunque encaje en la matriz.
+
+## Paso a paso: 7 pasos para migrar de Excel a un sistema en 90 días
+
+Esto no es teoría. Es la secuencia que seguimos en proyectos reales, comprimida en 90 días sin que la operación se detenga ni un día.
+
+1. **Diagnosticar procesos (semana 1-2).** Mapea el "as-is": qué pasa, quién lo hace, en qué orden. El 70% de los fracasos viene de elegir herramienta antes de entender el proceso.
+2. **Mapear datos (semana 2-3).** Qué hoja contiene qué, qué campo es fuente de verdad y cuáles son copias. Aquí se ven las duplicidades.
+3. **Elegir herramienta (semana 3-4).** Aplica la matriz anterior. Decisión basada en encaje, no en moda.
+4. **Diseñar el piloto (semana 4-6).** Un solo proceso, un solo equipo. Acotado para validar rápido y barato.
+5. **Migrar fase 1 (semana 6-9).** Datos críticos con validación cruzada contra el Excel original. Nada se da por bueno sin cuadrar.
+6. **Validar 30 días en paralelo (semana 9-13).** El sistema nuevo y la hoja vieja conviven. Si los números coinciden un mes, el corte es seguro.
+7. **Escalar al resto (semana 13+).** Con el ahorro del piloto demostrado, el resto de procesos y la resistencia interna se vencen con datos propios.
+
+El plan paralelo del paso 6 es lo que responde a la objeción de "no tengo tiempo para parar": no se para. Se solapa, se congela una semana, se corta limpio.
+
+## Cuánto cuesta cada ruta (precios reales 2026 en España)
+
+Rangos orientativos según lo que vemos en el mercado español. Tu cifra exacta depende de procesos, integraciones y volumen de datos.
+
+| Ruta | Setup inicial | Coste recurrente | Time to value |
+|---|---|---|---|
+| No-code | 0 € – 2.500 € | hasta 800 €/mes | 1-4 semanas |
+| Low-code | 3.000 € – 18.000 € | 200 € – 1.500 €/mes | 4-10 semanas |
+| A medida | 18.000 € – 140.000 € | mantenimiento 8-18%/año | 8-24 semanas |
+
+En software a medida, el rango es amplio porque depende de los módulos. Un sistema de gestión típico de PYME combina: gestión de clientes/CRM, un módulo operativo propio del sector, facturación conectada a cumplimiento, e informes. Cada módulo añadido mueve la cifra dentro del rango.
+
+> Antes de pedir presupuestos a ciegas, [pide un presupuesto sin compromiso](https://systemforge.es/servicios/sistemas-personalizados) con el alcance ya acotado. Evita pagar de más por funciones que no usarás.
+
+## Cómo lo resuelve SystemForge
+
+Construimos sistemas a medida para PYMEs españolas, pero nuestra primera respuesta no siempre es "haz un desarrollo a medida". Sería deshonesto. Si tu caso encaja con no-code, te lo decimos, porque un cliente que elige bien vuelve y recomienda.
+
+**Nuestra metodología en 4 fases:**
+
+1. **Diagnóstico de procesos.** Mapeamos cómo trabajas hoy en Excel, dónde se pierden horas y qué errores cuestan dinero. Salida: un informe con la ruta de menor coste y ROI más rápido para tu caso concreto, sea cual sea.
+2. **Diseño del piloto.** Acotamos un proceso, definimos datos y validamos contigo el alcance antes de escribir una línea de código. Aquí evitamos el sobrecoste del 70% de proyectos que fracasan.
+3. **Construcción y migración por fases.** Documentación primero, después código. Migramos datos críticos con validación cruzada y operamos 30 días en paralelo. Tu operación nunca se detiene.
+4. **Cumplimiento integrado.** Factura electrónica de la Ley Crea y Crece, VeriFactu y RGPD no se añaden al final: se diseñan dentro del sistema desde el principio.
+
+**Precio indicativo:** un sistema a medida de PYME suele situarse entre **18.000 € y 90.000 €** según módulos, con mantenimiento del 8-18% anual. Para casos que encajan en low-code, el setup baja a la franja de **3.000 € a 18.000 €**. Te damos el rango honesto tras el diagnóstico, no antes.
+
+**Plazo:** del diagnóstico al go-live, entre 8 y 24 semanas según complejidad. El piloto entrega valor en las primeras 6-10 semanas.
+
+Lo que nos diferencia: no defendemos una herramienta concreta porque no vendemos licencias de terceros. Recomendamos la ruta que tenga ROI más rápido para ti, aunque sea la más barata.
+
+> [Solicita un diagnóstico gratuito](https://systemforge.es/servicios/sistemas-personalizados) y en una sesión sabrás qué ruta te conviene y cuánto vas a ahorrar. Si prefieres hablar directamente, [habla con un experto por WhatsApp](https://systemforge.es/servicios/sistemas-personalizados).
+
+## Caso real en España
+
+Una distribuidora de alimentación en Valencia, 18 empleados con 4 comerciales y almacén, operaba con 6 hojas de Excel mal sincronizadas entre comercial, almacén y administración. Cada cierre de mes era una batalla de versiones por WhatsApp.
+
+Tras el diagnóstico, la ruta correcta no era un desarrollo completo a medida, sino low-code: Retool conectado a sus fuentes de datos. Setup de unos **11.000 €** más **380 €/mes**. Implantación con piloto en el área comercial y migración por fases.
+
+Resultado a los seis meses: alrededor de **28 horas semanales** recuperadas entre los tres departamentos, que en coste de tiempo equivalen a unos **21.000 € al año**. Retorno de la inversión en torno a **7 meses**. Métricas anonimizadas y redondeadas, pero del orden real de lo que vemos en proyectos de este tamaño.
+
+La lección: el caso pedía low-code, no a medida. Forzar un desarrollo completo habría triplicado el coste sin mejorar el resultado.
+
+## Errores frecuentes al dejar Excel (y cómo evitarlos)
+
+- **Migrar todo de golpe.** El "big bang" es la receta del desastre. Piloto primero, escalado después.
+- **No mapear procesos antes de elegir herramienta.** Elegir la tecnología por moda y luego forzar el proceso. Dos semanas de diagnóstico ahorran meses de implantación fallida.
+- **Elegir por tendencia, no por encaje.** Que una herramienta esté de moda no significa que sirva para tu caso.
+- **No formar al equipo.** Un sistema que nadie sabe usar es peor que la hoja que sustituye.
+- **No prever soporte post-migración.** El go-live no es el final. Sin mantenimiento, el sistema nuevo se degrada hasta volver al caos.
+
+## Cumplimiento legal: RGPD, factura electrónica y VeriFactu
+
+En España, dejar Excel ya no es solo eficiencia: en muchos casos es cumplimiento.
+
+**Factura electrónica (Ley Crea y Crece, Ley 18/2022).** Obliga a la factura electrónica B2B. Las empresas de mayor facturación entraron antes y el resto se incorpora según el desarrollo reglamentario. Una hoja de cálculo no emite factura electrónica conforme.
+
+**VeriFactu (RD 1007/2023).** Sistema de facturación certificado, obligatorio desde enero de 2026 para empresas no acogidas al SII. El software debe garantizar integridad y trazabilidad de los registros, algo que Excel no aporta.
+
+**SII (Suministro Inmediato de Información).** Obligatorio para facturación superior a 6 M€.
+
+**RGPD.** Si tienes datos de clientes o empleados en hojas, estás tratando datos personales. Hojas compartidas sin control de acceso son un riesgo de sanción. Y con tratamiento sistemático a gran escala puede ser obligatorio un Delegado de Protección de Datos (DPO).
+
+El cumplimiento es un motivo legítimo, por sí solo, para abandonar la hoja de cálculo como sistema de facturación.
+
+## Cuándo NO conviene dejar Excel
+
+Sí, existe. Y decirlo nos diferencia de quien solo quiere venderte un proyecto.
+
+No migres todavía si: tu equipo tiene **menos de 5 personas** y el proceso es realmente simple; **no hay presupuesto mínimo** para hacerlo bien (a medias es peor que no hacerlo); **no hay capacidad de cambio cultural** y el equipo no va a adoptarlo; o el negocio está en **fase de pre-validación** y los procesos cambiarán en seis meses.
+
+En esos casos, Excel bien organizado es la opción racional. Vuelve a esta guía cuando aparezcan las señales del primer apartado.
+
+## Cuándo contratar fuera vs hacerlo en casa
+
+Criterios medibles para decidir:
+
+- **Hazlo en casa** si tienes una persona con tiempo real (no "cuando pueda"), el alcance es no-code y el proceso no es crítico. Coste de oportunidad bajo.
+- **Contrata fuera** si el sistema toca facturación o cumplimiento, si necesitas integraciones, si el coste de un error es alto, o si no tienes a nadie que pueda mantenerlo después.
+
+Regla práctica: cuando el coste de equivocarse supera el coste de contratar bien, externaliza el diseño aunque luego mantengas tú.
+
+## Conclusión
+
+Dejar Excel no es cuestión de odiar la hoja de cálculo, sino de reconocer cuándo dejó de ser la herramienta adecuada para tu tamaño y tus procesos. Las señales son objetivas, el coste de no actuar es medible y existen tres rutas honestas según tu caso.
+
+El primer paso no cuesta dinero: entender cuántas horas pierdes hoy. [Solicita un diagnóstico gratuito](https://systemforge.es/servicios/sistemas-personalizados) y te diremos qué ruta tiene el ROI más rápido para tu empresa, sin sesgo y sin compromiso.
+
+## Preguntas frecuentes
+
+**¿Cuándo Excel deja de ser suficiente para una empresa?**
+Cuando más de tres personas editan la misma hoja a la vez, has tenido errores caros de fórmula, el onboarding supera dos semanas o el cumplimiento normativo se vuelve manual. Son señales objetivas, no sensaciones.
+
+**¿Cuánto cuesta migrar de Excel a un sistema de gestión en España?**
+Depende de la ruta: no-code hasta 800 €/mes, low-code entre 3.000 € y 18.000 € de setup, y software a medida entre 18.000 € y 140.000 €. La inversión se recupera de media en 9 a 22 meses.
+
+**¿Qué es no-code, low-code y software a medida, y cuál me conviene?**
+No-code (Airtable) para procesos simples, low-code (Retool) para procesos medios, y a medida para procesos críticos o diferenciadores. La elección depende del tamaño del equipo y la complejidad, no de la moda.
+
+**¿Tengo que migrar todo de golpe o puedo ir por fases?**
+Por fases, siempre. Se empieza con un piloto de un solo proceso, se valida 30 días en paralelo con el Excel original y solo después se escala. El "big bang" es la causa principal de fracaso.
+
+**¿Cuánto tarda el cambio desde la decisión hasta el go-live?**
+Entre 8 y 24 semanas según complejidad y ruta. El no-code puede estar operativo en semanas; un desarrollo a medida completo tarda varios meses, pero el piloto entrega valor en las primeras 6-10 semanas.
+
+**¿Es obligatoria la factura electrónica con la Ley Crea y Crece?**
+Sí, la Ley 18/2022 obliga a la factura electrónica B2B con un calendario escalonado por tamaño de empresa. Una hoja de cálculo no emite facturas conformes; necesitas software certificado.
+
+**¿Cumplo el RGPD si tengo datos de clientes en una hoja de cálculo?**
+Difícilmente. Hojas compartidas sin control de acceso ni trazabilidad son un riesgo de sanción. Si tratas datos personales de forma sistemática, necesitas un sistema con permisos y registro de actividad.
+
+**¿Qué pasa si elijo mal la herramienta y no funciona?**
+Es el riesgo más común, y se evita con diagnóstico previo: el 70% de los fracasos viene de elegir herramienta antes de mapear procesos. Dedicar dos semanas a entender el proceso ahorra meses de implantación fallida.

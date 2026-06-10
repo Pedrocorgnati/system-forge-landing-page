@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["erp", "crm", "custom-software", "small-business", "erp-cost"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/how-much-does-a-simple-erp-cost-for-small-business"
 published: false
 seo_score: 85

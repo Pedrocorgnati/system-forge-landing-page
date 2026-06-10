@@ -40,6 +40,8 @@ wave: 1
 
 # AI Agent for Small Business: Real Cost and ROI in 2026
 
+*By Pedro Corgnati, Founder of SystemForge*
+
 An AI agent for a small-to-midsize business costs between $1,500 and $18,000 per year, depending on whether you buy off-the-shelf or build custom. Off-the-shelf solutions like Intercom Fin or Zendesk AI run $500–$2,000 per month and deploy in days. Custom agents built for your specific workflows start at $5,000 in development plus $300–$800 per month in infrastructure, but typically pay for themselves within 10 months through labor savings and faster response times.
 
 After building AI automation systems for over 80 businesses across Brazil, Italy, and the US, the pattern is always the same: owners overestimate the complexity and underestimate the payoff. This guide breaks down the real numbers, the build-vs-buy decision, and the red flags that separate legitimate AI developers from consultants selling snake oil.

@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["software maintenance", "maintenance contract", "technical support cost", "software support agreement"]
-relatedService: "manutencao-sistemas"
+relatedService: system-maintenance
 canonical: "https://systemforgesoftware.com/blog/how-much-does-a-software-maintenance-contract-cost"
 published: false
 seo_score: 86

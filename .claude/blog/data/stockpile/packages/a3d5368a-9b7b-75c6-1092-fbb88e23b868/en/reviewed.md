@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["management dashboard", "business intelligence", "kpi tracking", "data analytics", "business management"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/how-to-get-a-management-dashboard-for-your-company"
 published: false
 seo_score: 85

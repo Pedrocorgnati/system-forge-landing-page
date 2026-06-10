@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["landing page cost", "professional landing page price", "landing page development", "web development pricing"]
-relatedService: "desenvolvimento-web"
+relatedService: web-development
 canonical: "https://systemforgesoftware.com/blog/how-much-does-a-professional-landing-page-cost"
 published: false
 seo_score: 86

@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["law firm website", "attorney website professional", "legal website development", "law firm web design", "legal marketing website"]
-relatedService: "desenvolvimento-web"
+relatedService: web-development
 canonical: "https://systemforgesoftware.com/blog/professional-law-firm-website-features-costs"
 published: false
 seo_score: 85

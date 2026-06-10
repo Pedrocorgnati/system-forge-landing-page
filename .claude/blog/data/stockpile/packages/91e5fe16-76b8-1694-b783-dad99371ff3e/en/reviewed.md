@@ -1,14 +1,15 @@
 ---
+
 title: "How Much Does It Cost to Automate Business Processes in 2026"
 slug: "how-much-does-it-cost-to-automate-business-processes"
-description: "Complete pricing guide for business process automation in 2026: from simple automations to complex AI-powered flows. Pricing table and estimated ROI by project type."
+description: "Complete pricing guide for business process automation in 2026: from simple automations to complex AI-powered flows. Pricing table and estimated ROI by."
 excerpt: "Real cost ranges for business process automation in 2026, what drives prices up or down, and how to calculate ROI before committing to a project."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["business process automation cost", "automation pricing 2026", "RPA cost", "workflow automation price"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/how-much-does-it-cost-to-automate-business-processes"
 published: false
 seo_score: 85

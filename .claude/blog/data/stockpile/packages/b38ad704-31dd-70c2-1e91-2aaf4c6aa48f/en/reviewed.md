@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["landing-page", "hire-landing-page", "web-development", "conversion", "checklist", "digital-agency"]
-relatedService: "desenvolvimento-web"
+relatedService: web-development
 canonical: "https://systemforgesoftware.com/blog/how-to-hire-professional-landing-page-developer"
 published: false
 seo_score: 86

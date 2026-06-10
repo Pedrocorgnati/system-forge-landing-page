@@ -1,14 +1,15 @@
 ---
+
 title: "Custom Software Development: How It Works and What It Costs in 2026"
 slug: "custom-software-development-local-guide"
-description: "How custom software development works: project phases, real pricing ranges in 2026, timelines, and how to choose the right development partner for your business."
+description: "How custom software development works: project phases, real pricing ranges in 2026, timelines, and how to choose the right development partner for your."
 excerpt: "Custom software development costs between $15,000 and $200,000 depending on complexity, with delivery in 60 to 180 days. This guide shows every step and what to expect."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["custom-software", "software-development", "business-management-system", "bespoke-software", "smb-software"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/custom-software-development-local-guide"
 published: false
 seo_score: 86

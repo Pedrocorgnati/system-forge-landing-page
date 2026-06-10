@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["technical-consulting", "enterprise-software", "when-to-hire", "technology-management", "smb"]
-relatedService: "consultoria-tecnica"
+relatedService: technical-consulting
 canonical: "https://systemforgesoftware.com/blog/when-to-hire-software-technical-consulting"
 published: false
 seo_score: 86

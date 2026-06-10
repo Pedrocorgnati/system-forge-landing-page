@@ -1,7 +1,8 @@
 ---
+
 title: "Custom CRM vs Salesforce for Small Business: Which One Actually Wins?"
 slug: "custom-crm-vs-salesforce-small-business"
-description: "Custom CRM or Salesforce for your small business? We compare 3-year TCO, process fit, implementation time, data ownership, and a decision checklist to help you choose."
+description: "Custom CRM or Salesforce for your small business? We compare 3-year TCO, process fit, implementation time, data ownership, and a decision checklist to help."
 excerpt: "Salesforce is powerful — but for a small or mid-size business, 'powerful' often means 'expensive and over-engineered.' Here's how to make the honest call."
 date: "2026-05-21"
 dateModified: "2026-05-21"

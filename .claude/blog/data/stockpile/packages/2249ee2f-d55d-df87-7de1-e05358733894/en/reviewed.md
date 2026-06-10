@@ -1,14 +1,15 @@
 ---
+
 title: "Company System Down: Immediate Action Guide for Managers"
 slug: "company-system-down-urgent-technical-support"
-description: "Your company's system just went down? Follow this immediate action guide: who to call, what to do in the first 60 minutes, and how to prevent it from happening again."
+description: "Your company's system just went down? Follow this immediate action guide: who to call, what to do in the first 60 minutes, and how to prevent it from."
 excerpt: "System down at work: step-by-step plan for the first 60 minutes, restoring operations, and building resilience to prevent recurrence."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["technical-support", "system-down", "system-maintenance", "it-emergency"]
-relatedService: "systems-maintenance"
+relatedService: system-maintenance
 canonical: "https://systemforgesoftware.com/blog/company-system-down-urgent-technical-support"
 published: false
 seo_score: 83

@@ -1,14 +1,15 @@
 ---
+
 title: "How to Build a Digital Product MVP in Under 60 Days: Complete Guide for Founders"
 slug: "how-to-build-digital-product-mvp"
-description: "How to build a digital product MVP in under 60 days: scope definition, tech stack, real costs in US$, common pitfalls, and how to validate before heavy investment."
+description: "How to build a digital product MVP in under 60 days: scope definition, tech stack, real costs in US$, common pitfalls, and how to validate before heavy."
 excerpt: "A well-built digital product MVP in 60 days is achievable — if you cut the right scope, choose the right stack, and resist the urge to build everything at once."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["mvp", "digital-product", "startup", "software-development"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/how-to-build-digital-product-mvp"
 published: false
 seo_score: 87

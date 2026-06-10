@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["business-process-automation", "sme", "workflow-automation", "operations"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/business-process-automation-sme-guide"
 published: false
 seo_score: 86

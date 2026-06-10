@@ -1,14 +1,15 @@
 ---
+
 title: "How to Hire a Senior Developer: Complete Checklist and Guide for 2026"
 slug: "how-to-hire-senior-developer-checklist"
-description: "Complete guide to hiring a senior developer: where to find them, how to evaluate technical skills, market compensation in 2026, and how to avoid costly hiring mistakes."
+description: "Complete guide to hiring a senior developer: where to find them, how to evaluate technical skills, market compensation in 2026, and how to avoid costly."
 excerpt: "Hiring the wrong senior developer costs 3-5x their monthly compensation. This guide shows how to evaluate, where to find, and what to pay in 2026."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["senior-developer", "hire-developer", "tech-hiring", "software-outsourcing", "technical-consulting"]
-relatedService: "consultoria-tecnica"
+relatedService: technical-consulting
 canonical: "https://systemforgesoftware.com/blog/how-to-hire-senior-developer-checklist"
 published: false
 seo_score: 88

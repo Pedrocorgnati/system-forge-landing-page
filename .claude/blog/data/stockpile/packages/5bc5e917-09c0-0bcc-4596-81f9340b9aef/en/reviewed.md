@@ -1,14 +1,15 @@
 ---
+
 title: "AI for Service Businesses: Real Use Cases That Actually Work"
 slug: "ai-for-service-businesses-real-use-cases"
-description: "A practical guide to real AI use cases for service businesses: agencies, clinics, law firms, and consultancies. Realistic ROI, what to automate first, and how to start."
+description: "A practical guide to real AI use cases for service businesses: agencies, clinics, law firms, and consultancies. Realistic ROI, what to automate first, and."
 excerpt: "AI is no longer theory for service businesses — here is what genuinely works today."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["artificial intelligence", "business automation", "service businesses", "AI use cases"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/ai-for-service-businesses-real-use-cases"
 published: false
 seo_score: 87

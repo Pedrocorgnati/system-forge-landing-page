@@ -1,7 +1,8 @@
 ---
+
 title: "How to Move from Spreadsheets to a Real Management System: A Complete Guide"
 slug: "how-to-move-from-spreadsheets-to-management-system"
-description: "How to stop running your business on spreadsheets and move to a real management system: warning signs, hidden costs, migration steps, build vs buy, and how to pick the right solution."
+description: "How to stop running your business on spreadsheets and move to a real management system: warning signs, hidden costs, migration steps, build vs buy, and how."
 excerpt: "Getting this far on spreadsheets was an achievement. Staying there is what will cap your next stage of growth — here's the honest path out."
 date: "2026-05-21"
 dateModified: "2026-05-21"

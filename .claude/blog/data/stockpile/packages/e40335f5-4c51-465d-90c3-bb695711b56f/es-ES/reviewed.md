@@ -1,0 +1,227 @@
+---
+title: "Software para centros educativos en España: FP, universidades privadas y academias a medida (2026)"
+excerpt: "Guía honesta sobre software a medida para FP, universidades privadas y academias en España: módulos, costes reales, LOPDGDD de menores y cuándo gana el SaaS."
+description: "Guía honesta sobre software a medida para FP, universidades privadas y academias en España: módulos, costes reales, LOPDGDD de menores y cuándo gana el SaaS."
+slug: software-centros-educativos-fp-universidad-espana-medida
+locale: es-ES
+date: "2026-06-08"
+dateModified: "2026-06-08"
+canonical: "https://systemforge.es/blog/software-centros-educativos-fp-universidad-espana-medida"
+published: false
+tags: ["software educativo", "FP a medida", "ERP universidad"]
+relatedService: "sistemas-personalizados"
+stockpile_origin:
+  equivalence_id: e40335f5-4c51-465d-90c3-bb695711b56f
+  package_version: 1
+  generated_at: "2026-06-08"
+  promoted_at: null
+  promoted_in_commit: null
+---
+
+# Software para centros educativos en España: FP, universidades privadas y academias a medida (2026)
+
+El **software a medida para centros educativos en España** es un sistema ERP construido específicamente para gestionar matrícula, expedientes, asistencia, calificaciones y, en FP, el seguimiento de prácticas en empresa según la regulación del Ministerio de Educación. A diferencia de SaaS como Alexia, Educamos o Clickedu, no se paga por alumno y se adapta a procesos propios del centro. La inversión inicial va de €35.000 a €400.000 según el tipo de centro.
+
+En los proyectos que hemos construido para PYMEs y centros en España, el patrón se repite: una dirección que lleva años pagando un SaaS vertical, que ha contratado seis o siete customizaciones aparte y que sigue sin tener el módulo de FP Dual que necesita de verdad. Soy Pedro Corgnati, fundador de SystemForge, y este artículo es la conversación que tengo cada vez que un gerente de centro me pregunta si vale la pena salir del SaaS. La respuesta honesta es: a veces sí, a veces no. Aquí están los criterios.
+
+## Qué entendemos por software educativo a medida (y qué NO es)
+
+Conviene separar tres cosas que se confunden a diario. Un **ERP educativo** gestiona la operación administrativa y académica: matrícula, expedientes, asistencia, actas, tasas, comunicación con familias. Un **LMS** (Moodle, Canvas) gestiona el aprendizaje: cursos, contenidos, entregas, evaluación online. Y un **CRM educativo** gestiona la captación: leads, campañas de admisión, embudo de matriculación.
+
+El software a medida del que hablamos aquí es el ERP, el corazón administrativo. No sustituye a Moodle, se integra con él. La frontera es clara: si tu problema es entregar contenido y corregir, eso es LMS y rara vez compensa rehacerlo. Si tu problema es que el expediente del alumno, su asistencia, su FP Dual y sus tasas viven en cinco sitios distintos, ahí es donde un sistema a medida cambia la operación.
+
+Un sistema a medida típico cubre matrícula online con pasarela de pago, expediente académico digital, control de asistencia, calificaciones y actas, comunicación con familias, y los módulos específicos del tipo de centro: FP Dual en formación profesional, multi-titulación y acreditación en universidad privada.
+
+## El problema con los SaaS verticales (Alexia, Educamos, Clickedu, ESEMTIA)
+
+Estos productos funcionan, y para muchos centros son la respuesta correcta. El problema aparece cuando el centro deja de ser estándar. Las limitaciones reales que vemos una y otra vez:
+
+- **Coste por alumno que escala agresivamente.** El precio medio del SaaS educativo en España ronda los €18-€45 por alumno y año según módulos. Un centro de 600 alumnos puede acabar pagando €26.000 anuales sin haber pedido nada extraordinario.
+- **Customizaciones cobradas aparte.** Cada adaptación es un proyecto facturado por encima de la licencia, y el código resultante no es tuyo.
+- **Integraciones cerradas.** Conectar con la plataforma oficial de tu Comunidad Autónoma o con tu pasarela de pago concreta depende de que el proveedor lo priorice.
+- **Vendor lock-in en la exportación.** Cuando quieres irte, recuperar el histórico de expedientes en un formato usable suele ser doloroso.
+
+La cuota conjunta de Alexia, Educamos, ESEMTIA y Clickedu en colegios concertados se estima en torno al 74% del sector. Eso no es casualidad: cubren bien el caso general. El matiz es que tú no diriges el caso general, diriges tu centro.
+
+## Software a medida vs SaaS educativo: cuándo conviene cada uno
+
+La decisión no es ideológica. Se decide por tres ejes medibles: tamaño, especialización y presupuesto a cinco años.
+
+| Criterio | SaaS educativo gana | Software a medida gana |
+|---|---|---|
+| Coste inicial | Bajo (suscripción) | Alto (€35k-€400k) |
+| Coste por alumno | €18-€45/alumno/año | Cero tras el build |
+| Customización | Limitada y facturada | Total, código propio |
+| Integración CCAA | Según hoja de ruta del proveedor | Bajo tu control |
+| Propiedad de los datos | Del proveedor (exportación limitada) | Tuya |
+| Salida del sistema | Costosa, con fricción | Sin ataduras de licencia |
+
+Como regla práctica: por debajo de 150-200 alumnos, sin equipo IT y con operación estándar, el SaaS casi siempre gana. Por encima de 400 alumnos, con especialización fuerte (FP Dual, dual internacional, programas singulares) o requisitos no estándar, el a medida empieza a tener sentido financiero y operativo.
+
+## Módulos imprescindibles para FP en España
+
+La formación profesional es donde el SaaS genérico se queda más corto, porque la FP Dual tiene una operación que los productos pensados para colegios no modelan bien.
+
+- **Matrícula online con pasarela de pago** y validación de requisitos de acceso por ciclo.
+- **Expediente académico digital** con módulos, RA (resultados de aprendizaje) y convalidaciones.
+- **Control de asistencia** por código QR o, en centros que lo requieren, biometría.
+- **Módulo de FP Dual:** seguimiento de prácticas en empresa, cuaderno del alumno, tutor de empresa y tutor de centro, registro de horas y evaluación conjunta.
+- **Generación automatizada de memorias finales** y documentación del periodo en empresa.
+- **Integración con SEPE** para los contratos de formación cuando aplica.
+
+El cuaderno de FP Dual y el seguimiento de empresas es, en mi experiencia, el módulo que justifica por sí solo muchos proyectos a medida. Es exactamente lo que los SaaS verticales cobran como customización cara y rígida.
+
+## Módulos imprescindibles para universidades privadas
+
+Aquí la complejidad sube por la multi-titulación y la acreditación. Los bloques que no pueden faltar:
+
+- **Gestión académica multi-titulación:** grado, máster y posgrado conviviendo con planes distintos.
+- **Actas y calificaciones** con flujos de firma y cierre.
+- **TFG/TFM** con asignación de tribunal, defensa y registro.
+- **Gestión de investigación:** proyectos, publicaciones, sexenios.
+- **Acreditación ANECA:** repositorio de evidencias listo para los procesos de evaluación.
+- **Suplemento Europeo al Título (SET)** generado conforme a normativa.
+
+La integración con ANECA y la generación del SET suelen hacerse de forma semiautomática, porque el coste de automatizar al 100% rara vez compensa frente al volumen real de una universidad privada media.
+
+## Cumplimiento normativo: LOPDGDD escolar y datos de menores
+
+Este es el punto donde más proyectos educativos fallan, y donde un proveedor que entiende el nicho marca la diferencia. La Ley Orgánica 3/2018 (LOPDGDD) y el RGPD imponen obligaciones concretas:
+
+- **Consentimiento parental para menores de 14 años** (Art. 7 LOPDGDD). El sistema debe registrar quién consintió, cuándo y para qué.
+- **Datos sensibles de salud:** alergias, necesidades educativas especiales (NEE). Requieren tratamiento reforzado y acceso restringido por rol.
+- **Conservación de expedientes durante 5 años tras la baja**, con bloqueo y posterior supresión trazable.
+- **Imagen y redes sociales del centro:** gestión de consentimientos y derecho de supresión efectivo.
+- **DPO obligatorio** para centros con tratamiento a gran escala de datos de menores.
+
+No es un módulo opcional: es arquitectura. El control de acceso por rol, la trazabilidad y la política de retención tienen que estar diseñados desde el primer día, no parcheados después.
+
+## Integración con plataformas oficiales por Comunidad Autónoma
+
+Cada Comunidad Autónoma tiene su plataforma y su API: Séneca en Andalucía, IES Fácil en Castilla-La Mancha, Plumier en Murcia, Yedra en Cantabria, y así sucesivamente. El patrón es común aunque los detalles cambien: intercambio de datos académicos y administrativos en periodos concretos del curso.
+
+Lo importante que casi nadie te dice: **esta integración es trabajo recurrente, no una sola vez**. Cada curso hay ajustes, cambios de esquema y nuevas validaciones. Estimamos entre 80 y 160 horas de desarrollo al año por integración con la plataforma autonómica. Con un SaaS pagas esto vía customización; con un sistema a medida entra en el contrato de mantenimiento, con la ventaja de que el código es tuyo.
+
+## Cuánto cuesta desarrollar software educativo a medida en España
+
+Los rangos que manejamos, con la honestidad de que cada centro es distinto:
+
+| Tipo de centro | Inversión inicial | Mantenimiento anual |
+|---|---|---|
+| Academia regulada / FP de centro único | €35.000 - €80.000 | 20-25% del build |
+| Centro de FP con múltiples ramas | €80.000 - €180.000 | 20-25% del build |
+| Universidad privada multi-titulación | €180.000 - €400.000 | 20-25% del build |
+
+A esto se suma el **hosting con cumplimiento GDPR** (preferiblemente con datos en la UE), que es obligatorio por el tipo de dato tratado. El plazo medio para un centro de FP único ronda los 5-9 meses de desarrollo más 2 meses de estabilización.
+
+Estos números son indicativos: el alcance real lo fija un diagnóstico. Pero sirven para una conversación honesta sobre TCO.
+
+> **¿Pagas más de €25.000 al año de SaaS y has sumado varias customizaciones?** Habla con un experto por WhatsApp y proyectamos juntos tu TCO a 5 años, a medida frente a SaaS.
+
+## Caso real en España
+
+Un **centro de FP en Granada** con 640 alumnos y 8 ramas formativas llevaba tres cursos con un SaaS vertical. El detonante fue doble: el coste por alumno había escalado hasta unos €26.000 anuales y el módulo de FP Dual no cubría el seguimiento real de empresas que su volumen exigía.
+
+Construyeron un sistema a medida por unos €92.000 más €18.000 al año de mantenimiento, con el cuaderno de FP Dual y el seguimiento de prácticas como núcleo. El retorno se proyectó en torno a los 30 meses, contando el ahorro frente a la licencia y las customizaciones que ya estaban pagando aparte.
+
+En el otro extremo, una **academia de idiomas certificada Cambridge en Valencia** con 380 alumnos hizo lo contrario, y acertó: mantuvo su SaaS. Su caso de uso era estándar, el presupuesto estaba por debajo de €25.000 y no tenían equipo IT. Rehacerlo a medida habría sido quemar dinero. Esto es lo que ningún proveedor de SaaS ni ningún software house te dirá si solo busca venderte: el a medida no siempre gana.
+
+## Cómo migrar de Alexia/Educamos sin perder histórico ni romper el curso
+
+La migración es donde se concentra el miedo, y con razón. La regla es simple: **nunca se migra en plena operación**. La ventana es julio-agosto, entre cursos.
+
+El dataset crítico son los expedientes históricos, las calificaciones y las asistencias. El plan que aplicamos: funcionamiento en paralelo durante un mes, freeze de datos durante 15 días y corte limpio antes de la matrícula de septiembre. El riesgo mayor no son los datos, es la pasarela de pago de la matrícula de septiembre: si esa integración no está probada a tiempo, arruina el arranque. Por eso se prueba primero.
+
+## Cuándo NO tiene sentido el a medida (y por qué el SaaS es la respuesta correcta)
+
+Lo digo claro porque me ahorra y te ahorra disgustos. El software a medida es mala idea si:
+
+1. Tu centro tiene **menos de 150 alumnos** y operación estable.
+2. **No tienes equipo IT** ni un partner externo dedicado.
+3. Tu **presupuesto está por debajo de €30.000**.
+4. Tu operación es monolítica y **no necesitas personalización** real.
+
+Si te reconoces en tres de estos cuatro puntos, un buen SaaS vertical te va a servir mejor y más barato. Contratarme en ese escenario sería venderte algo que no necesitas.
+
+## Cómo lo resuelve SystemForge
+
+Nuestro enfoque no empieza por código, empieza por números. El primer paso es un **diagnóstico** en el que revisamos tu setup actual, contamos lo que pagas de verdad (licencia más customizaciones más horas internas) y proyectamos el TCO a 5 años en ambos escenarios. Si el SaaS gana, te lo decimos y ahí termina.
+
+Si el a medida tiene sentido, trabajamos por fases para que el riesgo sea controlable:
+
+1. **Fase de diagnóstico y alcance.** Mapeo de procesos, módulos imprescindibles, requisitos LOPDGDD e integración con tu plataforma autonómica.
+2. **Construcción del núcleo.** Matrícula, expedientes, asistencia y calificaciones primero. Es la columna vertebral.
+3. **Módulos específicos.** FP Dual con seguimiento de empresas, o multi-titulación y acreditación en universidad.
+4. **Integraciones.** Pasarela de pago, plataforma oficial de tu CCAA, LMS si lo usas.
+5. **Migración y estabilización.** En ventana julio-agosto, con plan paralelo, freeze y corte limpio.
+
+Sobre rangos indicativos: una academia regulada o FP de centro único entra normalmente en €35.000-€80.000; un centro de FP con varias ramas en €80.000-€180.000; una universidad privada multi-titulación entre €180.000 y €400.000. El mantenimiento posterior va del 20% al 25% anual del build inicial e incluye las horas recurrentes de integración con la CCAA y un SLA con respuesta crítica por debajo de 2 horas y RTO por debajo de 4. Funciona igual que un SaaS en cuanto a tranquilidad, sin la atadura de la licencia por alumno y con el código en tu propiedad.
+
+El plazo típico para un centro de FP único es de 5-9 meses más 2 de estabilización. Hosting en la UE, cumplimiento GDPR de serie, y el control de acceso por rol diseñado desde el primer commit porque tratamos datos de menores.
+
+> ¿Quieres saber si tu centro está en el lado del SaaS o en el del a medida? **Solicita un diagnóstico gratuito** y te damos una respuesta basada en tus números, no en un argumentario de ventas.
+
+## Comparativa de funcionalidades FP
+
+| Funcionalidad | Alexia | Educamos | Clickedu | ESEMTIA | A medida |
+|---|---|---|---|---|---|
+| Matrícula online | Sí | Sí | Sí | Sí | Sí, adaptada |
+| Expediente FP | Sí | Sí | Sí | Sí | Sí, a tu proceso |
+| FP Dual seguimiento empresas | Limitado | Limitado | Limitado | Limitado | Completo |
+| Integración CCAA | Según hoja de ruta | Según hoja de ruta | Según hoja de ruta | Según hoja de ruta | Bajo tu control |
+| Coste por alumno | Sí | Sí | Sí | Sí | No |
+| Propiedad del código | No | No | No | No | Sí |
+
+Es una matriz honesta: los SaaS cubren bien lo estándar. La diferencia se juega en FP Dual, integración y propiedad.
+
+## Costes a 5 años para un centro de 600 alumnos
+
+| Escenario | Cálculo | Total 5 años |
+|---|---|---|
+| SaaS | €26.000/año × 5 | €130.000, sin propiedad |
+| A medida | €92.000 build + €90.000 mantenimiento (5 años) | €182.000, con propiedad y cero coste por alumno futuro |
+
+A primera vista el SaaS sale más barato a 5 años. El matiz que cambia la decisión: a partir del año 6 el SaaS sigue cobrando por alumno y subiendo, mientras el sistema a medida solo mantiene su coste de mantenimiento. Y si tu número de alumnos crece, la brecha se invierte mucho antes.
+
+## Errores más comunes al contratar software educativo a medida
+
+1. **Ignorar la LOPDGDD de menores hasta el final.** El consentimiento parental y la retención de 5 años son arquitectura, no un parche posterior.
+2. **Subestimar la integración con la CCAA.** No es una sola vez: son 80-160 horas al año. Si no está en el contrato, llega como sorpresa.
+3. **Migrar fuera de la ventana julio-agosto.** Tocar el sistema en pleno curso es jugarse la matrícula de septiembre.
+4. **Comparar solo el coste inicial.** La decisión correcta se toma sobre el TCO a 5 años, no sobre la factura del primer mes.
+5. **Pedir a medida lo que un SaaS ya hace bien.** Si tu caso es estándar, pagar un desarrollo es quemar presupuesto.
+
+## Cuándo contratar vs hacerlo en interno
+
+Hazlo en interno solo si cumples criterios medibles: equipo de al menos 2-3 desarrolladores en plantilla, capacidad de cubrir un SLA crítico sin depender de una sola persona, y experiencia previa en cumplimiento de datos de menores. Si no, el coste de oportunidad y el riesgo de bus factor te van a salir más caros que externalizar.
+
+Contrata a un software house cuando necesitas el sistema en producción en menos de un año, cuando tu equipo IT da soporte pero no construye producto, o cuando la integración con la plataforma autonómica y la LOPDGDD exigen un conocimiento que no tienes en casa. La señal más clara: si tu gente IT apaga fuegos y no puede dedicar meses seguidos al desarrollo, externaliza el build y quédate con el mantenimiento compartido.
+
+## Conclusión
+
+El software a medida para centros educativos en España no es mejor que el SaaS por definición: es mejor cuando tu centro deja de ser estándar, tiene volumen y necesita FP Dual, integración propia o multi-titulación. Si eres pequeño, estándar y sin equipo IT, el SaaS sigue siendo la respuesta correcta y honesta.
+
+La forma de saberlo es mirar tus números, no escuchar un argumentario. **Pide un presupuesto sin compromiso** y proyectamos juntos qué te conviene de verdad.
+
+## Preguntas frecuentes
+
+**¿Cuánto cuesta desarrollar software a medida para un centro educativo en España?**
+Entre €35.000 y €80.000 para una academia o FP de centro único, €80.000-€180.000 para FP con varias ramas y €180.000-€400.000 para universidad privada multi-titulación. El mantenimiento anual ronda el 20-25% del build.
+
+**¿Cuánto tarda desde la firma hasta el go-live?**
+Para un centro de FP único, unos 5-9 meses de desarrollo más 2 meses de estabilización. El go-live se planifica en la ventana julio-agosto para no tocar el sistema en pleno curso.
+
+**¿Cumple la LOPDGDD y la protección de datos de menores?**
+Sí, si se diseña así desde el inicio: consentimiento parental para menores de 14 años, acceso por rol a datos de salud, retención de expedientes 5 años tras la baja y supresión trazable. No es un módulo, es arquitectura.
+
+**¿Se integra con la plataforma oficial de mi Comunidad Autónoma?**
+Sí. Séneca, IES Fácil, Plumier, Yedra y demás tienen API. Es trabajo recurrente cada curso (80-160 horas al año) y entra en el contrato de mantenimiento.
+
+**¿Puedo migrar los expedientes históricos desde Alexia o Educamos?**
+Sí. Se migran expedientes, calificaciones y asistencias en la ventana julio-agosto, con un mes en paralelo, freeze de 15 días y corte limpio antes de la matrícula de septiembre.
+
+**¿Quién mantiene el sistema una vez en producción?**
+Lo mantiene el software house con un SLA de respuesta crítica por debajo de 2 horas y RTO por debajo de 4. Funciona como un SaaS en tranquilidad, sin la atadura de la licencia por alumno.
+
+**¿Qué pasa con el seguimiento de FP Dual y el cuaderno de prácticas?**
+Es uno de los módulos que más justifica el a medida: seguimiento de empresas, cuaderno del alumno, tutor de centro y de empresa, registro de horas y evaluación conjunta, con memorias finales generadas automáticamente.

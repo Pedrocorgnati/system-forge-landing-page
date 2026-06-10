@@ -1,30 +1,18 @@
 ---
-title: "Dashboard por Nicho: KPIs Essenciais Todo Dia"
 description: "Dashboard atualiza em tempo real os KPIs do seu negócio — sem planilha, sem esperar relatório mensal. Veja os indicadores por nicho e quanto custa implementar."
 slug: "dashboard-por-nicho-indicadores-gestor-2026"
 date: "2026-05-13"
 dateModified: "2026-05-13"
-locale: "pt-BR"
 author: "Pedro Corgnati"
 tags: ["dashboard", "kpis", "sistema-por-nicho", "pme-brasil", "business-intelligence"]
 relatedService: "sistema-personalizado"
 canonical: "https://forjadesistemas.com.br/blog/dashboard-por-nicho-indicadores-gestor-2026"
 exclusive: true
 hreflang_pair: []
-draft: true
-approved: true
-seo_score: 9
-conversion_score: 9
-authority_score: 9
-uniqueness_score: 9
 localization_score: 9
 featured_snippet_score: 9
-average_score: 9.0
 codex_session_id: "019e1fd7-b555-7270-b4e1-eb5f3269ddb0"
 codex_adversarial_findings: 0
-codex_block: false
-reviewed_at: "2026-05-13"
-word_count: 1560
 wave: 1
 published: false
 stockpile_origin:
@@ -33,6 +21,20 @@ stockpile_origin:
   generated_at: "2026-05-13T12:00:00Z"
   promoted_at: null
   promoted_in_commit: null
+draft: false
+approved: true
+seo_score: 10
+conversion_score: 10
+authority_score: 8
+uniqueness_score: 8
+average_score: 9
+word_count: 1101
+codex_block: false
+reviewed_at: "2026-06-09T16:16:22Z"
+equivalence_id: "c3d26dea-268a-4e87-8c5d-a2bf297f709b"
+locale: "pt-BR"
+brief: "dashboard-por-nicho-indicadores-gestor-2026"
+title: "Dashboard por Nicho: KPIs Essenciais Todo Dia"
 ---
 
 # Dashboard por Nicho: os Indicadores Que Todo Gestor Precisa Ver Todo Dia

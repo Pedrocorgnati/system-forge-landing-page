@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["systems integration", "ERP integration cost", "management systems integration", "API integration business"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/how-much-does-it-cost-to-integrate-management-systems"
 published: false
 seo_score: 86

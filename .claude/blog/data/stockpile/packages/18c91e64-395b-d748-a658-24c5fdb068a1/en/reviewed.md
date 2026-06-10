@@ -1,14 +1,15 @@
 ---
+
 title: "Real Estate Agency System with Property Catalog: Features and Costs"
 slug: "real-estate-agency-system-features-costs"
-description: "Discover the essential features of a real estate agency management system, how much it costs to build one, and when custom development beats off-the-shelf software."
+description: "Discover the essential features of a real estate agency management system, how much it costs to build one, and when custom development beats off-the-shelf."
 excerpt: "A custom real estate system centralizes property catalog, client CRM, and contracts in one platform — see essential features and real cost ranges."
 date: "2026-05-21"
 dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["real estate agency system", "property catalog software", "real estate CRM", "property management system", "custom real estate software"]
-relatedService: "sistemas-personalizados"
+relatedService: custom-systems
 canonical: "https://systemforgesoftware.com/blog/real-estate-agency-system-features-costs"
 published: false
 seo_score: 85

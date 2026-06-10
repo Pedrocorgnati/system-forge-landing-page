@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["process-automation", "artificial-intelligence", "ai-business", "business-automation", "smb"]
-relatedService: "automacao-empresarial"
+relatedService: business-automation
 canonical: "https://systemforgesoftware.com/blog/business-process-automation-artificial-intelligence"
 published: false
 seo_score: 87

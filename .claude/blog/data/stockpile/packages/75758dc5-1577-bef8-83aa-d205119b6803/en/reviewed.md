@@ -1,7 +1,8 @@
 ---
+
 title: "Medical Clinic Management System: Requirements and Costs in 2026"
 slug: "medical-clinic-management-system-requirements-costs"
-description: "What are the requirements for a medical clinic management system and how much does it cost? 2026 pricing table, mandatory features, and how to choose the right vendor."
+description: "What are the requirements for a medical clinic management system and how much does it cost? 2026 pricing table, mandatory features, and how to choose the."
 excerpt: "Medical clinic software guide: technical and legal requirements, 2026 cost comparison, and vendor selection checklist for clinics of any size."
 date: "2026-05-21"
 dateModified: "2026-05-21"

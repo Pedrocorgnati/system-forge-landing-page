@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["mobile app development", "app development company", "hire app developer", "mobile application", "local development"]
-relatedService: "aplicativos-mobile"
+relatedService: mobile-apps
 canonical: "https://systemforgesoftware.com/blog/mobile-app-development-company-your-city"
 published: false
 seo_score: 85

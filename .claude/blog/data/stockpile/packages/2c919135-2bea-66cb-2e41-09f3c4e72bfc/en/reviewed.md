@@ -8,7 +8,7 @@ dateModified: "2026-05-21"
 locale: "en"
 author: "Pedro Corgnati"
 tags: ["institutional website", "hire web agency", "web development", "how to choose software company"]
-relatedService: "desenvolvimento-web"
+relatedService: web-development
 canonical: "https://systemforgesoftware.com/blog/how-to-hire-company-create-institutional-website"
 published: false
 seo_score: 84
