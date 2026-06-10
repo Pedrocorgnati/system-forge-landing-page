@@ -2,6 +2,37 @@ import { ServiceCategory, TechTag, ProjectStatus, DeliveryCountry } from './type
 import type { Service, PortfolioProject, Testimonial, ServiceFilterGroup } from './types'
 import { loadServicesContent, loadPortfolioDescriptions } from '@config/content'
 
+// Métricas agregadas verificáveis do hero pt-BR (Fase A do plano conversion-machine).
+// Sem logos e sem depoimentos textuais — esses entram em Sprint 2 mediante autorização.
+export type ConversionHeroMetric = {
+  value: string
+  label: string
+  description: string
+}
+
+export const conversionHeroMetrics: ConversionHeroMetric[] = [
+  {
+    value: '50+',
+    label: 'Projetos entregues',
+    description: 'Sistemas em produção desde 2019, do MVP ao ERP nichado.',
+  },
+  {
+    value: '6 sem.',
+    label: 'Prazo médio de entrega',
+    description: 'Tempo típico do briefing ao deploy do primeiro módulo crítico.',
+  },
+  {
+    value: '82%',
+    label: 'Taxa de renovação',
+    description: 'Clientes que mantêm contrato após o primeiro ciclo de entrega.',
+  },
+  {
+    value: '5 anos',
+    label: 'De operação',
+    description: 'Software house focada em B2B desde 2019.',
+  },
+]
+
 // ── Non-translatable service base config ──────────────────────────────────────
 // contentId maps to the id in content/{locale}/pages/services.json
 const SERVICE_BASE: {
@@ -100,7 +131,7 @@ export const testimonials: Testimonial[] = [
     author: 'Mariana Costa',
     role: 'CEO',
     company: 'ClinicaPro Saúde Digital',
-    avatarUrl: '/images/testimonials/mariana-costa.png',
+    avatarUrl: '/images/testimonials/mariana-costa.webp',
   },
   {
     id: '2',
@@ -108,7 +139,7 @@ export const testimonials: Testimonial[] = [
     author: 'Rafael Oliveira',
     role: 'Founder',
     company: 'Arte & Ofício Marketplace',
-    avatarUrl: '/images/testimonials/rafael-oliveira.png',
+    avatarUrl: '/images/testimonials/rafael-oliveira.webp',
   },
   {
     id: '3',
@@ -116,7 +147,7 @@ export const testimonials: Testimonial[] = [
     author: 'Lucia Ferrari',
     role: 'Direttrice Operativa',
     company: 'FreelancerHub Italia',
-    avatarUrl: '/images/testimonials/lucia-ferrari.png',
+    avatarUrl: '/images/testimonials/lucia-ferrari.webp',
   },
   {
     id: '4',
@@ -124,7 +155,7 @@ export const testimonials: Testimonial[] = [
     author: 'Carlos Mendes',
     role: 'Diretor de TI',
     company: 'LogiView Transportes',
-    avatarUrl: '/images/testimonials/carlos-mendes.png',
+    avatarUrl: '/images/testimonials/carlos-mendes.webp',
   },
   {
     id: '5',
@@ -132,7 +163,7 @@ export const testimonials: Testimonial[] = [
     author: 'Ana Paula Lima',
     role: 'Proprietária',
     company: 'Vitrine Chic Moda',
-    avatarUrl: '/images/testimonials/ana-paula-lima.png',
+    avatarUrl: '/images/testimonials/ana-paula-lima.webp',
   },
   {
     id: '6',
@@ -140,6 +171,6 @@ export const testimonials: Testimonial[] = [
     author: 'Thiago Souza',
     role: 'CTO',
     company: 'SyncBridge Integrações',
-    avatarUrl: '/images/testimonials/thiago-souza.png',
+    avatarUrl: '/images/testimonials/thiago-souza.webp',
   },
 ]

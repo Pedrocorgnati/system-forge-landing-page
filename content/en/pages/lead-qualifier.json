@@ -1,0 +1,127 @@
+{
+  "section": {
+    "ariaLabel": "Form to request the project scope",
+    "eyebrow": "Get scoped proposal",
+    "headline": "Get a clear scope in 24 hours",
+    "subheadline": "Two quick steps. No phone calls, no vague fields. We come back on the channel you prefer with executable scope, timeline and budget."
+  },
+  "steps": {
+    "indicator": "Step {current} of {total}",
+    "passo1": {
+      "title": "Who you are",
+      "description": "Three fields to answer with the same seriousness as your request."
+    },
+    "passo2": {
+      "title": "About the project",
+      "description": "The more specific you are, the faster we close scope and budget."
+    }
+  },
+  "fields": {
+    "fullName": {
+      "label": "Full name",
+      "placeholder": "How we should call you",
+      "autocomplete": "name"
+    },
+    "email": {
+      "label": "Work email",
+      "placeholder": "you@company.com",
+      "autocomplete": "email",
+      "hint": "We use it to send scope and budget."
+    },
+    "company": {
+      "label": "Company",
+      "placeholder": "Legal name or brand",
+      "autocomplete": "organization"
+    },
+    "softwareType": {
+      "label": "Software type",
+      "placeholder": "Select project type",
+      "options": [
+        { "value": "sob-medida", "label": "Custom software" },
+        { "value": "erp-nichado", "label": "Vertical ERP" },
+        { "value": "automacao-ia", "label": "AI automation" },
+        { "value": "outro", "label": "Other" }
+      ]
+    },
+    "urgency": {
+      "label": "Urgency",
+      "options": [
+        { "value": "1-mes", "label": "Next 1 month" },
+        { "value": "3-meses", "label": "Next 3 months" },
+        { "value": "6-mais-meses", "label": "6 months or more" },
+        { "value": "explorando", "label": "Just exploring" }
+      ]
+    },
+    "budget": {
+      "label": "Investment range",
+      "options": [
+        { "value": "ate-50k", "label": "Up to USD 10k" },
+        { "value": "50-150k", "label": "USD 10k to 30k" },
+        { "value": "150-300k", "label": "USD 30k to 60k" },
+        { "value": "300k-mais", "label": "USD 60k or more" }
+      ]
+    },
+    "channel": {
+      "label": "Preferred response channel",
+      "options": [
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "email", "label": "Email" },
+        { "value": "call", "label": "Scheduled call" }
+      ]
+    },
+    "lgpdConsent": {
+      "label": "I authorize contact based on the data above, as described in the Privacy Policy.",
+      "policyLinkLabel": "Privacy Policy",
+      "policyHref": "/privacy-policy"
+    }
+  },
+  "actions": {
+    "next": "Continue to step 2",
+    "back": "Back to step 1",
+    "submit": "Get a scoped proposal in 24h",
+    "submitting": "Sending request...",
+    "submitAgain": "Send another request"
+  },
+  "errors": {
+    "fullName": {
+      "min": "Enter your full name (minimum 2 characters).",
+      "max": "Name too long (maximum 120 characters)."
+    },
+    "email": {
+      "format": "Enter a valid work email.",
+      "max": "Email too long (maximum 254 characters)."
+    },
+    "company": {
+      "required": "Enter the company name.",
+      "max": "Company name too long (maximum 160 characters)."
+    },
+    "softwareType": {
+      "required": "Select the software type."
+    },
+    "urgency": {
+      "required": "Select the project urgency."
+    },
+    "budget": {
+      "required": "Select the investment range."
+    },
+    "channel": {
+      "required": "Select the preferred response channel."
+    },
+    "lgpdConsent": {
+      "required": "We need your consent to get in touch."
+    },
+    "submit": {
+      "generic": "Could not send right now. Please try again in a moment.",
+      "network": "No connection to the server. Check your internet and try again."
+    }
+  },
+  "states": {
+    "empty": "Fill in the current step fields to continue.",
+    "loading": "Validating information...",
+    "success": {
+      "title": "Request received.",
+      "description": "We will come back within 24 hours on the chosen channel with the executable project scope.",
+      "next": "Next step: you will get an email confirming the channel and time of the response."
+    }
+  }
+}

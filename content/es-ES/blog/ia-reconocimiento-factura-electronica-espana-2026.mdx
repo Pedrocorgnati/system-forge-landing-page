@@ -30,7 +30,7 @@ schema_types: ["Article", "BlogPosting"]
 
 # IA para Reconocimiento de Facturas Electronicas en Espana 2026: OCR, Parsing y Casacion Automatica
 
-Procesar manualmente las facturas que llegan a una PYME espanola consume entre 4 y 8 minutos por factura, con un margen de error humano del 5-12% y una proporcion media de 200 a 2.000 facturas mes en empresas de 50-300 empleados. Aplicar IA al pipeline de facturas recibidas, no las emitidas que cubre Verifactu, reduce ese tiempo a 15-40 segundos por factura con precision del 95-98% en campos clave. Coste por factura procesada: entre 0,005 y 0,030 euros usando Claude 4.7 Haiku o GPT-5-mini en 2026. La inversion para implantar el modulo va de 6.000 a 18.000 euros segun el stack que ya tengas.
+Procesar manualmente las facturas que llegan a una PYME espanola consume entre 4 y 8 minutos por factura, con un margen de error humano del 5-12% y una proporcion media de 200 a 2.000 facturas mes en empresas de 50-300 empleados. Aplicar IA al pipeline de facturas recibidas, no las emitidas que cubre Verifactu, reduce ese tiempo a 15-40 segundos por factura con precision del 95-98% en campos clave. Coste por factura procesada: entre 0,005 y 0,030 euros usando Claude 4.7 Sonnet o GPT-5-mini en 2026. La inversion para implantar el modulo va de 6.000 a 18.000 euros segun el stack que ya tengas.
 
 *Por Pedro Corgnati, consultor brasileno full-stack que ha implementado modulos OCR + LLM en gestorias espanolas y departamentos financieros de PYMES desde 2024. Esta guia tiene los numeros reales, sin promesas de marketing.*
 
@@ -90,7 +90,7 @@ Pipeline completo de extremo a extremo:
 
 - **Ingesta**: IMAP via `imap-flow` (Node) o `imapclient` (Python). WhatsApp Business API con webhook cuando proveedor manda foto. Drag-drop en panel web Next.js.
 - **OCR**: Tesseract para volumen bajo y presupuesto cero. AWS Textract a 0,001-0,015 euros por pagina cuando volumen sube. Azure Document Intelligence con modelo prebuilt-invoice optimizado para facturas.
-- **LLM**: Claude 4.7 Haiku via Anthropic API region Frankfurt (cumple RGPD UE). GPT-5-mini via Azure OpenAI region UE. Mistral Large si quieres soberania europea estricta.
+- **LLM**: Claude 4.7 Sonnet via Anthropic API region Frankfurt (cumple RGPD UE). GPT-5-mini via Azure OpenAI region UE. Mistral Large si quieres soberania europea estricta.
 - **Schema validation**: Zod en TypeScript, Pydantic en Python. Define el JSON esperado con campos obligatorios y tipos. El LLM puede equivocarse pero el schema lo atrapa.
 - **Vector DB para RAG opcional**: pgvector sobre Postgres si manejas catalogo proveedores (el LLM consulta historico para mejorar matching). Mas detalle en [bases de datos vectoriales guia devs IA](/blog/bases-de-datos-vectoriales-guia-devs-ia).
 
@@ -98,13 +98,13 @@ Pipeline completo de extremo a extremo:
 
 | Modelo | Coste por factura simple | Precision PDF estructurado | Latencia |
 |--------|---------------------------|-----------------------------|----------|
-| Claude 4.7 Haiku | 0,005-0,015 EUR | 96-98% | 1-3s |
+| Claude 4.7 Sonnet | 0,005-0,015 EUR | 96-98% | 1-3s |
 | GPT-5 mini | 0,008-0,020 EUR | 95-97% | 1-3s |
 | Gemini 2.5 Flash | 0,003-0,010 EUR | 93-96% | 1-2s |
 | Mistral Large | 0,012-0,025 EUR | 94-97% | 2-4s |
 | Claude 4.7 Sonnet (overkill) | 0,030-0,080 EUR | 97-99% | 2-5s |
 
-Recomendacion: Claude 4.7 Haiku para volumen alto, GPT-5-mini si tu stack ya tiene Azure. Reservar Sonnet o GPT-5 full para casos limite que la cola de revision marca como dudosos.
+Recomendacion: Claude 4.7 Sonnet para volumen alto, GPT-5-mini si tu stack ya tiene Azure. Reservar Sonnet o GPT-5 full para casos limite que la cola de revision marca como dudosos.
 
 ## Casacion automatica con tu ERP
 

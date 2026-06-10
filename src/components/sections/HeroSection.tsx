@@ -112,18 +112,26 @@ export function HeroSection() {
             </p>
           </div>
 
-          {/* Right column — hero illustration */}
+          {/* Right column — hero illustration. Container reserva aspect-ratio
+              square e width maxima para travar CLS antes do <img> carregar.
+              sizes informa ao browser a largura efetiva do recurso por viewport,
+              cortando bandwidth desperdiçada em mobile. priority + fetchPriority
+              high mantem o LCP candidate do hero direito sob 2.5s. */}
           <div className="hidden lg:flex items-center justify-center hero-enter-scale hero-delay-300">
-            <Image
-              src="/hero-illustration.png"
-              alt={locale === 'it-IT' ? 'Illustrazione SystemForge — software su misura'
-                : locale === 'en' ? 'SystemForge illustration — custom software'
-                : 'Ilustração SystemForge — software sob medida'}
-              width={1024}
-              height={1024}
-              className="w-full max-w-[480px] h-auto"
-              priority
-            />
+            <div className="w-full max-w-[480px] aspect-square">
+              <Image
+                src="/hero-illustration.webp"
+                alt={locale === 'it-IT' ? 'Illustrazione SystemForge - software su misura'
+                  : locale === 'en' ? 'SystemForge illustration - custom software'
+                  : 'Ilustração SystemForge - software sob medida'}
+                width={1254}
+                height={1254}
+                sizes="(min-width: 1024px) 480px, 0px"
+                className="w-full h-auto"
+                priority
+                fetchPriority="high"
+              />
+            </div>
           </div>
         </div>
 

@@ -1158,3 +1158,23 @@ body {
   .testimonial-reveal { opacity: 1; animation: none; }
   .star-animate { animation: none; opacity: 1; }
 }
+
+/* ============================================
+   PERFORMANCE - Fase E (task-008-fase-e-performance-home)
+   ============================================
+   content-visibility:auto delega ao browser pular layout/paint
+   de sections fora do viewport ate proximidade do scroll. Reduz
+   TBT/INP no first paint sem quebrar SSR/SEO (vs dynamic ssr:false
+   que tira do bundle inicial mas perde indexacao).
+   contain-intrinsic-size reserva 800px vertical antes do paint,
+   eliminando o CLS que content-visibility:auto causaria sozinho.
+   Aplicado APENAS em secoes confirmadamente below-the-fold da home.
+   Blog (/blog, /blog/[slug]) NAO recebe (escopo proibido task-008). */
+.perf-below-fold {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Sem mudanca de animacao aqui; perf-below-fold nao envolve animacao. */
+}

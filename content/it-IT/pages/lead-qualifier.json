@@ -1,0 +1,127 @@
+{
+  "section": {
+    "ariaLabel": "Modulo per richiedere il perimetro del progetto",
+    "eyebrow": "Richiedi un preventivo",
+    "headline": "Ricevi un perimetro chiaro in 24 ore",
+    "subheadline": "Due passaggi rapidi. Senza telefono, senza campi vaghi. Torniamo sul canale che preferisci con perimetro eseguibile, tempistiche e budget."
+  },
+  "steps": {
+    "indicator": "Passo {current} di {total}",
+    "passo1": {
+      "title": "Chi sei",
+      "description": "Tre campi da compilare con la stessa serieta della tua richiesta."
+    },
+    "passo2": {
+      "title": "Sul progetto",
+      "description": "Piu sei specifico, piu rapidamente chiudiamo perimetro e budget."
+    }
+  },
+  "fields": {
+    "fullName": {
+      "label": "Nome completo",
+      "placeholder": "Come dobbiamo chiamarti",
+      "autocomplete": "name"
+    },
+    "email": {
+      "label": "Email aziendale",
+      "placeholder": "tu@azienda.com",
+      "autocomplete": "email",
+      "hint": "Lo usiamo per inviare perimetro e budget."
+    },
+    "company": {
+      "label": "Azienda",
+      "placeholder": "Ragione sociale o brand",
+      "autocomplete": "organization"
+    },
+    "softwareType": {
+      "label": "Tipo di software",
+      "placeholder": "Seleziona il tipo di progetto",
+      "options": [
+        { "value": "sob-medida", "label": "Software su misura" },
+        { "value": "erp-nichado", "label": "ERP verticale" },
+        { "value": "automacao-ia", "label": "Automazione con IA" },
+        { "value": "outro", "label": "Altro" }
+      ]
+    },
+    "urgency": {
+      "label": "Urgenza",
+      "options": [
+        { "value": "1-mes", "label": "Prossimo 1 mese" },
+        { "value": "3-meses", "label": "Prossimi 3 mesi" },
+        { "value": "6-mais-meses", "label": "6 mesi o piu" },
+        { "value": "explorando", "label": "Sto esplorando" }
+      ]
+    },
+    "budget": {
+      "label": "Fascia di investimento",
+      "options": [
+        { "value": "ate-50k", "label": "Fino a 10.000 EUR" },
+        { "value": "50-150k", "label": "10.000 a 30.000 EUR" },
+        { "value": "150-300k", "label": "30.000 a 60.000 EUR" },
+        { "value": "300k-mais", "label": "60.000 EUR o piu" }
+      ]
+    },
+    "channel": {
+      "label": "Canale preferito di ritorno",
+      "options": [
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "email", "label": "Email" },
+        { "value": "call", "label": "Call programmata" }
+      ]
+    },
+    "lgpdConsent": {
+      "label": "Acconsento al trattamento dei dati personali in base al GDPR (Reg. UE 2016/679), come descritto nell'Informativa sulla Privacy.",
+      "policyLinkLabel": "Informativa sulla Privacy",
+      "policyHref": "/informativa-privacy"
+    }
+  },
+  "actions": {
+    "next": "Vai al passo 2",
+    "back": "Torna al passo 1",
+    "submit": "Richiedi un preventivo in 24h",
+    "submitting": "Invio richiesta in corso...",
+    "submitAgain": "Invia un'altra richiesta"
+  },
+  "errors": {
+    "fullName": {
+      "min": "Inserisci il tuo nome completo (minimo 2 caratteri).",
+      "max": "Nome troppo lungo (massimo 120 caratteri)."
+    },
+    "email": {
+      "format": "Inserisci un'email aziendale valida.",
+      "max": "Email troppo lunga (massimo 254 caratteri)."
+    },
+    "company": {
+      "required": "Inserisci il nome dell'azienda.",
+      "max": "Nome dell'azienda troppo lungo (massimo 160 caratteri)."
+    },
+    "softwareType": {
+      "required": "Seleziona il tipo di software."
+    },
+    "urgency": {
+      "required": "Seleziona l'urgenza del progetto."
+    },
+    "budget": {
+      "required": "Seleziona la fascia di investimento."
+    },
+    "channel": {
+      "required": "Seleziona il canale preferito di ritorno."
+    },
+    "lgpdConsent": {
+      "required": "Abbiamo bisogno del tuo consenso per contattarti."
+    },
+    "submit": {
+      "generic": "Non e stato possibile inviare ora. Riprova tra un istante.",
+      "network": "Nessuna connessione al server. Verifica la tua rete e riprova."
+    }
+  },
+  "states": {
+    "empty": "Compila i campi del passo corrente per continuare.",
+    "loading": "Validazione delle informazioni in corso...",
+    "success": {
+      "title": "Richiesta ricevuta.",
+      "description": "Torneremo entro 24 ore sul canale scelto con il perimetro eseguibile del progetto.",
+      "next": "Prossimo passo: riceverai un'email con conferma del canale e dell'orario di ritorno."
+    }
+  }
+}

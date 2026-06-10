@@ -87,7 +87,7 @@ O LLM é o vilão da fatura. Quatro técnicas que cortam de 30% a 70% do custo:
 
 1. **Caching de prompt (Anthropic).** Claude permite cachear contexto de até 200k tokens. Para chatbot com system prompt longo (5k tokens), o cache reduz o custo de input em 90%. Implementação: 5 linhas no SDK usando `providerOptions: { anthropic: { cacheControl: { type: 'ephemeral' } } }`.
 
-2. **Modelos mais baratos para tarefas simples.** GPT-4o mini custa US$ 0,15/1M tokens de input. Claude Haiku 3.5 custa US$ 0,80/1M. Para classificação, extração e respostas curtas, mini/haiku entregam 95% da qualidade do modelo grande por 5% do preço.
+2. **Modelos mais baratos para tarefas simples.** GPT-4o mini custa US$ 0,15/1M tokens de input. Claude Sonnet 3.5 custa US$ 0,80/1M. Para classificação, extração e respostas curtas, mini/sonnet entregam 95% da qualidade do modelo grande por 5% do preço.
 
 3. **Limite duro de tokens por usuário.** No middleware, contabilize tokens por sessão e bloqueie acima do orçamento. Sem isso, um usuário malicioso ou um bug pode queimar R$ 5k em uma noite.
 
@@ -132,7 +132,7 @@ Quando o projeto exige testes A/B para otimizar a UX do assistente, o guia de [t
 ## Erros mais comuns (e como evitar)
 
 1. **Não monitorar tokens em produção.** Solução: usar AI Gateway ou Langfuse desde o dia 1 para ver consumo por usuário e por endpoint. Sem visibilidade, você só descobre o problema na fatura.
-2. **Usar modelo grande para tudo.** Solução: roteamento por complexidade da tarefa. Classificação, parsing e resposta curta vão para mini/haiku; raciocínio complexo, geração longa ou multi-step vai para sonnet/4o.
+2. **Usar modelo grande para tudo.** Solução: roteamento por complexidade da tarefa. Classificação, parsing e resposta curta vão para mini/sonnet; raciocínio complexo, geração longa ou multi-step vai para sonnet/4o.
 3. **Esquecer o cap de custo.** Solução: limite por usuário/sessão no middleware Next.js + alerta de orçamento na conta OpenAI/Anthropic.
 4. **Streaming via API route quando podia ser Edge.** Solução: para LLM, sempre `runtime = 'edge'` na route handler. Latência cai pela metade e custo de função fica menor.
 5. **Não cachear system prompt.** Solução: Claude com prompt caching ou OpenAI com automatic prompt caching. Em chatbot com system prompt grande, economia de 50% a 90% no input.

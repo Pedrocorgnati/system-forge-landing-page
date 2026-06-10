@@ -45,13 +45,13 @@ PYME, gestoría o asesoría buscando aplicar IA al cuello de botella de facturas
 - Ingesta (email IMAP, drag&drop, WhatsApp Business API)
 - Pre-clasificación (es factura? duplicada?)
 - OCR si imagen
-- LLM (Claude 4.7 Haiku o GPT-5-mini) extrae JSON estructurado
+- LLM (Claude 4.7 Sonnet o GPT-5-mini) extrae JSON estructurado
 - Validación contra esquema (Zod/Pydantic)
 - Casación con base de proveedores existentes
 - Cola de revisión humana si confianza < umbral
 
 #### H3: Comparativa LLM por coste y precisión
-- Tabla: Claude 4.7 Haiku, GPT-5-mini, Gemini 2.5 Flash, Mistral Large
+- Tabla: Claude 4.7 Sonnet, GPT-5-mini, Gemini 2.5 Flash, Mistral Large
 - Métricas: precisión, latencia, coste por factura
 
 ### H2: Casación automática con tu ERP

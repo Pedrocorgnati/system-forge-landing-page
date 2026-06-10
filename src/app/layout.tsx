@@ -10,6 +10,7 @@ import { LanguageSuggestionBanner } from '@/components/ui/LanguageSuggestionBann
 import { DevOverlayLoader } from '@/components/dev/DevOverlayLoader'
 import { CookieBanner } from '@/components/ui/CookieBanner'
 import { Analytics } from '@/components/analytics/Analytics'
+import { AnalyticsProvider } from '@/components/providers/AnalyticsProvider'
 import { getSiteConfig, LOCALE_URLS, SUPPORTED_LOCALES } from '@config'
 import { loadMessages } from '@config/content'
 import { WebVitalsReporter } from '@/components/performance/WebVitalsReporter'
@@ -131,7 +132,7 @@ export default function RootLayout({
           <LanguageSuggestionBanner />
           <Header />
           <main id="main-content" data-testid="main-content" className="flex-1">
-            {children}
+            <AnalyticsProvider>{children}</AnalyticsProvider>
           </main>
           <Footer />
           <DevOverlayLoader />

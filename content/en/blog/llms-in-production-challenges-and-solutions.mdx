@@ -52,7 +52,7 @@ async function streamResponse(prompt: string) {
 Beyond streaming, consider these strategies to reduce latency:
 
 - **Shorter prompts:** every token in the prompt is processed by the model. Remove unnecessary context.
-- **Smaller models for simple tasks:** GPT-4o mini or Claude Haiku are 5-10x faster for classification, triage, and short summaries.
+- **Smaller models for simple tasks:** GPT-4o mini or Claude Sonnet are 5-10x faster for classification, triage, and short summaries.
 - **Prompt cache prefill:** OpenAI and Anthropic offer prompt caching. If the first tokens of your system prompt are always the same, you pay less and get faster responses.
 - **Parallel requests:** for pipelines that allow parallelism, fire multiple simultaneous requests instead of sequential ones.
 
@@ -64,7 +64,7 @@ The first lever is **model selection by task**. Not every task needs GPT-4o. A w
 
 | Task | Recommended Model | Relative Cost |
 |--------|-------------------|---------------|
-| Intent classification | GPT-4o mini / Haiku | 1x |
+| Intent classification | GPT-4o mini / Sonnet | 1x |
 | Document summarization | GPT-4o mini | 1x |
 | Final response generation | GPT-4o / Claude Sonnet | 10-20x |
 | Legal / medical analysis | Claude Opus / GPT-4o | 30-50x |

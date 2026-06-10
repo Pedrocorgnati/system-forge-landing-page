@@ -184,7 +184,7 @@ export function TestimonialsSection() {
               id="testimonial-panel"
               key={active}
               data-testid="testimonial-card-active"
-              className="testimonial-active-card relative flex flex-col gap-6 p-8 md:p-10 rounded-2xl border border-border bg-card overflow-hidden"
+              className="testimonial-active-card relative flex flex-col gap-6 p-8 md:p-10 rounded-2xl border border-border bg-card overflow-hidden min-h-[320px] md:min-h-[280px]"
               role="tabpanel"
               aria-label={`${messages.sections.testimonials.eyebrow} — ${current.author}`}
               aria-live="polite"

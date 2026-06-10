@@ -39,13 +39,13 @@ Landing page multi-mercado do **SystemForge / Forja de Sistemas** — um site Ne
 ## Infraestrutura Cloudflare já provisionada
 
 ### Cloudflare Workers (3 workers live + 1 pendente)
-Workers deployados e respondendo em `murta-pedro.workers.dev`:
+Workers deployados e respondendo em `corgnati-pedro.workers.dev`:
 
 | Worker | URL | Locale | Compliance |
 |--------|-----|--------|-----------|
-| newsletter-br | `https://newsletter-br.murta-pedro.workers.dev` | pt-BR | LGPD (single opt-in) |
-| newsletter-it | `https://newsletter-it.murta-pedro.workers.dev` | it-IT | GDPR (double opt-in) |
-| newsletter-en | `https://newsletter-en.murta-pedro.workers.dev` | en | CAN-SPAM (single opt-in) |
+| newsletter-br | `https://newsletter-br.corgnati-pedro.workers.dev` | pt-BR | LGPD (single opt-in) |
+| newsletter-it | `https://newsletter-it.corgnati-pedro.workers.dev` | it-IT | GDPR (double opt-in) |
+| newsletter-en | `https://newsletter-en.corgnati-pedro.workers.dev` | en | CAN-SPAM (single opt-in) |
 | newsletter-es | **PENDENTE** — criar em `workers/worker-es/` | es-ES | GDPR (double opt-in, como IT) |
 
 Endpoints disponíveis em cada worker: `GET /health`, `POST /subscribe`, `POST /unsubscribe`
@@ -302,7 +302,7 @@ Configure em: Repositório → Settings → Secrets and variables → Actions �
 | `NEXT_PUBLIC_GA4_MEASUREMENT_ID` | ID do GA4 | `G-XXXXXXXXXX` (do GA4 Dashboard) |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Número WhatsApp para CTAs | `+5541XXXXXXXXX` |
 | `NEXT_PUBLIC_CONTACT_EMAIL` | Email de contato público | `contato@forjadesistemas.com.br` |
-| `NEXT_PUBLIC_CALENDLY_URL` | URL do Calendly para agendamento | `https://calendly.com/pedro-murta/...` |
+| `NEXT_PUBLIC_CALENDLY_URL` | URL do Calendly para agendamento | `https://calendly.com/pedro-corgnati/...` |
 | `NEXT_PUBLIC_BUDGET_ENGINE_URL` | URL do Budget Engine (se configurado) | `https://...forjadesistemas.com.br` |
 
 ## Cloudflare Worker Secrets

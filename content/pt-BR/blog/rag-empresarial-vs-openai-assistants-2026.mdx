@@ -47,7 +47,7 @@ A linha mais importante para empresa brasileira: LGPD. Se seus documentos têm d
 Cenários onde levo cliente para RAG sem hesitar:
 
 - **Dados sensíveis ou regulados.** Jurídico, saúde, financeiro, M&A, RH. Você precisa controlar onde os dados ficam e quem acessa.
-- **Volume alto e previsível.** Acima de 50k consultas/mês, RAG custom otimizado bate Assistants em custo de operação. Cache de embeddings, modelos mistos (Haiku para retrieval, Sonnet para resposta) e batching fazem diferença.
+- **Volume alto e previsível.** Acima de 50k consultas/mês, RAG custom otimizado bate Assistants em custo de operação. Cache de embeddings, modelos mistos (Sonnet para retrieval, Sonnet para resposta) e batching fazem diferença.
 - **Necessidade de fontes específicas.** Quando a resposta precisa citar documento, página e parágrafo. RAG entrega isso porque você controla a metadata.
 - **Pipeline híbrido com agentes.** Em 2026, a tendência é RAG + agente que age. O agente busca, raciocina, chama tools, consulta o ERP. Assistants tem function calling, mas a arquitetura agentic robusta exige controle granular.
 

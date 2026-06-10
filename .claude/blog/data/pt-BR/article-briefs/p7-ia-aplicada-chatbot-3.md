@@ -65,7 +65,7 @@ generator: /blog:generate-briefs
 10. FAQ: prazo, suporte, treinar IA com base própria, custo de mensagem
 
 ### H3s sugeridos:
-- Custo mensal de LLM em 2026 (OpenAI gpt-4.1, Claude Haiku, Gemini Flash)
+- Custo mensal de LLM em 2026 (OpenAI gpt-4.1, Claude Sonnet, Gemini Flash)
 - WhatsApp Business API: tarifa por conversa em R$
 - Handoff humano: por que toda empresa séria precisa
 

@@ -26,14 +26,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-// Async config: runs Velite before Next.js compilation.
-// In production, prebuild script already ran `velite build` — skip to avoid
-// Turbopack multi-eval race condition with clean:true that empties .velite.
-// In dev, watch=true enables HMR-like content reloading.
-// INT-045: NEXT_PUBLIC_LOCALE must be set before this runs.
+// Module-scoped cache so Turbopack multi-eval reuses the same Velite build promise
+// instead of racing parallel `clean: true` invocations that empty .velite mid-build.
+let veliteBuildPromise: Promise<unknown> | undefined;
+
 export default async function config(): Promise<NextConfig> {
   if (process.env.NODE_ENV === 'development') {
-    await build({ watch: true });
+    if (!veliteBuildPromise) {
+      veliteBuildPromise = build({ watch: true, clean: false });
+    }
+    await veliteBuildPromise;
   }
   return withAnalyzer(nextConfig);
 }

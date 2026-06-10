@@ -1,0 +1,127 @@
+{
+  "section": {
+    "ariaLabel": "Formulário para solicitar escopo do projeto",
+    "eyebrow": "Solicitar escopo",
+    "headline": "Receba um escopo claro em até 24 horas",
+    "subheadline": "Dois passos rápidos. Sem telefone, sem campos vagos. Voltamos no canal que você preferir com escopo executável, prazo e orçamento."
+  },
+  "steps": {
+    "indicator": "Passo {current} de {total}",
+    "passo1": {
+      "title": "Quem é você",
+      "description": "Três campos para responder com a mesma seriedade do seu pedido."
+    },
+    "passo2": {
+      "title": "Sobre o projeto",
+      "description": "Quanto mais específico, mais rápido fechamos escopo e orçamento."
+    }
+  },
+  "fields": {
+    "fullName": {
+      "label": "Nome completo",
+      "placeholder": "Como devemos te chamar",
+      "autocomplete": "name"
+    },
+    "email": {
+      "label": "E-mail corporativo",
+      "placeholder": "voce@empresa.com",
+      "autocomplete": "email",
+      "hint": "Usamos para enviar o escopo e o orçamento."
+    },
+    "company": {
+      "label": "Empresa",
+      "placeholder": "Razão social ou marca",
+      "autocomplete": "organization"
+    },
+    "softwareType": {
+      "label": "Tipo de software",
+      "placeholder": "Selecione o tipo de projeto",
+      "options": [
+        { "value": "sob-medida", "label": "Software sob medida" },
+        { "value": "erp-nichado", "label": "ERP nichado" },
+        { "value": "automacao-ia", "label": "Automação com IA" },
+        { "value": "outro", "label": "Outro" }
+      ]
+    },
+    "urgency": {
+      "label": "Urgência",
+      "options": [
+        { "value": "1-mes", "label": "Próximo 1 mês" },
+        { "value": "3-meses", "label": "Próximos 3 meses" },
+        { "value": "6-mais-meses", "label": "6 meses ou mais" },
+        { "value": "explorando", "label": "Estou explorando" }
+      ]
+    },
+    "budget": {
+      "label": "Faixa de investimento",
+      "options": [
+        { "value": "ate-50k", "label": "Até R$ 50 mil" },
+        { "value": "50-150k", "label": "R$ 50 mil a R$ 150 mil" },
+        { "value": "150-300k", "label": "R$ 150 mil a R$ 300 mil" },
+        { "value": "300k-mais", "label": "R$ 300 mil ou mais" }
+      ]
+    },
+    "channel": {
+      "label": "Canal preferido de retorno",
+      "options": [
+        { "value": "whatsapp", "label": "WhatsApp" },
+        { "value": "email", "label": "E-mail" },
+        { "value": "call", "label": "Call agendada" }
+      ]
+    },
+    "lgpdConsent": {
+      "label": "Autorizo o contato com base nos dados acima, conforme a Política de Privacidade.",
+      "policyLinkLabel": "Política de Privacidade",
+      "policyHref": "/politica-de-privacidade"
+    }
+  },
+  "actions": {
+    "next": "Avançar para passo 2",
+    "back": "Voltar ao passo 1",
+    "submit": "Solicitar escopo em 24h",
+    "submitting": "Enviando solicitação...",
+    "submitAgain": "Enviar outro pedido"
+  },
+  "errors": {
+    "fullName": {
+      "min": "Informe seu nome completo (mínimo 2 caracteres).",
+      "max": "Nome muito longo (máximo 120 caracteres)."
+    },
+    "email": {
+      "format": "Informe um e-mail corporativo válido.",
+      "max": "E-mail muito longo (máximo 254 caracteres)."
+    },
+    "company": {
+      "required": "Informe o nome da empresa.",
+      "max": "Nome da empresa muito longo (máximo 160 caracteres)."
+    },
+    "softwareType": {
+      "required": "Selecione o tipo de software."
+    },
+    "urgency": {
+      "required": "Selecione a urgência do projeto."
+    },
+    "budget": {
+      "required": "Selecione a faixa de investimento."
+    },
+    "channel": {
+      "required": "Selecione o canal preferido de retorno."
+    },
+    "lgpdConsent": {
+      "required": "Precisamos do seu consentimento para entrar em contato."
+    },
+    "submit": {
+      "generic": "Não foi possível enviar agora. Tente novamente em instantes.",
+      "network": "Sem conexão com o servidor. Verifique sua internet e tente novamente."
+    }
+  },
+  "states": {
+    "empty": "Preencha os campos do passo atual para continuar.",
+    "loading": "Validando informações...",
+    "success": {
+      "title": "Solicitação recebida.",
+      "description": "Vamos voltar em até 24 horas no canal escolhido com o escopo executável do projeto.",
+      "next": "Próximo passo: você receberá um e-mail confirmando o canal e o horário do retorno."
+    }
+  }
+}

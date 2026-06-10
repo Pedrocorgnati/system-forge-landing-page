@@ -7,6 +7,12 @@ import { generatePageMetadata } from '@/lib/seo'
 import type { Metadata } from 'next'
 import { getRelatedArticles } from '@/lib/cross-links'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
+
+const VALID_SERVICE_CATEGORIES: ReadonlySet<string> = new Set(Object.values(ServiceCategory))
+
+function normalizeServiceCategory(value: string | undefined): ServiceCategory | undefined {
+  return value && VALID_SERVICE_CATEGORIES.has(value) ? (value as ServiceCategory) : undefined
+}
 import { SITE } from '@/lib/constants'
 import { getSiteConfig } from '@config'
 
@@ -93,12 +99,13 @@ export default async function BlogPostPage({ params }: PageProps) {
     tags: a.tags,
     coverImage: a.coverImage,
     author: a.author,
-    relatedService: a.relatedService as ServiceCategory | undefined,
+    relatedService: normalizeServiceCategory(a.relatedService),
     readingTime: a.readingTime,
   }))
 
-  const relatedArticles = article.relatedService
-    ? getRelatedArticles(article.relatedService as ServiceCategory, allArticlesFrontmatter)
+  const normalizedRelatedService = normalizeServiceCategory(article.relatedService)
+  const relatedArticles = normalizedRelatedService
+    ? getRelatedArticles(normalizedRelatedService, allArticlesFrontmatter)
       .filter(a => a.slug !== article.slug)
     : []
 
@@ -122,7 +129,10 @@ export default async function BlogPostPage({ params }: PageProps) {
         }}
         siteConfig={siteConfig}
       />
-      <ArticlePage article={article} relatedArticles={relatedArticles} />
+      <ArticlePage
+        article={{ ...article, relatedService: normalizedRelatedService }}
+        relatedArticles={relatedArticles}
+      />
     </>
   )
 }

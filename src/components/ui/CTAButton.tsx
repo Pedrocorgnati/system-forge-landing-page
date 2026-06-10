@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { logger } from '@/lib/logger'
 import { trackEvent } from '@/lib/analytics'
 import { GA4_EVENTS } from '@/lib/constants/analytics'
+import { capture as posthogCapture } from '@/lib/tracking/posthog'
 
 interface CTAButtonProps {
   config: CTAConfig
@@ -26,6 +27,18 @@ export function CTAButton({ config, size = 'md', variant, className, fullWidth }
 
     // GA4 tracking
     trackEvent(GA4_EVENTS.CTA_CLICKED, {
+      action: resolvedConfig.action,
+      label: resolvedConfig.label,
+    })
+
+    const posthogEvent =
+      resolvedConfig.action === ConversionAction.WHATSAPP
+        ? 'whatsapp_click'
+        : resolvedConfig.variant === 'primary'
+          ? 'cta_primary_click'
+          : 'cta_secondary_click'
+    posthogCapture(posthogEvent, {
+      source: 'cta_button',
       action: resolvedConfig.action,
       label: resolvedConfig.label,
     })

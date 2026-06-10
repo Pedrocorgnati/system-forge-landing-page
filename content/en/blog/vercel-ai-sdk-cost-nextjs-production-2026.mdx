@@ -43,7 +43,7 @@ The AI SDK itself is free. You pay the model provider per token:
 | GPT-4o mini | $0.15 | $0.60 | Best cost/quality for most apps |
 | GPT-4o | $2.50 | $10.00 | Premium, use sparingly |
 | Claude Sonnet 4.6 | $3.00 | $15.00 | Better for long-context tasks |
-| Claude Haiku 4.5 | $0.80 | $4.00 | Fast, cheap, good for classification |
+| Claude Sonnet 4.5 | $0.80 | $4.00 | Fast, cheap, good for classification |
 | Gemini 2.0 Flash | $0.10 | $0.40 | Cheapest option, competitive quality |
 
 **Real monthly cost at 1,000 calls/day (30 days) — avg 500 tokens/call:**
@@ -52,7 +52,7 @@ The AI SDK itself is free. You pay the model provider per token:
 |-------|------------------------|
 | GPT-4o mini | $13–$20 |
 | Gemini 2.0 Flash | $5–$8 |
-| Claude Haiku 4.5 | $18–$30 |
+| Claude Sonnet 4.5 | $18–$30 |
 | GPT-4o | $115–$175 |
 | Claude Sonnet 4.6 | $140–$210 |
 
@@ -92,10 +92,10 @@ This is the "boring" AI app — boring is good. Zero surprises, reliable, ROI ob
 
 ### Example 2: Customer-facing sales assistant (1,500 calls/day)
 
-Stack: Next.js + Vercel AI SDK + Claude Haiku 4.5 + product catalog RAG
+Stack: Next.js + Vercel AI SDK + Claude Sonnet 4.5 + product catalog RAG
 
 Monthly cost breakdown:
-- LLM (Claude Haiku 4.5): $40–$60
+- LLM (Claude Sonnet 4.5): $40–$60
 - Vercel Pro: $20
 - Vector database (Pinecone starter): $0
 - **Total: ~$70/month**

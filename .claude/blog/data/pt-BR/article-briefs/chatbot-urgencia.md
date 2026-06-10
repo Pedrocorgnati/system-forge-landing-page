@@ -43,7 +43,7 @@
 
 ## Conteudo Obrigatorio
 - **Resposta nos primeiros 100 palavras:** Sim, da pra ter chatbot rodando em 48-72h. Chatbot de fluxo (botoes e respostas pre-definidas) sobe em 24h por R$ 1.500-5.000 mais R$ 200-600/mes de plataforma. Chatbot com IA (GPT, Claude) precisa de 3-7 dias por R$ 4.000-25.000 mais R$ 300-2.000/mes incluindo API. Para urgencia real, comece com fluxo cobrindo 80% e adicione IA na segunda onda. Quem promete IA conversacional perfeita em 24h ta vendendo fluxo com nome de IA.
-- **Dados reais:** Fluxo: R$ 1.500-5.000 montagem + R$ 200-600/mes plataforma; IA: R$ 4.000-25.000 montagem + R$ 300-2.000/mes (Claude Haiku custa cerca de R$ 5/mil tokens entrada em 2026); WhatsApp Business API: aprovacao 24-72h via parceiro Meta, R$ 0,005-0,10 por mensagem dependendo do tipo
+- **Dados reais:** Fluxo: R$ 1.500-5.000 montagem + R$ 200-600/mes plataforma; IA: R$ 4.000-25.000 montagem + R$ 300-2.000/mes (Claude Sonnet custa cerca de R$ 5/mil tokens entrada em 2026); WhatsApp Business API: aprovacao 24-72h via parceiro Meta, R$ 0,005-0,10 por mensagem dependendo do tipo
 - **Exemplos concretos:** Clinica de Sao Paulo automatizando agendamento em 48h, e-commerce de Florianopolis lidando com pos-venda viralizado, escola de idiomas em Goiania liberando matricula em 72h
 - **Comparacoes:** Fluxo vs IA, Botconversa vs Take Blip vs Z-API, Claude vs GPT vs Gemini para atendimento BR, widget vs WhatsApp vs Instagram DM
 - **FAQ:**

@@ -13,9 +13,9 @@ export const brConfig: SiteConfig = {
   siteName: 'Forja de Sistemas',
   domain: 'forjadesistemas.com.br',
   url: BR_URL,
-  tagline: 'Software sob medida para transformar negócios',
+  tagline: 'Software sob medida para PME e scale-up B2B — escopo em 24 horas',
   description:
-    'Desenvolvemos software sob medida: SaaS, apps mobile, landing pages, e-commerce, dashboards e automações com IA. Time especializado, entrega em semanas.',
+    'Software sob medida, ERP nichado e automação com IA para PME e scale-up B2B. Escopo executável em 24 horas, entrega típica em 6 semanas, sem fidelidade.',
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contato@forjadesistemas.com.br',
   // Per-locale: NEXT_PUBLIC_WHATSAPP_NUMBER (sem sufixo) era compartilhado entre
@@ -41,9 +41,9 @@ export const brConfig: SiteConfig = {
     { label: 'Contato', href: '/#contato' },
   ],
   seo: {
-    title: 'Forja de Sistemas | Desenvolvimento de Software sob Medida',
+    title: 'Forja de Sistemas | Software sob medida para PME e scale-up B2B',
     description:
-      'Desenvolvemos software sob medida: SaaS, apps mobile, landing pages, e-commerce, dashboards e automações com IA.',
+      'Software sob medida, ERP nichado e automação com IA para PME e scale-up B2B. Escopo executável em 24 horas, entrega típica em 6 semanas, sem fidelidade.',
     titleTemplate: '%s | Forja de Sistemas',
     ogImage: '/og/og-br.png',
   },

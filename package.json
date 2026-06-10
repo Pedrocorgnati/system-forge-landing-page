@@ -57,7 +57,8 @@
     "test:load:i18n:smoke": "k6 run --env SCENARIO=smoke tests/load/run-all-i18n.js",
     "test:load:i18n": "k6 run tests/load/run-all-i18n.js",
     "test:load:i18n:it": "k6 run --env MARKET=it tests/load/run-all-i18n.js",
-    "test:load:i18n:en": "k6 run --env MARKET=en tests/load/run-all-i18n.js"
+    "test:load:i18n:en": "k6 run --env MARKET=en tests/load/run-all-i18n.js",
+    "validate:stockpile": "tsx src/lib/blog/validate-stockpile.ts"
   },
   "dependencies": {
     "class-variance-authority": "^0.7.1",

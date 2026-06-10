@@ -147,7 +147,7 @@ For an SMB with moderate volume, RAG operating cost rarely exceeds $300/month.
 - Standardize formats (convert old PDFs, clean noisy documents)
 
 **Week 2–3: Tech stack selection**
-- LLM: OpenAI GPT-4o Mini (cost-efficiency), Claude Haiku (very fast), Gemini Flash (cheapest)
+- LLM: OpenAI GPT-4o Mini (cost-efficiency), Claude Sonnet (very fast), Gemini Flash (cheapest)
 - Embedding: OpenAI text-embedding-3-small or local model (Nomic)
 - Vector store: pgvector (if already using PostgreSQL), Pinecone (managed), Chroma (local)
 - Framework: LangChain, LlamaIndex, or custom implementation
@@ -184,7 +184,7 @@ For technical implementation support for a RAG system for your company, our team
 | Component | Option | Best For | Cost |
 |---|---|---|---|
 | LLM | GPT-4o Mini | Best cost-quality balance | $0.15/1M tokens |
-| LLM | Claude Haiku | Fastest response | $0.25/1M tokens |
+| LLM | Claude Sonnet | Fastest response | $0.25/1M tokens |
 | LLM | Llama 3.1 (local) | Data privacy | Hardware cost |
 | Vector DB | pgvector | Already using Postgres | Free (hosting cost) |
 | Vector DB | Pinecone | Managed, easy scaling | Free tier + $70/month+ |

@@ -81,7 +81,7 @@ Servidor Next.js (Route Handlers) o FastAPI Python recibe el webhook de Meta/BSP
 El LLM debe soportar tool calling robusto. Recomendaciones 2026:
 
 - **Claude 4.7 Sonnet**: el mejor en tool use complejo, ideal para agentes con 8-15 herramientas.
-- **Claude 4.7 Haiku**: 5x mas barato, suficiente para 80% casos.
+- **Claude 4.7 Sonnet**: 5x mas barato, suficiente para 80% casos.
 - **GPT-5**: paridad funcional con Claude, mejor en algunos benchmarks de razonamiento.
 - **Gemini 2.5 Pro**: aceptable, contexto largo (1M tokens) util para conversaciones muy largas.
 
@@ -127,7 +127,7 @@ Si el agente debe responder con conocimiento propio (catalogo, documentacion tec
 |----------|-------|
 | Setup proyecto (6-10 semanas) | 15.000-45.000 EUR |
 | Hosting (Vercel + Railway + Postgres + Redis + vector DB) | 120-650 EUR/mes |
-| LLM API (Claude 4.7 Haiku con cache de prompt) | 0,01-0,08 EUR por conversacion |
+| LLM API (Claude 4.7 Sonnet con cache de prompt) | 0,01-0,08 EUR por conversacion |
 | BSP fee (360dialog o similar) | 0,03-0,08 EUR por conversacion |
 | Mantenimiento evolutivo | 12-18% inversion inicial/ano |
 | **Acumulado 24 meses (volumen 5K convs/mes)** | **22.000-55.000 EUR** |
@@ -149,7 +149,7 @@ Basado en lo que esta funcionando en proyectos en produccion ahora:
 - **ORM**: Drizzle (TS) o SQLAlchemy (Py)
 - **Database**: PostgreSQL 16 con pgvector
 - **Cache**: Redis Cloud o Upstash
-- **LLM**: Anthropic Claude 4.7 Haiku (con prompt caching activado, ahorro 80-90% tokens system prompt repetido)
+- **LLM**: Anthropic Claude 4.7 Sonnet (con prompt caching activado, ahorro 80-90% tokens system prompt repetido)
 - **Vector**: pgvector si menos 1M docs, Qdrant managed si mas
 - **Observabilidad**: Langfuse self-hosted o Helicone
 - **BSP**: 360dialog para mercado europeo
