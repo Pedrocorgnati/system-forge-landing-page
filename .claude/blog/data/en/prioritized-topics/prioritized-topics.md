@@ -1,109 +1,75 @@
-# Prioritized Topics — EN Locale
-**Generated:** 2026-04-05
-**Total clusters evaluated:** 50 (from topic-clusters.json)
-**Scoring formula:** `commercial_intent*0.25 + ranking_ease*0.20 + proximity_to_hire*0.20 + lead_capacity*0.15 + interlinking_value*0.10 + niche_coverage*0.10`
+# Priorizacao Editorial — Blog SystemForge (en)
 
----
+## Locale
+- Locale: en
+- Mercado: Brasil
+- Idioma: Portugues Brasileiro
 
-## Wave 1 — Score 70+ (21 clusters)
-*Produce in weeks 1-2. Pillars and highest-intent commercial content first.*
+## Resumo por Onda
+| Onda | Clusters | Score Medio | Foco |
+|------|----------|-------------|------|
+| 1 | 3 | 75.0 | Comercial/urgencia |
+| 2 | 12 | 67.0 | Nichos/dores |
+| 3 | 33 | 52.0 | Autoridade |
+| 4 | 0 | 0 | Cobertura |
+| 5 | 0 | 0 | Programatico/local |
 
-| Rank | Score | Slug | Pillar | Intent | Funnel |
-|------|-------|------|--------|--------|--------|
-| 1 | 92 | custom-software-development-cost | cost-comparison | commercial | middle |
-| 2 | 91 | hire-custom-software-development-company | hiring-guide | transactional | bottom |
-| 3 | 89 | mvp-development-startups | project-types | commercial | middle-bottom |
-| 4 | 88 | saas-product-development-guide | project-types | commercial | middle-bottom |
-| 5 | 87 | business-process-automation-custom-software | automation | commercial | middle-bottom |
-| 6 | 86 | custom-software-vs-off-the-shelf | comparisons | commercial | middle |
-| 7 | 85 | llm-ai-integration-business-software | ai-applied | commercial | middle-bottom |
-| 8 | 84 | hipaa-compliant-software-development | niche-industry | commercial | bottom |
-| 9 | 83 | custom-web-app-development | project-types | commercial | bottom |
-| 10 | 82 | ai-automation-business-processes | ai-applied | commercial | middle-bottom |
-| 11 | 82 | software-project-rescue | hiring-guide | urgency | bottom |
-| 12 | 81 | hire-software-developer-fast | hiring-guide | urgency | bottom |
-| 13 | 80 | no-code-vs-custom-development | comparisons | commercial | middle |
-| 14 | 79 | fractional-cto-services-startups | hiring-guide | commercial | bottom |
-| 15 | 78 | how-to-get-software-built-for-business | hiring-guide | informational | top |
-| 16 | 78 | custom-mobile-app-development | project-types | commercial | bottom |
-| 17 | 77 | custom-software-development-new-york | niche-industry | local | bottom |
-| 18 | 76 | custom-software-development-san-francisco | niche-industry | local | bottom |
-| 19 | 75 | custom-software-development-austin-texas | niche-industry | local | bottom |
-| 20 | 74 | freelancer-vs-software-development-agency | comparisons | commercial | middle |
-| 21 | 73 | custom-ecommerce-vs-shopify | project-types | commercial | middle-bottom |
+## Onda 1 — Ataque Imediato
+| # | Cluster | Score | Tipo | CTA |
+|---|---------|-------|------|-----|
+| 1 | p1-custos-investimento-custom-systems-2 | 75.0 | preco | whatsapp |
+| 2 | p1-custos-investimento-custom-systems-3 | 75.0 | preco | whatsapp |
+| 3 | p1-custos-investimento-custom-systems-4 | 75.0 | preco | whatsapp |
 
----
+## Onda 2 — Expansao Comercial
+| # | Cluster | Score | Tipo | CTA |
+|---|---------|-------|------|-----|
+| 1 | p1-custos-investimento-custom-systems-5 | 73.0 | preco | whatsapp |
+| 2 | p1-custos-investimento-diversos-2 | 70.0 | preco | whatsapp |
+| 3 | p1-custos-investimento-custom-systems-6 | 68.5 | comparacao | whatsapp |
+| 4 | p1-custos-investimento-diversos | 68.5 | comparacao | whatsapp |
+| 5 | p2-tipos-projeto-produto-apps-mobile-6 | 68.5 | comparacao | whatsapp |
+| 6 | p2-tipos-projeto-produto-automation-business-6 | 68.5 | comparacao | whatsapp |
+| 7 | p2-tipos-projeto-produto-consulting-technical-6 | 68.5 | comparacao | whatsapp |
+| 8 | p2-tipos-projeto-produto-development-web-6 | 68.5 | comparacao | whatsapp |
+| 9 | p2-tipos-projeto-produto-maintenance-system-6 | 68.5 | comparacao | whatsapp |
+| 10 | p5-nichos-segmentos-hotel-pousada | 62.0 | pilar | whatsapp |
+| 11 | p5-nichos-segmentos-coworking | 60.0 | nicho | whatsapp |
+| 12 | p5-nichos-segmentos-startup | 60.0 | nicho | whatsapp |
 
-## Wave 2 — Score 50-69 (27 clusters)
-*Produce in weeks 3-4. Supporting content, niche verticals, and additional comparisons.*
-
-| Rank | Score | Slug | Pillar | Intent | Funnel |
-|------|-------|------|--------|--------|--------|
-| 22 | 71 | legacy-software-modernization | tech-stack | commercial | bottom |
-| 23 | 70 | custom-internal-tools-operations | automation | commercial | bottom |
-| 24 | 69 | how-to-start-software-project | hiring-guide | informational | middle |
-| 25 | 68 | marketplace-app-development | project-types | commercial | bottom |
-| 26 | 67 | custom-crm-vs-salesforce | project-types | commercial | bottom |
-| 27 | 66 | fintech-software-development | niche-industry | commercial | bottom |
-| 28 | 65 | software-security-compliance-guide | tech-stack | commercial | bottom |
-| 29 | 64 | real-estate-software-development | niche-industry | commercial | bottom |
-| 30 | 63 | custom-analytics-dashboard-development | project-types | commercial | bottom |
-| 31 | 62 | us-vs-offshore-software-development | comparisons | commercial | middle |
-| 32 | 61 | fixed-price-vs-time-materials-software | hiring-guide | informational | middle |
-| 33 | 60 | custom-api-development-integration | tech-stack | commercial | bottom |
-| 34 | 59 | custom-ai-chatbot-development | ai-applied | commercial | bottom |
-| 35 | 58 | custom-erp-vs-sap-small-business | project-types | commercial | bottom |
-| 36 | 57 | software-maintenance-support-costs | tech-stack | commercial | bottom |
-| 37 | 56 | nextjs-react-angular-comparison-startups | tech-stack | commercial | middle |
-| 38 | 55 | supabase-vs-firebase-startups | tech-stack | commercial | middle |
-| 39 | 54 | payment-integration-subscription-billing | automation | commercial | bottom |
-| 40 | 53 | digital-transformation-small-business-guide | product-management | informational | top |
-| 41 | 52 | staff-augmentation-dedicated-development-team | hiring-guide | commercial | bottom |
-| 42 | 51 | custom-lms-elearning-platform-development | niche-industry | commercial | bottom |
-| 43 | 50 | rag-machine-learning-business-development | ai-applied | commercial | bottom |
-| 44 | 50 | microservices-vs-monolith-startup-architecture | tech-stack | commercial | middle |
-| 45 | 49 | field-service-management-software | automation | commercial | bottom |
-| 46 | 48 | ai-tools-sales-hr-marketing | ai-applied | commercial | bottom |
-| 47 | 47 | custom-software-development-timeline | product-management | informational | middle |
-| 48 | 46 | replace-saas-tools-custom-software | cost-comparison | commercial | bottom |
-| 49 | 45 | legal-tech-software-development | niche-industry | commercial | bottom |
-| 50 | 44 | custom-scheduling-booking-software | automation | commercial | bottom |
-| 51 | 42 | enterprise-custom-software-development | project-types | commercial | bottom |
-| 52–61 | 33-41 | *Local city pages + niche verticals* | niche-industry | local | bottom |
-
----
-
-## Wave 3 — Score <50 (additional clusters)
-*Produce in weeks 5+. Long-tail, lower-volume, or heavily competed content.*
-
-| Rank | Score | Slug | Notes |
-|------|-------|------|-------|
-| 62 | 43 | python-nodejs-backend-development | Technical, high competition |
-| 63 | 32 | custom-hr-software-development | Strong SaaS alternatives |
-| 64 | 30 | saas-product-market-fit-guide | TOFU, long cycle |
-| 65 | 29 | progressive-web-app-vs-native-app | Saturated SERP |
-| 66 | 28 | data-pipeline-analytics-platform-development | Very niche |
-| 67 | 27 | white-label-saas-development | Small ICP |
-| 68–78 | <27 | *Specialty niches + programmatic multi-city* | Lower ROI |
-
----
-
-## Scoring Criteria Applied
-
-| Factor | Weight | Max Value Assigned To |
-|--------|--------|----------------------|
-| commercial_intent | 25% | Transactional (100), Urgency (90), Commercial (85), Local (70), Informational (40) |
-| ranking_ease | 20% | Wave-1 pillar (80), Wave-1 non-pillar (70), Wave-2 (60), Wave-3 (45) |
-| proximity_to_hire | 20% | Bottom funnel (100), Middle-bottom (80), Middle (60), Top (30) |
-| lead_capacity | 15% | All clusters rated high (100) per ICP definition |
-| interlinking_value | 10% | Is_pillar=true (90), Multi-kw non-pillar (70), Local/niche (50) |
-| niche_coverage | 10% | Niche/local (90), General (60) |
-
----
-
-## Production Notes
-
-- **Produce pillars first:** Clusters marked `is_pillar: true` (ranks 1, 4, 5, 6, 7) must be published before their supporting cluster articles.
-- **Urgency clusters (ranks 11-12):** Short format, strong CTA from paragraph one. WhatsApp CTA preferred.
-- **Local pages (ranks 17-19, 57-61):** Use consistent template with local market data. Cross-link all to cost article (rank 1).
-- **Existing article overlaps:** Ranks 16, 21, 26, 34, 35, 39, 43, 68 have partial coverage in existing blog. Angle differentiation is mandatory — check `deduplicated-topics.json` for details.
+## Onda 3 — Autoridade
+| # | Cluster | Score | Tipo | CTA |
+|---|---------|-------|------|-----|
+| 1 | p5-nichos-segmentos-coworking-2 | 58.0 | nicho | diagnostico |
+| 2 | p5-nichos-segmentos-hotel-pousada-2 | 58.0 | nicho | diagnostico |
+| 3 | p5-nichos-segmentos-startup-2 | 58.0 | nicho | diagnostico |
+| 4 | p6-tecnologia-stack-diversos-1 | 55.0 | pilar | diagnostico |
+| 5 | p2-tipos-projeto-produto-apps-mobile-2 | 53.0 | guia-completo | diagnostico |
+| 6 | p2-tipos-projeto-produto-apps-mobile-3 | 53.0 | guia-completo | diagnostico |
+| 7 | p2-tipos-projeto-produto-apps-mobile-4 | 53.0 | guia-completo | diagnostico |
+| 8 | p2-tipos-projeto-produto-automation-business-2 | 53.0 | guia-completo | diagnostico |
+| 9 | p2-tipos-projeto-produto-automation-business-3 | 53.0 | guia-completo | diagnostico |
+| 10 | p2-tipos-projeto-produto-automation-business-4 | 53.0 | guia-completo | diagnostico |
+| 11 | p2-tipos-projeto-produto-consulting-technical-2 | 53.0 | guia-completo | diagnostico |
+| 12 | p2-tipos-projeto-produto-consulting-technical-3 | 53.0 | guia-completo | diagnostico |
+| 13 | p2-tipos-projeto-produto-consulting-technical-4 | 53.0 | guia-completo | diagnostico |
+| 14 | p2-tipos-projeto-produto-dentista | 53.0 | guia-completo | diagnostico |
+| 15 | p2-tipos-projeto-produto-development-web-2 | 53.0 | guia-completo | diagnostico |
+| 16 | p2-tipos-projeto-produto-development-web-3 | 53.0 | guia-completo | diagnostico |
+| 17 | p2-tipos-projeto-produto-development-web-4 | 53.0 | guia-completo | diagnostico |
+| 18 | p2-tipos-projeto-produto-maintenance-system-2 | 53.0 | guia-completo | diagnostico |
+| 19 | p2-tipos-projeto-produto-maintenance-system-3 | 53.0 | guia-completo | diagnostico |
+| 20 | p2-tipos-projeto-produto-maintenance-system-4 | 53.0 | guia-completo | diagnostico |
+| 21 | p2-tipos-projeto-produto-apps-mobile-5 | 51.0 | guia-completo | diagnostico |
+| 22 | p2-tipos-projeto-produto-automation-business-5 | 51.0 | guia-completo | diagnostico |
+| 23 | p2-tipos-projeto-produto-consulting-technical-5 | 51.0 | guia-completo | diagnostico |
+| 24 | p2-tipos-projeto-produto-development-web-5 | 51.0 | guia-completo | diagnostico |
+| 25 | p2-tipos-projeto-produto-maintenance-system-5 | 51.0 | guia-completo | diagnostico |
+| 26 | p6-tecnologia-stack-diversos-2 | 51.0 | guia-completo | diagnostico |
+| 27 | p1-custos-investimento-custom-systems | 49.0 | pilar | diagnostico |
+| 28 | p2-tipos-projeto-produto-development-web | 49.0 | pilar | diagnostico |
+| 29 | p2-tipos-projeto-produto-dentista-2 | 48.0 | guia-completo | diagnostico |
+| 30 | p2-tipos-projeto-produto-apps-mobile | 47.0 | guia-completo | diagnostico |
+| 31 | p2-tipos-projeto-produto-automation-business | 47.0 | guia-completo | diagnostico |
+| 32 | p2-tipos-projeto-produto-consulting-technical | 47.0 | guia-completo | diagnostico |
+| 33 | p2-tipos-projeto-produto-maintenance-system | 47.0 | guia-completo | diagnostico |
