@@ -1,14 +1,14 @@
 {
   "locale": "pt-BR",
-  "generated_at": "2026-06-15",
+  "generated_at": "2026-06-16",
   "total_clusters_avaliados": 71,
-  "novos": 4,
+  "novos": 0,
   "ja_cobertos": 1,
-  "expandir": 66,
+  "expandir": 68,
   "fundir": 0,
   "ja_gerados": 0,
-  "ja_no_estoque": 0,
-  "taxa_aproveitamento": 98.6,
+  "ja_no_estoque": 2,
+  "taxa_aproveitamento": 95.8,
   "clusters": [
     {
       "cluster_id": "p1-custos-investimento-diversos-2",
@@ -66,13 +66,13 @@
       "article_type": "urgencia",
       "wave": 1,
       "priority_score": 81.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
+      "classification": "JA_NO_ESTOQUE",
+      "action": "promover",
+      "details": "slug exato vs estoque 'p2-tipos-projeto-produto-personalizados-sistemas-3' (available)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
+      "stockpile_equivalence_id": "ec84d2a2-8f44-441e-a1b7-68c706cf4729",
+      "stockpile_promotion_state": "available"
     },
     {
       "cluster_id": "p4-automacao-processos-automacao-empresarial-3",
@@ -82,13 +82,13 @@
       "article_type": "urgencia",
       "wave": 1,
       "priority_score": 81.0,
-      "classification": "EXPANDIR",
-      "action": "expandir",
-      "details": "overlap parcial 0.67 vs 'automacao-empresarial-cidades-brasil' (content)",
-      "match_slug": "automacao-empresarial-cidades-brasil",
-      "match_source": "content",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
+      "classification": "JA_NO_ESTOQUE",
+      "action": "promover",
+      "details": "slug exato vs estoque 'p4-automacao-processos-automacao-empresarial-3' (available)",
+      "match_slug": "p4-automacao-processos-automacao-empresarial-3",
+      "match_source": "stockpile",
+      "stockpile_equivalence_id": "ea936043-c9ad-487b-9024-6875dc40f695",
+      "stockpile_promotion_state": "available"
     },
     {
       "cluster_id": "p1-custos-investimento-diversos-1",
@@ -162,11 +162,11 @@
       "article_type": "urgencia",
       "wave": 2,
       "priority_score": 74.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -306,11 +306,11 @@
       "article_type": "comparacao",
       "wave": 2,
       "priority_score": 68.5,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -706,11 +706,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 55.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -788,8 +788,8 @@
       "priority_score": 55.0,
       "classification": "EXPANDIR",
       "action": "expandir",
-      "details": "overlap parcial 0.40 vs 'integracao-pix-sistema-empresa-brasil-2026' (content)",
-      "match_slug": "integracao-pix-sistema-empresa-brasil-2026",
+      "details": "overlap parcial 0.40 vs 'app-mobile-contratacao-166' (content)",
+      "match_slug": "app-mobile-contratacao-166",
       "match_source": "content",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
@@ -820,8 +820,8 @@
       "priority_score": 55.0,
       "classification": "EXPANDIR",
       "action": "expandir",
-      "details": "overlap parcial 0.40 vs 'integracao-pix-sistema-empresa-brasil-2026' (content)",
-      "match_slug": "integracao-pix-sistema-empresa-brasil-2026",
+      "details": "overlap parcial 0.40 vs 'app-mobile-contratacao-166' (content)",
+      "match_slug": "app-mobile-contratacao-166",
       "match_source": "content",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
@@ -1012,9 +1012,9 @@
       "priority_score": 53.0,
       "classification": "EXPANDIR",
       "action": "expandir",
-      "details": "overlap parcial 0.67 vs 'app-mobile-contratacao-166' (stockpile)",
+      "details": "overlap parcial 0.67 vs 'app-mobile-contratacao-166' (content)",
       "match_slug": "app-mobile-contratacao-166",
-      "match_source": "stockpile",
+      "match_source": "content",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -1182,17 +1182,6 @@
       "justification": "Cluster cobre parcialmente '3b7c5b23-0694-4c8a-a182-9d68bd0ebbca' — expandir o existente em vez de novo artigo."
     },
     {
-      "cluster_id": "p4-automacao-processos-automacao-empresarial-3",
-      "action": "expandir",
-      "existing_slug": "automacao-empresarial-cidades-brasil",
-      "existing_title": "Automacao Empresarial nas Principais Cidades do Brasil",
-      "sections_to_add": [],
-      "keywords_to_incorporate": [
-        "quero automacao empresarial"
-      ],
-      "justification": "Cluster cobre parcialmente 'automacao-empresarial-cidades-brasil' — expandir o existente em vez de novo artigo."
-    },
-    {
       "cluster_id": "p1-custos-investimento-diversos-1",
       "action": "expandir",
       "existing_slug": "integracao-api-sistemas-empresa-quanto-custa-como-funciona",
@@ -1235,6 +1224,17 @@
         "aplicativos mobile barato"
       ],
       "justification": "Cluster cobre parcialmente 'fc6d6fd0-dcef-49a0-82d0-aae4b8567360' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Quero Sistemas Personalizados: Como Transformar Essa Urgência em um Projeto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "sistemas personalizados barato"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p4-automacao-processos-automacao-empresarial",
@@ -1323,6 +1323,17 @@
         "melhor manutencao sistemas"
       ],
       "justification": "Cluster cobre parcialmente '3b7c5b23-0694-4c8a-a182-9d68bd0ebbca' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas-2",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Quero Sistemas Personalizados: Como Transformar Essa Urgência em um Projeto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "melhor sistemas personalizados"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p4-automacao-processos-diversos-5",
@@ -1589,6 +1600,17 @@
       "justification": "Cluster cobre parcialmente 'desenvolvimento-web-moderno-nextjs-2026' — expandir o existente em vez de novo artigo."
     },
     {
+      "cluster_id": "p2-tipos-projeto-produto-diversos-3",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Quero Sistemas Personalizados: Como Transformar Essa Urgência em um Projeto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "sistemas personalizados para escola"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
+    },
+    {
       "cluster_id": "p4-automacao-processos-automacao-empresarial-2",
       "action": "expandir",
       "existing_slug": "automacao-empresarial-cidades-brasil",
@@ -1635,13 +1657,13 @@
     {
       "cluster_id": "p5-nichos-segmentos-farmacia-3",
       "action": "expandir",
-      "existing_slug": "integracao-pix-sistema-empresa-brasil-2026",
-      "existing_title": "Integração PIX no Sistema da Empresa: Custo e Como Fazer 2026",
+      "existing_slug": "app-mobile-contratacao-166",
+      "existing_title": "Empresa que Faz Aplicativo em Recife: Como Contratar em 2026",
       "sections_to_add": [],
       "keywords_to_incorporate": [
         "como fazer aplicativos mobile para farmácia"
       ],
-      "justification": "Cluster cobre parcialmente 'integracao-pix-sistema-empresa-brasil-2026' — expandir o existente em vez de novo artigo."
+      "justification": "Cluster cobre parcialmente 'app-mobile-contratacao-166' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p5-nichos-segmentos-imobiliaria",
@@ -1657,13 +1679,13 @@
     {
       "cluster_id": "p5-nichos-segmentos-imobiliaria-3",
       "action": "expandir",
-      "existing_slug": "integracao-pix-sistema-empresa-brasil-2026",
-      "existing_title": "Integração PIX no Sistema da Empresa: Custo e Como Fazer 2026",
+      "existing_slug": "app-mobile-contratacao-166",
+      "existing_title": "Empresa que Faz Aplicativo em Recife: Como Contratar em 2026",
       "sections_to_add": [],
       "keywords_to_incorporate": [
         "como fazer aplicativos mobile para imobiliária"
       ],
-      "justification": "Cluster cobre parcialmente 'integracao-pix-sistema-empresa-brasil-2026' — expandir o existente em vez de novo artigo."
+      "justification": "Cluster cobre parcialmente 'app-mobile-contratacao-166' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p5-nichos-segmentos-salao-beleza",

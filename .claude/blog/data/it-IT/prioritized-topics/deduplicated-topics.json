@@ -1,10 +1,10 @@
 {
   "locale": "it-IT",
-  "generated_at": "2026-06-15",
+  "generated_at": "2026-06-16",
   "total_clusters_avaliados": 49,
-  "novos": 6,
+  "novos": 3,
   "ja_cobertos": 0,
-  "expandir": 43,
+  "expandir": 46,
   "fundir": 0,
   "ja_gerados": 0,
   "ja_no_estoque": 0,
@@ -82,11 +82,11 @@
       "article_type": "urgencia",
       "wave": 2,
       "priority_score": 73.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -500,9 +500,9 @@
       "priority_score": 53.0,
       "classification": "EXPANDIR",
       "action": "expandir",
-      "details": "overlap parcial 0.40 vs 'assumere-ia-agenti-azienda-come-fare' (content)",
-      "match_slug": "assumere-ia-agenti-azienda-come-fare",
-      "match_source": "content",
+      "details": "overlap parcial 0.60 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -514,11 +514,11 @@
       "article_type": "checklist",
       "wave": 3,
       "priority_score": 53.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.40 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -786,11 +786,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 47.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.50 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     }
@@ -828,6 +828,17 @@
         "consulenza tecnica urgente"
       ],
       "justification": "Cluster cobre parcialmente 'quando-assumere-consulenza-tecnica-software' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizzati-sistemi-4",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Voglio Sistemi Personalizzati: Come Trasformare questa Urgenza in un Progetto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "sistemi personalizzati urgente"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p2-tipos-projeto-produto-sviluppo-web-4",
@@ -1096,13 +1107,24 @@
     {
       "cluster_id": "p2-tipos-projeto-produto-personalizzati-sistemi-2",
       "action": "expandir",
-      "existing_slug": "assumere-ia-agenti-azienda-come-fare",
-      "existing_title": "IA Agenti per Aziende: Cos'è, Quanto Costa e Come Funziona nel 2026",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Voglio Sistemi Personalizzati: Come Trasformare questa Urgenza in un Progetto",
       "sections_to_add": [],
       "keywords_to_incorporate": [
         "come fare sistemi personalizzati para palestra"
       ],
-      "justification": "Cluster cobre parcialmente 'assumere-ia-agenti-azienda-come-fare' — expandir o existente em vez de novo artigo."
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizzati-sistemi-3",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Voglio Sistemi Personalizzati: Come Trasformare questa Urgenza in un Progetto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "chi fa sistemi personalizzati para palestra"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p2-tipos-projeto-produto-personalizzati-sistemi-5",
@@ -1268,6 +1290,17 @@
         "chi fa consulenza tecnica"
       ],
       "justification": "Cluster cobre parcialmente 'quando-assumere-consulenza-tecnica-software' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizzati-sistemi",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Voglio Sistemi Personalizzati: Come Trasformare questa Urgenza in un Progetto",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "chi fa sistemi personalizzati"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     }
   ],
   "merges": []

@@ -1,14 +1,14 @@
 {
   "locale": "es-ES",
-  "generated_at": "2026-06-15",
+  "generated_at": "2026-06-16",
   "total_clusters_avaliados": 48,
-  "novos": 9,
+  "novos": 3,
   "ja_cobertos": 0,
-  "expandir": 39,
+  "expandir": 44,
   "fundir": 0,
   "ja_gerados": 0,
-  "ja_no_estoque": 0,
-  "taxa_aproveitamento": 100.0,
+  "ja_no_estoque": 1,
+  "taxa_aproveitamento": 97.9,
   "clusters": [
     {
       "cluster_id": "p2-tipos-projeto-produto-apps-moviles-5",
@@ -98,11 +98,11 @@
       "article_type": "urgencia",
       "wave": 1,
       "priority_score": 76.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -274,11 +274,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 55.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -450,11 +450,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 51.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -482,13 +482,13 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 51.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
-      "stockpile_equivalence_id": null,
-      "stockpile_promotion_state": null
+      "classification": "JA_NO_ESTOQUE",
+      "action": "promover",
+      "details": "slug exato vs estoque 'p2-tipos-projeto-produto-personalizados-sistemas-3' (available)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
+      "stockpile_equivalence_id": "ec84d2a2-8f44-441e-a1b7-68c706cf4729",
+      "stockpile_promotion_state": "available"
     },
     {
       "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas-4",
@@ -578,11 +578,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 48.5,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     },
@@ -770,11 +770,11 @@
       "article_type": "guia-completo",
       "wave": 3,
       "priority_score": 47.0,
-      "classification": "NOVO",
-      "action": "gerar",
-      "details": "Sem sobreposicao relevante no inventario.",
-      "match_slug": "",
-      "match_source": "",
+      "classification": "EXPANDIR",
+      "action": "expandir",
+      "details": "overlap parcial 0.67 vs 'p2-tipos-projeto-produto-personalizados-sistemas-3' (stockpile)",
+      "match_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "match_source": "stockpile",
       "stockpile_equivalence_id": null,
       "stockpile_promotion_state": null
     }
@@ -823,6 +823,17 @@
         "desarrollo web urgente"
       ],
       "justification": "Cluster cobre parcialmente 'como-elegir-empresa-desarrollo-web-espana-confiable' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas-5",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Sistemas Personalizados para Gimnasio: Guía Completa para Digitalizar tu Centro",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "sistemas personalizados urgente"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p5-nichos-segmentos-dentista",
@@ -935,6 +946,17 @@
       "justification": "Cluster cobre parcialmente 'como-elegir-empresa-desarrollo-web-espana-confiable' — expandir o existente em vez de novo artigo."
     },
     {
+      "cluster_id": "p2-tipos-projeto-produto-diversos-2",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Sistemas Personalizados para Gimnasio: Guía Completa para Digitalizar tu Centro",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "sistemas personalizados para startup"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
+    },
+    {
       "cluster_id": "p5-nichos-segmentos-clinica",
       "action": "expandir",
       "existing_slug": "autenticacion-biometrica-apps-moviles",
@@ -1045,6 +1067,17 @@
       "justification": "Cluster cobre parcialmente 'empresa-desarrollo-apps-moviles-espana-ciudades-precios' — expandir o existente em vez de novo artigo."
     },
     {
+      "cluster_id": "p2-tipos-projeto-produto-mantenimiento-sistemas-3",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Sistemas Personalizados para Gimnasio: Guía Completa para Digitalizar tu Centro",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "mantenimiento sistemas para gimnasio"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
+    },
+    {
       "cluster_id": "p2-tipos-projeto-produto-mantenimiento-sistemas-4",
       "action": "expandir",
       "existing_slug": "autenticacion-biometrica-apps-moviles",
@@ -1098,6 +1131,17 @@
         "mejor consultoria tecnica"
       ],
       "justification": "Cluster cobre parcialmente 'cuando-contratar-consultoria-tecnica-de-software' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Sistemas Personalizados para Gimnasio: Guía Completa para Digitalizar tu Centro",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "mejor sistemas personalizados"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     },
     {
       "cluster_id": "p3-contratar-avaliar-apps-moviles",
@@ -1208,6 +1252,17 @@
         "quiero desarrollo web"
       ],
       "justification": "Cluster cobre parcialmente 'como-elegir-empresa-desarrollo-web-espana-confiable' — expandir o existente em vez de novo artigo."
+    },
+    {
+      "cluster_id": "p2-tipos-projeto-produto-personalizados-sistemas-2",
+      "action": "expandir",
+      "existing_slug": "p2-tipos-projeto-produto-personalizados-sistemas-3",
+      "existing_title": "Sistemas Personalizados para Gimnasio: Guía Completa para Digitalizar tu Centro",
+      "sections_to_add": [],
+      "keywords_to_incorporate": [
+        "quiero sistemas personalizados"
+      ],
+      "justification": "Cluster cobre parcialmente 'p2-tipos-projeto-produto-personalizados-sistemas-3' — expandir o existente em vez de novo artigo."
     }
   ],
   "merges": []
