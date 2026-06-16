@@ -26,6 +26,21 @@ export interface SiteConfig {
   address: string
   compliance: ComplianceFramework
   currency: MarketCurrency
+  /**
+   * Multibackend OIDC (Modelo B). Vinculo do site estatico ao IdP central
+   * (systemforgedashboard.com) com a origin/moeda/idioma corretos por dominio.
+   * Todos os valores sao PUBLICOS (client_id publico PKCE; nunca client_secret).
+   */
+  oidc: {
+    /** client_id publico registrado em OIDC_CLIENTS do IdP (ex.: systemforge-it). */
+    clientId: string
+    /** redirect_uri exato (match no IdP): https://{dominio}/auth/callback. */
+    redirectUri: string
+    /** authority = issuer central (https://www.systemforgedashboard.com). */
+    authority: string
+    /** ui_locales para a tela de login do IdP (apresentacao; nao decide moeda). */
+    uiLocale?: string
+  }
   newsletter: {
     workerUrl: string
     doubleOptIn: boolean

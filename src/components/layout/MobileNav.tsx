@@ -7,6 +7,7 @@ import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
 import { cn } from '@/lib/utils'
 import { TIMING } from '@/lib/constants/timing'
+import { MultibackendLogin } from '@/components/auth/MultibackendLogin'
 
 const config = getSiteConfig()
 const messages = loadMessages()
@@ -145,6 +146,12 @@ export function MobileNav({ isOpen, onClose, triggerRef }: MobileNavProps) {
             ))}
           </ul>
         </nav>
+
+        {/* Login OIDC multibackend dentro do menu mobile (R-26/F-6): markup em
+            ambos (header desktop + drawer), script/estado sincronizados (R-24). */}
+        <div className="px-4 py-3 border-t border-border">
+          <MultibackendLogin variant="mobile" />
+        </div>
       </div>
     </>
   )

@@ -26,6 +26,12 @@ export const esConfig: SiteConfig = {
   address: 'España / Latinoamérica',
   compliance: 'GDPR',
   currency: 'EUR',
+  oidc: {
+    clientId: 'systemforge-es',
+    redirectUri: 'https://systemforge.es/auth/callback',
+    authority: 'https://www.systemforgedashboard.com',
+    uiLocale: 'es-ES',
+  },
   socialLinks: {
     linkedin: 'https://www.linkedin.com/company/systemforge',
     github: 'https://github.com/Pedrocorgnati/system-forge-landing-page',

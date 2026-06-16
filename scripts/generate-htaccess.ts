@@ -5,6 +5,12 @@
  * IT não inclui GTM no script-src por padrão (GDPR — GTM carrega somente após
  * consentimento explícito via CMP do module-11). BR e EN incluem GTM.
  *
+ * connect-src inclui o IdP central (https://www.systemforgedashboard.com) em TODOS
+ * os locales: o widget de login multibackend (oidc-client-ts) faz fetch cross-origin
+ * para `{authority}/.well-known/openid-configuration` (discovery) e `{authority}
+ * /api/oidc/token` (troca do code) no /auth/callback. Sem isso o CSP bloqueia a troca
+ * e o callback sempre cai em erro (login não fecha). NÃO é GTM/analytics — é auth.
+ *
  * Usage:
  *   npx tsx scripts/generate-htaccess.ts --locale=br
  *   npx tsx scripts/generate-htaccess.ts --locale=it
@@ -12,7 +18,7 @@
  *   npx tsx scripts/generate-htaccess.ts --locale=es
  *   npx tsx scripts/generate-htaccess.ts --all
  *
- * Output: dist/{locale}/.htaccess
+ * Output: dist-{locale}/.htaccess
  *
  * Exit codes:
  *   0 — gerado com sucesso
@@ -37,7 +43,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://api.resend.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -51,7 +57,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://api.resend.com https://newsletter-it.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-it.corgnati-pedro.workers.dev",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -65,7 +71,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://api.resend.com https://newsletter-en.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-en.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -79,7 +85,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://api.resend.com https://newsletter-es.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-es.corgnati-pedro.workers.dev",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -241,12 +247,15 @@ ErrorDocument 500 /500.html
 // ---------------------------------------------------------------------------
 
 function writeHtaccess(locale: string): void {
-  const outDir = path.resolve(process.cwd(), 'dist', locale)
+  // O build localizado emite em `dist-${locale}` (OUT_DIR dos scripts build:*),
+  // NAO em `dist/${locale}`. Escrever no diretorio real evita o drift que deixou
+  // o .htaccess deployado defasado do gerador.
+  const outDir = path.resolve(process.cwd(), `dist-${locale}`)
   const outPath = path.join(outDir, '.htaccess')
 
   fs.mkdirSync(outDir, { recursive: true })
   fs.writeFileSync(outPath, generateHtaccess(locale), 'utf-8')
-  console.log(`✅ dist/${locale}/.htaccess gerado (CSP locale: ${locale.toUpperCase()})`)
+  console.log(`✅ dist-${locale}/.htaccess gerado (CSP locale: ${locale.toUpperCase()})`)
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +270,7 @@ function main(): void {
     for (const locale of VALID_LOCALES) {
       writeHtaccess(locale)
     }
-    console.log('\n✅ Todos os arquivos .htaccess gerados em dist/{locale}/.htaccess')
+    console.log('\n✅ Todos os arquivos .htaccess gerados em dist-{locale}/.htaccess')
     process.exit(0)
   }
 

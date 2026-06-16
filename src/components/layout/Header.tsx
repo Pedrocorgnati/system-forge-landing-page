@@ -10,6 +10,7 @@ import { MobileNav } from './MobileNav'
 import { useTheme } from './ThemeProvider'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/constants/routes'
+import { MultibackendLogin } from '@/components/auth/MultibackendLogin'
 
 const config = getSiteConfig()
 const messages = loadMessages()
@@ -92,6 +93,8 @@ export function Header() {
 
             {/* Actions */}
             <div data-testid="header-actions" className="flex items-center gap-2">
+              {/* Login OIDC multibackend (R-26: visivel em toda viewport; tambem no menu mobile) */}
+              <MultibackendLogin />
               {/* Theme toggle */}
               <button
                 data-testid="header-theme-toggle-button"

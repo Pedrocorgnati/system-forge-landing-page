@@ -118,12 +118,15 @@ function checkReciprocity(
       for (const alt of entry.alternates) {
         if (alt.hreflang === 'x-default') continue
 
-        // Encontrar qual sitemap contém a URL alvo
-        const targetLocale = Object.entries(SITEMAP_PATHS).find(([_k, _v]) => {
-          return Object.values(sitemaps).some(entries =>
-            entries.some(e => e.loc === alt.href),
-          )
-        })?.[0]
+        // Encontrar qual sitemap contém a URL alvo.
+        // BUGFIX: o find() anterior ignorava a chave `_k` do locale e checava
+        // "existe em ALGUM sitemap", retornando SEMPRE o 1o locale ('br'). Assim
+        // targetEntries virava o sitemap BR e qualquer href cross-locale
+        // (systemforge.it, etc.) caía em MISSING (falso-positivo, 252 violações).
+        // Correto: casar o locale cujo PRÓPRIO sitemap contém o href.
+        const targetLocale = Object.keys(SITEMAP_PATHS).find((k) =>
+          sitemaps[k]?.some(e => e.loc === alt.href),
+        )
 
         if (!targetLocale) continue
 

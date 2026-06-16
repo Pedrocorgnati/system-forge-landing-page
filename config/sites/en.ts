@@ -24,6 +24,12 @@ export const enConfig: SiteConfig = {
   address: 'Remote, United States',
   compliance: 'CAN-SPAM',
   currency: 'USD',
+  oidc: {
+    clientId: 'systemforge-en',
+    redirectUri: 'https://systemforgesoftware.com/auth/callback',
+    authority: 'https://www.systemforgedashboard.com',
+    uiLocale: 'en',
+  },
   socialLinks: {
     linkedin: 'https://www.linkedin.com/company/systemforge',
     github: 'https://github.com/Pedrocorgnati/system-forge-landing-page',

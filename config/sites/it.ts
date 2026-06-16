@@ -8,7 +8,7 @@ const IT_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://systemforge.it'
 
 export const itConfig: SiteConfig = {
   locale: 'it-IT',
-  htmlLang: 'it',
+  htmlLang: 'it-IT',
   ogLocale: 'it_IT',
   siteName: 'SystemForge',
   domain: 'systemforge.it',
@@ -24,6 +24,12 @@ export const itConfig: SiteConfig = {
   address: 'Milano, Italia',
   compliance: 'GDPR',
   currency: 'EUR',
+  oidc: {
+    clientId: 'systemforge-it',
+    redirectUri: 'https://systemforge.it/auth/callback',
+    authority: 'https://www.systemforgedashboard.com',
+    uiLocale: 'it-IT',
+  },
   socialLinks: {
     linkedin: 'https://www.linkedin.com/company/systemforge',
     github: 'https://github.com/Pedrocorgnati/system-forge-landing-page',

@@ -100,7 +100,12 @@ for (const check of checks) {
     // - language switcher (nav/footer com links para outros locales)
     const contentWithoutAlternate = content
       .replace(/<link[^>]*rel=["']alternate["'][^>]*>/gi, '')
-      .replace(/<script[^>]*type=["']application\/ld\+json["'][^>]*>[\s\S]*?<\/script>/gi, '')
+      // Scripts inline (JSON-LD E o flight-data RSC do Next `self.__next_f.push`)
+      // serializam os MESMOS hreflang/nav/footer ja permitidos abaixo. Sem isto, a
+      // serializacao RSC do <link hreflang> (ex.: [\"$\",\"link\",\"it-IT\",...])
+      // dispara falso-positivo "string proibida fora de hreflang". O check mira
+      // vazamento de CONTEUDO renderizado, nao runtime/serializacao do framework.
+      .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
       .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
       .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
     for (const forbidden of check.forbiddenStrings) {

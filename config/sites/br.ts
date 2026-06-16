@@ -27,6 +27,12 @@ export const brConfig: SiteConfig = {
   address: 'Curitiba/PR, Brasil',
   compliance: 'LGPD',
   currency: 'BRL',
+  oidc: {
+    clientId: 'systemforge-br',
+    redirectUri: 'https://forjadesistemas.com.br/auth/callback',
+    authority: 'https://www.systemforgedashboard.com',
+    uiLocale: 'pt-BR',
+  },
   socialLinks: {
     linkedin: 'https://www.linkedin.com/company/systemforge',
     github: 'https://github.com/Pedrocorgnati/system-forge-landing-page',
