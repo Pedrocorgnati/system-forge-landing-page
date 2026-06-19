@@ -100,13 +100,28 @@ jobs:
           # V-02: mirror --ignore-time compara por tamanho; pula arquivos com
           # tamanho idêntico ao remoto (evita reupload de conteúdo inalterado).
           # Cria diretórios remotos ausentes automaticamente.
-          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
-            "set sftp:auto-confirm yes; \
-             set net:max-retries 3; \
-             set net:reconnect-interval-base 5; \
-             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
-                    --log=/dev/stderr out/ ${SFTP_PATH}; \
-             quit"
+          # V-03: retry loop (ate 3 tentativas). O SFTP da Hostinger as vezes
+          # rejeita um lote de arquivos numa janela transitoria (SSH_FX_FAILURE
+          # ~30s), fazendo o lftp sair 1 mesmo com a maioria enviada. Cada retry
+          # com --ignore-time sobe so o que faltou; parallel reduzido 5->3 e
+          # net:max-retries/timeout maiores reduzem a chance da janela ruim.
+          deploy_ok=0
+          for attempt in 1 2 3; do
+            echo "=== lftp mirror -- tentativa $attempt/3 ==="
+            if lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+              "set sftp:auto-confirm yes; \
+               set net:max-retries 5; \
+               set net:timeout 30; \
+               set net:reconnect-interval-base 5; \
+               mirror --reverse --parallel=3 --ignore-time --no-empty-dirs \
+                      --log=/dev/stderr out/ ${SFTP_PATH}; \
+               quit"; then
+              deploy_ok=1; echo "mirror OK na tentativa $attempt"; break
+            fi
+            echo "mirror falhou na tentativa $attempt; backoff 15s antes do retry..."
+            sleep 15
+          done
+          [ "$deploy_ok" = "1" ] || { echo "ERRO: lftp mirror falhou apos 3 tentativas"; exit 1; }
           echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (BR)
@@ -198,13 +213,24 @@ jobs:
           sudo apt-get install -y lftp > /dev/null 2>&1
           LOCAL_COUNT=$(find out -type f | wc -l)
           echo "Arquivos no output local: $LOCAL_COUNT"
-          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
-            "set sftp:auto-confirm yes; \
-             set net:max-retries 3; \
-             set net:reconnect-interval-base 5; \
-             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
-                    --log=/dev/stderr out/ ${SFTP_PATH}; \
-             quit"
+          # V-03: retry loop (ate 3 tentativas) — ver bloco BR para racional.
+          deploy_ok=0
+          for attempt in 1 2 3; do
+            echo "=== lftp mirror -- tentativa $attempt/3 ==="
+            if lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+              "set sftp:auto-confirm yes; \
+               set net:max-retries 5; \
+               set net:timeout 30; \
+               set net:reconnect-interval-base 5; \
+               mirror --reverse --parallel=3 --ignore-time --no-empty-dirs \
+                      --log=/dev/stderr out/ ${SFTP_PATH}; \
+               quit"; then
+              deploy_ok=1; echo "mirror OK na tentativa $attempt"; break
+            fi
+            echo "mirror falhou na tentativa $attempt; backoff 15s antes do retry..."
+            sleep 15
+          done
+          [ "$deploy_ok" = "1" ] || { echo "ERRO: lftp mirror falhou apos 3 tentativas"; exit 1; }
           echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (IT)
@@ -296,13 +322,24 @@ jobs:
           sudo apt-get install -y lftp > /dev/null 2>&1
           LOCAL_COUNT=$(find out -type f | wc -l)
           echo "Arquivos no output local: $LOCAL_COUNT"
-          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
-            "set sftp:auto-confirm yes; \
-             set net:max-retries 3; \
-             set net:reconnect-interval-base 5; \
-             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
-                    --log=/dev/stderr out/ ${SFTP_PATH}; \
-             quit"
+          # V-03: retry loop (ate 3 tentativas) — ver bloco BR para racional.
+          deploy_ok=0
+          for attempt in 1 2 3; do
+            echo "=== lftp mirror -- tentativa $attempt/3 ==="
+            if lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+              "set sftp:auto-confirm yes; \
+               set net:max-retries 5; \
+               set net:timeout 30; \
+               set net:reconnect-interval-base 5; \
+               mirror --reverse --parallel=3 --ignore-time --no-empty-dirs \
+                      --log=/dev/stderr out/ ${SFTP_PATH}; \
+               quit"; then
+              deploy_ok=1; echo "mirror OK na tentativa $attempt"; break
+            fi
+            echo "mirror falhou na tentativa $attempt; backoff 15s antes do retry..."
+            sleep 15
+          done
+          [ "$deploy_ok" = "1" ] || { echo "ERRO: lftp mirror falhou apos 3 tentativas"; exit 1; }
           echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (EN)
@@ -394,13 +431,24 @@ jobs:
           sudo apt-get install -y lftp > /dev/null 2>&1
           LOCAL_COUNT=$(find out -type f | wc -l)
           echo "Arquivos no output local: $LOCAL_COUNT"
-          lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
-            "set sftp:auto-confirm yes; \
-             set net:max-retries 3; \
-             set net:reconnect-interval-base 5; \
-             mirror --reverse --parallel=5 --ignore-time --no-empty-dirs \
-                    --log=/dev/stderr out/ ${SFTP_PATH}; \
-             quit"
+          # V-03: retry loop (ate 3 tentativas) — ver bloco BR para racional.
+          deploy_ok=0
+          for attempt in 1 2 3; do
+            echo "=== lftp mirror -- tentativa $attempt/3 ==="
+            if lftp -u "$SFTP_USER,$LFTP_PASSWORD" "sftp://${SFTP_HOST}:${SFTP_PORT}" -e \
+              "set sftp:auto-confirm yes; \
+               set net:max-retries 5; \
+               set net:timeout 30; \
+               set net:reconnect-interval-base 5; \
+               mirror --reverse --parallel=3 --ignore-time --no-empty-dirs \
+                      --log=/dev/stderr out/ ${SFTP_PATH}; \
+               quit"; then
+              deploy_ok=1; echo "mirror OK na tentativa $attempt"; break
+            fi
+            echo "mirror falhou na tentativa $attempt; backoff 15s antes do retry..."
+            sleep 15
+          done
+          [ "$deploy_ok" = "1" ] || { echo "ERRO: lftp mirror falhou apos 3 tentativas"; exit 1; }
           echo "DEPLOY_FILE_COUNT=$LOCAL_COUNT" >> "$GITHUB_ENV"
 
       - name: Purge Cloudflare cache (ES)
