@@ -7,7 +7,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb'
 import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { JsonLdService } from '@/components/seo/JsonLdService'
 import { CTASection } from '@/components/sections/CTASection'
-import { services } from '@/lib/data'
+import { services, allServiceSlugs, getServiceBySlug } from '@/lib/data'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
 
@@ -15,7 +15,7 @@ const config = getSiteConfig()
 const messages = loadMessages()
 
 export function generateStaticParams() {
-  return services.map((s) => ({ slug: s.slug }))
+  return allServiceSlugs.map((slug) => ({ slug }))
 }
 
 interface Props {
@@ -24,20 +24,21 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const service = services.find((s) => s.slug === slug)
+  const service = getServiceBySlug(slug)
   if (!service) return {}
 
   const { generatePageMetadata } = await import('@/lib/seo')
   return generatePageMetadata({
     title: service.name,
     description: service.longDescription,
-    path: config.routes.service(slug),
+    // Canonicaliza aliases para o slug canônico (evita conteúdo duplicado no SEO).
+    path: config.routes.service(service.slug),
   })
 }
 
 export default async function ServicoPage({ params }: Props) {
   const { slug } = await params
-  const service = services.find((s) => s.slug === slug)
+  const service = getServiceBySlug(slug)
   if (!service) notFound()
 
   const breadcrumbs = [

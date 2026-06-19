@@ -35,7 +35,15 @@ export const conversionHeroMetrics: ConversionHeroMetric[] = [
 
 // ── Non-translatable service base config ──────────────────────────────────────
 // contentId maps to the id in content/{locale}/pages/services.json
-const SERVICE_BASE: {
+//
+// HARDENING (regressão recorrente — 3x cards duplicados na grid de serviços):
+// `SERVICE_BASE` é a lista CANÔNICA de serviços exibíveis — UM item por serviço.
+// NUNCA adicione duas entradas com o mesmo `contentId` aqui: a grid renderiza
+// `services` 1:1, então slugs-irmãos com o mesmo conteúdo viram cards idênticos.
+// Slugs alternativos (para resolver rotas /servicos/<alias> sem quebrar links)
+// vão em `SERVICE_SLUG_ALIASES` abaixo — eles geram rota mas NÃO geram card.
+// O guard de carga (`_assertCanonicalServices`) aborta o build se a regra cair.
+type ServiceBase = {
   slug: string
   contentId: string
   icon: string
@@ -43,26 +51,61 @@ const SERVICE_BASE: {
   techHints: string[]
   deliveryRange: string
   filterGroup: ServiceFilterGroup
-}[] = [
+}
+
+const SERVICE_BASE: ServiceBase[] = [
   { slug: 'saas', contentId: 'saas', icon: '🚀', category: ServiceCategory.SAAS, techHints: ['Next.js', 'Stripe', 'PostgreSQL'], deliveryRange: '8–16', filterGroup: 'produto' },
   { slug: 'mobile', contentId: 'aplicativo-mobile', icon: '📱', category: ServiceCategory.MOBILE, techHints: ['React Native', 'Expo'], deliveryRange: '10–18', filterGroup: 'mobile-ia' },
-  { slug: 'aplicativo-mobile', contentId: 'aplicativo-mobile', icon: '📱', category: ServiceCategory.MOBILE, techHints: ['React Native', 'Expo'], deliveryRange: '10–18', filterGroup: 'mobile-ia' }, // RESOLVED: /servicos/aplicativo-mobile
   { slug: 'landing-page', contentId: 'landing-page', icon: '🌐', category: ServiceCategory.LANDING, techHints: ['Next.js', 'Tailwind'], deliveryRange: '2–4', filterGroup: 'produto' },
   { slug: 'ecommerce', contentId: 'e-commerce', icon: '🛒', category: ServiceCategory.ECOMMERCE, techHints: ['Next.js', 'Stripe'], deliveryRange: '8–14', filterGroup: 'produto' },
-  { slug: 'e-commerce', contentId: 'e-commerce', icon: '🛒', category: ServiceCategory.ECOMMERCE, techHints: ['Next.js', 'Stripe'], deliveryRange: '8–14', filterGroup: 'produto' },
   { slug: 'dashboard', contentId: 'dashboard-b2b', icon: '📊', category: ServiceCategory.DASHBOARD, techHints: ['Next.js', 'Recharts'], deliveryRange: '6–12', filterGroup: 'dados' },
-  { slug: 'dashboard-b2b', contentId: 'dashboard-b2b', icon: '📊', category: ServiceCategory.DASHBOARD, techHints: ['Next.js', 'Recharts'], deliveryRange: '6–12', filterGroup: 'dados' },
   { slug: 'api', contentId: 'api-integracoes', icon: '🔌', category: ServiceCategory.API, techHints: ['Node.js', 'REST / GraphQL'], deliveryRange: '3–8', filterGroup: 'dados' },
-  { slug: 'api-integracoes', contentId: 'api-integracoes', icon: '🔌', category: ServiceCategory.API, techHints: ['Node.js', 'REST / GraphQL'], deliveryRange: '3–8', filterGroup: 'dados' }, // RESOLVED: /servicos/api-integracoes
   { slug: 'automacao-com-ia', contentId: 'automacao-com-ia', icon: '🤖', category: ServiceCategory.AI, techHints: ['Claude AI', 'OpenAI', 'Python'], deliveryRange: '4–10', filterGroup: 'mobile-ia' },
   { slug: 'marketplace', contentId: 'marketplace', icon: '🏪', category: ServiceCategory.MARKETPLACE, techHints: ['Next.js', 'Stripe Connect'], deliveryRange: '12–20', filterGroup: 'produto' },
   { slug: 'erp', contentId: 'erp', icon: '⚙️', category: ServiceCategory.ERP, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '16–30', filterGroup: 'dados' },
   { slug: 'chatbot', contentId: 'bots-automacoes', icon: '💬', category: ServiceCategory.CHATBOT, techHints: ['Node.js', 'LLMs'], deliveryRange: '3–6', filterGroup: 'mobile-ia' },
-  { slug: 'bots-automacoes', contentId: 'bots-automacoes', icon: '💬', category: ServiceCategory.CHATBOT, techHints: ['Node.js', 'n8n', 'WhatsApp API'], deliveryRange: '3–6', filterGroup: 'mobile-ia' }, // RESOLVED: /servicos/bots-automacoes
-  { slug: 'gestao-setorial', contentId: 'gestao-setorial', icon: '🏭', category: ServiceCategory.GESTAO, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '8–20', filterGroup: 'dados' }, // RESOLVED: /servicos/gestao-setorial
+  { slug: 'gestao-setorial', contentId: 'gestao-setorial', icon: '🏭', category: ServiceCategory.GESTAO, techHints: ['Next.js', 'Prisma', 'PostgreSQL'], deliveryRange: '8–20', filterGroup: 'dados' },
   { slug: 'consultoria', contentId: 'consultoria', icon: '🎯', category: ServiceCategory.CONSULTORIA, techHints: ['Stack agnóstico'], deliveryRange: '1–3', filterGroup: 'dados' },
   { slug: 'desktop', contentId: 'desktop', icon: '🖥️', category: ServiceCategory.DESKTOP, techHints: ['Electron', 'SQLite'], deliveryRange: '8–14', filterGroup: 'produto' },
 ]
+
+// Slugs alternativos -> slug canônico. Geram rota /servicos/<alias> (links antigos
+// não quebram) mas resolvem para o MESMO serviço canônico — não aparecem na grid.
+const SERVICE_SLUG_ALIASES: Record<string, string> = {
+  'aplicativo-mobile': 'mobile',
+  'e-commerce':        'ecommerce',
+  'dashboard-b2b':     'dashboard',
+  'api-integracoes':   'api',
+  'bots-automacoes':   'chatbot',
+}
+
+// Guard de carga: aborta o build (e os testes) se a invariante canônica cair.
+function _assertCanonicalServices(): void {
+  const seenContent = new Map<string, string>()
+  const seenSlug = new Set<string>()
+  for (const s of SERVICE_BASE) {
+    if (seenContent.has(s.contentId)) {
+      throw new Error(
+        `[data.services] contentId duplicado "${s.contentId}" (slugs "${seenContent.get(s.contentId)}" e "${s.slug}"). ` +
+        `Cada serviço deve ter UMA entrada canônica em SERVICE_BASE; mova o slug extra para SERVICE_SLUG_ALIASES.`,
+      )
+    }
+    if (seenSlug.has(s.slug)) {
+      throw new Error(`[data.services] slug canônico duplicado "${s.slug}" em SERVICE_BASE.`)
+    }
+    seenContent.set(s.contentId, s.slug)
+    seenSlug.add(s.slug)
+  }
+  for (const [alias, target] of Object.entries(SERVICE_SLUG_ALIASES)) {
+    if (seenSlug.has(alias)) {
+      throw new Error(`[data.services] alias "${alias}" colide com um slug canônico em SERVICE_BASE.`)
+    }
+    if (!seenSlug.has(target)) {
+      throw new Error(`[data.services] alias "${alias}" aponta para slug canônico inexistente "${target}".`)
+    }
+  }
+}
+_assertCanonicalServices()
 
 // Build locale-aware content at module load time (locale is fixed per build)
 const _portfolioDescriptions = loadPortfolioDescriptions()
@@ -88,6 +131,19 @@ export const services: Service[] = SERVICE_BASE.map(base => {
     faq: content?.faq,
   }
 })
+
+// Todos os slugs que devem gerar rota /servicos/<slug> (canônicos + aliases).
+// Use em generateStaticParams para preservar links antigos sem duplicar cards.
+export const allServiceSlugs: string[] = [
+  ...services.map((s) => s.slug),
+  ...Object.keys(SERVICE_SLUG_ALIASES),
+]
+
+// Resolve um slug (canônico OU alias) para o serviço canônico correspondente.
+export function getServiceBySlug(slug: string): Service | undefined {
+  const canonical = SERVICE_SLUG_ALIASES[slug] ?? slug
+  return services.find((s) => s.slug === canonical)
+}
 
 const _portfolioProjectsRaw: PortfolioProject[] = [
   { slug: 'servizipercasa', name: 'ServiziPerCasa', title: 'ServiziPerCasa', description: 'Marketplace italiano conectando proprietários a profissionais de serviços domésticos. Booking, Stripe payments e dashboard analytics.', categories: [ServiceCategory.MARKETPLACE], techs: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], technologies: [TechTag.NEXTJS, TechTag.PRISMA, TechTag.STRIPE, TechTag.CHARTJS], status: ProjectStatus.COMPLETED, featured: true, videoUrl: '/video/servizipercasa.mp4', countries: [DeliveryCountry.ITALIA] },
