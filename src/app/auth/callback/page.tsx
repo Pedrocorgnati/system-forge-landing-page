@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { getSiteConfig } from '@config'
 import { getUserManager } from '@/lib/auth/oidc-user-manager'
 
@@ -65,9 +66,9 @@ export default function AuthCallbackPage() {
         {T.error}
       </p>
 
-      <a data-testid="auth-callback-back" href="/" hidden={state !== 'error'}>
+      <Link data-testid="auth-callback-back" href="/" hidden={state !== 'error'}>
         {T.back}
-      </a>
+      </Link>
     </main>
   )
 }

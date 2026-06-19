@@ -85,10 +85,15 @@ export function LeadQualifierForm({ onSubmitPayload }: LeadQualifierFormProps) {
   })
   const [errors, setErrors] = useState<FieldErrors>({})
   const [submitState, setSubmitState] = useState<SubmitState>({ kind: 'idle' })
+  // Espelho de `formStartedRef` para LEITURA em render (data-form-event). O ref
+  // segue como guarda síncrona do disparo único do posthog; o state existe só
+  // porque ler ref.current durante o render é proibido (react-hooks/refs).
+  const [formStarted, setFormStarted] = useState(false)
 
   function markFormStartedOnce(): void {
     if (!formStartedRef.current) {
       formStartedRef.current = true
+      setFormStarted(true)
       posthogCapture('form_start', { source: 'lead_qualifier' })
     }
   }
@@ -177,7 +182,7 @@ export function LeadQualifierForm({ onSubmitPayload }: LeadQualifierFormProps) {
         channel: fullPayload.data.channel,
       })
       setSubmitState({ kind: 'success' })
-    } catch (_err) {
+    } catch {
       setSubmitState({ kind: 'error', message: copy.errors.submit.generic })
     }
   }
@@ -189,6 +194,7 @@ export function LeadQualifierForm({ onSubmitPayload }: LeadQualifierFormProps) {
     setErrors({})
     setSubmitState({ kind: 'idle' })
     formStartedRef.current = false
+    setFormStarted(false)
   }
 
   if (submitState.kind === 'success') {
@@ -270,7 +276,7 @@ export function LeadQualifierForm({ onSubmitPayload }: LeadQualifierFormProps) {
             onSubmit={step === 1 ? handleAdvance : handleSubmit}
             data-form-step={step}
             data-form-event={
-              step === 1 ? (formStartedRef.current ? 'form_step1_in_progress' : 'form_start') : 'form_step_advance'
+              step === 1 ? (formStarted ? 'form_step1_in_progress' : 'form_start') : 'form_step_advance'
             }
             className="max-w-2xl rounded-2xl border border-border bg-card p-6 md:p-8 lg:p-10 flex flex-col gap-6"
           >

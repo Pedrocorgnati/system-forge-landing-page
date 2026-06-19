@@ -37,7 +37,7 @@ function validate(): { errors: ValidationError[]; packagesTotal: number; package
       continue
     }
 
-    let manifest: any
+    let manifest: Record<string, unknown>
     try {
       manifest = JSON.parse(fs.readFileSync(pkgJsonPath, 'utf-8'))
     } catch {
