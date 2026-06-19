@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-erp-crm-personalizado-pme" }
-  - { locale: "it-IT", slug: "quanto-costa-erp-crm-personalizzato-pmi" }
   - { locale: "en", slug: "how-much-does-a-simple-erp-cost-for-small-business" }
   - { locale: "es-ES", slug: "cuanto-cuesta-erp-crm-personalizado-pyme" }
 stockpile_origin:

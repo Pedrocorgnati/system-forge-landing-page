@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "contratar-empresa-para-desenvolver-aplicativo-mobile" }
-  - { locale: "it-IT", slug: "assumere-azienda-sviluppo-app-mobile" }
   - { locale: "en", slug: "hire-company-to-develop-mobile-app" }
   - { locale: "es-ES", slug: "contratar-empresa-desarrollo-aplicacion-movil" }
 stockpile_origin:

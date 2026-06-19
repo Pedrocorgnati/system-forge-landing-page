@@ -15,7 +15,6 @@ seo_score: 86
 conversion_score: 81
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-chatbot-ia-empresa-2026" }
-  - { locale: "it-IT", slug: "quanto-costa-chatbot-ia-azienda-2026" }
   - { locale: "en", slug: "how-much-does-an-ai-chatbot-for-business-cost-2026" }
   - { locale: "es-ES", slug: "cuanto-cuesta-chatbot-ia-empresa-2026" }
 stockpile_origin:

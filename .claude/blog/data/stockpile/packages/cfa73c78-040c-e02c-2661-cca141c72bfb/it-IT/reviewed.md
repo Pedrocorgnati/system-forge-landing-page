@@ -15,7 +15,6 @@ seo_score: 85
 conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "automacao-processos-inteligencia-artificial-empresas" }
-  - { locale: "it-IT", slug: "automazione-processi-intelligenza-artificiale-aziende" }
   - { locale: "en", slug: "business-process-automation-artificial-intelligence" }
   - { locale: "es-ES", slug: "automatizacion-procesos-inteligencia-artificial-empresas" }
 stockpile_origin:

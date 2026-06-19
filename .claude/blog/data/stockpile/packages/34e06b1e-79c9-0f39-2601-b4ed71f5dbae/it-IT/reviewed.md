@@ -15,7 +15,6 @@ seo_score: 83
 conversion_score: 77
 hreflang_pair:
   - { locale: "pt-BR", slug: "desenvolvimento-sistema-personalizado-sao-paulo" }
-  - { locale: "it-IT", slug: "sviluppo-sistema-personalizzato-italia" }
   - { locale: "en", slug: "custom-software-development-local-guide" }
   - { locale: "es-ES", slug: "desarrollo-sistema-personalizado-espana" }
 stockpile_origin:

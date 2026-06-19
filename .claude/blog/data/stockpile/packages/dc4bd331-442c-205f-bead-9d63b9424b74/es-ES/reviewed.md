@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "site-escritorio-advocacia-profissional" }
   - { locale: "it-IT", slug: "sito-studio-legale-professionale" }
   - { locale: "en", slug: "professional-law-firm-website-features-costs" }
-  - { locale: "es-ES", slug: "web-profesional-despacho-abogados" }
 stockpile_origin:
   equivalence_id: "dc4bd331-442c-205f-bead-9d63b9424b74"
   package_version: 1

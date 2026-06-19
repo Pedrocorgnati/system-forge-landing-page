@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 82
 hreflang_pair:
-  - { locale: "pt-BR", slug: "ia-para-empresas-servicos-casos-uso-reais" }
   - { locale: "it-IT", slug: "ia-per-aziende-di-servizi-casi-uso-reali" }
   - { locale: "en", slug: "ai-for-service-businesses-real-use-cases" }
   - { locale: "es-ES", slug: "ia-para-empresas-de-servicios-casos-de-uso-reales" }

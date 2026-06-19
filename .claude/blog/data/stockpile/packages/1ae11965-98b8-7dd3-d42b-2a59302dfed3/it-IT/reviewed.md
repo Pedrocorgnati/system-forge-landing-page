@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 76
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-contrato-manutencao-software" }
-  - { locale: "it-IT", slug: "quanto-costa-contratto-manutenzione-software" }
   - { locale: "en", slug: "how-much-does-a-software-maintenance-contract-cost" }
   - { locale: "es-ES", slug: "cuanto-cuesta-contrato-mantenimiento-software" }
 stockpile_origin:

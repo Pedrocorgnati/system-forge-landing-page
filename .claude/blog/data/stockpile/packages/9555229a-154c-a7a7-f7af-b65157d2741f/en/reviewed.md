@@ -17,7 +17,6 @@ conversion_score: 84
 hreflang_pair:
   - { locale: "pt-BR", slug: "crm-proprio-vs-salesforce-pme" }
   - { locale: "it-IT", slug: "crm-personalizzato-vs-salesforce-pmi" }
-  - { locale: "en", slug: "custom-crm-vs-salesforce-small-business" }
   - { locale: "es-ES", slug: "crm-propio-vs-salesforce-pyme" }
 stockpile_origin:
   equivalence_id: "9555229a-154c-a7a7-f7af-b65157d2741f"

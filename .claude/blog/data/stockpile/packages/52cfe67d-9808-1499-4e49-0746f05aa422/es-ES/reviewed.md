@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "como-sair-da-planilha-sistema-gestao" }
   - { locale: "it-IT", slug: "come-abbandonare-i-fogli-excel-sistema-gestionale" }
   - { locale: "en", slug: "how-to-move-from-spreadsheets-to-management-system" }
-  - { locale: "es-ES", slug: "como-dejar-las-hojas-de-calculo-sistema-de-gestion" }
 stockpile_origin:
   equivalence_id: "52cfe67d-9808-1499-4e49-0746f05aa422"
   package_version: 1

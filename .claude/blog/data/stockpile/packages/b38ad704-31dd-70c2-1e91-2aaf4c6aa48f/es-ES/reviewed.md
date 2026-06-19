@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "como-contratar-landing-page-profissional" }
   - { locale: "it-IT", slug: "come-commissionare-landing-page-professionale" }
   - { locale: "en", slug: "how-to-hire-professional-landing-page-developer" }
-  - { locale: "es-ES", slug: "como-contratar-landing-page-profesional" }
 stockpile_origin:
   equivalence_id: "b38ad704-31dd-70c2-1e91-2aaf4c6aa48f"
   package_version: 1

@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 76
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-integrar-sistemas-gestao" }
-  - { locale: "it-IT", slug: "quanto-costa-integrare-sistemi-gestionali" }
   - { locale: "en", slug: "how-much-does-it-cost-to-integrate-management-systems" }
   - { locale: "es-ES", slug: "cuanto-cuesta-integrar-sistemas-de-gestion" }
 stockpile_origin:

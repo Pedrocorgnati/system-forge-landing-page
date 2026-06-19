@@ -15,7 +15,6 @@ seo_score: 83
 conversion_score: 78
 hreflang_pair:
   - { locale: "pt-BR", slug: "como-contratar-empresa-criar-site-institucional" }
-  - { locale: "it-IT", slug: "come-assumere-azienda-sito-istituzionale" }
   - { locale: "en", slug: "how-to-hire-company-create-institutional-website" }
   - { locale: "es-ES", slug: "como-contratar-empresa-crear-sitio-web-institucional" }
 stockpile_origin:

@@ -14,7 +14,6 @@ published: false
 seo_score: 87
 conversion_score: 83
 hreflang_pair:
-  - { locale: "pt-BR", slug: "sistema-logistica-rastreamento-transportadora" }
   - { locale: "it-IT", slug: "sistema-logistica-tracciamento-azienda-trasporto" }
   - { locale: "en", slug: "logistics-tracking-system-transport-company-features-costs" }
   - { locale: "es-ES", slug: "sistema-logistica-rastreo-empresa-transporte" }

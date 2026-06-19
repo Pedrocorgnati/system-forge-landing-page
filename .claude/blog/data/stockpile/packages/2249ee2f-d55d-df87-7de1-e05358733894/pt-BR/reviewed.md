@@ -14,7 +14,6 @@ published: false
 seo_score: 84
 conversion_score: 83
 hreflang_pair:
-  - { locale: "pt-BR", slug: "sistema-caiu-suporte-tecnico-urgente" }
   - { locale: "it-IT", slug: "sistema-aziendale-giù-supporto-tecnico-urgente" }
   - { locale: "en", slug: "company-system-down-urgent-technical-support" }
   - { locale: "es-ES", slug: "sistema-empresa-caido-soporte-tecnico-urgente" }

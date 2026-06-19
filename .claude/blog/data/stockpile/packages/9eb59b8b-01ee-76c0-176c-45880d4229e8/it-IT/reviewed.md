@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 77
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-lancar-mvp-saas-brasil" }
-  - { locale: "it-IT", slug: "quanto-costa-lanciare-mvp-prodotto-digitale" }
   - { locale: "en", slug: "how-much-does-it-cost-to-launch-a-digital-product-mvp" }
   - { locale: "es-ES", slug: "cuanto-cuesta-lanzar-mvp-producto-digital" }
 stockpile_origin:

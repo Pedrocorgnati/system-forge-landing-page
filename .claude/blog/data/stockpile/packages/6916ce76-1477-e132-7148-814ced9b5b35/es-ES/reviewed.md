@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "roi-automacao-processos-como-calcular" }
   - { locale: "it-IT", slug: "roi-automazione-processi-come-calcolarlo" }
   - { locale: "en", slug: "roi-of-process-automation-how-to-calculate-it" }
-  - { locale: "es-ES", slug: "roi-automatizacion-procesos-como-calcularlo" }
 stockpile_origin:
   equivalence_id: "6916ce76-1477-e132-7148-814ced9b5b35"
   package_version: 1

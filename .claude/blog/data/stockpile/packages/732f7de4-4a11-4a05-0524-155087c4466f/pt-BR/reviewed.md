@@ -14,7 +14,6 @@ published: false
 seo_score: 85
 conversion_score: 82
 hreflang_pair:
-  - { locale: "pt-BR", slug: "preciso-de-um-site-institucional-urgente" }
   - { locale: "it-IT", slug: "ho-bisogno-di-un-sito-istituzionale-urgente" }
   - { locale: "en", slug: "need-a-company-website-urgently" }
   - { locale: "es-ES", slug: "necesito-un-sitio-web-institucional-urgente" }

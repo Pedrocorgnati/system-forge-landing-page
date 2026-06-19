@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-integrar-sistemas-gestao" }
   - { locale: "it-IT", slug: "quanto-costa-integrare-sistemi-gestionali" }
   - { locale: "en", slug: "how-much-does-it-cost-to-integrate-management-systems" }
-  - { locale: "es-ES", slug: "cuanto-cuesta-integrar-sistemas-de-gestion" }
 stockpile_origin:
   equivalence_id: "1f7bb3fe-2634-fbe2-f7f6-0ae0a6a32c39"
   package_version: 1

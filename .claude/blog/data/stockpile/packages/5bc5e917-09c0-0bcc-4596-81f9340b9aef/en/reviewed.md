@@ -17,7 +17,6 @@ conversion_score: 83
 hreflang_pair:
   - { locale: "pt-BR", slug: "ia-para-empresas-servicos-casos-uso-reais" }
   - { locale: "it-IT", slug: "ia-per-aziende-di-servizi-casi-uso-reali" }
-  - { locale: "en", slug: "ai-for-service-businesses-real-use-cases" }
   - { locale: "es-ES", slug: "ia-para-empresas-de-servicios-casos-de-uso-reales" }
 stockpile_origin:
   equivalence_id: "5bc5e917-09c0-0bcc-4596-81f9340b9aef"

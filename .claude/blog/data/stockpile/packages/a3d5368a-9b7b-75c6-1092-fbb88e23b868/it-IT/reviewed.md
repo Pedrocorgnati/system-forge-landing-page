@@ -15,7 +15,6 @@ seo_score: 83
 conversion_score: 75
 hreflang_pair:
   - { locale: "pt-BR", slug: "dashboard-gerencial-empresa-como-ter" }
-  - { locale: "it-IT", slug: "come-avere-dashboard-gestionale-azienda" }
   - { locale: "en", slug: "how-to-get-a-management-dashboard-for-your-company" }
   - { locale: "es-ES", slug: "como-tener-dashboard-gerencial-empresa" }
 stockpile_origin:

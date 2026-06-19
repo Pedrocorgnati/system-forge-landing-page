@@ -15,7 +15,6 @@ seo_score: 85
 conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "site-wix-vs-site-sob-medida-empresa" }
-  - { locale: "it-IT", slug: "sito-wix-vs-sito-su-misura-azienda" }
   - { locale: "en", slug: "wix-website-vs-custom-built-site-business" }
   - { locale: "es-ES", slug: "sitio-wix-vs-sitio-a-medida-empresa" }
 stockpile_origin:

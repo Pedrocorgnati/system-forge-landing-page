@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "como-lancar-saas-brasil-guia" }
-  - { locale: "it-IT", slug: "come-lanciare-saas-italia-guida" }
   - { locale: "en", slug: "how-to-launch-saas-without-own-team" }
   - { locale: "es-ES", slug: "como-lanzar-saas-espana-sin-equipo-propio" }
 stockpile_origin:

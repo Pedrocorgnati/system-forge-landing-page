@@ -16,7 +16,6 @@ conversion_score: 81
 hreflang_pair:
   - { locale: "pt-BR", slug: "empresa-desenvolvimento-aplicativo-sua-cidade" }
   - { locale: "it-IT", slug: "azienda-sviluppo-app-mobile-citta" }
-  - { locale: "en", slug: "mobile-app-development-company-your-city" }
   - { locale: "es-ES", slug: "empresa-desarrollo-aplicacion-movil-ciudad" }
 stockpile_origin:
   equivalence_id: "1bb91f20-3a46-e509-f357-5008f2a8bf4d"

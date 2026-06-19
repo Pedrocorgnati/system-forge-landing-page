@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "quando-contratar-consultoria-tecnica-de-software" }
-  - { locale: "it-IT", slug: "quando-assumere-consulenza-tecnica-software" }
   - { locale: "en", slug: "when-to-hire-software-technical-consulting" }
   - { locale: "es-ES", slug: "cuando-contratar-consultoria-tecnica-de-software" }
 stockpile_origin:

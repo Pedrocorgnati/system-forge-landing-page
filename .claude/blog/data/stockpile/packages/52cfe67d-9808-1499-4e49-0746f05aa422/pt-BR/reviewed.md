@@ -14,7 +14,6 @@ published: false
 seo_score: 87
 conversion_score: 85
 hreflang_pair:
-  - { locale: "pt-BR", slug: "como-sair-da-planilha-sistema-gestao" }
   - { locale: "it-IT", slug: "come-abbandonare-i-fogli-excel-sistema-gestionale" }
   - { locale: "en", slug: "how-to-move-from-spreadsheets-to-management-system" }
   - { locale: "es-ES", slug: "como-dejar-las-hojas-de-calculo-sistema-de-gestion" }

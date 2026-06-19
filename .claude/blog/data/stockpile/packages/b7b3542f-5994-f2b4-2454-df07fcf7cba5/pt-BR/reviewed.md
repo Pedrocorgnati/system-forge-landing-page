@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 80
 hreflang_pair:
-  - { locale: "pt-BR", slug: "site-clinica-odontologica-medica-o-que-incluir" }
   - { locale: "it-IT", slug: "sito-clinica-dentale-medica-cosa-includere" }
   - { locale: "en", slug: "professional-website-dental-medical-clinic-what-to-include" }
   - { locale: "es-ES", slug: "sitio-web-profesional-clinica-dental-medica-que-incluir" }

@@ -15,7 +15,6 @@ seo_score: 83
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "como-contratar-landing-page-profissional" }
-  - { locale: "it-IT", slug: "come-commissionare-landing-page-professionale" }
   - { locale: "en", slug: "how-to-hire-professional-landing-page-developer" }
   - { locale: "es-ES", slug: "como-contratar-landing-page-profesional" }
 stockpile_origin:

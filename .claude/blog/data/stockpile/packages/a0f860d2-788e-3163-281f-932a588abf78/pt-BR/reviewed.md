@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 81
 hreflang_pair:
-  - { locale: "pt-BR", slug: "como-criar-mvp-produto-digital" }
   - { locale: "it-IT", slug: "come-creare-mvp-prodotto-digitale" }
   - { locale: "en", slug: "how-to-build-digital-product-mvp" }
   - { locale: "es-ES", slug: "como-crear-mvp-producto-digital" }

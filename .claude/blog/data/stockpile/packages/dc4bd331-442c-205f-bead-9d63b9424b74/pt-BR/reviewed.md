@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 81
 hreflang_pair:
-  - { locale: "pt-BR", slug: "site-escritorio-advocacia-profissional" }
   - { locale: "it-IT", slug: "sito-studio-legale-professionale" }
   - { locale: "en", slug: "professional-law-firm-website-features-costs" }
   - { locale: "es-ES", slug: "web-profesional-despacho-abogados" }

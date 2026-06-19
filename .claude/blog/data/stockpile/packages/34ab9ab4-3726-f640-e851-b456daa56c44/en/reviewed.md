@@ -17,7 +17,6 @@ conversion_score: 81
 hreflang_pair:
   - { locale: "pt-BR", slug: "sistema-logistica-rastreamento-transportadora" }
   - { locale: "it-IT", slug: "sistema-logistica-tracciamento-azienda-trasporto" }
-  - { locale: "en", slug: "logistics-tracking-system-transport-company-features-costs" }
   - { locale: "es-ES", slug: "sistema-logistica-rastreo-empresa-transporte" }
 stockpile_origin:
   equivalence_id: "34ab9ab4-3726-f640-e851-b456daa56c44"

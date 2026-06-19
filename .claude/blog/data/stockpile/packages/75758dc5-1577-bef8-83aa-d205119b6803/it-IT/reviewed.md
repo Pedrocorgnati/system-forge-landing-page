@@ -15,7 +15,6 @@ seo_score: 85
 conversion_score: 81
 hreflang_pair:
   - { locale: "pt-BR", slug: "sistema-para-clinica-medica-requisitos-custos" }
-  - { locale: "it-IT", slug: "sistema-gestione-clinica-medica-requisiti-costi" }
   - { locale: "en", slug: "medical-clinic-management-system-requirements-costs" }
   - { locale: "es-ES", slug: "sistema-gestion-clinica-medica-requisitos-costes" }
 stockpile_origin:

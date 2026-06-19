@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 82
 hreflang_pair:
-  - { locale: "pt-BR", slug: "sistema-para-imobiliaria-funcionalidades-custos" }
   - { locale: "it-IT", slug: "sistema-per-agenzia-immobiliare-funzionalita-costi" }
   - { locale: "en", slug: "real-estate-agency-system-features-costs" }
   - { locale: "es-ES", slug: "sistema-para-inmobiliaria-funcionalidades-costes" }

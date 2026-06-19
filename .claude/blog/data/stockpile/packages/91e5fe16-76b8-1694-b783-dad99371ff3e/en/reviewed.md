@@ -17,7 +17,6 @@ conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-automatizar-processos-empresa" }
   - { locale: "it-IT", slug: "quanto-costa-automatizzare-processi-azienda" }
-  - { locale: "en", slug: "how-much-does-it-cost-to-automate-business-processes" }
   - { locale: "es-ES", slug: "cuanto-cuesta-automatizar-procesos-empresa" }
 stockpile_origin:
   equivalence_id: "91e5fe16-76b8-1694-b783-dad99371ff3e"

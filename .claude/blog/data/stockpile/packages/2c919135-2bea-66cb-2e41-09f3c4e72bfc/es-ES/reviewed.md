@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "como-contratar-empresa-criar-site-institucional" }
   - { locale: "it-IT", slug: "come-assumere-azienda-sito-istituzionale" }
   - { locale: "en", slug: "how-to-hire-company-create-institutional-website" }
-  - { locale: "es-ES", slug: "como-contratar-empresa-crear-sitio-web-institucional" }
 stockpile_origin:
   equivalence_id: "2c919135-2bea-66cb-2e41-09f3c4e72bfc"
   package_version: 1

@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "como-integrar-sistemas-gestao-empresa" }
-  - { locale: "it-IT", slug: "come-integrare-sistemi-gestionali-diversi-azienda" }
   - { locale: "en", slug: "how-to-integrate-different-management-systems-in-your-company" }
   - { locale: "es-ES", slug: "como-integrar-sistemas-de-gestion-diferentes-en-la-empresa" }
 stockpile_origin:

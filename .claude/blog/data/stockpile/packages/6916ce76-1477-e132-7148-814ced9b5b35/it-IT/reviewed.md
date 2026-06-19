@@ -15,7 +15,6 @@ seo_score: 84
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "roi-automacao-processos-como-calcular" }
-  - { locale: "it-IT", slug: "roi-automazione-processi-come-calcolarlo" }
   - { locale: "en", slug: "roi-of-process-automation-how-to-calculate-it" }
   - { locale: "es-ES", slug: "roi-automatizacion-procesos-como-calcularlo" }
 stockpile_origin:

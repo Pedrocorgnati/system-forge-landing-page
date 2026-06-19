@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "preciso-de-um-site-institucional-urgente" }
   - { locale: "it-IT", slug: "ho-bisogno-di-un-sito-istituzionale-urgente" }
   - { locale: "en", slug: "need-a-company-website-urgently" }
-  - { locale: "es-ES", slug: "necesito-un-sitio-web-institucional-urgente" }
 stockpile_origin:
   equivalence_id: "732f7de4-4a11-4a05-0524-155087c4466f"
   package_version: 1

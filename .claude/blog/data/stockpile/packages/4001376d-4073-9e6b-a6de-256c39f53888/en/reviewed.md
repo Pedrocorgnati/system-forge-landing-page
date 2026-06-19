@@ -17,7 +17,6 @@ conversion_score: 82
 hreflang_pair:
   - { locale: "pt-BR", slug: "sistema-controle-financeiro-empresa-personalizado" }
   - { locale: "it-IT", slug: "sistema-controllo-finanziario-aziendale-personalizzato" }
-  - { locale: "en", slug: "custom-financial-management-system-for-business" }
   - { locale: "es-ES", slug: "sistema-control-financiero-empresa-personalizado" }
 stockpile_origin:
   equivalence_id: "4001376d-4073-9e6b-a6de-256c39f53888"

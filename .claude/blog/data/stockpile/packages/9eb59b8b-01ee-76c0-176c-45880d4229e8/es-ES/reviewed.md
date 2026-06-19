@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-lancar-mvp-saas-brasil" }
   - { locale: "it-IT", slug: "quanto-costa-lanciare-mvp-prodotto-digitale" }
   - { locale: "en", slug: "how-much-does-it-cost-to-launch-a-digital-product-mvp" }
-  - { locale: "es-ES", slug: "cuanto-cuesta-lanzar-mvp-producto-digital" }
 stockpile_origin:
   equivalence_id: "9eb59b8b-01ee-76c0-176c-45880d4229e8"
   package_version: 1

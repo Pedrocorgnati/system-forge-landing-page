@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "automacao-processos-inteligencia-artificial-empresas" }
   - { locale: "it-IT", slug: "automazione-processi-intelligenza-artificiale-aziende" }
   - { locale: "en", slug: "business-process-automation-artificial-intelligence" }
-  - { locale: "es-ES", slug: "automatizacion-procesos-inteligencia-artificial-empresas" }
 stockpile_origin:
   equivalence_id: "cfa73c78-040c-e02c-2661-cca141c72bfb"
   package_version: 1

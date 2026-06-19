@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-landing-page-profissional" }
   - { locale: "it-IT", slug: "quanto-costa-landing-page-professionale" }
   - { locale: "en", slug: "how-much-does-a-professional-landing-page-cost" }
-  - { locale: "es-ES", slug: "cuanto-cuesta-landing-page-profesional" }
 stockpile_origin:
   equivalence_id: "100d0882-a801-ef3b-93e5-44ed47344378"
   package_version: 1

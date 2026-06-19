@@ -14,7 +14,6 @@ published: false
 seo_score: 87
 conversion_score: 83
 hreflang_pair:
-  - { locale: "pt-BR", slug: "sistema-controle-financeiro-empresa-personalizado" }
   - { locale: "it-IT", slug: "sistema-controllo-finanziario-aziendale-personalizzato" }
   - { locale: "en", slug: "custom-financial-management-system-for-business" }
   - { locale: "es-ES", slug: "sistema-control-financiero-empresa-personalizado" }

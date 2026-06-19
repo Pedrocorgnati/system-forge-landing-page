@@ -14,7 +14,6 @@ published: false
 seo_score: 87
 conversion_score: 80
 hreflang_pair:
-  - { locale: "pt-BR", slug: "como-contratar-desenvolvedor-senior-brasil" }
   - { locale: "it-IT", slug: "come-assumere-sviluppatore-senior-italia" }
   - { locale: "en", slug: "how-to-hire-senior-developer-checklist" }
   - { locale: "es-ES", slug: "como-contratar-desarrollador-senior-espana" }

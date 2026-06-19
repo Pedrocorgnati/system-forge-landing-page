@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "site-clinica-odontologica-medica-o-que-incluir" }
   - { locale: "it-IT", slug: "sito-clinica-dentale-medica-cosa-includere" }
   - { locale: "en", slug: "professional-website-dental-medical-clinic-what-to-include" }
-  - { locale: "es-ES", slug: "sitio-web-profesional-clinica-dental-medica-que-incluir" }
 stockpile_origin:
   equivalence_id: "b7b3542f-5994-f2b4-2454-df07fcf7cba5"
   package_version: 1

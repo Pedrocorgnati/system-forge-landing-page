@@ -17,7 +17,6 @@ hreflang_pair:
   - { locale: "pt-BR", slug: "guia-manutencao-software-empresa" }
   - { locale: "it-IT", slug: "guida-manutenzione-software-azienda" }
   - { locale: "en", slug: "software-maintenance-contract-guide" }
-  - { locale: "es-ES", slug: "guia-mantenimiento-software-empresa" }
 stockpile_origin:
   equivalence_id: "104a9a3a-9ddb-ad9d-6f28-b12f7c0789f5"
   package_version: 1

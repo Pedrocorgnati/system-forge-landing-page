@@ -15,7 +15,6 @@ seo_score: 85
 conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "quanto-custa-landing-page-profissional" }
-  - { locale: "it-IT", slug: "quanto-costa-landing-page-professionale" }
   - { locale: "en", slug: "how-much-does-a-professional-landing-page-cost" }
   - { locale: "es-ES", slug: "cuanto-cuesta-landing-page-profesional" }
 stockpile_origin:

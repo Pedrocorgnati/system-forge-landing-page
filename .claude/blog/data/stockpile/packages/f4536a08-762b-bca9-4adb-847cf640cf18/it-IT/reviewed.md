@@ -15,7 +15,6 @@ seo_score: 85
 conversion_score: 79
 hreflang_pair:
   - { locale: "pt-BR", slug: "automacao-processos-pme-guia-completo" }
-  - { locale: "it-IT", slug: "automazione-processi-pmi-guida-completa" }
   - { locale: "en", slug: "business-process-automation-sme-guide" }
   - { locale: "es-ES", slug: "automatizacion-procesos-pyme-guia-completa" }
 stockpile_origin:

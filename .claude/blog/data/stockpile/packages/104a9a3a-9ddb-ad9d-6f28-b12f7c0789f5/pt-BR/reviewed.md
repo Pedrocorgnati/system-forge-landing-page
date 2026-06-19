@@ -14,7 +14,6 @@ published: false
 seo_score: 86
 conversion_score: 83
 hreflang_pair:
-  - { locale: "pt-BR", slug: "guia-manutencao-software-empresa" }
   - { locale: "it-IT", slug: "guida-manutenzione-software-azienda" }
   - { locale: "en", slug: "software-maintenance-contract-guide" }
   - { locale: "es-ES", slug: "guia-mantenimiento-software-empresa" }

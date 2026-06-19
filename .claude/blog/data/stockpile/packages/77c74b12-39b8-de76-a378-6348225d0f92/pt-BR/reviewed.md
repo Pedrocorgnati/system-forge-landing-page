@@ -14,7 +14,6 @@ published: false
 seo_score: 88
 conversion_score: 83
 hreflang_pair:
-  - { locale: "pt-BR", slug: "como-usar-ia-empresa-guia-pme" }
   - { locale: "it-IT", slug: "come-usare-intelligenza-artificiale-azienda-guida-pmi" }
   - { locale: "en", slug: "how-to-use-artificial-intelligence-in-your-business" }
   - { locale: "es-ES", slug: "como-usar-inteligencia-artificial-en-mi-empresa" }

@@ -17,7 +17,6 @@ conversion_score: 80
 hreflang_pair:
   - { locale: "pt-BR", slug: "sistema-caiu-suporte-tecnico-urgente" }
   - { locale: "it-IT", slug: "sistema-aziendale-giu-supporto-tecnico-urgente" }
-  - { locale: "en", slug: "company-system-down-urgent-technical-support" }
   - { locale: "es-ES", slug: "sistema-empresa-caido-soporte-tecnico-urgente" }
 stockpile_origin:
   equivalence_id: "2249ee2f-d55d-df87-7de1-e05358733894"
