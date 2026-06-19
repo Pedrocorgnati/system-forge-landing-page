@@ -77,7 +77,7 @@ jobs:
         run: npx tsx scripts/generate-htaccess.ts --locale=br
 
       - name: Copy .htaccess into build output
-        run: cp dist/br/.htaccess out/.htaccess
+        run: cp dist-br/.htaccess out/.htaccess
 
       - name: Verify security headers in .htaccess (BR)
         run: |
@@ -178,7 +178,7 @@ jobs:
         run: npx tsx scripts/generate-htaccess.ts --locale=it
 
       - name: Copy .htaccess into build output
-        run: cp dist/it/.htaccess out/.htaccess
+        run: cp dist-it/.htaccess out/.htaccess
 
       - name: Verify security headers in .htaccess (IT)
         run: |
@@ -276,7 +276,7 @@ jobs:
         run: npx tsx scripts/generate-htaccess.ts --locale=en
 
       - name: Copy .htaccess into build output
-        run: cp dist/en/.htaccess out/.htaccess
+        run: cp dist-en/.htaccess out/.htaccess
 
       - name: Verify security headers in .htaccess (EN)
         run: |
@@ -374,7 +374,7 @@ jobs:
         run: npx tsx scripts/generate-htaccess.ts --locale=es
 
       - name: Copy .htaccess into build output
-        run: cp dist/es/.htaccess out/.htaccess
+        run: cp dist-es/.htaccess out/.htaccess
 
       - name: Verify security headers in .htaccess (ES)
         run: |
