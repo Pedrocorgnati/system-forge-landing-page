@@ -1178,3 +1178,249 @@ body {
 @media (prefers-reduced-motion: reduce) {
   /* Sem mudanca de animacao aqui; perf-below-fold nao envolve animacao. */
 }
+
+/* ============================================================================
+   MULTIBACKEND LOGIN WIDGET — CANONICAL CSS CONTRACT (R-20..R-26)
+   ----------------------------------------------------------------------------
+   Estilos das 7 classes consumidas por
+   src/components/auth/MultibackendLogin.tsx:
+     .mb-login            -> root scope (cluster inline no header desktop)
+     .mb-login--mobile    -> variant stacked full-width dentro do menu mobile
+     .mb-login-btn        -> CTA primario (Entrar/Sign in), filled var(--primary)
+     .mb-register-btn     -> CTA secundario (Criar conta), outline/ghost
+     .mb-account          -> cluster logado (link da conta + logout)
+     .mb-logout-btn       -> botao logout terciario/quiet
+     .mb-login-status     -> texto de status dos 4 estados (empty/loading/error/success)
+
+   NAO REMOVER / NAO RENOMEAR sem atualizar MultibackendLogin.tsx. Sem este bloco
+   o preflight do Tailwind v4 reseta os <button> para texto puro e o header mostra
+   "Entrar Criar conta Voce ainda nao entrou." sem estilo (regressao ja observada).
+   O teste src/lib/__tests__/multibackend-login-css.test.ts trava estas classes.
+
+   Regras:
+     - R-22/F-4 (anti-cascade): o componente injeta inline
+       [data-testid="multibackend-login-widget"] [hidden]{display:none!important}.
+       NENHUMA regra aqui usa `!important` em `display`; o atributo HTML `hidden`
+       e a unica fonte de visibilidade dos estados/clusters.
+     - R-23 (Zero Estados Indefinidos): os 4 .mb-login-status estao sempre no DOM,
+       exatamente um "ativo" por render. empty + success = sr-only (redundantes com
+       os CTAs / cluster logado, ficam silenciosos no header mas acessiveis a
+       leitores de tela); loading = texto pequeno/mudo; error = visivel + cor
+       destructive (role=alert).
+     - R-26 (paridade responsiva/ECU): jamais display:none na instancia ativa em
+       qualquer breakpoint. Desktop = cluster inline; mobile (.mb-login--mobile) =
+       stacked full-width, tap targets >=44px. Dark-mode flipa via tokens.
+   ============================================================================ */
+
+/* --- Root: cluster inline compacto para o header (desktop) --------------- */
+.mb-login {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem; /* ecoa o gap-2 (8px) da linha de acoes do header */
+}
+
+/* --- Variant mobile: empilhado, full-width, tap targets generosos -------- */
+.mb-login--mobile {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+/* --- Base compartilhada dos botoes de acao ------------------------------- */
+.mb-login-btn,
+.mb-register-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--duration-normal) ease,
+    border-color var(--duration-normal) ease,
+    color var(--duration-normal) ease,
+    box-shadow var(--duration-normal) ease;
+}
+
+/* --- CTA primario: Entrar / Sign in (filled) ----------------------------- */
+.mb-login-btn {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+}
+
+.mb-login-btn:hover {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--primary-foreground);
+}
+
+.mb-login-btn:active {
+  box-shadow: 0 1px 4px rgba(37, 99, 235, 0.2);
+}
+
+/* --- CTA secundario: Criar conta (outline/ghost) ------------------------- */
+.mb-register-btn {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--foreground);
+}
+
+.mb-register-btn:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* --- Foco acessivel (espelha o padrao global :focus-visible) ------------- */
+.mb-login-btn:focus-visible,
+.mb-register-btn:focus-visible,
+.mb-logout-btn:focus-visible,
+.mb-account a:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+/* --- Cluster logado: link da conta + logout ------------------------------ */
+.mb-account {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mb-account a {
+  display: inline-flex;
+  align-items: center;
+  color: var(--foreground);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  max-width: 14ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mb-account a:hover {
+  color: var(--primary);
+  text-decoration: underline;
+}
+
+/* --- Botao logout: terciario/quiet --------------------------------------- */
+.mb-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--muted-foreground);
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--duration-normal) ease,
+    color var(--duration-normal) ease,
+    border-color var(--duration-normal) ease;
+}
+
+.mb-logout-btn:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* --- Texto de status dos 4 estados (R-23) -------------------------------- */
+/* Base = sr-only/visually-hidden: presente no DOM para a11y, sem ocupar espaco
+   visual (empty + success ficam silenciosos: os CTAs e o cluster logado ja
+   comunicam o estado). loading + error sao revelados abaixo. NUNCA usa
+   `display:none` aqui (o atributo HTML `hidden` continua autoritativo, R-22). */
+.mb-login-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* loading: texto pequeno, mudo, inline (feedback transitorio, subordinado) */
+.mb-login-status[data-mb-state-for='loading'] {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--muted-foreground);
+}
+
+/* error (role=alert): visivel + cor de perigo, compacto, single-line no header */
+.mb-login-status[data-mb-state-for='error'] {
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  clip: auto;
+  clip-path: none;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--destructive);
+}
+
+/* --- Overrides do variant mobile: tudo full-width, tap targets >=44px ----- */
+.mb-login--mobile .mb-login-btn,
+.mb-login--mobile .mb-register-btn,
+.mb-login--mobile .mb-logout-btn {
+  width: 100%;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  font-size: 0.9375rem;
+}
+
+.mb-login--mobile .mb-account {
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  gap: 0.5rem;
+}
+
+.mb-login--mobile .mb-account a {
+  min-height: 44px;
+  max-width: none;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* No menu mobile ha espaco vertical: status pode quebrar linha. */
+.mb-login--mobile .mb-login-status[data-mb-state-for='loading'],
+.mb-login--mobile .mb-login-status[data-mb-state-for='error'] {
+  white-space: normal;
+}
