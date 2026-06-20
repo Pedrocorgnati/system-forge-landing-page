@@ -1345,9 +1345,11 @@ body {
 
 /* --- Texto de status dos 4 estados (R-23) -------------------------------- */
 /* Base = sr-only/visually-hidden: presente no DOM para a11y, sem ocupar espaco
-   visual (empty + success ficam silenciosos: os CTAs e o cluster logado ja
-   comunicam o estado). loading + error sao revelados abaixo. NUNCA usa
-   `display:none` aqui (o atributo HTML `hidden` continua autoritativo, R-22). */
+   visual. empty/loading/success ficam silenciosos no header (os CTAs, o estado
+   de redirect do navegador e o cluster logado ja comunicam o estado; "Redirecting
+   to sign in..." poluia o header). Apenas `error` (role=alert) e revelado abaixo.
+   NUNCA usa `display:none` aqui (o atributo HTML `hidden` continua autoritativo,
+   R-22; aria-live anuncia loading/success a leitores de tela mesmo invisivel). */
 .mb-login-status {
   position: absolute;
   width: 1px;
@@ -1361,22 +1363,9 @@ body {
   white-space: nowrap;
 }
 
-/* loading: texto pequeno, mudo, inline (feedback transitorio, subordinado) */
-.mb-login-status[data-mb-state-for='loading'] {
-  position: static;
-  width: auto;
-  height: auto;
-  margin: 0;
-  padding: 0;
-  overflow: visible;
-  clip: auto;
-  clip-path: none;
-  white-space: nowrap;
-  font-size: 0.8rem;
-  font-weight: 500;
-  line-height: 1.2;
-  color: var(--muted-foreground);
-}
+/* loading: intencionalmente NAO revelado. Fica sr-only (base) — o texto
+   "Redirecting to sign in..." no header era ruido; o redirect do navegador
+   ja e o feedback. aria-live mantem o anuncio para leitores de tela. */
 
 /* error (role=alert): visivel + cor de perigo, compacto, single-line no header */
 .mb-login-status[data-mb-state-for='error'] {
@@ -1419,8 +1408,7 @@ body {
   justify-content: flex-start;
 }
 
-/* No menu mobile ha espaco vertical: status pode quebrar linha. */
-.mb-login--mobile .mb-login-status[data-mb-state-for='loading'],
+/* No menu mobile ha espaco vertical: o status de erro pode quebrar linha. */
 .mb-login--mobile .mb-login-status[data-mb-state-for='error'] {
   white-space: normal;
 }

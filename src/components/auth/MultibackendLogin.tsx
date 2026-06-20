@@ -178,7 +178,7 @@ export function MultibackendLogin({ variant = 'desktop' }: { variant?: Variant }
       <p className="mb-login-status" data-mb-state-for="empty" data-testid="multibackend-login-empty" hidden={state !== 'empty'}>
         {T.empty}
       </p>
-      <p className="mb-login-status" data-mb-state-for="loading" data-testid="multibackend-login-loading" hidden={state !== 'loading'}>
+      <p className="mb-login-status" data-mb-state-for="loading" data-testid="multibackend-login-loading" aria-live="polite" hidden={state !== 'loading'}>
         {T.loading}
       </p>
       <p className="mb-login-status" data-mb-state-for="error" data-testid="multibackend-login-error" role="alert" hidden={state !== 'error'}>

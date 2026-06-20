@@ -40,9 +40,13 @@ describe('multibackend login — contrato de CSS (.mb-*) em globals.css', () => 
     expect(re.test(css), `globals.css não estiliza ${selector}`).toBe(true)
   })
 
-  it('os 4 estados (empty/loading/error/success) são endereçáveis via data-mb-state-for', () => {
-    expect(css).toContain("[data-mb-state-for='loading']")
+  it('apenas o estado error é revelado no header; loading fica sr-only (sem "Redirecting to sign in..." poluindo o header)', () => {
+    // error (role=alert) é o único estado com override visível.
     expect(css).toContain("[data-mb-state-for='error']")
+    // loading NÃO recebe override visível: herda a base sr-only. O texto de
+    // redirect poluia o header (reclamação do usuário); o redirect do navegador
+    // já é o feedback e aria-live="polite" anuncia a leitores de tela.
+    expect(css).not.toContain("[data-mb-state-for='loading']")
   })
 
   it('NÃO usa !important em display (não pode vencer a regra anti-cascade [hidden] do componente, R-22/F-4)', () => {
