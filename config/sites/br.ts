@@ -23,7 +23,11 @@ export const brConfig: SiteConfig = {
   // sua própria env var; o fallback hardcoded vence se a env não estiver setada.
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_BR ?? '+5512934859127',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=pt-BR`,
+  // Orcamento entra pela HOME (raiz) do dashboard, nao mais por /quote: a home resolve
+  // a origem por host (forjadesistemas -> SystemForge) e o idioma por ?locale= (proxy.ts
+  // injeta x-landing-locale so em '/'). As rotas antigas /quote (200) e /get-ai-quote
+  // (redirect) seguem respondendo, nunca 404 (task 013).
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/'}?locale=pt-BR`,
   address: 'Curitiba/PR, Brasil',
   compliance: 'LGPD',
   currency: 'BRL',
