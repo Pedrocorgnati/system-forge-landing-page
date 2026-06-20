@@ -177,10 +177,17 @@ if (!bootstrap && prevCount > 0 && toDelete.length / prevCount > 0.30) {
 const tmpNew = path.join(os.tmpdir(), `new-manifest-${process.pid}.json`)
 fs.writeFileSync(tmpNew, JSON.stringify(local))
 
-// Escrita atômica: put no .tmp + rename server-side (evita manifesto truncado
-// num corte de conexão -> próximo run não vira bootstrap por engano).
+// Escrita "atômica" do manifesto: put no .tmp + rename server-side. ATENÇÃO:
+// o SFTP rename (lftp `mv`) NÃO sobrescreve um destino existente no servidor da
+// Hostinger -> falha "Access failed: Failure" em TODO deploy pós-bootstrap (o
+// manifesto já existe). Por isso `rm -f` do manifesto atual ANTES do `mv`. O
+// .tmp continua sendo escrito por completo e só então renomeado (sem arquivo
+// final truncado). Janela rm→mv: se a conexão cair entre os dois, o manifesto
+// fica ausente -> o próximo run vira bootstrap (mirror completo, seguro), nunca
+// lê um manifesto pela metade.
 const manifestPut =
   `put ${lftpQuote(tmpNew)} -o ${lftpQuote(`${REMOTE}/${MANIFEST}.tmp`)};\n` +
+  `rm -f ${lftpQuote(`${REMOTE}/${MANIFEST}`)};\n` +
   `mv ${lftpQuote(`${REMOTE}/${MANIFEST}.tmp`)} ${lftpQuote(`${REMOTE}/${MANIFEST}`)}`
 
 // ── 4. Deploy ───────────────────────────────────────────────────────────────
