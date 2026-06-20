@@ -22,7 +22,7 @@ export const esConfig: SiteConfig = {
   // espanhol para numero italiano. Componentes guardam render em whatsapp==''.
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_ES ?? '',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=es-ES`,
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=es-ES`,
   address: 'España / Latinoamérica',
   compliance: 'GDPR',
   currency: 'EUR',

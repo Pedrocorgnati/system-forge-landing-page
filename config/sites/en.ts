@@ -20,7 +20,7 @@ export const enConfig: SiteConfig = {
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hello@systemforgesoftware.com',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_EN ?? '+17865891052',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=en-US`,
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=en-US`,
   address: 'Remote, United States',
   compliance: 'CAN-SPAM',
   currency: 'USD',

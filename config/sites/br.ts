@@ -23,7 +23,7 @@ export const brConfig: SiteConfig = {
   // sua própria env var; o fallback hardcoded vence se a env não estiver setada.
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_BR ?? '+5512934859127',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=pt-BR`,
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=pt-BR`,
   address: 'Curitiba/PR, Brasil',
   compliance: 'LGPD',
   currency: 'BRL',

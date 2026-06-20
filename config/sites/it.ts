@@ -20,7 +20,7 @@ export const itConfig: SiteConfig = {
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'contatto@systemforge.it',
   whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_IT ?? '+393508751885',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://corgnati.com/quote'}?locale=it-IT`,
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=it-IT`,
   address: 'Milano, Italia',
   compliance: 'GDPR',
   currency: 'EUR',
