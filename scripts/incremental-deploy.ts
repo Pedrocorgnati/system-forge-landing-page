@@ -130,16 +130,27 @@ function probeLftpExists(remoteFile: string): boolean | null {
  *     full-mirror silencioso sobre um glitch de rede).
  * Apaga qualquer download parcial a cada falha p/ um arquivo truncado nunca ser
  * lido como sucesso (a guarda JSON.parse do chamador continua valendo também). */
+// PACIENCIA proposital: a Hostinger (shared) estrangula a banda da conta por
+// ~20min APOS uma sessao SFTP pesada (ex.: o mirror de transicao de um mercado).
+// Nesse intervalo o GET do manifesto de 3-4MB estola (timeout) e morre com
+// "max-retries exceeded". Como o deploy e serializado (br->it->en->es), o GET de
+// um mercado pode cair na sombra do estrangulamento do mercado anterior. 10
+// tentativas x ~3min (net:max-retries do lftp) + backoff ~= ~30min, o suficiente
+// p/ ESPERAR a banda voltar e o GET passar — sem cooldown manual nem full-mirror
+// indevido. Em deploys leves (diario do blog) nao ha sessao pesada, entao o GET
+// passa na 1a tentativa e nao ha espera nenhuma.
+const GET_ATTEMPTS = 10
+const GET_BACKOFF_S = 20
 function tryLftpGet(remoteFile: string, localFile: string): GetResult {
   let lastErr = ''
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  for (let attempt = 1; attempt <= GET_ATTEMPTS; attempt++) {
     const r = spawnSync(
       'lftp',
       ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `${LFTP_PREAMBLE}; get "${remoteFile}" -o "${localFile}"; quit`],
       { stdio: ['ignore', 'ignore', 'pipe'], maxBuffer: 1 << 28, encoding: 'utf8' },
     )
     if (r.status === 0 && fs.existsSync(localFile)) {
-      console.log(`[incr-deploy] manifesto remoto baixado (tentativa ${attempt}/3)`)
+      console.log(`[incr-deploy] manifesto remoto baixado (tentativa ${attempt}/${GET_ATTEMPTS})`)
       return 'OK'
     }
     fs.rmSync(localFile, { force: true }) // limpa parcial p/ não confundir existsSync nem JSON.parse
@@ -148,19 +159,19 @@ function tryLftpGet(remoteFile: string, localFile: string): GetResult {
       console.log('[incr-deploy] manifesto remoto ausente (lftp: no such file) -> bootstrap')
       return 'NOT_FOUND'
     }
-    console.error(`[incr-deploy] get manifesto falhou (tentativa ${attempt}/3, transiente): ${lastErr.trim().slice(0, 400)}`)
-    if (attempt < 3) execFileSync('sleep', ['15'])
+    console.error(`[incr-deploy] get manifesto falhou (tentativa ${attempt}/${GET_ATTEMPTS}, transiente/estrangulado): ${lastErr.trim().slice(0, 300)}`)
+    if (attempt < GET_ATTEMPTS) execFileSync('sleep', [String(GET_BACKOFF_S)])
   }
-  console.error('[incr-deploy] get do manifesto falhou 3x — sondando existência via cls antes de decidir bootstrap')
+  console.error(`[incr-deploy] get do manifesto falhou ${GET_ATTEMPTS}x (~30min) — sondando existência via cls antes de decidir bootstrap`)
   const exists = probeLftpExists(remoteFile)
   if (exists === false) {
     console.log('[incr-deploy] sonda confirma manifesto AUSENTE -> bootstrap legítimo')
     return 'NOT_FOUND'
   }
   throw new Error(
-    `[incr-deploy] manifesto remoto NÃO baixou após 3 tentativas e a sonda ` +
+    `[incr-deploy] manifesto remoto NÃO baixou após ${GET_ATTEMPTS} tentativas (~30min) e a sonda ` +
     `${exists === true ? 'confirma que ELE EXISTE' : 'foi indeterminada (rede instável)'}. ` +
-    `Abortando p/ NÃO disparar full-mirror indevido. Último erro: ${lastErr.trim().slice(0, 400)}`,
+    `Abortando p/ NÃO disparar full-mirror indevido. Último erro: ${lastErr.trim().slice(0, 300)}`,
   )
 }
 
