@@ -194,6 +194,17 @@ const manifestPut =
 if (bootstrap || toUpload.length > MIRROR_THRESHOLD) {
   // Full mirror (bootstrap ou mudança massiva). Mantém arquivos remotos extras
   // (sem --delete) para não arriscar; o manifesto passa a refletir o build.
+  //
+  // CORREÇÃO crítica: NÃO usar --ignore-time aqui. Com --ignore-time o lftp
+  // compara só TAMANHO e PULA arquivos do mesmo tamanho — mas uma página HTML
+  // cujo único diff é o hash de um asset `_next/static/<hash>` (mesmo
+  // comprimento -> mesmo tamanho) NÃO seria reenviada, ficando com CSS/JS
+  // velhos. Pior: o manifesto é gravado com os hashes LOCAIS de qualquer jeito,
+  // então o servidor dessincroniza em silêncio e os deploys incrementais
+  // seguintes nunca reenviam essas páginas (staleness permanente). Sem
+  // --ignore-time o lftp usa mtime: no CI todo arquivo recém-buildado/extraído
+  // é mais novo que o remoto -> sobe TUDO -> servidor == manifesto. Mais lento
+  // (~todo o build), mas só dispara em bootstrap ou mudança massiva (>${MIRROR_THRESHOLD}).
   console.log(`[incr-deploy] estratégia: MIRROR completo (${bootstrap ? 'bootstrap' : toUpload.length + ' alterados > ' + MIRROR_THRESHOLD})`)
   if (bootstrap) {
     // Sem manifesto remoto, o mirror (sem --delete) NÃO remove as árvores
@@ -206,7 +217,7 @@ if (bootstrap || toUpload.length > MIRROR_THRESHOLD) {
     )
   }
   runLftp(
-    `mirror --reverse --parallel=${PARALLEL} --ignore-time --no-empty-dirs --log=/dev/stderr ${lftpQuote(OUT + '/')} ${lftpQuote(REMOTE)}`,
+    `mirror --reverse --parallel=${PARALLEL} --no-empty-dirs --log=/dev/stderr ${lftpQuote(OUT + '/')} ${lftpQuote(REMOTE)}`,
     'mirror',
   )
   runLftp(manifestPut, 'manifest')
