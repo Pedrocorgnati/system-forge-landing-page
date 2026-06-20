@@ -40,6 +40,10 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const REPO_ROOT = path.resolve(__dirname, '..')
 const MAX_PER_LOCALE = Number(process.env.MAX_PER_LOCALE ?? 3)
+// Data de publicação do drip = dia do promote (YYYY-MM-DD). O pacote do stockpile
+// carrega a data de GERAÇÃO (ex.: 2026-05-21); sem recarimbar, o artigo entra no
+// ar sempre "velho" e nunca aparece como o mais recente no /blog (ordenado por date).
+const PROMOTE_DATE = new Date().toISOString().slice(0, 10)
 const LOCALES = (process.env.LOCALES ?? 'pt-BR,it-IT,en,es-ES').split(',').map((l) => l.trim()) as SupportedLocale[]
 const STOCKPILE_DIR = path.resolve(REPO_ROOT, process.env.STOCKPILE_DIR ?? '.claude/blog/data/stockpile')
 const CONTENT_DIR = path.resolve(REPO_ROOT, process.env.CONTENT_DIR ?? 'content')
@@ -408,6 +412,20 @@ function main(): void {
             continue
           }
           finalRaw = spliced
+        }
+        // Stockpile-drip: o artigo vai AO AR hoje. Recarimba date/dateModified
+        // com a data do promote e tira de draft (published:true). Só no
+        // frontmatter (entre os '---'), para não tocar o corpo do artigo.
+        {
+          const fmEnd = finalRaw.indexOf('\n---', 3)
+          if (fmEnd > 0) {
+            const fmBlock = finalRaw
+              .slice(0, fmEnd)
+              .replace(/^date:[^\n]*$/m, `date: "${PROMOTE_DATE}"`)
+              .replace(/^dateModified:[^\n]*$/m, `dateModified: "${PROMOTE_DATE}"`)
+              .replace(/^published:[^\n]*$/m, 'published: true')
+            finalRaw = fmBlock + finalRaw.slice(fmEnd)
+          }
         }
         if (DRY_RUN) {
           console.log(`[promote][dry-run] would write ${path.relative(REPO_ROOT, target)} (excerpt_injected=${injectedExcerpt}, bytes=${finalRaw.length})`)
