@@ -6,6 +6,7 @@
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { ROUTES } from '@/lib/constants/routes'
+import { slugifyTag } from '@/lib/blog/tag-slug'
 import { loadMessages } from '@config/content'
 
 const m = loadMessages()
@@ -44,7 +45,7 @@ export function CategoryFilter({ categories, currentCategory }: CategoryFilterPr
             <li key={cat}>
               <Link
                 data-testid={`blog-category-filter-${cat.toLowerCase().replace(/\s+/g, '-')}`}
-                href={ROUTES.BLOG_CATEGORY(encodeURIComponent(cat))}
+                href={ROUTES.BLOG_CATEGORY(slugifyTag(cat))}
                 aria-current={isActive ? 'page' : undefined}
                 className={cn(
                   'inline-block px-4 py-1.5 rounded-full text-sm font-medium transition-colors capitalize',

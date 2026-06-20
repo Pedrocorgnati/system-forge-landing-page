@@ -13,6 +13,7 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { JsonLd } from '@/components/ui/JsonLd'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
+import { slugifyTag, resolveTagFromSlug } from '@/lib/blog/tag-slug'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
 import type { ArticleFrontmatter } from '@/lib/types'
 import { getSiteConfig } from '@config'
@@ -26,13 +27,16 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  const categories = [...new Set(allArticles.flatMap((a) => a.tags))]
-  return categories.map((cat) => ({ cat: encodeURIComponent(cat) }))
+  // Slug URL-safe (sem espaço/acento) — evita arquivos estáticos com espaço que
+  // quebram o upload SFTP e dão 404 no LiteSpeed.
+  const slugs = [...new Set(allArticles.flatMap((a) => a.tags).map(slugifyTag))]
+  return slugs.map((cat) => ({ cat }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { cat } = await params
-  const decoded = decodeURIComponent(cat)
+  const allCategories = [...new Set(allArticles.flatMap((a) => a.tags))]
+  const decoded = resolveTagFromSlug(cat, allCategories) ?? cat
   return generatePageMetadata({
     title: `${decoded} — Blog ${config.siteName}`,
     description: `Artigos sobre ${decoded} no blog da ${config.siteName}.`,
@@ -42,17 +46,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogCategoryPage({ params }: PageProps) {
   const { cat } = await params
-  const decoded = decodeURIComponent(cat)
 
-  const sorted = [...allArticles]
-    .filter((a) => a.tags.includes(decoded))
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
-  // Verificar se a categoria existe
+  // Resolve o slug -> tag original; 404 se nenhuma tag mapeia para o slug.
   const allCategories = [...new Set(allArticles.flatMap((a) => a.tags))]
-  if (!allCategories.includes(decoded)) {
+  const decoded = resolveTagFromSlug(cat, allCategories)
+  if (!decoded) {
     notFound()
   }
+
+  const sorted = [...allArticles]
+    .filter((a) => a.tags.some((t) => slugifyTag(t) === cat))
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const totalPages = Math.ceil(sorted.length / BLOG_ITEMS_PER_PAGE)
   const pageArticles = sorted.slice(0, BLOG_ITEMS_PER_PAGE) as ArticleFrontmatter[]

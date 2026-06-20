@@ -21,7 +21,11 @@ export function Analytics() {
   const config = getSiteConfig()
   const measurementId = config.ga4MeasurementId
 
-  const shouldLoadGA = consent.categories.analytics && !!measurementId
+  // Só carrega GA com um ID GA4 VÁLIDO (G-XXXX). Sem isso, o placeholder de
+  // build ("[PRODUCTION] G-XXXXXXXXXX") era injetado e o navegador pedia
+  // googletagmanager.com/gtag/js?id=[PRODUCTION]%20G-XXXXXXXXXX (request quebrado).
+  const isValidGaId = /^G-[A-Z0-9]{4,}$/.test(measurementId ?? '')
+  const shouldLoadGA = consent.categories.analytics && isValidGaId
 
   useEffect(() => {
     if (!shouldLoadGA || !measurementId) return

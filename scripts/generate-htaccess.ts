@@ -39,11 +39,11 @@ const CSP_BY_LOCALE: Record<string, string> = {
   // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   br: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -53,11 +53,11 @@ const CSP_BY_LOCALE: Record<string, string> = {
   // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   it: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-it.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-it.corgnati-pedro.workers.dev",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -67,11 +67,11 @@ const CSP_BY_LOCALE: Record<string, string> = {
   // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   en: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-en.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-en.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -81,11 +81,11 @@ const CSP_BY_LOCALE: Record<string, string> = {
   // 'unsafe-eval' necessário para MDXContent (new Function) e Next.js chunks
   es: [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://newsletter-es.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-es.corgnati-pedro.workers.dev",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

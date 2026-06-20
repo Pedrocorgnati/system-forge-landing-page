@@ -9,6 +9,7 @@ import { ArticleCard } from '@/components/blog/ArticleCard'
 import { NewsletterOptIn } from '@/components/ui/NewsletterOptIn'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
 import { ROUTES } from '@/lib/constants'
+import { slugifyTag } from '@/lib/blog/tag-slug'
 import { formatDate } from '@/lib/utils'
 import { loadMessages } from '@config/content'
 
@@ -87,7 +88,7 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
                 {article.tags.slice(0, 3).map(tag => (
                   <Link
                     key={tag}
-                    href={ROUTES.BLOG_TAG(tag)}
+                    href={ROUTES.BLOG_TAG(slugifyTag(tag))}
                     className="text-xs px-2.5 py-1 rounded-full bg-accent text-accent-foreground hover:bg-accent/80 transition-colors"
                   >
                     {tag}

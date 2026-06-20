@@ -12,6 +12,7 @@ import { JsonLdBreadcrumb } from '@/components/seo/JsonLdBreadcrumb'
 import { BlogListPage } from '@/components/blog/BlogListPage'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
+import { slugifyTag, resolveTagFromSlug } from '@/lib/blog/tag-slug'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
 import { loadMessages } from '@config/content'
 import { getSiteConfig } from '@config'
@@ -24,13 +25,15 @@ interface PageProps {
 }
 
 export function generateStaticParams() {
-  const tags = [...new Set(allArticles.flatMap((a) => a.tags))]
-  return tags.map((tag) => ({ tag: encodeURIComponent(tag) }))
+  // Slug URL-safe (sem espaço/acento) — ver categoria/[cat] e lib/blog/tag-slug.
+  const slugs = [...new Set(allArticles.flatMap((a) => a.tags).map(slugifyTag))]
+  return slugs.map((tag) => ({ tag }))
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { tag } = await params
-  const decoded = decodeURIComponent(tag)
+  const allTags = [...new Set(allArticles.flatMap((a) => a.tags))]
+  const decoded = resolveTagFromSlug(tag, allTags) ?? tag
   return generatePageMetadata({
     title: `#${decoded} — Blog SystemForge`,
     description: `Artigos com a tag "${decoded}" no blog da SystemForge.`,
@@ -41,16 +44,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogTagPage({ params }: PageProps) {
   const { tag } = await params
-  const decoded = decodeURIComponent(tag)
 
-  // Verificar se a tag existe
+  // Resolve o slug -> tag original; 404 se nenhuma tag mapeia.
   const allTags = [...new Set(allArticles.flatMap((a) => a.tags))]
-  if (!allTags.includes(decoded)) {
+  const decoded = resolveTagFromSlug(tag, allTags)
+  if (!decoded) {
     notFound()
   }
 
   const sorted = [...allArticles]
-    .filter((a) => a.tags.includes(decoded))
+    .filter((a) => a.tags.some((t) => slugifyTag(t) === tag))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
   const totalPages = Math.ceil(Math.max(sorted.length, 1) / BLOG_ITEMS_PER_PAGE)

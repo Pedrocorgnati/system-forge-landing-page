@@ -8,6 +8,7 @@ import { ArticleCard } from './ArticleCard'
 import { CategoryFilter } from './CategoryFilter'
 import { Pagination } from './Pagination'
 import { ROUTES } from '@/lib/constants/routes'
+import { slugifyTag } from '@/lib/blog/tag-slug'
 import type { ArticleFrontmatter } from '@/lib/types'
 import { loadMessages } from '@config/content'
 
@@ -92,9 +93,9 @@ export function BlogListPage({
           totalPages={totalPages}
           basePath={
             categoryFilter
-              ? ROUTES.BLOG_CATEGORY(encodeURIComponent(categoryFilter))
+              ? ROUTES.BLOG_CATEGORY(slugifyTag(categoryFilter))
               : tagFilter
-                ? ROUTES.BLOG_TAG(encodeURIComponent(tagFilter))
+                ? ROUTES.BLOG_TAG(slugifyTag(tagFilter))
                 : ROUTES.BLOG
           }
         />
