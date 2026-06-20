@@ -41,7 +41,7 @@ ROBOTS_BR=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 "https://forjad
 # ─── Domínio IT ────────────────────────────────────────────────────────────────
 echo ""
 echo "▶ [2/3] Itália — systemforge.it"
-if bash "$SCRIPT_DIR/smoke-test.sh" "https://systemforge.it" "SystemForge" "it"; then
+if bash "$SCRIPT_DIR/smoke-test.sh" "https://systemforge.it" "SystemForge" "it-IT"; then
   echo "  ✅ IT: PASS"
 else
   echo "  ❌ IT: FAIL"
