@@ -19,11 +19,27 @@ function buildWhatsAppUrl(number: string, locale: string): string {
   return `https://wa.me/${clean}?text=${text}`
 }
 
-export function WhatsAppStickyButton() {
+interface WhatsAppStickyButtonProps {
+  /** Revela o botão após rolar N px (páginas sem hero, ex.: artigos do blog). */
+  revealAfterPx?: number
+  /** Classes extras (ex.: 'hidden md:flex' para não colidir com a barra mobile). */
+  className?: string
+}
+
+export function WhatsAppStickyButton({ revealAfterPx, className }: WhatsAppStickyButtonProps = {}) {
   const [visible, setVisible] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Modo blog/artigo: revela após rolar revealAfterPx (páginas sem hero, onde
+    // o sentinel em top-[100vh] não funciona). Default (homepage): sentinel.
+    if (revealAfterPx != null) {
+      if (typeof window === 'undefined') return
+      const onScroll = () => setVisible(window.scrollY > revealAfterPx)
+      onScroll()
+      window.addEventListener('scroll', onScroll, { passive: true })
+      return () => window.removeEventListener('scroll', onScroll)
+    }
     const sentinel = sentinelRef.current
     if (!sentinel) return
     const observer = new IntersectionObserver(
@@ -32,7 +48,7 @@ export function WhatsAppStickyButton() {
     )
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [])
+  }, [revealAfterPx])
 
   // Locale sem linha WhatsApp configurada (e.g., ES sem env var) -> nao renderiza CTA.
   if (!config.whatsapp) return null
@@ -42,8 +58,10 @@ export function WhatsAppStickyButton() {
 
   return (
     <>
-      {/* sentinel — positioned at bottom of hero (approx 100vh) */}
-      <div ref={sentinelRef} className="absolute top-[100vh] left-0 h-px w-px pointer-events-none" aria-hidden="true" />
+      {/* sentinel — só no modo homepage (sem revealAfterPx) */}
+      {revealAfterPx == null && (
+        <div ref={sentinelRef} className="absolute top-[100vh] left-0 h-px w-px pointer-events-none" aria-hidden="true" />
+      )}
 
       <a
         href={href}
@@ -59,6 +77,7 @@ export function WhatsAppStickyButton() {
           'hover:scale-110 active:scale-95',
           'transition-all duration-300',
           visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none',
+          className ?? '',
         ].join(' ')}
       >
         {/* WhatsApp SVG icon */}

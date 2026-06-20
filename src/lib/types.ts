@@ -62,6 +62,7 @@ export enum ConversionAction {
   WHATSAPP = 'whatsapp',
   CALENDLY = 'calendly',
   BUDGET_ENGINE = 'budget_engine',
+  EMAIL = 'email',
 }
 
 export const ProjectStatus = {

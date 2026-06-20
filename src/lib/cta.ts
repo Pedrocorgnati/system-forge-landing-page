@@ -3,6 +3,7 @@ import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
 
 export function isAllowedCTAHref(href: string): boolean {
+  if (href.startsWith('mailto:')) return true
   try {
     const url = new URL(href)
     return ['https:', 'http:'].includes(url.protocol)
@@ -127,5 +128,45 @@ export function buildBudgetCTA(label: string, context?: string): CTAConfig {
     label,
     href: `${config.budgetEngine}${suffix}`,
     variant: 'secondary',
+  }
+}
+
+/**
+ * E-mail CTA (mailto:) — usa config.email por locale, com assunto/corpo
+ * localizados (chaveia em 'en', NÃO 'en-US'). Sempre disponível (todo locale
+ * tem email), inclusive ES (que não tem WhatsApp).
+ */
+export function buildEmailCTA(label: string, context?: string): CTAConfig {
+  const config = getSiteConfig()
+  const locale = config.locale
+  let subject: string
+  let body: string
+  if (locale === 'it-IT') {
+    subject = 'Contatto dal blog SystemForge'
+    body = context
+      ? `Ciao! Ho letto il vostro articolo e sono interessato a ${context}.`
+      : 'Ciao! Ho letto il vostro blog e vorrei saperne di più sui vostri servizi.'
+  } else if (locale === 'en') {
+    subject = 'Inquiry from SystemForge blog'
+    body = context
+      ? `Hi! I read your article and I'm interested in ${context}.`
+      : 'Hi! I read your blog and would like to know more about your services.'
+  } else if (locale === 'es-ES') {
+    subject = 'Contacto desde el blog SystemForge'
+    body = context
+      ? `¡Hola! He leído vuestro artículo y estoy interesado en ${context}.`
+      : '¡Hola! He leído vuestro blog y me gustaría saber más sobre los servicios.'
+  } else {
+    subject = 'Contato via blog SystemForge'
+    body = context
+      ? `Olá! Li o artigo de vocês e tenho interesse em ${context}.`
+      : 'Olá! Li o blog de vocês e gostaria de saber mais sobre os serviços.'
+  }
+  return {
+    action: ConversionAction.EMAIL,
+    label,
+    href: `mailto:${config.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`,
+    variant: 'secondary',
+    icon: '✉️',
   }
 }

@@ -5,6 +5,9 @@ import { MDXContent } from '@/components/blog/MDXContent'
 import { BlogCoverImage } from '@/components/blog/BlogCoverImage'
 import { CTAContextual } from '@/components/blog/CTAContextual'
 import { SidebarCTA } from '@/components/blog/SidebarCTA'
+import { ReadingProgress } from '@/components/blog/ReadingProgress'
+import { BlogMobileCTABar } from '@/components/blog/BlogMobileCTABar'
+import { WhatsAppStickyButton } from '@/components/ui/WhatsAppStickyButton'
 import { ArticleCard } from '@/components/blog/ArticleCard'
 import { NewsletterOptIn } from '@/components/ui/NewsletterOptIn'
 import { ServiceCategory, type ArticleFrontmatter } from '@/lib/types'
@@ -53,7 +56,9 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
   ]
 
   return (
-    <div data-testid="article-page" className="py-8 md:py-12 bg-background">
+    <div data-testid="article-page" className="pt-8 md:pt-12 pb-28 md:pb-12 bg-background">
+      {/* Barra de progresso de leitura (fixed top) */}
+      <ReadingProgress />
       <Container>
         {/* 1. Breadcrumb */}
         <Breadcrumb items={breadcrumbItems} className="mb-6" />
@@ -63,10 +68,9 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
 
           {/* Coluna principal */}
           <article>
-            {/* SidebarCTA mobile (before content on mobile) */}
-            <div className="lg:hidden mb-6">
-              <SidebarCTA relatedService={article.relatedService} />
-            </div>
+            {/* Mobile: o herói (capa + título) lidera; a conversão no mobile fica
+                a cargo da BlogMobileCTABar (fixa, persistente) + CTAContextual
+                (meio/fim). Sem card de CTA empurrando o herói abaixo da dobra. */}
 
             {/* 2. Header do artigo */}
             <header data-testid="article-page-header" className="mb-8">
@@ -156,12 +160,17 @@ export function ArticlePage({ article, relatedArticles }: ArticlePageProps) {
 
           {/* Sidebar desktop (sticky) */}
           <div className="hidden lg:block">
-            <div className="sticky top-8">
+            <div className="sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto">
               <SidebarCTA relatedService={article.relatedService} />
             </div>
           </div>
         </div>
       </Container>
+
+      {/* WhatsApp flutuante (desktop; ES retorna null; mobile usa a barra) */}
+      <WhatsAppStickyButton revealAfterPx={500} className="hidden md:flex" />
+      {/* Barra de CTA fixa no mobile */}
+      <BlogMobileCTABar relatedService={article.relatedService} />
     </div>
   )
 }

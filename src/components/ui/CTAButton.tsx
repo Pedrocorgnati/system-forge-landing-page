@@ -31,22 +31,28 @@ export function CTAButton({ config, size = 'md', variant, className, fullWidth }
       label: resolvedConfig.label,
     })
 
+    const isEmail = resolvedConfig.action === ConversionAction.EMAIL
     const posthogEvent =
       resolvedConfig.action === ConversionAction.WHATSAPP
         ? 'whatsapp_click'
-        : resolvedConfig.variant === 'primary'
-          ? 'cta_primary_click'
-          : 'cta_secondary_click'
+        : isEmail
+          ? 'email_click'
+          : resolvedConfig.variant === 'primary'
+            ? 'cta_primary_click'
+            : 'cta_secondary_click'
     posthogCapture(posthogEvent, {
       source: 'cta_button',
       action: resolvedConfig.action,
       label: resolvedConfig.label,
     })
 
-    window.open(resolvedConfig.href, '_blank', 'noopener,noreferrer')
+    // mailto: numa nova aba deixaria uma aba em branco — navega no mesmo contexto.
+    if (isEmail) {
+      window.location.href = resolvedConfig.href
+    } else {
+      window.open(resolvedConfig.href, '_blank', 'noopener,noreferrer')
+    }
   }
-
-  const isWhatsApp = resolvedConfig.action === ConversionAction.WHATSAPP
 
   return (
     <button
@@ -60,28 +66,24 @@ export function CTAButton({ config, size = 'md', variant, className, fullWidth }
         size === 'md' && 'px-5 py-2.5 text-base rounded-xl gap-2 min-h-[44px]',
         size === 'lg' && 'px-7 py-3.5 text-lg rounded-xl gap-2.5 min-h-[56px]',
         // variants
+        'active:scale-[0.98]',
         resolvedConfig.variant === 'primary' && [
           'bg-primary text-primary-foreground border border-transparent',
-          'hover:bg-primary-hover shadow-sm hover:shadow-md',
+          'shadow-sm hover:bg-primary-hover hover:shadow-md hover:-translate-y-px',
         ],
         resolvedConfig.variant === 'secondary' && [
-          'bg-transparent text-primary border border-primary',
-          'hover:bg-primary/10',
+          'bg-primary/5 text-primary border border-primary',
+          'hover:bg-primary hover:text-primary-foreground hover:shadow-sm',
         ],
         resolvedConfig.variant === 'ghost' && [
-          'bg-transparent text-primary border border-transparent',
-          'hover:bg-primary/5 underline-offset-4',
+          'bg-transparent text-muted-foreground border border-border',
+          'hover:bg-accent hover:text-foreground hover:border-foreground/20',
         ],
         fullWidth && 'w-full',
         className,
       )}
     >
-      {isWhatsApp && resolvedConfig.icon && (
-        <span className="mr-1" aria-hidden="true">
-          {resolvedConfig.icon}
-        </span>
-      )}
-      {!isWhatsApp && resolvedConfig.icon && (
+      {resolvedConfig.icon && (
         <span className="mr-1" aria-hidden="true">
           {resolvedConfig.icon}
         </span>
