@@ -132,7 +132,14 @@ jobs:
   # ===========================================================================
   deploy-it:
     name: Deploy IT (systemforge.it)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Serializado apos deploy-br: os 4 mercados compartilham UMA conta Hostinger
+    # (creds SFTP shared); em paralelo abriam ~24 conexoes -> throttle/timeout (EN
+    # ja estourou 150min). `needs` impoe ordem (1 job ativo por vez, <=6 conexoes);
+    # `!cancelled()` mantem independencia de falha (roda mesmo se o upstream falhar;
+    # nao roda se o run for cancelado). NAO usar concurrency-group compartilhado: o
+    # default cancela jobs pending excedentes -> 2 mercados nao publicariam.
+    needs: deploy-br
+    if: ${{ !cancelled() && (github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
     timeout-minutes: 150
@@ -227,7 +234,9 @@ jobs:
   # ===========================================================================
   deploy-en:
     name: Deploy EN (systemforgesoftware.com)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Serializado apos deploy-it (ver comentario em deploy-it).
+    needs: deploy-it
+    if: ${{ !cancelled() && (github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
     timeout-minutes: 150
@@ -322,7 +331,9 @@ jobs:
   # ===========================================================================
   deploy-es:
     name: Deploy ES (systemforge.es)
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    # Serializado apos deploy-en (ver comentario em deploy-it).
+    needs: deploy-en
+    if: ${{ !cancelled() && (github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch') }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
     timeout-minutes: 150

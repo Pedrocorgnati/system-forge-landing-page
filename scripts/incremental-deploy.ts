@@ -23,7 +23,7 @@
  *
  * O manifesto é bloqueado de acesso web pela regra em generate-htaccess.ts.
  */
-import { execFileSync } from 'node:child_process'
+import { execFileSync, spawnSync } from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
@@ -86,17 +86,82 @@ function runLftp(commands: string, label: string): void {
   }
 }
 
-/** lftp `get` do manifesto. Não lança se falhar (ausente = bootstrap). */
-function tryLftpGet(remoteFile: string, localFile: string): boolean {
-  try {
-    execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `${LFTP_PREAMBLE}; get "${remoteFile}" -o "${localFile}"; quit`], {
-      stdio: ['ignore', 'ignore', 'ignore'],
-      maxBuffer: 1 << 28,
-    })
-    return fs.existsSync(localFile)
-  } catch {
-    return false // manifesto ausente (bootstrap) ou erro de leitura
+type GetResult = 'OK' | 'NOT_FOUND'
+
+/** Classifica a stderr de uma falha do lftp em "ausência genuína" vs "erro de
+ * rede/transiente". Conservador: o que não casar como ausência é tratado como
+ * transiente (logo, retry), porque um full-mirror indevido é muito mais caro que
+ * uma tentativa a mais. */
+function isGenuineAbsence(stderr: string): boolean {
+  const s = stderr.toLowerCase()
+  return (
+    /no such file/.test(s) ||
+    /file not found/.test(s) ||
+    /access failed:.*no such/.test(s) ||
+    /permission denied/.test(s) || // inacessível p/ este user -> trate como "sem manifesto"
+    /access denied/.test(s)
+  )
+}
+
+/** Sonda leve de existência do manifesto remoto (sem baixar os ~3-4MB). Usa
+ * `cls -1` (listagem só-nomes) do caminho exato. Retorna:
+ *   true  -> existe (status 0 + 1+ linha listada);
+ *   false -> ausente (erro "no such file" OU cls falhou sem ruído de rede);
+ *   null  -> indeterminado (erro de rede na própria sonda) -> NÃO concluir nada. */
+function probeLftpExists(remoteFile: string): boolean | null {
+  const r = spawnSync(
+    'lftp',
+    ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `${LFTP_PREAMBLE}; cls -1 "${remoteFile}"; quit`],
+    { stdio: ['ignore', 'pipe', 'pipe'], maxBuffer: 1 << 28, encoding: 'utf8' },
+  )
+  const out = (r.stdout || '').trim()
+  const err = (r.error ? r.error.message : '') + (r.stderr || '')
+  if (r.status === 0 && out.length > 0) return true
+  if (isGenuineAbsence(err) || (r.status !== 0 && out.length === 0 && err.trim().length === 0)) return false
+  return null
+}
+
+/** lftp `get` do manifesto, COM retry (3x, backoff 15s — espelha runLftp).
+ * Distingue ausência genuína de falha transiente:
+ *   - "no such file"/permission denied -> NOT_FOUND imediato (bootstrap real);
+ *   - erro de rede                      -> retry; esgotadas as 3 tentativas, faz
+ *     uma sonda `cls`: só vira NOT_FOUND se a sonda disser AUSENTE; se a sonda
+ *     disser PRESENTE ou for indeterminada, LANÇA (deploy falha alto em vez de
+ *     full-mirror silencioso sobre um glitch de rede).
+ * Apaga qualquer download parcial a cada falha p/ um arquivo truncado nunca ser
+ * lido como sucesso (a guarda JSON.parse do chamador continua valendo também). */
+function tryLftpGet(remoteFile: string, localFile: string): GetResult {
+  let lastErr = ''
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    const r = spawnSync(
+      'lftp',
+      ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `${LFTP_PREAMBLE}; get "${remoteFile}" -o "${localFile}"; quit`],
+      { stdio: ['ignore', 'ignore', 'pipe'], maxBuffer: 1 << 28, encoding: 'utf8' },
+    )
+    if (r.status === 0 && fs.existsSync(localFile)) {
+      console.log(`[incr-deploy] manifesto remoto baixado (tentativa ${attempt}/3)`)
+      return 'OK'
+    }
+    fs.rmSync(localFile, { force: true }) // limpa parcial p/ não confundir existsSync nem JSON.parse
+    lastErr = (r.error ? r.error.message + '\n' : '') + (r.stderr || '')
+    if (isGenuineAbsence(lastErr)) {
+      console.log('[incr-deploy] manifesto remoto ausente (lftp: no such file) -> bootstrap')
+      return 'NOT_FOUND'
+    }
+    console.error(`[incr-deploy] get manifesto falhou (tentativa ${attempt}/3, transiente): ${lastErr.trim().slice(0, 400)}`)
+    if (attempt < 3) execFileSync('sleep', ['15'])
   }
+  console.error('[incr-deploy] get do manifesto falhou 3x — sondando existência via cls antes de decidir bootstrap')
+  const exists = probeLftpExists(remoteFile)
+  if (exists === false) {
+    console.log('[incr-deploy] sonda confirma manifesto AUSENTE -> bootstrap legítimo')
+    return 'NOT_FOUND'
+  }
+  throw new Error(
+    `[incr-deploy] manifesto remoto NÃO baixou após 3 tentativas e a sonda ` +
+    `${exists === true ? 'confirma que ELE EXISTE' : 'foi indeterminada (rede instável)'}. ` +
+    `Abortando p/ NÃO disparar full-mirror indevido. Último erro: ${lastErr.trim().slice(0, 400)}`,
+  )
 }
 
 function lftpQuote(p: string): string {
@@ -148,7 +213,7 @@ let previous: Record<string, string> = {}
 const FORCE_FULL = process.env.FORCE_FULL_DEPLOY === '1'
 const tmpPrev = path.join(os.tmpdir(), `prev-manifest-${process.pid}.json`)
 fs.rmSync(tmpPrev, { force: true })
-if (!FORCE_FULL && tryLftpGet(`${REMOTE}/${MANIFEST}`, tmpPrev)) {
+if (!FORCE_FULL && tryLftpGet(`${REMOTE}/${MANIFEST}`, tmpPrev) === 'OK') {
   try { previous = JSON.parse(fs.readFileSync(tmpPrev, 'utf8')) }
   catch { console.warn('[incr-deploy] manifesto remoto corrompido — tratando como bootstrap'); previous = {} }
   fs.rmSync(tmpPrev, { force: true })

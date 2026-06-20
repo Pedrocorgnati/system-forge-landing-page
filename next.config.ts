@@ -8,6 +8,17 @@ const withAnalyzer = withBundleAnalyzer({
 
 const nextConfig: NextConfig = {
   output: 'export',
+  // BUILD_ID estável: sem isto o Next gera um nanoid novo a cada build, e como
+  // todo HTML embute /_next/static/<BUILD_ID>/_buildManifest.js + _ssgManifest.js,
+  // TODO arquivo HTML muda de path a cada build -> o deploy SFTP incremental
+  // (scripts/incremental-deploy.ts, diff sha256) via um delta de ~15k-35k arquivos
+  // em todo deploy. Com um id constante, rebuilds de mesmo conteudo produzem out/
+  // identico (toUpload=0) e um post novo gera so um delta pequeno. Seguro em
+  // output:'export': nao ha runtime que rejeite id divergente, os chunks tem
+  // content-hash proprio (cache-bust real continua), e o deploy purga o Cloudflare
+  // (purge_everything) apos cada upload. Strings explicitas sao honradas verbatim
+  // pelo Next (o guard /ad/i so se aplica ao fallback nanoid, nao a este valor).
+  generateBuildId: () => 'systemforge-static',
   experimental: {
     // RESOLVED: tree-shaking otimizado para lucide-react
     optimizePackageImports: ['lucide-react'],
