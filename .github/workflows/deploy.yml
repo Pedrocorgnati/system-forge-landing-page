@@ -40,7 +40,7 @@ jobs:
     # V-02: lftp mirror --ignore-time sincroniza apenas arquivos com tamanho
     # diferente do remoto — evita reupload massivo de ~36k arquivos para 4 posts
     # novos. Timeout reduzido de 150→90 min; ajustar se locale crescer muito.
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Capture deploy start timestamp
@@ -135,7 +135,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Capture deploy start timestamp
@@ -230,7 +230,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Capture deploy start timestamp
@@ -325,7 +325,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     # V-02: lftp mirror --ignore-time. Ver comentário em deploy-br.
-    timeout-minutes: 90
+    timeout-minutes: 150
 
     steps:
       - name: Capture deploy start timestamp

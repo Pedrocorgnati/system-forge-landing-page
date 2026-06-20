@@ -191,31 +191,24 @@ const manifestPut =
   `mv ${lftpQuote(`${REMOTE}/${MANIFEST}.tmp`)} ${lftpQuote(`${REMOTE}/${MANIFEST}`)}`
 
 // ── 4. Deploy ───────────────────────────────────────────────────────────────
-if (bootstrap || toUpload.length > MIRROR_THRESHOLD) {
-  // Full mirror (bootstrap ou mudança massiva). Mantém arquivos remotos extras
-  // (sem --delete) para não arriscar; o manifesto passa a refletir o build.
-  //
-  // CORREÇÃO crítica: NÃO usar --ignore-time aqui. Com --ignore-time o lftp
-  // compara só TAMANHO e PULA arquivos do mesmo tamanho — mas uma página HTML
-  // cujo único diff é o hash de um asset `_next/static/<hash>` (mesmo
-  // comprimento -> mesmo tamanho) NÃO seria reenviada, ficando com CSS/JS
-  // velhos. Pior: o manifesto é gravado com os hashes LOCAIS de qualquer jeito,
-  // então o servidor dessincroniza em silêncio e os deploys incrementais
-  // seguintes nunca reenviam essas páginas (staleness permanente). Sem
-  // --ignore-time o lftp usa mtime: no CI todo arquivo recém-buildado/extraído
-  // é mais novo que o remoto -> sobe TUDO -> servidor == manifesto. Mais lento
-  // (~todo o build), mas só dispara em bootstrap ou mudança massiva (>${MIRROR_THRESHOLD}).
-  console.log(`[incr-deploy] estratégia: MIRROR completo (${bootstrap ? 'bootstrap' : toUpload.length + ' alterados > ' + MIRROR_THRESHOLD})`)
-  if (bootstrap) {
-    // Sem manifesto remoto, o mirror (sem --delete) NÃO remove as árvores
-    // pré-slugify com %20 (blog/categoria/<react%20native>, blog/tag/<...>) ->
-    // continuariam 404. Purga só essas árvores renomeáveis; o mirror logo abaixo
-    // repovoa com os caminhos slugificados. Best-effort (ausência é ok).
-    runLftpBestEffort(
-      `rm -rf ${lftpQuote(`${REMOTE}/blog/categoria`)}; rm -rf ${lftpQuote(`${REMOTE}/blog/tag`)}`,
-      'purge-renamed-dirs',
-    )
-  }
+// Princípio comum a todos os caminhos: NUNCA usar --ignore-time. Com
+// --ignore-time o lftp compara só TAMANHO e PULA arquivos do mesmo tamanho — mas
+// uma página HTML cujo único diff é o hash de um asset `_next/static/<hash>`
+// (mesmo comprimento -> mesmo tamanho) não seria reenviada, ficando com CSS/JS
+// velhos; pior, o manifesto é gravado com os hashes LOCAIS de qualquer jeito, e
+// o servidor dessincroniza em silêncio (staleness permanente). Sem --ignore-time
+// o lftp usa mtime, e todo arquivo recém-criado no runner é mais novo que o
+// remoto -> sobe de fato.
+if (bootstrap) {
+  // Bootstrap: sem manifesto remoto, espelha o build inteiro de out/.
+  console.log('[incr-deploy] estratégia: BOOTSTRAP (mirror completo de out/)')
+  // O mirror (sem --delete) NÃO remove as árvores pré-slugify com %20
+  // (blog/categoria/<react%20native>, blog/tag/<...>) -> continuariam 404. Purga
+  // só essas árvores renomeáveis; o mirror logo abaixo repovoa slugificado.
+  runLftpBestEffort(
+    `rm -rf ${lftpQuote(`${REMOTE}/blog/categoria`)}; rm -rf ${lftpQuote(`${REMOTE}/blog/tag`)}`,
+    'purge-renamed-dirs',
+  )
   runLftp(
     `mirror --reverse --parallel=${PARALLEL} --no-empty-dirs --log=/dev/stderr ${lftpQuote(OUT + '/')} ${lftpQuote(REMOTE)}`,
     'mirror',
@@ -224,8 +217,35 @@ if (bootstrap || toUpload.length > MIRROR_THRESHOLD) {
 } else if (toUpload.length === 0 && toDelete.length === 0) {
   console.log('[incr-deploy] nada mudou — só atualiza o manifesto (no-op de conteúdo)')
   runLftp(manifestPut, 'manifest')
+} else if (toUpload.length > MIRROR_THRESHOLD) {
+  // Mudança massiva: subir só o DELTA, mas em PARALELO. `mirror out/` espelharia
+  // os ~35k arquivos do build inteiro (mtime fresco => sobe tudo) e estoura o
+  // timeout-minutes do job no maior mercado (BR já bateu 90 min). Em vez disso,
+  // monta uma árvore temporária só com os arquivos alterados (toUpload) e dá
+  // `mirror` NELA: arquivos do stage têm mtime recém-criado -> todos sobem
+  // (inclui os de mesmo tamanho com conteúdo novo) e SÓ eles -> rápido e correto.
+  const stage = path.join(os.tmpdir(), `stage-${process.pid}`)
+  fs.rmSync(stage, { recursive: true, force: true })
+  for (const f of toUpload) {
+    const dest = path.join(stage, f)
+    fs.mkdirSync(path.dirname(dest), { recursive: true })
+    fs.copyFileSync(path.join(OUT, f), dest)
+  }
+  console.log(`[incr-deploy] estratégia: DELTA-MIRROR (${toUpload.length} alterados via stage, ${toDelete.length} a apagar)`)
+  try {
+    runLftp(
+      `mirror --reverse --parallel=${PARALLEL} --no-empty-dirs --log=/dev/stderr ${lftpQuote(stage + '/')} ${lftpQuote(REMOTE)}`,
+      'mirror-delta',
+    )
+    if (toDelete.length > 0) {
+      runLftp(toDelete.map((f) => `rm -f ${lftpQuote(`${REMOTE}/${f}`)}`).join(';\n'), 'deletes')
+    }
+    runLftp(manifestPut, 'manifest')
+  } finally {
+    fs.rmSync(stage, { recursive: true, force: true })
+  }
 } else {
-  // Incremental: mkdir dos diretórios, put dos alterados, rm dos removidos.
+  // Incremental pequeno: mkdir dos diretórios, put dos alterados, rm dos removidos.
   const dirs = [...new Set(toUpload.map((f) => path.posix.dirname(f)).filter((d) => d && d !== '.'))].sort()
   const cmds: string[] = []
   for (const d of dirs) cmds.push(`mkdir -p -f ${lftpQuote(`${REMOTE}/${d}`)}`)
