@@ -18,11 +18,14 @@ export const esConfig: SiteConfig = {
     'Desarrollamos software a medida: SaaS, apps móviles, landing pages, e-commerce, dashboards y automatizaciones con IA. Equipo especializado, entrega en semanas.',
   author: 'SystemForge',
   email: process.env.NEXT_PUBLIC_CONTACT_EMAIL ?? 'hola@systemforge.es',
-  // Sem linha WhatsApp ES propria ate hoje; fallback vazio evita enviar lead
-  // espanhol para numero italiano. Componentes guardam render em whatsapp==''.
-  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_ES ?? '',
+  // ES usa a linha WhatsApp da ITALIA (decisao do operador 2026-06-20): leads
+  // espanhois caem no mesmo atendimento italiano. A mensagem pre-preenchida fica
+  // em espanhol (cta.ts / WhatsAppStickyButton localizam por locale).
+  whatsapp: process.env.NEXT_PUBLIC_WHATSAPP_NUMBER_ES ?? '+393508751885',
   calendly: '',
-  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/quote'}?locale=es-ES`,
+  // Orcamento entra pela HOME (raiz) do dashboard, nao mais por /quote: origem por host,
+  // idioma por ?locale=. Rotas antigas /quote (200) e /get-ai-quote (redirect) nunca 404 (task 013).
+  budgetEngine: `${process.env.NEXT_PUBLIC_BUDGET_ENGINE_URL ?? 'https://www.systemforgedashboard.com/'}?locale=es-ES`,
   address: 'España / Latinoamérica',
   compliance: 'GDPR',
   currency: 'EUR',
