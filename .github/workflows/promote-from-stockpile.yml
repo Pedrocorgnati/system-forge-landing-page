@@ -31,9 +31,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Promote (max-per-locale 3)
+      - name: Promote (max-per-locale 1)
         env:
-          MAX_PER_LOCALE: '3'
+          MAX_PER_LOCALE: '1'
         # O script (scripts/promote-from-stockpile.ts, passo 7) faz commit +
         # pull --rebase --autostash + push origin main internamente. Se o push
         # falhar, o script sai != 0, este step falha e o job aborta antes do
