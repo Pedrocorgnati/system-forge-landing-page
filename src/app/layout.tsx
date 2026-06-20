@@ -93,7 +93,12 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    // Só emite a meta google-site-verification com um token REAL — nunca o
+    // placeholder de build ("[PRODUCTION] seu_token_gsc_aqui"), que viraria
+    // uma meta tag inválida em produção.
+    google: ((t) => (t && !t.includes('[PRODUCTION]') && !/seu_token|placeholder/i.test(t) ? t : undefined))(
+      process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    ),
   },
 }
 

@@ -47,21 +47,30 @@ function need(k: string): string {
 }
 
 const LFTP_PREAMBLE = [
+  // CRÍTICO: sem isto o lftp sai 0 mesmo com put/mirror/rm parcialmente falho
+  // (o último comando é `quit`) -> deploy "verde" mas site velho + manifesto
+  // gravado em cima de um upload incompleto (quebra a idempotência). Com
+  // fail-exit, a falha propaga -> retry 3x engata, o step do CI falha, e o
+  // manifesto antigo sobrevive p/ o próximo run reenviar o que faltou.
+  'set cmd:fail-exit yes',
   'set sftp:auto-confirm yes',
   'set net:max-retries 5',
   'set net:timeout 30',
   'set net:reconnect-interval-base 5',
 ].join('; ')
 
-/** Roda um script lftp (string de comandos) com até 3 tentativas. */
+/** Roda um script lftp (string de comandos) com até 3 tentativas.
+ * Usa a forma `lftp -u user,pass host -e "source FILE; quit"` (idêntica à do
+ * deploy legado que funcionava): `-f` com host é inválido ("Usage: lftp ...").
+ * `source` lê os comandos do arquivo (evita limite de tamanho de arg). */
 function runLftp(commands: string, label: string): void {
   const file = path.join(os.tmpdir(), `lftp-${process.pid}-${Date.now()}.txt`)
-  fs.writeFileSync(file, `${LFTP_PREAMBLE};\n${commands}\nquit\n`)
+  fs.writeFileSync(file, `${LFTP_PREAMBLE};\n${commands}\n`)
   try {
     for (let attempt = 1; attempt <= 3; attempt++) {
       try {
         console.log(`[incr-deploy] lftp ${label} — tentativa ${attempt}/3`)
-        execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-f', file], {
+        execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `source ${file}; quit`], {
           stdio: ['ignore', 'inherit', 'inherit'],
           maxBuffer: 1 << 28,
         })
@@ -77,25 +86,37 @@ function runLftp(commands: string, label: string): void {
   }
 }
 
-/** lftp que captura stdout (para o `get` do manifesto). Não lança se falhar. */
+/** lftp `get` do manifesto. Não lança se falhar (ausente = bootstrap). */
 function tryLftpGet(remoteFile: string, localFile: string): boolean {
-  const file = path.join(os.tmpdir(), `lftp-get-${process.pid}-${Date.now()}.txt`)
-  fs.writeFileSync(file, `${LFTP_PREAMBLE};\nget "${remoteFile}" -o "${localFile}";\nquit\n`)
   try {
-    execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-f', file], {
+    execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `${LFTP_PREAMBLE}; get "${remoteFile}" -o "${localFile}"; quit`], {
       stdio: ['ignore', 'ignore', 'ignore'],
       maxBuffer: 1 << 28,
     })
     return fs.existsSync(localFile)
   } catch {
     return false // manifesto ausente (bootstrap) ou erro de leitura
-  } finally {
-    fs.rmSync(file, { force: true })
   }
 }
 
 function lftpQuote(p: string): string {
   return `"${p.replace(/(["\\])/g, '\\$1')}"`
+}
+
+/** Roda comandos lftp em best-effort (1 tentativa, não lança). Para limpezas
+ * onde a falha não deve abortar o deploy (ex.: purga de diretórios renomeados). */
+function runLftpBestEffort(commands: string, label: string): void {
+  const file = path.join(os.tmpdir(), `lftp-be-${process.pid}-${Date.now()}.txt`)
+  fs.writeFileSync(file, `${LFTP_PREAMBLE};\n${commands}\n`)
+  try {
+    execFileSync('lftp', ['-u', `${USER},${PASS}`, `sftp://${HOST}:${PORT}`, '-e', `source ${file}; quit`], {
+      stdio: ['ignore', 'inherit', 'inherit'], maxBuffer: 1 << 28,
+    })
+  } catch (e) {
+    console.warn(`[incr-deploy] ${label} (best-effort) falhou, seguindo: ${(e as Error).message}`)
+  } finally {
+    fs.rmSync(file, { force: true })
+  }
 }
 
 // ── 1. Manifesto local ──────────────────────────────────────────────────────
@@ -116,6 +137,12 @@ for (const rel of localFiles) {
 }
 console.log(`[incr-deploy] build local: ${localFiles.length} arquivos`)
 
+// Fail-closed: build vazio ou sem .htaccess = artefato quebrado. Deployar
+// apagaria conteúdo / quebraria o site (a máquina de delete removeria o
+// .htaccess vivo com toda a config de HTTPS/CSP/rewrites).
+if (localFiles.length === 0) { console.error('[incr-deploy] ABORTA: build vazio (0 arquivos)'); process.exit(1) }
+if (!('.htaccess' in local)) { console.error('[incr-deploy] ABORTA: out/.htaccess ausente (build incompleto)'); process.exit(1) }
+
 // ── 2. Manifesto remoto (o que está publicado) ──────────────────────────────
 let previous: Record<string, string> = {}
 const FORCE_FULL = process.env.FORCE_FULL_DEPLOY === '1'
@@ -131,20 +158,46 @@ console.log(`[incr-deploy] manifesto remoto: ${bootstrap ? '(ausente -> bootstra
 
 // ── 3. Diff ─────────────────────────────────────────────────────────────────
 const toUpload = localFiles.filter((f) => local[f] !== previous[f])
-const toDelete = Object.keys(previous).filter((f) => !(f in local) && f !== MANIFEST)
+// NUNCA apaga o manifesto nem o .htaccess (não estão em out/ na ordem normal,
+// mas se algum dia entrarem no manifesto, um build sem eles os apagaria).
+const PROTECTED = new Set([MANIFEST, '.htaccess'])
+const toDelete = Object.keys(previous).filter((f) => !(f in local) && !PROTECTED.has(f))
 console.log(`[incr-deploy] delta: subir=${toUpload.length} apagar=${toDelete.length} inalterados=${localFiles.length - toUpload.length}`)
+
+// Guarda anti-catástrofe: fora do bootstrap, se o delta apagaria >30% do
+// publicado, o artefato/manifesto está suspeito — aborta (use FORCE_FULL_DEPLOY=1
+// para um re-sync intencional via mirror não-destrutivo).
+const prevCount = Object.keys(previous).length
+if (!bootstrap && prevCount > 0 && toDelete.length / prevCount > 0.30) {
+  console.error(`[incr-deploy] ABORTA: apagaria ${toDelete.length}/${prevCount} (>30%) — suspeito. Use FORCE_FULL_DEPLOY=1 se intencional.`)
+  process.exit(1)
+}
 
 // Grava o novo manifesto num arquivo temp para upload (sobe por último).
 const tmpNew = path.join(os.tmpdir(), `new-manifest-${process.pid}.json`)
 fs.writeFileSync(tmpNew, JSON.stringify(local))
 
-const manifestPut = `put ${lftpQuote(tmpNew)} -o ${lftpQuote(`${REMOTE}/${MANIFEST}`)}`
+// Escrita atômica: put no .tmp + rename server-side (evita manifesto truncado
+// num corte de conexão -> próximo run não vira bootstrap por engano).
+const manifestPut =
+  `put ${lftpQuote(tmpNew)} -o ${lftpQuote(`${REMOTE}/${MANIFEST}.tmp`)};\n` +
+  `mv ${lftpQuote(`${REMOTE}/${MANIFEST}.tmp`)} ${lftpQuote(`${REMOTE}/${MANIFEST}`)}`
 
 // ── 4. Deploy ───────────────────────────────────────────────────────────────
 if (bootstrap || toUpload.length > MIRROR_THRESHOLD) {
   // Full mirror (bootstrap ou mudança massiva). Mantém arquivos remotos extras
   // (sem --delete) para não arriscar; o manifesto passa a refletir o build.
   console.log(`[incr-deploy] estratégia: MIRROR completo (${bootstrap ? 'bootstrap' : toUpload.length + ' alterados > ' + MIRROR_THRESHOLD})`)
+  if (bootstrap) {
+    // Sem manifesto remoto, o mirror (sem --delete) NÃO remove as árvores
+    // pré-slugify com %20 (blog/categoria/<react%20native>, blog/tag/<...>) ->
+    // continuariam 404. Purga só essas árvores renomeáveis; o mirror logo abaixo
+    // repovoa com os caminhos slugificados. Best-effort (ausência é ok).
+    runLftpBestEffort(
+      `rm -rf ${lftpQuote(`${REMOTE}/blog/categoria`)}; rm -rf ${lftpQuote(`${REMOTE}/blog/tag`)}`,
+      'purge-renamed-dirs',
+    )
+  }
   runLftp(
     `mirror --reverse --parallel=${PARALLEL} --ignore-time --no-empty-dirs --log=/dev/stderr ${lftpQuote(OUT + '/')} ${lftpQuote(REMOTE)}`,
     'mirror',

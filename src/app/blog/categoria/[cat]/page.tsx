@@ -58,7 +58,9 @@ export default async function BlogCategoryPage({ params }: PageProps) {
     .filter((a) => a.tags.some((t) => slugifyTag(t) === cat))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const totalPages = Math.ceil(sorted.length / BLOG_ITEMS_PER_PAGE)
+  // Não existe rota paginada por categoria (/blog/categoria/[cat]/page/[n]),
+  // então forçamos 1 página para não renderizar links de paginação mortos.
+  const totalPages = 1
   const pageArticles = sorted.slice(0, BLOG_ITEMS_PER_PAGE) as ArticleFrontmatter[]
 
   // Top 8 tags globais por frequência — consistente com a página principal do blog

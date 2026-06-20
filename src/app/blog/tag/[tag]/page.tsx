@@ -56,7 +56,9 @@ export default async function BlogTagPage({ params }: PageProps) {
     .filter((a) => a.tags.some((t) => slugifyTag(t) === tag))
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-  const totalPages = Math.ceil(Math.max(sorted.length, 1) / BLOG_ITEMS_PER_PAGE)
+  // Não existe rota paginada por tag (/blog/tag/[tag]/page/[n]); 1 página evita
+  // links de paginação mortos.
+  const totalPages = 1
   const pageArticles = sorted.slice(0, BLOG_ITEMS_PER_PAGE) as ArticleFrontmatter[]
 
   const tagCounts = allArticles.flatMap((a) => a.tags).reduce<Record<string, number>>((acc, tag) => {

@@ -132,10 +132,10 @@ function generateHtaccess(locale: string): string {
   # ----------------------------------------------------------------
   Options -Indexes
 
-  # Bloqueia o manifesto do deploy incremental (não é conteúdo público).
-  <Files ".deploy-manifest.json">
+  # Bloqueia o manifesto do deploy incremental (e seu .tmp) — não é público.
+  <FilesMatch "^\\.deploy-manifest\\.json(\\.tmp)?$">
     Require all denied
-  </Files>
+  </FilesMatch>
 
   # Desabilita o redirect automático para / (causaria /blog → /blog/ → 403)
   DirectorySlash Off
