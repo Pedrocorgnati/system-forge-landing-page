@@ -13,31 +13,28 @@ const locale = config.locale
 const kpiData = [
   {
     value: '50+',
-    label: locale === 'it-IT' ? 'Progetti' : locale === 'en' ? 'Projects' : 'Projetos',
+    label: locale === 'it-IT' ? 'Progetti' : locale === 'en' ? 'Projects' : locale === 'es-ES' ? 'Proyectos' : 'Projetos',
     bg: 'bg-primary/5',
     color: 'text-primary',
   },
   {
     value: '100%',
-    label: locale === 'it-IT' ? 'Nei tempi' : locale === 'en' ? 'On time' : 'No prazo',
+    label: locale === 'it-IT' ? 'Nei tempi' : locale === 'en' ? 'On time' : locale === 'es-ES' ? 'A tiempo' : 'No prazo',
     bg: 'bg-success/5',
     color: 'text-success',
   },
   {
     value: '24/7',
-    label: locale === 'it-IT' ? 'Supporto' : locale === 'en' ? 'Support' : 'Suporte',
+    label: locale === 'it-IT' ? 'Supporto' : locale === 'en' ? 'Support' : locale === 'es-ES' ? 'Soporte' : 'Suporte',
     bg: 'bg-info/5',
     color: 'text-info',
   },
 ]
 
 
-const clientNames = [
-  'TechNova', 'ScaleUp Brasil', 'FinanceHub', 'DataPrime', 'CloudFirst',
-  'InnovateCo', 'GrowthLabs', 'SmartRetail', 'HealthTech BR', 'EduPlatform',
-]
-const clientNamesDoubled = [...clientNames, ...clientNames]
-
+// H4 (2026-06-25): marquee de "clientes" removida — o operador confirmou que os
+// nomes eram fictícios; manter prova social inventada viola a regra anti-fake-proof
+// (landing-page-conversion-rules). Sem clientes nomeados autorizados, nada substitui.
 
 export function HeroSection() {
   return (
@@ -81,11 +78,21 @@ export function HeroSection() {
               {pageMessages.hero.subtitulo}
             </p>
 
-            {/* CTAs */}
+            {/* CTAs — primario (budget engine, acao de conversao) + secundario (portfolio) */}
             <div className="hero-enter hero-delay-300 flex flex-wrap items-center gap-3">
+              <a
+                href={config.budgetEngine}
+                target="_blank"
+                rel="noopener noreferrer"
+                data-testid="hero-cta-budget"
+                className="group inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-transparent bg-primary px-6 py-3 text-base font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary-hover hover:shadow-md hover:-translate-y-px active:scale-[0.98] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--ring)]"
+              >
+                {messages.cta.budget}
+                <ArrowRight size={18} className="transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
+              </a>
               <Link
                 href={config.routes.portfolio}
-                className="group inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-lg"
+                className="group inline-flex min-h-[44px] items-center gap-1.5 px-4 py-2.5 text-sm font-medium text-foreground hover:text-primary transition-colors rounded-lg"
               >
                 {messages.cta.portfolio}
                 <ArrowRight size={16} className="ml-0.5 transition-transform duration-150 group-hover:translate-x-1" aria-hidden="true" />
@@ -108,6 +115,8 @@ export function HeroSection() {
                 ? '✓ Senza vincoli \u00a0\u00a0 ✓ Preventivo gratuito \u00a0\u00a0 ✓ Risposta entro 2h'
                 : locale === 'en'
                 ? '✓ No lock-in \u00a0\u00a0 ✓ Free estimate \u00a0\u00a0 ✓ Response within 2h'
+                : locale === 'es-ES'
+                ? '✓ Sin permanencia    ✓ Presupuesto gratuito    ✓ Respuesta en 2h'
                 : '✓ Sem fidelidade \u00a0\u00a0 ✓ Orçamento gratuito \u00a0\u00a0 ✓ Resposta em até 2h'}
             </p>
           </div>
@@ -123,6 +132,7 @@ export function HeroSection() {
                 src="/hero-illustration.webp"
                 alt={locale === 'it-IT' ? 'Illustrazione SystemForge - software su misura'
                   : locale === 'en' ? 'SystemForge illustration - custom software'
+                  : locale === 'es-ES' ? 'Ilustración SystemForge - software a medida'
                   : 'Ilustração SystemForge - software sob medida'}
                 width={1254}
                 height={1254}
@@ -135,32 +145,6 @@ export function HeroSection() {
           </div>
         </div>
 
-        {/* Client names marquee */}
-        <div className="hero-enter hero-delay-400 border-t border-border pb-12 pt-6">
-          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-[0.15em] mb-4 text-center">
-            {locale === 'it-IT' ? 'Aziende che hanno già cresciuto'
-              : locale === 'en' ? 'Companies that have already grown'
-              : 'Empresas que já cresceram'}
-          </p>
-          <div
-            className="relative overflow-hidden"
-            style={{
-              maskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)',
-            }}
-          >
-            <div className="flex gap-8 animate-marquee-hero" aria-hidden="true">
-              {clientNamesDoubled.map((name, i) => (
-                <span
-                  key={`${name}-${i}`}
-                  className="shrink-0 text-sm font-medium text-muted-foreground/50 whitespace-nowrap"
-                >
-                  {name}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
       </Container>
     </section>
   )

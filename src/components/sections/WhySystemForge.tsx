@@ -5,6 +5,7 @@ import { useCounter } from '@/hooks/useCounter'
 import { FileText, SearchCheck, Blocks, Zap, ShieldCheck, Headphones } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
+import { SectionCTA } from '@/components/ui/SectionCTA'
 import { cn } from '@/lib/utils'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
@@ -40,6 +41,14 @@ const REASONS: Record<string, ReasonItem[]> = {
     { Icon: ShieldCheck, title: 'Code is Yours', description: 'Zero lock-in. All source code, infrastructure and data stays with you. No unwanted dependencies.' },
     { Icon: Headphones, title: 'Post-Delivery Support', description: 'We don\'t disappear after deploy. We follow the launch and offer dedicated technical support.' },
   ],
+  'es-ES': [
+    { Icon: FileText, title: 'Documentación primero', description: 'Cada proyecto comienza con documentación completa — PRD, wireframes y especificaciones antes de escribir una sola línea de código.' },
+    { Icon: SearchCheck, title: 'Transparencia total', description: 'Acceso en tiempo real al código, repositorio, tareas e informes de progreso durante todo el desarrollo.' },
+    { Icon: Blocks, title: 'Arquitectura sólida', description: 'Código limpio, probado y documentado. Entregamos sistemas que tu equipo puede mantener y hacer evolucionar.' },
+    { Icon: Zap, title: 'Entrega rápida', description: 'Sprints cortos con entregas incrementales. Ves resultados reales en semanas, no en meses.' },
+    { Icon: ShieldCheck, title: 'El código es tuyo', description: 'Cero lock-in. Todo el código fuente, la infraestructura y los datos se quedan contigo. Sin dependencias no deseadas.' },
+    { Icon: Headphones, title: 'Soporte posentrega', description: 'No desaparecemos tras el despliegue. Acompañamos el lanzamiento y ofrecemos soporte técnico dedicado.' },
+  ],
 }
 
 const reasons: ReasonItem[] = REASONS[locale] ?? REASONS['pt-BR']!
@@ -62,6 +71,12 @@ const METRICS: Record<string, { target: number; suffix: string; label: string }[
     { target: 100, suffix: '%', label: 'Client satisfaction' },
     { target: 5, suffix: '', label: 'Years of experience' },
     { target: 2, suffix: 'h', label: 'Response time' },
+  ],
+  'es-ES': [
+    { target: 50, suffix: '+', label: 'Proyectos entregados' },
+    { target: 100, suffix: '%', label: 'Satisfacción de clientes' },
+    { target: 5, suffix: '', label: 'Años de experiencia' },
+    { target: 2, suffix: 'h', label: 'Tiempo de respuesta' },
   ],
 }
 
@@ -187,17 +202,20 @@ export function WhySystemForge() {
                 <span className="text-sm font-semibold text-primary uppercase tracking-widest">
                   {locale === 'it-IT' ? 'Perché SystemForge'
                     : locale === 'en' ? 'Why SystemForge'
+                    : locale === 'es-ES' ? 'Por qué SystemForge'
                     : 'Por que a SystemForge'}
                 </span>
               </div>
               <h2 className="text-[32px] sm:text-[40px] font-semibold text-foreground leading-tight">
                 {locale === 'it-IT' ? <>Non siamo una semplice <span className="text-muted-foreground">agenzia software</span></>
                   : locale === 'en' ? <>We&apos;re Not Just Another <span className="text-muted-foreground">Software Agency</span></>
+                  : locale === 'es-ES' ? <>No somos una simple <span className="text-muted-foreground">agencia de software</span></>
                   : <>Não somos mais uma{' '}<span className="text-muted-foreground">agência de software</span></>}
               </h2>
               <p className="text-base text-muted-foreground leading-relaxed max-w-xl">
                 {locale === 'it-IT' ? 'Processo chiaro, documentazione rigorosa e impegno reale nel successo del tuo progetto.'
                   : locale === 'en' ? 'Clear process, rigorous documentation and genuine commitment to the success of your project.'
+                  : locale === 'es-ES' ? 'Proceso claro, documentación rigurosa y compromiso real con el éxito de tu proyecto.'
                   : 'Processo claro, documentação rigorosa e comprometimento real com o sucesso do seu projeto.'}
               </p>
             </div>
@@ -277,6 +295,20 @@ export function WhySystemForge() {
               ))}
             </dl>
           </div>
+
+          {/* Conversao: trust signals -> acao primaria (locale-aware) */}
+          <SectionCTA
+            context="why-system-forge"
+            lead={
+              locale === 'it-IT'
+                ? 'Pronto a iniziare? Richiedi il preventivo del tuo progetto.'
+                : locale === 'en'
+                ? 'Ready to start? Request your project scope.'
+                : locale === 'es-ES'
+                ? '¿Listo para empezar? Solicita el alcance de tu proyecto.'
+                : 'Pronto para começar? Solicite o escopo do seu projeto.'
+            }
+          />
 
         </div>
       </Container>

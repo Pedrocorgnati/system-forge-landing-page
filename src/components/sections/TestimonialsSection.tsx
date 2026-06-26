@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Quote, Pause, Play } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
+import { SectionCTA } from '@/components/ui/SectionCTA'
 import { testimonials } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import { loadMessages } from '@config/content'
@@ -208,7 +209,7 @@ export function TestimonialsSection() {
                 <div className="flex items-center gap-3">
                   <Avatar name={current.author} avatarUrl={current.avatarUrl} isActive />
                   <div>
-                    <p className="font-semibold text-foreground text-sm">{current.author}</p>
+                    <h3 className="font-semibold text-foreground text-sm">{current.author}</h3>
                     <p className="text-xs text-muted-foreground">
                       {current.role} · {current.company}
                     </p>
@@ -329,7 +330,7 @@ export function TestimonialsSection() {
                   <div className="flex items-center gap-3 mt-auto">
                     <Avatar name={t.author} avatarUrl={t.avatarUrl} isActive={i === active} />
                     <div>
-                      <p className="font-medium text-foreground text-sm">{t.author}</p>
+                      <h3 className="font-medium text-foreground text-sm">{t.author}</h3>
                       <p className="text-xs text-muted-foreground">
                         {t.role} · {t.company}
                       </p>
@@ -339,6 +340,9 @@ export function TestimonialsSection() {
               </div>
             ))}
           </div>
+
+          {/* Conversao: prova social -> acao primaria (locale-aware) */}
+          <SectionCTA context="testimonials" className="mt-12" />
         </div>
       </Container>
     </section>

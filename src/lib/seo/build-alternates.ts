@@ -86,12 +86,16 @@ export function buildLanguagesForArticle(
     languages[hreflang] = `${domain}${cleanBase}/${slug}`
   }
 
-  // x-default → versão EN (se existir)
+  // x-default → versão EN. Política NEXT-005: x-default é OBRIGATÓRIO e aponta
+  // para EN. Sem versão EN no cluster não há x-default válido, então o artigo
+  // não emite hreflang algum (tratado como single-locale) — evita o erro
+  // "X-DEFAULT AUSENTE" do validador. A reconciliação pós-build
+  // (scripts/reconcile-sitemap-hreflang.ts) reforça isso cross-locale e ainda
+  // poda arestas não-recíprocas, que um build por-locale não consegue ver.
   const enSlug = article.localeSlugMap[DEFAULT_LOCALE]
+  if (!enSlug) return undefined
   const enDomain = normalizeBase(LOCALE_URLS[DEFAULT_LOCALE])
-  if (enSlug) {
-    languages['x-default'] = `${enDomain}${cleanBase}/${enSlug}`
-  }
+  languages['x-default'] = `${enDomain}${cleanBase}/${enSlug}`
 
   // Sem alternates se apenas um locale
   const localeCount = Object.keys(languages).filter(k => k !== 'x-default').length

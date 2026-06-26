@@ -21,19 +21,19 @@ const H2_WORDS = pageMessages.services.titulo_secao.split(' ')
 const locale = config.locale
 const FILTER_PILLS: { label: string; value: 'all' | ServiceFilterGroup }[] = [
   {
-    label: locale === 'it-IT' ? 'Tutti' : locale === 'en' ? 'All' : 'Todos',
+    label: locale === 'it-IT' ? 'Tutti' : locale === 'en' ? 'All' : locale === 'es-ES' ? 'Todos' : 'Todos',
     value: 'all',
   },
   {
-    label: locale === 'it-IT' ? 'Prodotto Digitale' : locale === 'en' ? 'Digital Product' : 'Produto Digital',
+    label: locale === 'it-IT' ? 'Prodotto Digitale' : locale === 'en' ? 'Digital Product' : locale === 'es-ES' ? 'Producto Digital' : 'Produto Digital',
     value: 'produto',
   },
   {
-    label: locale === 'it-IT' ? 'Mobile & IA' : locale === 'en' ? 'Mobile & AI' : 'Mobile & IA',
+    label: locale === 'it-IT' ? 'Mobile & IA' : locale === 'en' ? 'Mobile & AI' : locale === 'es-ES' ? 'Mobile & IA' : 'Mobile & IA',
     value: 'mobile-ia',
   },
   {
-    label: locale === 'it-IT' ? 'Dati & API' : locale === 'en' ? 'Data & APIs' : 'Dados & APIs',
+    label: locale === 'it-IT' ? 'Dati & API' : locale === 'en' ? 'Data & APIs' : locale === 'es-ES' ? 'Datos & APIs' : 'Dados & APIs',
     value: 'dados',
   },
 ]
@@ -117,7 +117,7 @@ export function ServicesGrid() {
           <div
             className={`svc-filter-bar ${hasIntersected ? 'svc-stagger-2' : 'opacity-0'}`}
             role="group"
-            aria-label={locale === 'it-IT' ? 'Filtra per categoria' : locale === 'en' ? 'Filter by category' : 'Filtrar por categoria'}
+            aria-label={locale === 'it-IT' ? 'Filtra per categoria' : locale === 'en' ? 'Filter by category' : locale === 'es-ES' ? 'Filtrar por categoría' : 'Filtrar por categoria'}
           >
             {FILTER_PILLS.map((pill) => (
               <button

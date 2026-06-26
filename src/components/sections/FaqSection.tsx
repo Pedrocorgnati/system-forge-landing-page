@@ -1,4 +1,5 @@
 import { Container } from '@/components/ui/Container'
+import { SectionCTA } from '@/components/ui/SectionCTA'
 import { loadContent } from '@/lib/content/content-loader'
 import { getSiteConfig } from '@config'
 import { loadMessages } from '@config/content'
@@ -9,19 +10,28 @@ export function FaqSection() {
   const locale = config.locale
   const faqItems = loadContent('faq', locale)
 
-  const eyebrow = locale === 'it-IT' ? 'FAQ'
-    : locale === 'en' ? 'FAQ'
-    : 'FAQ'
+  const eyebrow = 'FAQ'
 
   const title = locale === 'it-IT' ? 'Domande frequenti'
     : locale === 'en' ? 'Frequently Asked Questions'
+    : locale === 'es-ES' ? 'Preguntas Frecuentes'
     : 'Perguntas Frequentes'
 
   const subtitle = locale === 'it-IT'
     ? 'Tutto ciò che devi sapere sul nostro processo di sviluppo.'
     : locale === 'en'
     ? 'Everything you need to know about our development process.'
+    : locale === 'es-ES'
+    ? 'Todo lo que necesitas saber sobre nuestro proceso de desarrollo.'
     : 'Tudo o que você precisa saber sobre nosso processo de desenvolvimento.'
+
+  const ctaLead = locale === 'it-IT'
+    ? 'Hai ancora domande? Raccontaci il tuo progetto e ti rispondiamo con una proposta.'
+    : locale === 'en'
+    ? 'Still have questions? Tell us about your project and we will reply with a proposal.'
+    : locale === 'es-ES'
+    ? '¿Aún tienes dudas? Cuéntanos tu proyecto y te respondemos con una propuesta.'
+    : 'Ainda tem dúvidas? Conte seu projeto e respondemos com uma proposta.'
 
   return (
     <section
@@ -65,6 +75,9 @@ export function FaqSection() {
               </div>
             ))}
           </dl>
+
+          {/* Conversao: transicao FAQ -> acao primaria (locale-aware) */}
+          <SectionCTA context="faq" lead={ctaLead} className="pt-2" />
         </div>
       </Container>
     </section>
