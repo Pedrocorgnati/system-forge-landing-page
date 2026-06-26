@@ -80,6 +80,9 @@ export const esConfig: SiteConfig = {
       ?? '',
     doubleOptIn: true, // GDPR obrigatório
   },
+  quoteLead: {
+    workerUrl: process.env.NEXT_PUBLIC_QUOTE_WORKER_URL_ES ?? '',
+  },
   newsletterApiUrl:
     process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_ES
       ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL

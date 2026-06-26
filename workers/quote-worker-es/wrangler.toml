@@ -1,0 +1,41 @@
+name = "quote-es"
+main = "src/index.ts"
+compatibility_date = "2026-03-26"
+
+workers_dev = true
+
+[[d1_databases]]
+binding = "D1_LEADS"
+database_name = "quote-leads-es"
+database_id = "61fd5138-4577-4639-bde7-63717685d33f"   # preencher no deploy (Item 019)
+
+# Rate-limit por IP (Item 006) — binding nativo, store serverless-safe.
+# namespace_id placeholder preenchido com o ID real no deploy (Item 019),
+# mesma convencao de deferral do database_id do D1 acima.
+[[ratelimit]]
+binding = "RATE_LIMITER"
+namespace_id = "1004"   # preencher no deploy (Item 019)
+simple = { limit = 5, period = 60 }
+
+[vars]
+SITE_LOCALE = "es-ES"
+MARKET = "es"
+ALLOWED_ORIGINS = "https://systemforge.es,http://localhost:3000"
+TURNSTILE_EXPECTED_HOSTNAME = "systemforge.es"
+AUDIT_PEPPER = "d4e5f60718293a4b5c6d7e8f90112233445566778899aabbccddeeff00112233"  # rotacionar no deploy (Item 018)
+# Item 007 — double opt-in + sync server-to-server:
+WORKER_DOMAIN = "quote.systemforge.es"                                         # host publico do Worker; base do link /confirm (rota real no Item 019)
+FROM_EMAIL = "presupuesto@systemforgedashboard.com"                           # remetente Resend verificado (local-part por idioma)
+QUOTE_INGEST_URL = "https://systemforgedashboard.com/api/internal/quote-ingest" # ingest centralizado do dashboard unificado
+INGEST_ORIGIN = "SYSTEMFORGE_ES"                                              # enum Origin do dashboard
+CONFIRM_TOKEN_TTL_HOURS = "48"                                                # TTL do token de confirmacao
+# Item 008 — kill-switch edge-side + reconciliacao observavel:
+SUBMIT_ENABLED = "true"                                                        # kill-switch global; fail-open (ausente OU "true" habilita; "false" -> 503 SUBMIT_DISABLED). Operador flipa para desligar.
+DIVERGENCE_ALERT_THRESHOLD = "3"                                              # limiar agregado de divergencia (0<div<thr -> warn; div>=thr -> error RECONCILIATION_DIVERGENCE)
+RECONCILIATION_WINDOW_MIN = "5"                                               # janela de reconciliacao em minutos (metrica lead_reconciliation)
+
+# Secrets — configurar via wrangler secret put (NAO committar):
+#   wrangler secret put TURNSTILE_SECRET_KEY   (Item 006 — OBRIGATORIO/enforced: sem ele POST /lead -> 500 CONFIG_ERROR)
+#   wrangler secret put QUOTE_INGEST_SECRET     (Item 007 — == INTERNAL_INGEST_TOKEN do dashboard; X-Internal-Token)
+#   wrangler secret put RESEND_API_KEY          (Item 007 — envio do email de confirmacao via Resend)
+#   wrangler secret put CONFIRM_TOKEN_SECRET    (Item 007 — assinatura HMAC do token; CHAVE SEPARADA do AUDIT_PEPPER, rotacao distinta)

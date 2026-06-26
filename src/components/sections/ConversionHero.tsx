@@ -2,19 +2,35 @@ import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
 import { conversionHeroMetrics } from '@/lib/data'
-import heroCopy from '@content/pt-BR/pages/conversion-hero.json'
+import heroCopyBr from '@content/pt-BR/pages/conversion-hero.json'
+import heroCopyIt from '@content/it-IT/pages/conversion-hero.json'
+import heroCopyEn from '@content/en/pages/conversion-hero.json'
+import heroCopyEs from '@content/es-ES/pages/conversion-hero.json'
+import { getLocale, type SupportedLocale } from '@config'
 
 /**
- * ConversionHero — Server Component pt-BR (Fase A do plano conversion-machine).
+ * Copy resolvida pelo locale do build (`NEXT_PUBLIC_LOCALE`). Os 4 catalogos
+ * compartilham shape identico; a paridade locale foi entregue em task-010.
+ */
+const HERO_COPY_BY_LOCALE: Record<SupportedLocale, typeof heroCopyBr> = {
+  'pt-BR': heroCopyBr,
+  'it-IT': heroCopyIt as typeof heroCopyBr,
+  'en': heroCopyEn as typeof heroCopyBr,
+  'es-ES': heroCopyEs as typeof heroCopyBr,
+}
+
+const heroCopy = HERO_COPY_BY_LOCALE[getLocale()]
+
+/**
+ * ConversionHero — Server Component multi-locale (Fase A do plano conversion-machine).
  *
- * Copy artesanal pt-BR vive em `content/pt-BR/pages/conversion-hero.json`. As métricas
- * agregadas são tipadas em `src/lib/data.ts > conversionHeroMetrics`. Demais locales
- * recebem tradução fiel em task-010 (paridade locale) — por isso este componente é
- * montado condicionalmente em `src/app/page.tsx` apenas quando `locale === 'pt-BR'`.
+ * A copy artesanal de cada locale vive em `content/{locale}/pages/conversion-hero.json`
+ * e e resolvida por `getLocale()` (locale fixo por build). As métricas agregadas são
+ * tipadas em `src/lib/data.ts > conversionHeroMetrics`. O componente renderiza nos 4
+ * builds (pt-BR, it-IT, en, es-ES) — o gate `locale === 'pt-BR'` foi removido em task-017.
  *
- * CTA primário aponta para o anchor `#solicitar-escopo`, que será materializado pelo
- * formulário lead-qualifier em task-003 (Fase B). Demais CTAs contextuais reusam
- * o mesmo anchor.
+ * CTA primário aponta para o anchor `#solicitar-escopo`, materializado pelo formulário
+ * lead-qualifier em task-003 (Fase B). Demais CTAs contextuais reusam o mesmo anchor.
  */
 export function ConversionHero() {
   return (

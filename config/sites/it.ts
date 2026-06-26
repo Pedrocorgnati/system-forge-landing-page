@@ -77,6 +77,9 @@ export const itConfig: SiteConfig = {
       ?? '',
     doubleOptIn: true, // GDPR obrigatório
   },
+  quoteLead: {
+    workerUrl: process.env.NEXT_PUBLIC_QUOTE_WORKER_URL_IT ?? '',
+  },
   newsletterApiUrl:
     process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT
       ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL

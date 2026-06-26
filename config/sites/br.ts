@@ -79,6 +79,9 @@ export const brConfig: SiteConfig = {
       ?? '',
     doubleOptIn: false,
   },
+  quoteLead: {
+    workerUrl: process.env.NEXT_PUBLIC_QUOTE_WORKER_URL_BR ?? '',
+  },
   newsletterApiUrl:
     process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_BR
       ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL

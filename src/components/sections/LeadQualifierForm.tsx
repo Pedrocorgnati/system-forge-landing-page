@@ -6,6 +6,12 @@ import Link from 'next/link'
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import {
+  TextField,
+  SelectField,
+  RadioGroupField,
+  CheckboxField,
+} from '@/components/ui'
+import {
   Passo1Schema,
   Passo2Schema,
   LeadPayloadSchema,
@@ -15,8 +21,23 @@ import {
   type SoftwareType,
   type Urgency,
 } from '@/lib/validation/leadSchema'
-import copy from '@content/pt-BR/pages/lead-qualifier.json'
+import copyBr from '@content/pt-BR/pages/lead-qualifier.json'
+import copyIt from '@content/it-IT/pages/lead-qualifier.json'
+import copyEn from '@content/en/pages/lead-qualifier.json'
+import copyEs from '@content/es-ES/pages/lead-qualifier.json'
+import { getLocale, type SupportedLocale } from '@config'
 import { capture as posthogCapture, identifyEmail } from '@/lib/tracking/posthog'
+
+// Copy resolvida pelo locale do build (NEXT_PUBLIC_LOCALE, inlinada no bundle client).
+// Os 4 catalogos compartilham shape identico; paridade locale entregue em task-010.
+const LEAD_COPY_BY_LOCALE: Record<SupportedLocale, typeof copyBr> = {
+  'pt-BR': copyBr,
+  'it-IT': copyIt as typeof copyBr,
+  'en': copyEn as typeof copyBr,
+  'es-ES': copyEs as typeof copyBr,
+}
+
+const copy = LEAD_COPY_BY_LOCALE[getLocale()]
 
 type Passo1State = {
   fullName: string
@@ -495,229 +516,5 @@ function Step2Fields({ fieldsId, values, errors, headingRef, onChange }: Step2Fi
         }
       />
     </fieldset>
-  )
-}
-
-type TextFieldProps = {
-  id: string
-  name: string
-  type: 'text' | 'email'
-  label: string
-  placeholder?: string
-  autoComplete?: string
-  hint?: string
-  value: string
-  error?: string
-  required?: boolean
-  onChange: (value: string) => void
-}
-
-function TextField({
-  id,
-  name,
-  type,
-  label,
-  placeholder,
-  autoComplete,
-  hint,
-  value,
-  error,
-  required,
-  onChange,
-}: TextFieldProps): ReactNode {
-  const hintId = hint ? `${id}-hint` : undefined
-  const errorId = error ? `${id}-error` : undefined
-  const describedBy = [hintId, errorId].filter(Boolean).join(' ') || undefined
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
-        {label}
-        {required ? <span aria-hidden="true" className="text-destructive ml-0.5">*</span> : null}
-      </label>
-      <input
-        id={id}
-        name={name}
-        type={type}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={describedBy}
-        aria-required={required ? 'true' : undefined}
-        data-form-field={name}
-        className="w-full px-3 py-2.5 text-base rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary aria-[invalid=true]:border-destructive aria-[invalid=true]:focus:ring-destructive/30"
-      />
-      {hint && !error ? (
-        <p id={hintId} className="text-xs text-muted-foreground">
-          {hint}
-        </p>
-      ) : null}
-      {error ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-type SelectFieldProps = {
-  id: string
-  name: string
-  label: string
-  placeholder: string
-  options: ReadonlyArray<{ value: string; label: string }>
-  value: string
-  error?: string
-  required?: boolean
-  onChange: (value: string) => void
-}
-
-function SelectField({
-  id,
-  name,
-  label,
-  placeholder,
-  options,
-  value,
-  error,
-  required,
-  onChange,
-}: SelectFieldProps): ReactNode {
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="text-sm font-medium text-foreground">
-        {label}
-        {required ? <span aria-hidden="true" className="text-destructive ml-0.5">*</span> : null}
-      </label>
-      <select
-        id={id}
-        name={name}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={error ? 'true' : 'false'}
-        aria-describedby={errorId}
-        aria-required={required ? 'true' : undefined}
-        data-form-field={name}
-        className="w-full px-3 py-2.5 text-base rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary aria-[invalid=true]:border-destructive aria-[invalid=true]:focus:ring-destructive/30"
-      >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        {options.map((opt) => (
-          <option key={opt.value} value={opt.value}>
-            {opt.label}
-          </option>
-        ))}
-      </select>
-      {error ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-type RadioGroupFieldProps = {
-  id: string
-  name: string
-  label: string
-  options: ReadonlyArray<{ value: string; label: string }>
-  value: string
-  error?: string
-  onChange: (value: string) => void
-}
-
-function RadioGroupField({ id, name, label, options, value, error, onChange }: RadioGroupFieldProps): ReactNode {
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <fieldset
-      aria-invalid={error ? 'true' : 'false'}
-      aria-describedby={errorId}
-      data-form-field={name}
-      className="flex flex-col gap-2.5 border-0 p-0 m-0"
-    >
-      <legend className="text-sm font-medium text-foreground">
-        {label}
-        <span aria-hidden="true" className="text-destructive ml-0.5">*</span>
-      </legend>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {options.map((opt) => {
-          const optionId = `${id}-${opt.value}`
-          const checked = value === opt.value
-          return (
-            <label
-              key={opt.value}
-              htmlFor={optionId}
-              className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border cursor-pointer transition-colors text-sm ${
-                checked
-                  ? 'border-primary bg-primary/5 text-foreground'
-                  : 'border-border bg-background text-foreground hover:border-primary/60'
-              }`}
-            >
-              <input
-                id={optionId}
-                type="radio"
-                name={name}
-                value={opt.value}
-                checked={checked}
-                onChange={() => onChange(opt.value)}
-                className="h-4 w-4 text-primary focus:ring-primary"
-              />
-              <span>{opt.label}</span>
-            </label>
-          )
-        })}
-      </div>
-      {error ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </fieldset>
-  )
-}
-
-type CheckboxFieldProps = {
-  id: string
-  name: string
-  label: string
-  checked: boolean
-  error?: string
-  policyLink: ReactNode
-  onChange: (value: boolean) => void
-}
-
-function CheckboxField({ id, name, label, checked, error, policyLink, onChange }: CheckboxFieldProps): ReactNode {
-  const errorId = error ? `${id}-error` : undefined
-  return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={id} className="flex items-start gap-3 text-sm text-foreground cursor-pointer">
-        <input
-          id={id}
-          name={name}
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          aria-invalid={error ? 'true' : 'false'}
-          aria-describedby={errorId}
-          aria-required="true"
-          data-form-field={name}
-          className="mt-0.5 h-4 w-4 text-primary focus:ring-primary"
-        />
-        <span className="leading-relaxed">
-          {label}{' '}
-          <span className="inline-block">{policyLink}</span>
-        </span>
-      </label>
-      {error ? (
-        <p id={errorId} role="alert" className="text-xs font-medium text-destructive">
-          {error}
-        </p>
-      ) : null}
-    </div>
   )
 }

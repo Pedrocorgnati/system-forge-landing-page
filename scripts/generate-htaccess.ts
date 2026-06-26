@@ -11,6 +11,12 @@
  * /api/oidc/token` (troca do code) no /auth/callback. Sem isso o CSP bloqueia a troca
  * e o callback sempre cai em erro (login não fecha). NÃO é GTM/analytics — é auth.
  *
+ * connect-src inclui também o quote-worker público do locale (quote.<dominio-do-locale>):
+ *   BR https://quote.forjadesistemas.com.br · IT https://quote.systemforge.it
+ *   EN https://quote.systemforgesoftware.com · ES https://quote.systemforge.es
+ * O submit do QuoteWizard faz fetch cross-origin para {workerUrl}/lead; sem o domínio
+ * no connect-src o browser bloqueia o POST do lead. (Item 018 — envs + CSP dos Workers)
+ *
  * Usage:
  *   npx tsx scripts/generate-htaccess.ts --locale=br
  *   npx tsx scripts/generate-htaccess.ts --locale=it
@@ -43,7 +49,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-br.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-br.corgnati-pedro.workers.dev https://quote.forjadesistemas.com.br https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -57,7 +63,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-it.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-it.corgnati-pedro.workers.dev https://quote.systemforge.it",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -71,7 +77,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-en.corgnati-pedro.workers.dev https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-en.corgnati-pedro.workers.dev https://quote.systemforgesoftware.com https://www.google-analytics.com https://analytics.google.com https://stats.g.doubleclick.net",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -85,7 +91,7 @@ const CSP_BY_LOCALE: Record<string, string> = {
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: https: blob:",
     "font-src 'self'",
-    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-es.corgnati-pedro.workers.dev",
+    "connect-src 'self' https://www.systemforgedashboard.com https://api.resend.com https://cloudflareinsights.com https://newsletter-es.corgnati-pedro.workers.dev https://quote.systemforge.es",
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",

@@ -45,6 +45,14 @@ export interface SiteConfig {
     workerUrl: string
     doubleOptIn: boolean
   }
+  /**
+   * Quote Worker (leads de orcamento). workerUrl resolvido por build via
+   * NEXT_PUBLIC_QUOTE_WORKER_URL_{BR,IT,EN,ES}; o submit do quote-wizard
+   * (src/lib/services/quote-lead.ts) faz POST {workerUrl}/lead.
+   */
+  quoteLead: {
+    workerUrl: string
+  }
   socialLinks: {
     linkedin: string
     github: string

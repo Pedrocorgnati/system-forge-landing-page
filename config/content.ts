@@ -26,6 +26,11 @@ import itITPortfolio from '@content/it-IT/pages/portfolio.json'
 import enPortfolio from '@content/en/pages/portfolio.json'
 import esESPortfolio from '@content/es-ES/pages/portfolio.json'
 
+import ptBRQuoteWizard from '@content/pt-BR/pages/quote-wizard.json'
+import itITQuoteWizard from '@content/it-IT/pages/quote-wizard.json'
+import enQuoteWizard from '@content/en/pages/quote-wizard.json'
+import esESQuoteWizard from '@content/es-ES/pages/quote-wizard.json'
+
 const MESSAGES_MAP: Record<SupportedLocale, typeof ptBRMessages> = {
   'pt-BR': ptBRMessages,
   'it-IT': itITMessages,
@@ -60,6 +65,21 @@ export function loadMessagesFor(locale: SupportedLocale) {
  */
 export function loadPageMessages() {
   return PAGE_MESSAGES_MAP[getLocale()]
+}
+
+const QUOTE_WIZARD_MAP: Record<SupportedLocale, typeof ptBRQuoteWizard> = {
+  'pt-BR': ptBRQuoteWizard,
+  'it-IT': itITQuoteWizard,
+  'en': enQuoteWizard,
+  'es-ES': esESQuoteWizard,
+}
+
+/**
+ * Carrega o catálogo do wizard de orçamento para o locale atual do build.
+ * Equivalente estático a loadPageMessages() — funciona em Client Components.
+ */
+export function loadQuoteWizard() {
+  return QUOTE_WIZARD_MAP[getLocale()]
 }
 
 type ServiceBenefit = { icon: string; title: string; description: string }

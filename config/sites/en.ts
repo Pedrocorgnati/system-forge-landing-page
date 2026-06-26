@@ -77,6 +77,9 @@ export const enConfig: SiteConfig = {
       ?? '',
     doubleOptIn: false,
   },
+  quoteLead: {
+    workerUrl: process.env.NEXT_PUBLIC_QUOTE_WORKER_URL_EN ?? '',
+  },
   newsletterApiUrl:
     process.env.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN
       ?? process.env.NEXT_PUBLIC_NEWSLETTER_API_URL

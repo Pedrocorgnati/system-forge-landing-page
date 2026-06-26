@@ -2,8 +2,7 @@ import type { Metadata } from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import { ConversionHero } from '@/components/sections/ConversionHero'
-import { HeroSection } from '@/components/sections/HeroSection'
-import { LeadQualifierForm } from '@/components/sections/LeadQualifierForm'
+import { QuoteWizard } from '@/components/sections/QuoteWizard'
 import { ServicesGrid } from '@/components/sections/ServicesGrid'
 import { PortfolioBento } from '@/components/sections/PortfolioBento'
 import { WhySystemForge } from '@/components/sections/WhySystemForge'
@@ -101,8 +100,8 @@ export default function HomePage() {
         />
       ))}
       <JsonLdFaq items={faqItems.map((item) => ({ question: item.question, answer: item.answer }))} />
-      {config.locale === 'pt-BR' ? <ConversionHero /> : <HeroSection />}
-      {config.locale === 'pt-BR' ? <LeadQualifierForm /> : null}
+      <ConversionHero />
+      <QuoteWizard />
       <ContactSection />
       {/* perf-below-fold: content-visibility:auto + contain-intrinsic-size
           delega ao browser pular layout/paint destes blocos ate scroll,

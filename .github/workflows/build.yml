@@ -129,6 +129,14 @@ jobs:
           NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_IT }}
           NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_EN }}
           NEXT_PUBLIC_NEWSLETTER_WORKER_URL_ES: ${{ secrets.NEXT_PUBLIC_NEWSLETTER_WORKER_URL_ES }}
+          # Quote wizard (Item 019): worker URLs por locale + site key Turnstile.
+          # Sem isto config.quoteLead.workerUrl resolve '' (QUOTE_WORKER_NOT_CONFIGURED)
+          # e o TurnstileWidget nao renderiza (submit rejeitado com TURNSTILE_REQUIRED).
+          NEXT_PUBLIC_QUOTE_WORKER_URL_BR: ${{ secrets.NEXT_PUBLIC_QUOTE_WORKER_URL_BR }}
+          NEXT_PUBLIC_QUOTE_WORKER_URL_IT: ${{ secrets.NEXT_PUBLIC_QUOTE_WORKER_URL_IT }}
+          NEXT_PUBLIC_QUOTE_WORKER_URL_EN: ${{ secrets.NEXT_PUBLIC_QUOTE_WORKER_URL_EN }}
+          NEXT_PUBLIC_QUOTE_WORKER_URL_ES: ${{ secrets.NEXT_PUBLIC_QUOTE_WORKER_URL_ES }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ secrets.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
 
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
