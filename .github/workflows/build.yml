@@ -195,12 +195,106 @@ jobs:
         # dedicada (route aliases + content reconciliation). Ver PENDING-ACTIONS.md.
         continue-on-error: true
 
+  # ─── Reconcile hreflang cross-locale (pos-matrix, pre-deploy) ──────────────
+  # A matrix `build` produz 1 sitemap por locale, isolado. A reciprocidade
+  # hreflang (NEXT-005) so e resolvivel vendo os 4 sitemaps juntos — um build
+  # por-locale nao enxerga os irmaos. Este job junta os 4 artifacts, roda o
+  # reconciliador (scripts/reconcile-sitemap-hreflang.ts), revalida fail-closed
+  # e RE-SOBE os 4 artifacts (overwrite) para o deploy.yml shippar os sitemaps
+  # ja reconciliados. Se a validacao falhar, o workflow falha e o deploy
+  # (gated em workflow_run.conclusion == 'success') nao roda.
+  reconcile-hreflang:
+    name: Reconcile Hreflang Sitemaps (quad)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download build artifact (pt-BR)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-pt-BR
+          path: dist-br/
+
+      - name: Download build artifact (it-IT)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-it-IT
+          path: dist-it/
+
+      - name: Download build artifact (en)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-en
+          path: dist-en/
+
+      - name: Download build artifact (es-ES)
+        uses: actions/download-artifact@v4
+        with:
+          name: build-es-ES
+          path: dist-es/
+
+      - name: Reconcile hreflang across the 4 sitemaps
+        run: npm run reconcile:hreflang
+
+      - name: Validate hreflang reciprocity (fail-closed)
+        run: npm run validate:sitemap-hreflang
+
+      - name: Re-upload reconciled artifact (pt-BR)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-pt-BR
+          path: dist-br/
+          overwrite: true
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Re-upload reconciled artifact (it-IT)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-it-IT
+          path: dist-it/
+          overwrite: true
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Re-upload reconciled artifact (en)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-en
+          path: dist-en/
+          overwrite: true
+          retention-days: 1
+          if-no-files-found: error
+
+      - name: Re-upload reconciled artifact (es-ES)
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-es-ES
+          path: dist-es/
+          overwrite: true
+          retention-days: 1
+          if-no-files-found: error
+
   # ─── Dispatch Deploy quando Build veio de workflow_dispatch (bot) ──────────
   # workflow_run nao dispara quando o Build foi triggado via GITHUB_TOKEN
   # (regra do GitHub Actions). Bot-driven flows precisam de dispatch explicito.
+  # needs reconcile-hreflang: garante que o deploy so dispara com os sitemaps
+  # ja reconciliados e validados (fail-closed).
   dispatch-deploy:
     name: Dispatch Quad Market Deploy
-    needs: build
+    needs: [build, reconcile-hreflang]
     if: ${{ github.event_name == 'workflow_dispatch' && success() }}
     runs-on: ubuntu-latest
     permissions:
