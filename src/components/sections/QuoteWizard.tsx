@@ -456,12 +456,12 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
     <WizardShell>
       {/* Section header — centered, full width */}
       <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-4 text-center md:mb-16">
-        <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
+        <h2 className="text-[clamp(1.75rem,4vw,2.5rem)] font-semibold leading-tight tracking-tight text-foreground">
           {copy.header.title}
           <span className="text-primary">{copy.header.titleHighlight}</span>
           {copy.header.titleAfter}
         </h2>
-        <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
+        <p className="text-base leading-relaxed text-muted-foreground">
           {copy.header.subtitle}
         </p>
         <ul className="flex flex-wrap justify-center gap-2">
@@ -677,7 +677,7 @@ function StepServiceType({
 }: StepServiceTypeProps): ReactNode {
   const meta = copy.wizard.steps[0]
   return (
-    <fieldset className="flex flex-col gap-5 border-0 p-0" data-testid="wizard-step-service">
+    <fieldset className="flex flex-col gap-6 border-0 p-0" data-testid="wizard-step-service">
       <legend className="sr-only">{meta?.title}</legend>
       <StepHeading title={meta?.title} description={meta?.description} />
       <div
@@ -737,7 +737,7 @@ function StepDescription({
   const meta = copy.wizard.steps[1]
   const errorId = error ? `${fieldsId}-description-error` : undefined
   return (
-    <fieldset className="flex flex-col gap-5 border-0 p-0" data-testid="wizard-step-description">
+    <fieldset className="flex flex-col gap-6 border-0 p-0" data-testid="wizard-step-description">
       <legend className="sr-only">{meta?.title}</legend>
       <StepHeading title={meta?.title} description={meta?.description} />
       <div className="flex flex-col gap-1.5" data-testid="field-description">
@@ -879,7 +879,7 @@ function StepContact({
 }: StepContactProps): ReactNode {
   const meta = copy.wizard.steps[3]
   return (
-    <fieldset className="flex flex-col gap-5 border-0 p-0" data-testid="wizard-step-contact">
+    <fieldset className="flex flex-col gap-6 border-0 p-0" data-testid="wizard-step-contact">
       <legend className="sr-only">{meta?.title}</legend>
       <StepHeading title={meta?.title} description={meta?.description} />
 
@@ -953,7 +953,7 @@ function StepReview({ data, token, onToken, onEdit }: StepReviewProps): ReactNod
   ]
 
   return (
-    <fieldset className="flex flex-col gap-5 border-0 p-0" data-testid="wizard-step-review">
+    <fieldset className="flex flex-col gap-6 border-0 p-0" data-testid="wizard-step-review">
       <legend className="sr-only">{meta?.title}</legend>
       <StepHeading title={meta?.title} description={meta?.description} />
 
@@ -1074,10 +1074,10 @@ function StepHeading({
   description?: string
 }): ReactNode {
   return (
-    <div className="flex flex-col gap-1">
-      <h3 className="text-xl font-semibold text-foreground">{title}</h3>
+    <div className="flex flex-col gap-1.5">
+      <h3 className="text-lg font-semibold leading-snug text-foreground">{title}</h3>
       {description ? (
-        <p className="text-sm text-muted-foreground">{description}</p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
       ) : null}
     </div>
   )
