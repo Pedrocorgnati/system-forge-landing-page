@@ -453,8 +453,8 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
 
   return (
     <WizardShell>
-      <div className="mx-auto flex max-w-2xl flex-col gap-8">
-        <header className="flex flex-col gap-3">
+      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+        <header className="flex flex-col gap-4 lg:sticky lg:top-28">
           <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
             {copy.header.title}
             <span className="text-primary">{copy.header.titleHighlight}</span>
@@ -475,13 +475,14 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
           </ul>
         </header>
 
-        <WizardProgressBar
-          steps={copy.wizard.steps}
-          current={step}
-          indicator={indicator}
-        />
+        <div className="flex flex-col gap-6">
+          <WizardProgressBar
+            steps={copy.wizard.steps}
+            current={step}
+            indicator={indicator}
+          />
 
-        <form
+          <form
           noValidate
           onSubmit={(event) => {
             event.preventDefault()
@@ -619,6 +620,7 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
             </button>
           </div>
         </form>
+        </div>
       </div>
     </WizardShell>
   )
@@ -632,7 +634,7 @@ function WizardShell({ children }: { children: ReactNode }): ReactNode {
       className="relative w-full bg-background"
     >
       <Container>
-        <div className="py-16 md:py-20 lg:py-24">{children}</div>
+        <div className="py-20 md:py-28">{children}</div>
       </Container>
     </section>
   )
