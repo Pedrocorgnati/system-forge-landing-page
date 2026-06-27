@@ -19,7 +19,7 @@ type SectionCTAProps = {
  * CTA de conversao reaproveitavel pelas secoes da home.
  *
  * Destino locale-aware:
- *  - pt-BR: anchor on-page `#solicitar-escopo` (formulario de captacao da home).
+ *  - pt-BR: anchor on-page `#scoped-proposal` (formulario de captacao da home).
  *  - demais mercados (it-IT, en, es-ES): budget engine externo (`config.budgetEngine`),
  *    com `?context=` preservando a secao de origem para atribuicao no destino.
  *
@@ -35,7 +35,7 @@ export function SectionCTA({ context, lead, className }: SectionCTAProps) {
 
   let href: string
   if (isPtBr) {
-    href = '#solicitar-escopo'
+    href = '#scoped-proposal'
   } else {
     const sep = config.budgetEngine.includes('?') ? '&' : '?'
     href = `${config.budgetEngine}${sep}context=${encodeURIComponent(context)}`

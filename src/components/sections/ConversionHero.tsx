@@ -28,7 +28,7 @@ const heroCopy = HERO_COPY_BY_LOCALE[getLocale()]
  * por `getLocale()` (locale fixo por build). O componente renderiza nos 4 builds
  * (pt-BR, it-IT, en, es-ES) — o gate `locale === 'pt-BR'` foi removido em task-017.
  *
- * CTA primário aponta para o anchor `#solicitar-escopo`, materializado pelo formulário
+ * CTA primário aponta para o anchor `#scoped-proposal`, materializado pelo formulário
  * lead-qualifier em task-003 (Fase B). Demais CTAs contextuais reusam o mesmo anchor.
  */
 export function ConversionHero() {

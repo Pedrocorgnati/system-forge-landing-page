@@ -651,7 +651,7 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
 function WizardShell({ children }: { children: ReactNode }): ReactNode {
   return (
     <section
-      id="solicitar-escopo"
+      id="scoped-proposal"
       data-testid="section-lead-qualifier"
       className="relative w-full bg-background"
     >
