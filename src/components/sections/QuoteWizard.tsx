@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
+import Image from 'next/image'
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, ShieldCheck } from 'lucide-react'
 import { getSiteConfig, type SupportedLocale } from '@config'
 import { Container, RadioGroupField, TextField } from '@/components/ui'
@@ -453,8 +454,9 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
 
   return (
     <WizardShell>
-      <div className="grid grid-cols-1 items-start gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
-        <header className="flex flex-col gap-4 lg:sticky lg:top-28">
+      <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
+        <div className="flex flex-col gap-8">
+        <header className="flex flex-col gap-4">
           <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
             {copy.header.title}
             <span className="text-primary">{copy.header.titleHighlight}</span>
@@ -474,6 +476,17 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
             ))}
           </ul>
         </header>
+
+          <div className="relative hidden min-h-[260px] flex-1 overflow-hidden rounded-2xl border border-border lg:block">
+            <Image
+              src="/images/quote-wizard-aside.webp"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 0px, 45vw"
+              className="object-cover"
+            />
+          </div>
+        </div>
 
         <div className="flex flex-col gap-6">
           <WizardProgressBar
