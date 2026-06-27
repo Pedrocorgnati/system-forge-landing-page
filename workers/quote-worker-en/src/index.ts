@@ -40,7 +40,12 @@ function parseTtlHours(raw: string | undefined): number {
 // ---------------------------------------------------------------------------
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const WHATSAPP_REGEX = /^[\d+\s]{8,}$/;
+// Anti-drift task-008 (G-P2-10): regex canonico do dashboard
+// (internalQuoteIngestSchema.whatsapp) e do quoteWizardSchema do form. Aceita
+// `+`/digito inicial seguido de digitos/espaco/().- ; comprimento exato 8..20
+// validado explicitamente (o regex sozinho admite 7). Nem mais frouxo nem mais
+// estrito que o dashboard -> zero 400 espurio em borda (NG6).
+const WHATSAPP_REGEX = /^[+\d][\d\s().-]{6,19}$/;
 const BRAND_REGEX = /^[a-z0-9-]{1,64}$/;
 
 // Enum de budget — inclui legacy `under5k` por compat de dados (blueprint).
@@ -52,6 +57,19 @@ const BUDGET_RANGES = new Set<string>([
   "50k-plus",
   "not-sure",
   "under5k", // legacy
+]);
+
+// Anti-drift task-008 (G-P2-10): enum FECHADO de timeline, identico ao
+// dashboard (internalQuoteIngestSchema.timeline) e ao TIMELINES do
+// quoteWizardSchema do form. Fecha o mismatch worker-frouxo (string <=40)
+// vs dashboard-estrito (enum) que gerava 400 em borda. O form ja so emite
+// estes 5 valores, entao nenhum payload legitimo em transito e rejeitado (NG6).
+const TIMELINES = new Set<string>([
+  "asap",
+  "1-3months",
+  "3-6months",
+  "6-plus",
+  "flexible",
 ]);
 
 // Mapa por id (NUNCA por indice). serviceId fora do mapa -> 400 INVALID_SERVICE.
@@ -241,9 +259,9 @@ async function handleLead(
     );
   }
 
-  // timeline (nao-vazio, <= 40 chars; enum fechado quando o catalogo i18n existir)
+  // timeline (enum fechado, identico ao dashboard — anti-drift task-008 G-P2-10)
   const timeline = (body.timeline ?? "").trim();
-  if (timeline.length === 0 || timeline.length > 40) {
+  if (!TIMELINES.has(timeline)) {
     return corsResponse(
       { error: "Prazo invalido.", code: "INVALID_DETAILS" },
       400, origin, ao,
@@ -262,9 +280,9 @@ async function handleLead(
     return corsResponse({ error: "Email invalido.", code: "INVALID_EMAIL" }, 400, origin, ao);
   }
 
-  // whatsapp (>= 8, digitos/+/espacos)
+  // whatsapp (8..20 + regex canonico do dashboard — anti-drift task-008 G-P2-10)
   const whatsapp = (body.whatsapp ?? "").trim();
-  if (!WHATSAPP_REGEX.test(whatsapp)) {
+  if (whatsapp.length < 8 || whatsapp.length > 20 || !WHATSAPP_REGEX.test(whatsapp)) {
     return corsResponse({ error: "WhatsApp invalido.", code: "INVALID_CONTACT" }, 400, origin, ao);
   }
 

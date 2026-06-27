@@ -49,10 +49,10 @@ export interface LeadRequest {
   serviceId: string;        // um dos 9 ids de SERVICE_ID_TO_TYPE — id cru NUNCA persiste
   description: string;      // 20..2000 chars apos fold
   budgetRange: string;      // enum: under1k|1k-5k|5k-15k|15k-50k|50k-plus|not-sure (+legacy under5k)
-  timeline: string;         // nao-vazio, <= 40 chars (enum fechado quando o catalogo i18n existir, Item 009)
+  timeline: string;         // enum fechado: asap|1-3months|3-6months|6-plus|flexible (identico ao dashboard, task-008 G-P2-10)
   name: string;             // >= 2 chars
   email: string;            // regex; persistido SOMENTE como HMAC-SHA256
-  whatsapp: string;         // >= 8 chars (digitos/+/espacos)
+  whatsapp: string;         // 8..20 chars, regex /^[+\d][\d\s().-]{6,19}$/ (identico ao dashboard, task-008 G-P2-10)
   referralSource?: string;  // opcional (nullable no D1)
   consent: boolean;         // === true senao CONSENT_REQUIRED
   turnstileToken?: string;  // best-effort em 005; obrigatorio no Item 006
