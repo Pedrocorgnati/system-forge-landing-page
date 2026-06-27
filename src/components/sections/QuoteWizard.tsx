@@ -454,48 +454,58 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
 
   return (
     <WizardShell>
-      <div className="grid grid-cols-1 items-stretch gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
-        <div className="flex flex-col gap-8">
-        <header className="flex flex-col gap-4">
-          <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
-            {copy.header.title}
-            <span className="text-primary">{copy.header.titleHighlight}</span>
-            {copy.header.titleAfter}
-          </h2>
-          <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
-            {copy.header.subtitle}
-          </p>
-          <ul className="flex flex-wrap gap-2">
-            {copy.header.badges.map((badge) => (
-              <li
-                key={badge}
-                className="inline-flex items-center rounded-full border border-border bg-accent px-3 py-1 text-xs font-medium text-accent-foreground"
-              >
-                {badge}
-              </li>
-            ))}
-          </ul>
-        </header>
+      {/* Section header — centered, full width */}
+      <div className="mx-auto mb-12 flex max-w-2xl flex-col items-center gap-4 text-center md:mb-16">
+        <h2 className="text-3xl font-bold leading-tight tracking-tight text-foreground md:text-4xl">
+          {copy.header.title}
+          <span className="text-primary">{copy.header.titleHighlight}</span>
+          {copy.header.titleAfter}
+        </h2>
+        <p className="text-base leading-relaxed text-muted-foreground md:text-lg">
+          {copy.header.subtitle}
+        </p>
+        <ul className="flex flex-wrap justify-center gap-2">
+          {copy.header.badges.map((badge) => (
+            <li
+              key={badge}
+              className="inline-flex items-center rounded-full border border-border bg-accent px-3 py-1 text-xs font-medium text-accent-foreground"
+            >
+              {badge}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-          <div className="relative hidden min-h-[260px] flex-1 overflow-hidden rounded-2xl border border-border lg:block">
+      {/* Two columns locked to the step-1 height so the layout never shrinks
+          between steps (lg:min-h). Left: step indicator + brand image. */}
+      <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[1fr_1.1fr] lg:gap-10">
+        <div className="flex flex-col gap-6 lg:min-h-[40rem]">
+          <div className="rounded-2xl border border-primary/30 bg-card p-5 md:p-6">
+            <WizardProgressBar
+              steps={copy.wizard.steps}
+              current={step}
+              indicator={indicator}
+            />
+          </div>
+          <div className="relative hidden flex-1 overflow-hidden rounded-2xl border border-primary/30 lg:block">
+            <Image
+              src="/images/quote-wizard-aside-light.webp"
+              alt=""
+              fill
+              sizes="(max-width: 1024px) 0px, 45vw"
+              className="object-cover dark:hidden"
+            />
             <Image
               src="/images/quote-wizard-aside.webp"
               alt=""
               fill
               sizes="(max-width: 1024px) 0px, 45vw"
-              className="object-cover"
+              className="hidden object-cover dark:block"
             />
           </div>
         </div>
 
-        <div className="flex flex-col gap-6">
-          <WizardProgressBar
-            steps={copy.wizard.steps}
-            current={step}
-            indicator={indicator}
-          />
-
-          <form
+        <form
           noValidate
           onSubmit={(event) => {
             event.preventDefault()
@@ -507,7 +517,7 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
           }}
           data-wizard-step={step}
           data-testid="quote-wizard-form"
-          className="flex flex-col gap-6 rounded-2xl border border-border bg-card p-6 md:p-8"
+          className="flex flex-col gap-6 rounded-2xl border border-primary/30 bg-card p-6 md:p-8 lg:min-h-[40rem]"
         >
           {step === 1 ? (
             <StepServiceType
@@ -595,7 +605,7 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
             </p>
           ) : null}
 
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+          <div className="mt-auto flex flex-wrap items-center justify-between gap-3 pt-2">
             {step > 1 ? (
               <button
                 type="button"
@@ -633,7 +643,6 @@ export function QuoteWizard({ onSubmit }: QuoteWizardProps): ReactNode {
             </button>
           </div>
         </form>
-        </div>
       </div>
     </WizardShell>
   )

@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+/* Dark mode is driven by the .dark class on <html> (ThemeProvider), not the OS
+   prefers-color-scheme. Wire the Tailwind v4 `dark:` variant to that class so
+   `dark:` utilities (e.g. the dark/light image swap) follow the theme toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* ============================================
    DESIGN TOKENS — Electric Trust + Deep Navy
    SystemForge Landing Page
