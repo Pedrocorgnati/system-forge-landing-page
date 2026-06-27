@@ -1,7 +1,6 @@
 import { ArrowRight, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { Container } from '@/components/ui/Container'
-import { conversionHeroMetrics } from '@/lib/data'
 import heroCopyBr from '@content/pt-BR/pages/conversion-hero.json'
 import heroCopyIt from '@content/it-IT/pages/conversion-hero.json'
 import heroCopyEn from '@content/en/pages/conversion-hero.json'
@@ -24,10 +23,10 @@ const heroCopy = HERO_COPY_BY_LOCALE[getLocale()]
 /**
  * ConversionHero — Server Component multi-locale (Fase A do plano conversion-machine).
  *
- * A copy artesanal de cada locale vive em `content/{locale}/pages/conversion-hero.json`
- * e e resolvida por `getLocale()` (locale fixo por build). As métricas agregadas são
- * tipadas em `src/lib/data.ts > conversionHeroMetrics`. O componente renderiza nos 4
- * builds (pt-BR, it-IT, en, es-ES) — o gate `locale === 'pt-BR'` foi removido em task-017.
+ * A copy artesanal de cada locale (incluindo as métricas agregadas em `metrics` e o
+ * `metricsAriaLabel`) vive em `content/{locale}/pages/conversion-hero.json` e e resolvida
+ * por `getLocale()` (locale fixo por build). O componente renderiza nos 4 builds
+ * (pt-BR, it-IT, en, es-ES) — o gate `locale === 'pt-BR'` foi removido em task-017.
  *
  * CTA primário aponta para o anchor `#solicitar-escopo`, materializado pelo formulário
  * lead-qualifier em task-003 (Fase B). Demais CTAs contextuais reusam o mesmo anchor.
@@ -109,9 +108,9 @@ export function ConversionHero() {
 
             <div
               className="hero-enter hero-delay-200 grid grid-cols-2 gap-3 sm:gap-4 lg:gap-5 self-center"
-              aria-label="Prova social agregada"
+              aria-label={heroCopy.metricsAriaLabel}
             >
-              {conversionHeroMetrics.map((metric) => (
+              {heroCopy.metrics.map((metric) => (
                 <article
                   key={metric.label}
                   className="rounded-xl border border-border bg-card p-5 sm:p-6 flex flex-col gap-2"

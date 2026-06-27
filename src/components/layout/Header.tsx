@@ -18,11 +18,14 @@ const messages = loadMessages()
 const locale = config.locale
 const NAV_ARIA_LABEL = locale === 'it-IT' ? 'Navigazione principale'
   : locale === 'en' ? 'Main navigation'
+  : locale === 'es-ES' ? 'Navegación principal'
   : 'Navegação principal'
 const THEME_LABELS = locale === 'it-IT'
   ? { light: 'Attiva modalità chiara', dark: 'Attiva modalità scura' }
   : locale === 'en'
   ? { light: 'Switch to light mode', dark: 'Switch to dark mode' }
+  : locale === 'es-ES'
+  ? { light: 'Activar modo claro', dark: 'Activar modo oscuro' }
   : { light: 'Ativar modo claro', dark: 'Ativar modo escuro' }
 
 export function Header() {

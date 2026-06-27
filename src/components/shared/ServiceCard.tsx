@@ -3,6 +3,9 @@ import { ChevronRight } from 'lucide-react'
 import type { Service } from '@/lib/types'
 import { ROUTES } from '@/lib/constants'
 import { cn } from '@/lib/utils'
+import { loadMessages } from '@config/content'
+
+const messages = loadMessages()
 
 interface ServiceCardProps {
   service: Service
@@ -31,7 +34,7 @@ export function ServiceCard({ service, className }: ServiceCardProps) {
         {service.description}
       </p>
       <span className="inline-flex items-center gap-1 text-xs font-medium text-primary mt-auto">
-        Saiba mais
+        {messages.cta.exploreService}
         <ChevronRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
       </span>
     </Link>

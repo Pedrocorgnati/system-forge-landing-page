@@ -28,6 +28,16 @@ const FOOTER_TEXT = (() => {
     linkedinLabel: `${config.siteName} on LinkedIn`,
     githubLabel: 'Pedrocorgnati on GitHub',
   }
+  if (locale === 'es-ES') return {
+    navAriaLabel: 'Navegación secundaria',
+    navTitle: 'Navegación',
+    socialTitle: 'Redes sociales',
+    privacy: 'Política de Privacidad',
+    copyright: (year: number) => `© ${year} ${config.siteName}. Todos los derechos reservados.`,
+    description: 'Software House especializada en desarrollo a medida — desde landing pages hasta sistemas complejos con IA.',
+    linkedinLabel: `${config.siteName} en LinkedIn`,
+    githubLabel: 'Pedrocorgnati en GitHub',
+  }
   return {
     navAriaLabel: 'Navegação secundária',
     navTitle: 'Navegação',

@@ -5,12 +5,29 @@ import Image from 'next/image'
 import { ChevronLeft, ChevronRight, Quote, Pause, Play } from 'lucide-react'
 import { Container } from '@/components/ui/Container'
 import { SectionCTA } from '@/components/ui/SectionCTA'
-import { testimonials } from '@/lib/data'
 import { cn } from '@/lib/utils'
 import { loadMessages } from '@config/content'
+import { getLocale, type SupportedLocale } from '@config'
+import type { Testimonial } from '@/lib/types'
+import testimonialsBr from '@content/pt-BR/pages/testimonials.json'
+import testimonialsIt from '@content/it-IT/pages/testimonials.json'
+import testimonialsEn from '@content/en/pages/testimonials.json'
+import testimonialsEs from '@content/es-ES/pages/testimonials.json'
 import { TIMING } from '@/lib/constants/timing'
 
 const messages = loadMessages()
+
+// Depoimentos resolvidos por locale do build (locale fixo por NEXT_PUBLIC_LOCALE).
+// Antes vinha de `@/lib/data` (testimonials hardcoded em pt-BR), o que renderizava
+// portugues nos builds it/en/es. Agora seleciona o catalogo traduzido por build via
+// getLocale(). Os JSONs nao trazem `avatarUrl` -> o Avatar cai para as iniciais.
+const TESTIMONIALS_BY_LOCALE: Record<SupportedLocale, Testimonial[]> = {
+  'pt-BR': testimonialsBr,
+  'it-IT': testimonialsIt,
+  'en': testimonialsEn,
+  'es-ES': testimonialsEs,
+}
+const testimonials: Testimonial[] = TESTIMONIALS_BY_LOCALE[getLocale()]
 
 // RESOLVED: StarRating array criado fora do componente para evitar alocação por render
 const STAR_INDICES = [0, 1, 2, 3, 4]

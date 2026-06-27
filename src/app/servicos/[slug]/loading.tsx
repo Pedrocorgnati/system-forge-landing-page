@@ -1,12 +1,16 @@
+import { loadMessages } from '@config/content'
+
+const m = loadMessages()
+
 export default function ServicoLoading() {
   return (
     <div
       data-testid="servico-loading"
       role="status"
-      aria-label="Carregando serviço..."
+      aria-label={m.pages.loading.label}
       className="py-12 md:py-16 bg-background"
     >
-      <span className="sr-only">Carregando serviço...</span>
+      <span className="sr-only">{m.pages.loading.label}</span>
       <div className="mx-auto max-w-3xl px-4">
         <div className="flex flex-col gap-8 max-w-3xl">
 

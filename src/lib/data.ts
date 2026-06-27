@@ -1,37 +1,10 @@
 import { ServiceCategory, TechTag, ProjectStatus, DeliveryCountry } from './types'
-import type { Service, PortfolioProject, Testimonial, ServiceFilterGroup } from './types'
+import type { Service, PortfolioProject, ServiceFilterGroup } from './types'
 import { loadServicesContent, loadPortfolioDescriptions } from '@config/content'
 
-// Métricas agregadas verificáveis do hero pt-BR (Fase A do plano conversion-machine).
-// Sem logos e sem depoimentos textuais — esses entram em Sprint 2 mediante autorização.
-export type ConversionHeroMetric = {
-  value: string
-  label: string
-  description: string
-}
-
-export const conversionHeroMetrics: ConversionHeroMetric[] = [
-  {
-    value: '50+',
-    label: 'Projetos entregues',
-    description: 'Sistemas em produção desde 2019, do MVP ao ERP nichado.',
-  },
-  {
-    value: '6 sem.',
-    label: 'Prazo médio de entrega',
-    description: 'Tempo típico do briefing ao deploy do primeiro módulo crítico.',
-  },
-  {
-    value: '82%',
-    label: 'Taxa de renovação',
-    description: 'Clientes que mantêm contrato após o primeiro ciclo de entrega.',
-  },
-  {
-    value: '5 anos',
-    label: 'De operação',
-    description: 'Software house focada em B2B desde 2019.',
-  },
-]
+// As métricas agregadas do hero migraram para `content/{locale}/pages/conversion-hero.json`
+// (chave `metrics`), resolvidas por locale em ConversionHero. Antes viviam aqui hardcoded
+// em pt-BR, o que fazia a faixa de prova social renderizar em portugues nos builds it/en/es.
 
 // ── Non-translatable service base config ──────────────────────────────────────
 // contentId maps to the id in content/{locale}/pages/services.json
@@ -180,53 +153,7 @@ export const portfolioProjects: PortfolioProject[] = _portfolioProjectsRaw.map(p
   description: _portfolioDescriptions.get(p.slug) ?? p.description,
 }))
 
-export const testimonials: Testimonial[] = [
-  {
-    id: '1',
-    content: 'A SystemForge transformou nossa clínica. O sistema de prontuário eletrônico que desenvolveram é intuitivo e reduziu em 40% o tempo de atendimento administrativo. Recomendo sem hesitar.',
-    author: 'Mariana Costa',
-    role: 'CEO',
-    company: 'ClinicaPro Saúde Digital',
-    avatarUrl: '/images/testimonials/mariana-costa.webp',
-  },
-  {
-    id: '2',
-    content: 'Precisávamos de um marketplace completo em 3 meses. A SystemForge entregou em 10 semanas, com qualidade de produto. O diferencial é que eles pensam no negócio, não só no código.',
-    author: 'Rafael Oliveira',
-    role: 'Founder',
-    company: 'Arte & Ofício Marketplace',
-    avatarUrl: '/images/testimonials/rafael-oliveira.webp',
-  },
-  {
-    id: '3',
-    content: 'Avevamo bisogno di una piattaforma SaaS su misura per il mercato italiano. SystemForge ha capito subito le nostre esigenze e ha consegnato un prodotto eccellente nei tempi previsti.',
-    author: 'Lucia Ferrari',
-    role: 'Direttrice Operativa',
-    company: 'FreelancerHub Italia',
-    avatarUrl: '/images/testimonials/lucia-ferrari.webp',
-  },
-  {
-    id: '4',
-    content: 'O dashboard de logística que a SystemForge construiu substituiu 3 ferramentas separadas. Visibilidade em tempo real e relatórios que antes levavam horas para gerar, agora estão a 1 clique.',
-    author: 'Carlos Mendes',
-    role: 'Diretor de TI',
-    company: 'LogiView Transportes',
-    avatarUrl: '/images/testimonials/carlos-mendes.webp',
-  },
-  {
-    id: '5',
-    content: 'Minha loja virtual ficou exatamente como eu imaginava. Rápida, bonita e fácil de usar tanto para mim na gestão quanto para as clientes na hora de comprar. Vendas aumentaram 60% no primeiro mês.',
-    author: 'Ana Paula Lima',
-    role: 'Proprietária',
-    company: 'Vitrine Chic Moda',
-    avatarUrl: '/images/testimonials/ana-paula-lima.webp',
-  },
-  {
-    id: '6',
-    content: 'A integração entre nosso ERP legado e os canais de venda era um pesadelo. A SystemForge criou uma API robusta que hoje processa 50 mil pedidos/dia sem incidentes. Suporte impecável.',
-    author: 'Thiago Souza',
-    role: 'CTO',
-    company: 'SyncBridge Integrações',
-    avatarUrl: '/images/testimonials/thiago-souza.webp',
-  },
-]
+// `testimonials` saiu daqui: era hardcoded em pt-BR (+ uma entrada it-IT) e renderizava
+// portugues nos builds it/en/es. A fonte canonica agora e locale-aware:
+// `@/lib/data/testimonials` -> content/{locale}/pages/testimonials.json. Consumido
+// direto por TestimonialsSection via Record por getLocale().

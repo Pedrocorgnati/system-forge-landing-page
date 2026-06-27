@@ -13,13 +13,48 @@ import { BlogListPage } from '@/components/blog/BlogListPage'
 import { generatePageMetadata } from '@/lib/seo'
 import { ROUTES } from '@/lib/constants/routes'
 import { BLOG_ITEMS_PER_PAGE } from '@/lib/constants/site'
-import { getSiteConfig } from '@config'
+import { getSiteConfig, getLocale, type SupportedLocale } from '@config'
 import { loadMessages } from '@config/content'
 
 const config = getSiteConfig()
 const messages = loadMessages()
 const pageLabel = config.locale === 'it-IT' ? 'Pagina' : config.locale === 'en' ? 'Page' : 'Página'
 import type { ArticleFrontmatter } from '@/lib/types'
+
+/**
+ * Metadata SEO das páginas paginadas, resolvida pelo locale do build
+ * (`NEXT_PUBLIC_LOCALE`). Inline Record (sem novas chaves em messages.json),
+ * com `{page}`/`{total}` interpolados. Tom alinhado à metadata do /blog.
+ */
+interface PaginatedMeta {
+  title: (page: number, total: number) => string
+  description: (page: number) => string
+}
+
+const PAGINATED_META: Record<SupportedLocale, PaginatedMeta> = {
+  'pt-BR': {
+    title: (page, total) => `Blog — Página ${page} de ${total}`,
+    description: (page) =>
+      `Artigos sobre desenvolvimento de software, IA e estratégias de produto — página ${page} do blog da SystemForge.`,
+  },
+  'it-IT': {
+    title: (page, total) => `Blog — Pagina ${page} di ${total}`,
+    description: (page) =>
+      `Articoli su sviluppo software, IA e strategie di prodotto — pagina ${page} del blog di SystemForge.`,
+  },
+  en: {
+    title: (page, total) => `Blog — Page ${page} of ${total}`,
+    description: (page) =>
+      `Articles on software development, AI and product strategy — page ${page} of the SystemForge blog.`,
+  },
+  'es-ES': {
+    title: (page, total) => `Blog — Página ${page} de ${total}`,
+    description: (page) =>
+      `Artículos sobre desarrollo de software, IA y estrategias de producto — página ${page} del blog de SystemForge.`,
+  },
+}
+
+const meta = PAGINATED_META[getLocale()]
 
 interface PageProps {
   params: Promise<{ n: string }>
@@ -37,8 +72,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     ...generatePageMetadata({
-      title: `Blog — Página ${pageNum} de ${totalPages}`,
-      description: `Artigos sobre desenvolvimento de software, IA e estratégias de produto — página ${pageNum} do blog da SystemForge.`,
+      title: meta.title(pageNum, totalPages),
+      description: meta.description(pageNum),
       path: ROUTES.BLOG_PAGE(pageNum),
     }),
   }
@@ -94,7 +129,7 @@ export default async function BlogPaginatedPage({ params }: PageProps) {
 
           <div className="flex flex-col gap-3 max-w-2xl">
             <h1 className="text-4xl sm:text-5xl font-bold text-foreground leading-tight">
-              Blog — Página {pageNum}
+              Blog — {pageLabel} {pageNum}
             </h1>
           </div>
 

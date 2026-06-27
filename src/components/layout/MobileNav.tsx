@@ -21,6 +21,7 @@ interface MobileNavProps {
 const locale = config.locale
 const DRAWER_LABEL = locale === 'it-IT' ? 'Menu di navigazione'
   : locale === 'en' ? 'Navigation menu'
+  : locale === 'es-ES' ? 'Menú de navegación'
   : 'Menu de navegação'
 const DRAWER_TITLE = 'Menu'
 

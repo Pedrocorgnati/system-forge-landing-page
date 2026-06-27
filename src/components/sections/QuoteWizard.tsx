@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { ArrowLeft, ArrowRight, CheckCircle2, Pencil, ShieldCheck } from 'lucide-react'
-import { getSiteConfig } from '@config'
+import { getSiteConfig, type SupportedLocale } from '@config'
 import { Container, RadioGroupField, TextField } from '@/components/ui'
 import {
   quoteWizardSchema,
@@ -12,8 +12,26 @@ import {
 } from '@/lib/validation/quoteWizardSchema'
 import { submitQuoteLead } from '@/lib/services/quote-lead'
 import { capture as posthogCapture, identifyEmail } from '@/lib/tracking/posthog'
-import copy from '@content/pt-BR/pages/quote-wizard.json'
+import copyBr from '@content/pt-BR/pages/quote-wizard.json'
+import copyIt from '@content/it-IT/pages/quote-wizard.json'
+import copyEn from '@content/en/pages/quote-wizard.json'
+import copyEs from '@content/es-ES/pages/quote-wizard.json'
 import { WizardProgressBar } from './QuoteWizardProgressBar'
+
+/**
+ * Copy resolvida pelo locale do build (`NEXT_PUBLIC_LOCALE`), mesmo padrao de
+ * ConversionHero/LeadQualifierForm. Os 4 catalogos compartilham shape identico
+ * (paridade de chaves validada). Antes este import era fixo em `pt-BR/`, o que
+ * fazia o wizard renderizar em portugues em TODOS os builds (it/en/es).
+ */
+const QUOTE_WIZARD_COPY_BY_LOCALE: Record<SupportedLocale, typeof copyBr> = {
+  'pt-BR': copyBr,
+  'it-IT': copyIt as typeof copyBr,
+  'en': copyEn as typeof copyBr,
+  'es-ES': copyEs as typeof copyBr,
+}
+
+const copy = QUOTE_WIZARD_COPY_BY_LOCALE[getSiteConfig().locale]
 
 declare global {
   interface Window {
