@@ -12,6 +12,29 @@ export function isAllowedCTAHref(href: string): boolean {
   }
 }
 
+/**
+ * Distingue um TÓPICO humano (ex.: "Automação com IA", "Software de gestão")
+ * de um TOKEN de atribuição interno (ex.: "blog-mobilebar-default",
+ * "service-comercial-saas", "advisor-page", "blog-cta-default").
+ *
+ * O 2º argumento dos builders de CTA sempre serviu a dois propósitos: virar
+ * texto do prefill (WhatsApp/e-mail) E rótulo de atribuição (`?context=` do
+ * budget engine). Vários callers passam apenas o slug de atribuição, que então
+ * VAZAVA no texto que o lead lê e envia ("¡Hola! Estoy interesado en
+ * blog-mobilebar-default."). Tokens de atribuição são kebab-case ASCII puro
+ * (sem espaços, sem maiúsculas, sem acentos); quando o valor casa esse formato,
+ * os CTAs de texto caem na mensagem genérica em vez de expor o slug interno.
+ * A atribuição do budget engine (buildBudgetCTA) segue usando o slug intacto.
+ */
+export function isAttributionSlug(value: string): boolean {
+  return /^[a-z0-9]+(?:-[a-z0-9]+)+$/.test(value)
+}
+
+/** Retorna o valor apenas se for um tópico humano; slug de atribuição -> undefined. */
+function humanTopic(context?: string): string | undefined {
+  return context && !isAttributionSlug(context) ? context : undefined
+}
+
 export function buildWhatsAppUrl(phone: string, message?: string): string {
   const clean = phone.replace(/\D/g, '')
   if (!clean) return ''
@@ -35,22 +58,23 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
   const m = loadMessages()
 
   const locale = config.locale
+  const topic = humanTopic(context)
   let waMessage: string
   if (locale === 'it-IT') {
-    waMessage = context
-      ? `Ciao! Ho visto il vostro sito e sono interessato a ${context}.`
+    waMessage = topic
+      ? `Ciao! Ho visto il vostro sito e sono interessato a ${topic}.`
       : 'Ciao! Ho visto il sito di SystemForge e vorrei saperne di più sui vostri servizi.'
   } else if (locale === 'en') {
-    waMessage = context
-      ? `Hi! I saw your website and I'm interested in ${context}.`
+    waMessage = topic
+      ? `Hi! I saw your website and I'm interested in ${topic}.`
       : "Hi! I saw SystemForge's website and would like to know more about your services."
   } else if (locale === 'es-ES') {
-    waMessage = context
-      ? `¡Hola! He visto vuestro sitio y estoy interesado en ${context}.`
+    waMessage = topic
+      ? `¡Hola! He visto vuestro sitio y estoy interesado en ${topic}.`
       : '¡Hola! He visto el sitio de SystemForge y me gustaría saber más sobre los servicios.'
   } else {
-    waMessage = context
-      ? `Olá! Vi seu site e tenho interesse em ${context}.`
+    waMessage = topic
+      ? `Olá! Vi seu site e tenho interesse em ${topic}.`
       : 'Olá! Vi o site da SystemForge e gostaria de saber mais sobre os serviços.'
   }
 
@@ -91,22 +115,23 @@ export function buildDefaultCTAs(context?: string): CTAConfig[] {
 export function buildWhatsAppCTA(label: string, context?: string): CTAConfig {
   const config = getSiteConfig()
   const locale = config.locale
+  const topic = humanTopic(context)
   let message: string
   if (locale === 'it-IT') {
-    message = context
-      ? `Ciao! Sono interessato a ${context}.`
+    message = topic
+      ? `Ciao! Sono interessato a ${topic}.`
       : 'Ciao! Ho visto il sito di SystemForge e vorrei saperne di più.'
   } else if (locale === 'en') {
-    message = context
-      ? `Hi! I'm interested in ${context}.`
+    message = topic
+      ? `Hi! I'm interested in ${topic}.`
       : "Hi! I saw SystemForge's website and would like to learn more."
   } else if (locale === 'es-ES') {
-    message = context
-      ? `¡Hola! Estoy interesado en ${context}.`
+    message = topic
+      ? `¡Hola! Estoy interesado en ${topic}.`
       : '¡Hola! He visto el sitio de SystemForge y me gustaría saber más.'
   } else {
-    message = context
-      ? `Olá! Tenho interesse em ${context}.`
+    message = topic
+      ? `Olá! Tenho interesse em ${topic}.`
       : 'Olá! Vi o site da SystemForge e gostaria de saber mais.'
   }
 
@@ -139,27 +164,28 @@ export function buildBudgetCTA(label: string, context?: string): CTAConfig {
 export function buildEmailCTA(label: string, context?: string): CTAConfig {
   const config = getSiteConfig()
   const locale = config.locale
+  const topic = humanTopic(context)
   let subject: string
   let body: string
   if (locale === 'it-IT') {
     subject = 'Contatto dal blog SystemForge'
-    body = context
-      ? `Ciao! Ho letto il vostro articolo e sono interessato a ${context}.`
+    body = topic
+      ? `Ciao! Ho letto il vostro articolo e sono interessato a ${topic}.`
       : 'Ciao! Ho letto il vostro blog e vorrei saperne di più sui vostri servizi.'
   } else if (locale === 'en') {
     subject = 'Inquiry from SystemForge blog'
-    body = context
-      ? `Hi! I read your article and I'm interested in ${context}.`
+    body = topic
+      ? `Hi! I read your article and I'm interested in ${topic}.`
       : 'Hi! I read your blog and would like to know more about your services.'
   } else if (locale === 'es-ES') {
     subject = 'Contacto desde el blog SystemForge'
-    body = context
-      ? `¡Hola! He leído vuestro artículo y estoy interesado en ${context}.`
+    body = topic
+      ? `¡Hola! He leído vuestro artículo y estoy interesado en ${topic}.`
       : '¡Hola! He leído vuestro blog y me gustaría saber más sobre los servicios.'
   } else {
     subject = 'Contato via blog SystemForge'
-    body = context
-      ? `Olá! Li o artigo de vocês e tenho interesse em ${context}.`
+    body = topic
+      ? `Olá! Li o artigo de vocês e tenho interesse em ${topic}.`
       : 'Olá! Li o blog de vocês e gostaria de saber mais sobre os serviços.'
   }
   return {
