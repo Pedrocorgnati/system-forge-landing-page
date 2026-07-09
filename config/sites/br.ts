@@ -55,7 +55,7 @@ export const brConfig: SiteConfig = {
     description:
       'Software sob medida, ERP nichado e automação com IA para PME e scale-up B2B. Escopo executável em 24 horas, entrega típica em 6 semanas, sem fidelidade.',
     titleTemplate: '%s | Forja de Sistemas',
-    ogImage: '/og/og-br.png',
+    ogImage: '/og/og-br-whatsapp.jpg',
   },
   routes: {
     home: '/',

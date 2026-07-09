@@ -53,7 +53,7 @@ export const esConfig: SiteConfig = {
     description:
       'Desarrollamos software a medida: SaaS, apps móviles, landing pages, e-commerce, dashboards y automatizaciones con IA.',
     titleTemplate: '%s | SystemForge',
-    ogImage: '/og/og-es.png',
+    ogImage: '/og/og-es-whatsapp.jpg',
   },
   // Slugs fisicos pt-BR: o app/ so gera rotas PT. Slugs localizados
   // (/servicios, /privacidad, /asesor) pendem da feature i18n-triple-market;

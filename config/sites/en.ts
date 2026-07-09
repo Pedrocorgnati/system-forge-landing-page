@@ -50,7 +50,7 @@ export const enConfig: SiteConfig = {
     description:
       'We build custom software: SaaS, mobile apps, landing pages, e-commerce, dashboards and AI automations.',
     titleTemplate: '%s | SystemForge Software',
-    ogImage: '/og/og-en.png',
+    ogImage: '/og/og-en-whatsapp.jpg',
   },
   // Slugs fisicos pt-BR: o app/ so gera rotas PT. Slugs localizados
   // (/services, /blog/category) pendem da feature i18n-triple-market;
